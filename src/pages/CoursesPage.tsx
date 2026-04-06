@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import PageTransition, { FadeIn } from "@/components/PageTransition";
-import { CheckCircle2, Lock, Star, Crown, Diamond, Heart, Flame, ChevronRight } from "lucide-react";
+import { CheckCircle2, Lock, Star, Crown, Diamond, Heart, Flame, ChevronRight, Trophy, Target, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Agni from "@/components/Agni";
 import type { AgniExpression } from "@/components/Agni";
@@ -40,11 +40,33 @@ const MODULES = [
   ]}
 ];
 
-// True S-curve: alternates left → center → right → center → left
+const MILESTONES = [
+  { at: 3, label: "🔓 Tools Unlocked", color: "text-agni-blue" },
+  { at: 6, label: "🏆 Foundation Master", color: "text-agni-gold" },
+  { at: 12, label: "⚔️ Framework Warrior", color: "text-agni-orange" },
+  { at: 17, label: "🏢 Architect", color: "text-agni-blue" },
+  { at: 22, label: "🚀 Agent Master", color: "text-agni-purple" },
+];
+
 const getSCurveX = (index: number): number => {
-  const pattern = [0, 40, 80, 120, 80, 40]; // pixel offsets from left
+  const pattern = [0, 40, 80, 120, 80, 40];
   return pattern[index % pattern.length];
 };
+
+/* Floating particle for bg decoration */
+const FloatingOrb = ({ delay, x, y, size, color }: { delay: number; x: string; y: string; size: number; color: string }) => (
+  <motion.div
+    className="absolute rounded-full pointer-events-none"
+    style={{ left: x, top: y, width: size, height: size, background: color }}
+    animate={{
+      y: [0, -15, 0, 10, 0],
+      x: [0, 8, -5, 3, 0],
+      opacity: [0.15, 0.3, 0.15],
+      scale: [1, 1.1, 0.95, 1],
+    }}
+    transition={{ duration: 8 + delay, repeat: Infinity, delay, ease: "easeInOut" }}
+  />
+);
 
 const CoursesPage = () => {
   const navigate = useNavigate();
@@ -53,20 +75,53 @@ const CoursesPage = () => {
   const [activeModule, setActiveModule] = useState(0);
 
   const totalLessons = MODULES.reduce((a, m) => a + m.lessons.length, 0);
+  const totalDone = done.length;
+  const overallPct = Math.round((totalDone / totalLessons) * 100);
   const mod = MODULES[activeModule];
   const modDone = mod.lessons.filter(l => done.includes(l.id)).length;
   const modPct = Math.round((modDone / mod.lessons.length) * 100);
+
+  const nextMilestone = useMemo(() => MILESTONES.find(m => totalDone < m.at), [totalDone]);
+  const lastMilestone = useMemo(() => [...MILESTONES].reverse().find(m => totalDone >= m.at), [totalDone]);
 
   const agniExpr: AgniExpression = modDone === mod.lessons.length ? "celebrating" : modDone > 0 ? "happy" : "default";
 
   return (
     <PageTransition>
       <div className="min-h-screen bg-background pb-24 relative overflow-hidden">
-        {/* Background decorative path line */}
+        {/* ===== Background decorations ===== */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <svg className="absolute top-[200px] left-1/2 -translate-x-1/2 w-[300px] h-[800px] opacity-[0.06]" viewBox="0 0 300 800">
-            <path d="M150 0 Q50 100 150 200 Q250 300 150 400 Q50 500 150 600 Q250 700 150 800" fill="none" stroke="currentColor" strokeWidth="40" className="text-foreground" />
+          {/* S-curve path */}
+          <svg className="absolute top-[220px] left-1/2 -translate-x-1/2 w-[300px] h-[900px] opacity-[0.04]" viewBox="0 0 300 900">
+            <path d="M150 0 Q30 120 150 240 Q270 360 150 480 Q30 600 150 720 Q270 840 150 900" fill="none" stroke="currentColor" strokeWidth="50" className="text-foreground" />
           </svg>
+
+          {/* Grid dots */}
+          <div className="absolute inset-0 opacity-[0.03]" style={{
+            backgroundImage: "radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px)",
+            backgroundSize: "24px 24px",
+          }} />
+
+          {/* Gradient glow top */}
+          <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[400px] h-[200px] rounded-full opacity-[0.06]"
+            style={{ background: `radial-gradient(ellipse, ${mod.hex}, transparent 70%)` }}
+          />
+
+          {/* Floating orbs */}
+          <FloatingOrb delay={0} x="10%" y="15%" size={60} color={`${mod.hex}18`} />
+          <FloatingOrb delay={2} x="80%" y="25%" size={40} color="hsla(100,95%,40%,0.08)" />
+          <FloatingOrb delay={4} x="5%" y="55%" size={50} color="hsla(199,92%,54%,0.08)" />
+          <FloatingOrb delay={1} x="85%" y="65%" size={35} color="hsla(270,100%,75%,0.08)" />
+          <FloatingOrb delay={3} x="50%" y="80%" size={45} color="hsla(46,100%,49%,0.08)" />
+          <FloatingOrb delay={5} x="25%" y="40%" size={30} color={`${mod.hex}12`} />
+
+          {/* Diagonal accent lines */}
+          <div className="absolute top-[300px] -left-10 w-[200px] h-[1px] rotate-[35deg] opacity-[0.06]"
+            style={{ background: `linear-gradient(90deg, transparent, ${mod.hex}, transparent)` }}
+          />
+          <div className="absolute top-[500px] -right-10 w-[180px] h-[1px] -rotate-[25deg] opacity-[0.06]"
+            style={{ background: `linear-gradient(90deg, transparent, ${mod.hex}, transparent)` }}
+          />
         </div>
 
         <div className="max-w-md mx-auto relative z-10">
@@ -90,6 +145,37 @@ const CoursesPage = () => {
                   <Heart size={12} className="text-agni-pink fill-agni-pink" />
                   <span className="text-[10px] font-black text-agni-pink">5</span>
                 </div>
+              </div>
+            </div>
+          </FadeIn>
+
+          {/* Overall progress bar */}
+          <FadeIn>
+            <div className="px-4 mb-2">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[8px] font-black text-muted-foreground tracking-wider">OVERALL PROGRESS</span>
+                <span className="text-[9px] font-black text-agni-green">{totalDone}/{totalLessons} lessons</span>
+              </div>
+              <div className="h-1.5 bg-muted/20 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full rounded-full bg-gradient-to-r from-agni-green to-agni-blue"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${overallPct}%` }}
+                  transition={{ duration: 1 }}
+                />
+              </div>
+              {/* Milestone tracker */}
+              <div className="flex items-center justify-between mt-1.5">
+                {lastMilestone ? (
+                  <span className={`text-[8px] font-black ${lastMilestone.color}`}>{lastMilestone.label}</span>
+                ) : (
+                  <span className="text-[8px] font-bold text-muted-foreground/40">Start your journey!</span>
+                )}
+                {nextMilestone && (
+                  <span className="text-[8px] font-bold text-muted-foreground/50 flex items-center gap-0.5">
+                    <Target size={8} /> Next: {nextMilestone.at - totalDone} lessons to {nextMilestone.label.split(" ").slice(1).join(" ")}
+                  </span>
+                )}
               </div>
             </div>
           </FadeIn>
@@ -133,6 +219,7 @@ const CoursesPage = () => {
               {/* Decorative circles */}
               <div className="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-white/5" />
               <div className="absolute -right-2 bottom-0 w-14 h-14 rounded-full bg-white/5" />
+              <div className="absolute left-[30%] -bottom-6 w-24 h-24 rounded-full bg-white/[0.03]" />
 
               <div className="flex items-center gap-3 relative z-10">
                 <motion.span
@@ -148,6 +235,7 @@ const CoursesPage = () => {
                 </div>
                 <div className="text-right">
                   <p className="text-white font-black text-xl">{modPct}%</p>
+                  <p className="text-white/50 text-[8px] font-bold">{modDone}/{mod.lessons.length}</p>
                 </div>
               </div>
 
@@ -170,9 +258,9 @@ const CoursesPage = () => {
               {mod.lessons.map((_, i) => {
                 if (i === 0) return null;
                 const x1 = getSCurveX(i - 1) + 32;
-                const y1 = (i - 1) * 110 + 40;
+                const y1 = (i - 1) * 120 + 40;
                 const x2 = getSCurveX(i) + 32;
-                const y2 = i * 110 + 40;
+                const y2 = i * 120 + 40;
                 const midY = (y1 + y2) / 2;
                 const isDone = done.includes(mod.lessons[i].id) || done.includes(mod.lessons[i - 1].id);
                 return (
@@ -200,6 +288,10 @@ const CoursesPage = () => {
                 const showTreasure = i === 2 && (isDone || isNext);
                 const showAgniPeek = i === Math.floor(mod.lessons.length / 2);
 
+                // Milestone marker between lessons
+                const globalIndex = MODULES.slice(0, activeModule).reduce((a, m) => a + m.lessons.length, 0) + i;
+                const milestone = MILESTONES.find(m => m.at === globalIndex + 1);
+
                 return (
                   <motion.div
                     key={lesson.id}
@@ -207,8 +299,21 @@ const CoursesPage = () => {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     transition={{ delay: 0.2 + i * 0.08, type: "spring", stiffness: 180 }}
                     className="relative"
-                    style={{ height: 110, paddingLeft: xOffset }}
+                    style={{ height: 120, paddingLeft: xOffset }}
                   >
+                    {/* Milestone badge */}
+                    {milestone && (
+                      <motion.div
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="absolute -top-2 right-0 z-20"
+                      >
+                        <div className={`text-[7px] font-black ${milestone.color} bg-card border border-border/30 px-2 py-0.5 rounded-full flex items-center gap-0.5`}>
+                          <Trophy size={7} /> {milestone.label}
+                        </div>
+                      </motion.div>
+                    )}
+
                     <div className="flex items-start gap-3">
                       {/* Node */}
                       <motion.button
@@ -230,7 +335,6 @@ const CoursesPage = () => {
                               : '0 3px 0 0 rgba(0,0,0,0.15)'
                           }}
                         >
-                          {/* Inner circle */}
                           <div className={`w-[52px] h-[52px] rounded-full flex items-center justify-center ${
                             isDone || isNext ? "bg-white/15" : "bg-muted/20"
                           }`}>
@@ -254,7 +358,7 @@ const CoursesPage = () => {
                         {/* Pulse ring for active */}
                         {isNext && (
                           <motion.div
-                            className={`absolute inset-[-4px] rounded-full border-2`}
+                            className="absolute inset-[-4px] rounded-full border-2"
                             style={{ borderColor: mod.hex }}
                             animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
                             transition={{ duration: 2, repeat: Infinity }}
@@ -280,13 +384,13 @@ const CoursesPage = () => {
                         }`}>
                           {lesson.t}
                         </p>
-                        <div className="flex items-center gap-1.5 mt-1">
+                        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                           <span className={`text-[9px] font-black ${isDone ? "text-agni-green" : "text-muted-foreground/40"}`}>
                             +{lesson.xp} XP
                           </span>
                           {isCheckpoint && (
                             <span className="text-[8px] font-black text-agni-gold bg-agni-gold/15 px-1.5 py-0.5 rounded-full">
-                              BOSS
+                              🏆 BOSS
                             </span>
                           )}
                           {isDone && (
