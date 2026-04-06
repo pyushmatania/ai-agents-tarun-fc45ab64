@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Sparkles, Shield, Wifi, Cpu, Zap, BookOpen, Users } from "lucide-react";
-import BotIllustration from "@/components/illustrations/BotIllustration";
+import MascotRobot from "@/components/MascotRobot";
 import heroSplash from "@/assets/hero-splash.png";
 import heroOnboarding from "@/assets/hero-onboarding.png";
 import FloatingShapes from "@/components/illustrations/FloatingShapes";
