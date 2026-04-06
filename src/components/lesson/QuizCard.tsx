@@ -9,10 +9,11 @@ export type QuizType = "mcq" | "truefalse" | "fillin";
 export interface QuizQuestion {
   type: QuizType;
   question: string;
+  difficulty?: "easy" | "medium" | "hard";
   options?: string[];
-  correctIndex?: number; // for mcq
-  correctAnswer?: boolean; // for truefalse
-  correctText?: string; // for fillin
+  correctIndex?: number;
+  correctAnswer?: boolean;
+  correctText?: string;
   explanation: string;
 }
 
@@ -67,6 +68,15 @@ const QuizCard = ({ quiz, onAnswer }: QuizCardProps) => {
           <span className="text-[8px] font-bold text-muted-foreground uppercase">
             {quiz.type === "mcq" ? "Multiple Choice" : quiz.type === "truefalse" ? "True or False" : "Fill in the Blank"}
           </span>
+          {quiz.difficulty && (
+            <span className={`text-[7px] font-black px-1.5 py-0.5 rounded-full ${
+              quiz.difficulty === "easy" ? "text-agni-green bg-agni-green/15" :
+              quiz.difficulty === "medium" ? "text-agni-orange bg-agni-orange/15" :
+              "text-agni-pink bg-agni-pink/15"
+            }`}>
+              {quiz.difficulty === "easy" ? "🟢 EASY" : quiz.difficulty === "medium" ? "🟡 MEDIUM" : "🔴 HARD"}
+            </span>
+          )}
         </div>
 
         {/* AGNI */}
