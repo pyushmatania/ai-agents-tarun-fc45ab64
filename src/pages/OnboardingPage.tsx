@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Sparkles, Shield, Wifi, Cpu, Zap, BookOpen, Users } from "lucide-react";
 import BotIllustration from "@/components/illustrations/BotIllustration";
+import heroSplash from "@/assets/hero-splash.png";
+import heroOnboarding from "@/assets/hero-onboarding.png";
 import FloatingShapes from "@/components/illustrations/FloatingShapes";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -75,18 +77,23 @@ const OnboardingPage = () => {
             transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-5 flex flex-col min-h-screen items-center justify-center"
           >
-            {/* Illustrated Hero */}
+            {/* Big Hero Illustration */}
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
+              initial={{ scale: 0.85, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
-              className="relative mb-6"
+              transition={{ delay: 0.15, duration: 0.6, ease: "easeOut" }}
+              className="relative mb-4 w-full"
             >
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-36 h-36 rounded-full border border-primary/10 animate-pulse-glow" />
-                <div className="absolute w-44 h-44 rounded-full border border-secondary/5" />
+              <img
+                src={heroSplash}
+                alt="AI Agents Academy - Robot teaching students"
+                className="w-full max-w-[320px] mx-auto rounded-3xl shadow-2xl"
+                width={800}
+                height={1024}
+              />
+              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-card/90 backdrop-blur-md border border-border/40 rounded-2xl px-4 py-1.5 shadow-lg">
+                <p className="text-[10px] font-bold text-primary flex items-center gap-1"><Sparkles size={10} /> Powered by AI</p>
               </div>
-              <BotIllustration size={140} className="relative z-10 drop-shadow-2xl" />
             </motion.div>
 
             {/* Title */}
@@ -222,16 +229,23 @@ const OnboardingPage = () => {
               </div>
             </div>
 
-            {/* Illustration card */}
+            {/* Hero Illustration */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="glass border border-border/30 rounded-2xl p-4 mb-5 flex items-center gap-4"
+              className="rounded-2xl overflow-hidden mb-5 relative"
             >
-              <BotIllustration size={56} />
-              <div className="flex-1">
-                <div className="flex items-center gap-1.5 mb-1">
+              <img
+                src={heroOnboarding}
+                alt="Your AI learning journey begins"
+                className="w-full h-40 object-cover rounded-2xl"
+                loading="lazy"
+                width={800}
+                height={800}
+              />
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/90 to-transparent p-3">
+                <div className="flex items-center gap-1.5 mb-0.5">
                   <Sparkles size={12} className="text-secondary" />
                   <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">Personalized</span>
                 </div>
