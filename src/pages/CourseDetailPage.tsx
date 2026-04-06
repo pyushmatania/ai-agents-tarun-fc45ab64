@@ -59,6 +59,7 @@ const CourseDetailPage = () => {
   const [timer, setTimer] = useState(0);
   const [quizError, setQuizError] = useState("");
   const timerRef = useRef<ReturnType<typeof setInterval>>();
+  const chatMessagesRef = useRef<ChatMessage[]>([]);
 
   const teachingMode = localStorage.getItem("teaching_mode") || "engineer";
   const lesson = id ? ALL_LESSONS[id] : null;
@@ -120,7 +121,8 @@ const CourseDetailPage = () => {
 
   const handleQuizReady = (conversation: ChatMessage[]) => {
     SFX.tap();
-    generateQuizzes(conversation);
+    chatMessagesRef.current = conversation;
+    generateQuizzes(conversation.length > 0 ? conversation : [{ role: "user", content: `Teach me about ${lesson?.t}: ${lesson?.topic}` }]);
   };
 
   const handleQuizAnswer = (correct: boolean) => {
@@ -184,7 +186,7 @@ const CourseDetailPage = () => {
 
             <motion.button
               whileTap={{ scale: 0.9 }}
-              onClick={() => { if (phase === "chat") handleQuizReady([]); else navigate("/courses"); }}
+              onClick={() => { if (phase === "chat") handleQuizReady(chatMessagesRef.current); else navigate("/courses"); }}
               className="text-[10px] font-black text-white bg-agni-green px-3 py-1.5 rounded-full flex items-center gap-1"
             >
               ✅ Done
