@@ -1,265 +1,271 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import PageTransition from "@/components/PageTransition";
-import { ChevronLeft, CheckCircle2, Send, StickyNote, Timer } from "lucide-react";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { getAIConfig, getActiveModelLabel } from "@/lib/aiConfig";
-import { Brain } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Heart, Zap, ChevronLeft } from "lucide-react";
+import LessonCard from "@/components/lesson/LessonCard";
+import QuizCard from "@/components/lesson/QuizCard";
+import type { QuizQuestion } from "@/components/lesson/QuizCard";
+import LessonComplete from "@/components/lesson/LessonComplete";
+import Agni from "@/components/Agni";
 
-const ALL_LESSONS: Record<string, { t: string; xp: number; topic: string }> = {
-  f1:{t:"What is an AI Agent?",xp:50,topic:"what AI agents are — Perceive-Reason-Act-Learn loop, how they differ from chatbots, ReAct pattern, core components: LLM + Tools + Memory + Planning + Autonomy Loop"},
-  f2:{t:"LLMs as the Brain",xp:50,topic:"how LLMs (GPT-4o, Claude, Gemini, Llama, Mistral) serve as agent reasoning engines, context windows as working memory, how to choose the right model"},
-  f3:{t:"Tools & Functions",xp:60,topic:"how tools give agents the ability to ACT in the real world, function calling mechanics, how the LLM decides when to call a tool and what arguments to pass"},
-  f4:{t:"Memory & RAG",xp:60,topic:"agent memory systems: short-term (conversation), long-term (vector databases like Pinecone, ChromaDB), episodic memory, and RAG (Retrieval Augmented Generation)"},
-  f5:{t:"Planning & Reasoning",xp:70,topic:"how agents plan: Chain-of-Thought, Tree-of-Thought, ReAct pattern, task decomposition, and why planning separates smart agents from dumb ones"},
-  f6:{t:"Build: Research Agent",xp:100,topic:"step-by-step building a Python research agent that searches the web, summarizes articles, and writes briefings using an LLM API + search tool + file writer"},
-  w1:{t:"LangGraph",xp:70,topic:"LangGraph directed graph workflows, checkpointing, time-travel debugging, LangSmith observability, 47M+ PyPI downloads"},
-  w2:{t:"CrewAI",xp:60,topic:"CrewAI role-based agent teams: Role+Backstory+Goal pattern, Crews and Flows architecture, prototyping in 20 lines of code"},
-  w3:{t:"AutoGen & SDKs",xp:70,topic:"Microsoft AutoGen conversational debate, OpenAI Agents SDK with handoffs, Google ADK with A2A protocol for cross-framework agent interoperability"},
-  w4:{t:"MCP Protocol",xp:80,topic:"Model Context Protocol by Anthropic — the USB-C of AI, how MCP servers connect LLMs to tools, 12000+ servers, building and using MCP servers"},
-  w5:{t:"MetaGPT & More",xp:60,topic:"MetaGPT multi-agent software company with SOPs, OpenAgents with native MCP + A2A, n8n no-code agents"},
-  w6:{t:"Build: FW Battle",xp:120,topic:"building the same research agent in CrewAI, LangGraph, and AutoGen, then comparing lines of code, speed, quality, cost, developer experience"},
-  m1:{t:"Communication",xp:70,topic:"how agents communicate: Shared State, Message Passing, Event-Driven pub/sub, Hierarchical delegation patterns"},
-  m2:{t:"AI Organization",xp:80,topic:"designing a multi-agent org: CEO for strategy, CMO for marketing, CTO for engineering, CFO for finance, Sales, HR, Legal, Ops agents"},
-  m3:{t:"Orchestration",xp:80,topic:"Sequential, Parallel, Hierarchical, Consensus (voting), Competitive orchestration patterns and when to use each"},
-  m4:{t:"Cost & Safety",xp:70,topic:"managing LLM costs in multi-agent systems (4 agents x 5 rounds = 20+ calls), tiered models, circuit breakers, guardrails, budget caps"},
-  m5:{t:"Build: AI Startup",xp:150,topic:"building a 6-agent startup team using CrewAI that takes a market question and produces a complete business package"},
-  r1:{t:"Enterprise 2026",xp:70,topic:"production AI agents: Salesforce Agentforce (18.5K deals), Microsoft Copilot (15M seats), Gartner prediction 40% enterprise apps embed agents by 2026"},
-  r2:{t:"Semiconductor AI",xp:90,topic:"AI agents for HCL-Foxconn OSAT plant: yield optimization, supply chain risk, equipment maintenance prediction, quality documentation, patent monitoring"},
-  r3:{t:"Solo Stack",xp:80,topic:"building a one-person company with 10 AI agents: content pipeline, sales outreach, competitor intelligence, bookkeeping, social media"},
-  r4:{t:"Crazy Mode",xp:100,topic:"agent swarms, self-improving agents, digital twins, Manus ($2B Meta acquisition), agent-to-agent economies, agentic SOC, intent-based computing"},
-  r5:{t:"Final Boss",xp:200,topic:"capstone: 10+ agent autonomous company producing market research, business plan, landing page, social posts, financial model, investor emails in parallel"},
+// Lesson content data — each lesson has concept cards + quizzes
+const LESSON_CONTENT: Record<string, {
+  cards: { title: string; content: string; type: "concept" | "diagram" | "example" | "code"; icon: string }[];
+  quizzes: QuizQuestion[];
+}> = {
+  f1: {
+    cards: [
+      { title: "What is an AI Agent?", type: "concept", icon: "🤖", content: "An AI Agent is software that can perceive its environment, reason about it, take actions, and learn from outcomes.\n\nUnlike a chatbot that just responds, an agent has AUTONOMY — it decides what to do next.\n\n• Perceive → Read data, observe world\n• Reason → Think with an LLM brain\n• Act → Use tools to change things\n• Learn → Improve from feedback" },
+      { title: "The Agent Loop", type: "diagram", icon: "🔄", content: "Every agent runs this core loop:\n\n**1. OBSERVE** — Take in information\n**2. THINK** — LLM reasons about what to do\n**3. ACT** — Call tools, APIs, write files\n**4. REFLECT** — Check if goal is met\n\nThis is called the ReAct pattern (Reason + Act). The loop continues until the task is complete or the agent decides to stop." },
+      { title: "Agent vs Chatbot", type: "example", icon: "⚡", content: "**Chatbot:** You ask → It replies → Done\n\n**Agent:** You give a goal → It plans steps → Executes each step → Uses tools → Checks progress → Adjusts → Delivers result\n\n• Chatbot = Single turn\n• Agent = Multi-step autonomous\n\nThink of it like: a chatbot is a calculator, an agent is a personal assistant who can actually DO things." },
+      { title: "5 Core Components", type: "concept", icon: "🧬", content: "Every AI agent needs:\n\n**1. LLM Brain** — GPT-4, Claude, Gemini\n**2. Tools** — APIs, search, code execution\n**3. Memory** — Short-term + long-term storage\n**4. Planning** — Task decomposition\n**5. Autonomy Loop** — Self-directed execution\n\nRemove any one of these and you have a chatbot, not an agent." },
+    ],
+    quizzes: [
+      { type: "mcq", question: "What makes an AI agent different from a chatbot?", options: ["It uses GPT-4", "It can take autonomous actions", "It has a better UI", "It's faster"], correctIndex: 1, explanation: "Agents can autonomously decide and execute multi-step actions, while chatbots just respond to messages." },
+      { type: "truefalse", question: "The ReAct pattern stands for Reason + Act.", correctAnswer: true, explanation: "ReAct combines reasoning (thinking through steps) with acting (executing tools) in a loop." },
+      { type: "fillin", question: "The 5 core components of an agent are: LLM, Tools, Memory, Planning, and _____ Loop.", correctText: "Autonomy", explanation: "The Autonomy Loop is what allows agents to self-direct their execution without human intervention at each step." },
+    ],
+  },
+  f2: {
+    cards: [
+      { title: "LLMs: The Agent Brain", type: "concept", icon: "🧠", content: "Large Language Models are the reasoning engine of every AI agent.\n\nThey don't just generate text — they:\n• Understand complex instructions\n• Plan multi-step workflows\n• Decide which tools to call\n• Parse and synthesize information\n\nThe LLM IS the brain. Everything else is the body." },
+      { title: "Choosing Your Model", type: "diagram", icon: "🎯", content: "**Top Models for Agents:**\n\n• GPT-4o — Best all-rounder, great tool use\n• Claude 3.5 — Best reasoning, longest context\n• Gemini 2.5 — Multimodal, huge context\n• Llama 3.1 — Best open-source option\n• Mistral — Fast, efficient, great for cost\n\nChoose based on: accuracy needs, speed, cost, and context window size." },
+      { title: "Context = Working Memory", type: "example", icon: "💾", content: "An LLM's context window is like working memory:\n\n• GPT-4o: 128K tokens (~300 pages)\n• Claude: 200K tokens (~500 pages)\n• Gemini: 1M+ tokens (~2500 pages)\n\nMore context = agent can handle more complex tasks without forgetting earlier information." },
+    ],
+    quizzes: [
+      { type: "mcq", question: "Which model has the largest context window?", options: ["GPT-4o (128K)", "Claude 3.5 (200K)", "Gemini 2.5 (1M+)", "Llama 3.1 (128K)"], correctIndex: 2, explanation: "Gemini 2.5 offers 1M+ tokens, the largest context window among major models." },
+      { type: "truefalse", question: "Open-source models like Llama cannot be used for AI agents.", correctAnswer: false, explanation: "Llama 3.1 and other open-source models work great for agents, especially when cost and privacy matter." },
+    ],
+  },
+  f3: {
+    cards: [
+      { title: "Tools: Hands of the Agent", type: "concept", icon: "🛠️", content: "Tools give agents the ability to ACT in the real world.\n\nWithout tools, an agent can only think and talk. With tools, it can:\n• Search the web\n• Read/write files\n• Call APIs\n• Execute code\n• Send emails\n• Query databases" },
+      { title: "Function Calling", type: "code", icon: "⚙️", content: "The LLM doesn't run tools directly. Instead:\n\n**1.** LLM sees available tools + descriptions\n**2.** LLM decides which tool to call\n**3.** LLM generates the arguments (JSON)\n**4.** Your code executes the tool\n**5.** Result goes back to the LLM\n\nThe LLM is the decision-maker, your code is the executor." },
+    ],
+    quizzes: [
+      { type: "mcq", question: "What do tools give an AI agent?", options: ["Better language", "Ability to act in the real world", "Faster thinking", "More memory"], correctIndex: 1, explanation: "Tools let agents interact with external systems — search, write files, call APIs, and more." },
+      { type: "truefalse", question: "The LLM directly executes tool functions.", correctAnswer: false, explanation: "The LLM decides which tool to call and generates arguments, but your application code actually executes the tool." },
+    ],
+  },
 };
 
-const MODES = [
-  {id:"class5",label:"🏏 Simple",prompt:"Explain like I'm 10. Cricket analogies, everyday Indian examples. No jargon."},
-  {id:"engineer",label:"🔧 Engineer",prompt:"Full technical depth with Python code and architecture."},
-  {id:"founder",label:"💼 Founder",prompt:"Business lens. ROI, moats. Connect to HCL semiconductor."},
-  {id:"hacker",label:"⚡ Hacker",prompt:"Speed-run. Copy-paste code. Ship in 2 hours."},
-  {id:"crazy",label:"🤯 Crazy",prompt:"Wildest bleeding-edge stuff. Science fiction."},
-  {id:"first",label:"🧠 Socratic",prompt:"Ask ME questions. First principles. Don't give answers directly."},
-  {id:"semi",label:"🏭 Semi",prompt:"Through semiconductor manufacturing / HCL-Foxconn OSAT lens."},
-];
+// Generate default content for lessons without specific content
+const getDefaultContent = (id: string, title: string, topic: string) => ({
+  cards: [
+    { title, type: "concept" as const, icon: "📚", content: `This lesson covers:\n\n${topic}\n\nSwipe through the cards to learn key concepts, then test your knowledge with quizzes!` },
+    { title: "Key Concepts", type: "diagram" as const, icon: "🎯", content: `**What you'll learn:**\n\n${topic.split(",").map(t => `• ${t.trim()}`).join("\n")}` },
+  ],
+  quizzes: [
+    { type: "mcq" as QuizQuestion["type"], question: `What is the main focus of "${title}"?`, options: ["Basic programming", topic.split(",")[0]?.trim() || "AI concepts", "Web development", "Data entry"], correctIndex: 1, explanation: `This lesson focuses on ${topic.split(",")[0]?.trim() || "AI agent concepts"}.` },
+  ],
+});
 
-const SYS = "You are AGENT SENSEI, an elite AI Agents tutor teaching someone at HCL's Founder's Office (semiconductor OSAT plant). Be passionate, use Indian examples. Keep under 250 words. End with a question to check understanding.";
-
-type Msg = { role: "user" | "assistant"; text: string };
+const ALL_LESSONS: Record<string, { t: string; xp: number; topic: string }> = {
+  f1:{t:"What is an AI Agent?",xp:50,topic:"what AI agents are, Perceive-Reason-Act-Learn loop, ReAct pattern, core components"},
+  f2:{t:"LLMs as the Brain",xp:50,topic:"how LLMs serve as agent reasoning engines, context windows, choosing the right model"},
+  f3:{t:"Tools & Functions",xp:60,topic:"how tools give agents the ability to ACT, function calling mechanics"},
+  f4:{t:"Memory & RAG",xp:60,topic:"agent memory systems: short-term, long-term, episodic, RAG"},
+  f5:{t:"Planning & Reasoning",xp:70,topic:"Chain-of-Thought, Tree-of-Thought, ReAct, task decomposition"},
+  f6:{t:"Build: Research Agent",xp:100,topic:"building a Python research agent with search + summarize + write"},
+  w1:{t:"LangGraph",xp:70,topic:"LangGraph directed graphs, checkpointing, time-travel debugging"},
+  w2:{t:"CrewAI",xp:60,topic:"CrewAI role-based teams, Role+Backstory+Goal pattern"},
+  w3:{t:"AutoGen & SDKs",xp:70,topic:"Microsoft AutoGen, OpenAI Agents SDK, Google ADK"},
+  w4:{t:"MCP Protocol",xp:80,topic:"Model Context Protocol, the USB-C of AI, 12000+ servers"},
+  w5:{t:"MetaGPT & More",xp:60,topic:"MetaGPT multi-agent software company, OpenAgents, n8n"},
+  w6:{t:"Build: FW Battle",xp:120,topic:"comparing CrewAI vs LangGraph vs AutoGen"},
+  m1:{t:"Communication",xp:70,topic:"Shared State, Message Passing, Event-Driven, Hierarchical patterns"},
+  m2:{t:"AI Organization",xp:80,topic:"designing multi-agent orgs: CEO, CMO, CTO agents"},
+  m3:{t:"Orchestration",xp:80,topic:"Sequential, Parallel, Hierarchical, Consensus patterns"},
+  m4:{t:"Cost & Safety",xp:70,topic:"managing LLM costs, circuit breakers, guardrails"},
+  m5:{t:"Build: AI Startup",xp:150,topic:"building a 6-agent startup team"},
+  r1:{t:"Enterprise 2026",xp:70,topic:"production AI agents, Salesforce Agentforce, Microsoft Copilot"},
+  r2:{t:"Semiconductor AI",xp:90,topic:"AI agents for semiconductor manufacturing"},
+  r3:{t:"Solo Stack",xp:80,topic:"one-person company with 10 AI agents"},
+  r4:{t:"Crazy Mode",xp:100,topic:"agent swarms, self-improving agents, digital twins"},
+  r5:{t:"Final Boss",xp:200,topic:"capstone: 10+ agent autonomous company"},
+};
 
 const CourseDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [msgs, setMsgs] = useState<Msg[]>([]);
-  const [inp, setInp] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState("engineer");
-  const [note, setNote] = useState("");
-  const [showNote, setShowNote] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [hearts, setHearts] = useState(5);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [phase, setPhase] = useState<"learning" | "complete">("learning");
   const [timer, setTimer] = useState(0);
-  const chatEnd = useRef<HTMLDivElement>(null);
-  const timerRef = useRef<any>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval>>();
 
   const lesson = id ? ALL_LESSONS[id] : null;
-  const done: string[] = JSON.parse(localStorage.getItem("adojo_done") || "[]");
-  const isDone = id ? done.includes(id) : false;
+  const content = id && LESSON_CONTENT[id]
+    ? LESSON_CONTENT[id]
+    : id && lesson
+      ? getDefaultContent(id, lesson.t, lesson.topic)
+      : null;
 
-  const callAI = async (apiMessages: { role: string; content: string }[]) => {
-    const config = getAIConfig();
-    const body: any = {
-      system: SYS,
-      messages: apiMessages,
-    };
-    if (config.mode === "byok" && config.byokApiKey) {
-      body.customApiKey = config.byokApiKey;
-      body.provider = config.byokProvider;
-      body.model = config.byokModel;
-    } else {
-      body.model = config.builtinModel;
-    }
-    const { data, error } = await supabase.functions.invoke("ai-tutor", { body });
-    if (error) throw new Error(error.message);
-    return data?.text || "";
-  };
+  const totalSteps = content ? content.cards.length + content.quizzes.length : 0;
+  const isQuizStep = content ? currentStep >= content.cards.length : false;
+  const quizIndex = content ? currentStep - content.cards.length : 0;
+  const progress = totalSteps > 0 ? ((currentStep + 1) / totalSteps) * 100 : 0;
 
   useEffect(() => {
-    if (!lesson) return;
-    setNote(JSON.parse(localStorage.getItem("adojo_notes") || "{}")[id!] || "");
     timerRef.current = setInterval(() => setTimer(t => t + 1), 1000);
-
-    setMsgs([{ role: "assistant", text: "⏳ Loading lesson..." }]);
-    setLoading(true);
-    const mObj = MODES.find(m => m.id === mode) || MODES[1];
-
-    callAI([
-      { role: "user", content: `Teach me about: ${lesson.topic}\n\nStyle: ${mObj.prompt}\n\nBe engaging. Use examples. End with a question.` }
-    ])
-    .then(text => {
-      setMsgs([{ role: "assistant", text: text || `Welcome to **${lesson.t}**!\n\nThis covers: ${lesson.topic}\n\nSend me a message to start learning!` }]);
-      setLoading(false);
-    })
-    .catch(() => {
-      setMsgs([{ role: "assistant", text: `Welcome to **${lesson.t}**!\n\nThis covers: ${lesson.topic}\n\nThe AI tutor is connecting... Try sending a message below to start!\n\nWhat would you like to learn?` }]);
-      setLoading(false);
-    });
-
     return () => clearInterval(timerRef.current);
-  }, [id]);
+  }, []);
 
-  useEffect(() => {
-    if (chatEnd.current) chatEnd.current.scrollIntoView({ behavior: "smooth" });
-  }, [msgs]);
-
-  const sendMsg = async (custom?: string) => {
-    const userMsg = custom || inp.trim();
-    if (!userMsg || loading) return;
-    setInp("");
-    const newMsgs: Msg[] = [...msgs, { role: "user", text: userMsg }];
-    setMsgs(newMsgs);
-    setLoading(true);
-
-    const mObj = MODES.find(m => m.id === mode) || MODES[1];
-    const apiMsgs = newMsgs.slice(-6).map(m => ({ role: m.role, content: m.text }));
-    apiMsgs.push({ role: "user", content: `[Context: ${lesson!.topic}. Style: ${mObj.prompt}. Under 250 words. End with question.]` });
-
-    try {
-      const text = await callAI(apiMsgs);
-      setMsgs([...newMsgs, { role: "assistant", text: text || "Could you try asking again?" }]);
-    } catch (err: any) {
-      setMsgs([...newMsgs, { role: "assistant", text: `Connection issue: ${err.message}\n\nPlease try again.` }]);
+  const handleCardNext = () => {
+    if (currentStep < totalSteps - 1) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      handleLessonComplete();
     }
-    setLoading(false);
   };
 
-  const markDone = () => {
-    if (!id || isDone) return;
-    const newDone = [...done, id];
-    localStorage.setItem("adojo_done", JSON.stringify(newDone));
-    const xp = parseInt(localStorage.getItem("adojo_xp") || "0") + (lesson?.xp || 0);
-    localStorage.setItem("adojo_xp", String(xp));
+  const handleQuizAnswer = (correct: boolean) => {
+    if (correct) {
+      setCorrectCount(c => c + 1);
+    } else {
+      setHearts(h => Math.max(0, h - 1));
+    }
+    // Move to next step after a delay
+    setTimeout(() => {
+      if (currentStep < totalSteps - 1) {
+        setCurrentStep(currentStep + 1);
+      } else {
+        handleLessonComplete();
+      }
+    }, 300);
+  };
+
+  const handleLessonComplete = () => {
     clearInterval(timerRef.current);
-    toast.success(`+${lesson?.xp} XP earned! 🎉`);
-    navigate("/courses");
+    if (id) {
+      const done: string[] = JSON.parse(localStorage.getItem("adojo_done") || "[]");
+      if (!done.includes(id)) {
+        done.push(id);
+        localStorage.setItem("adojo_done", JSON.stringify(done));
+        const xp = parseInt(localStorage.getItem("adojo_xp") || "0") + (lesson?.xp || 0);
+        localStorage.setItem("adojo_xp", String(xp));
+      }
+    }
+    setPhase("complete");
   };
 
-  const saveNote = () => {
-    const notes = JSON.parse(localStorage.getItem("adojo_notes") || "{}");
-    notes[id!] = note;
-    localStorage.setItem("adojo_notes", JSON.stringify(notes));
-    toast.success("Note saved!");
-  };
-
-  if (!lesson) return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
-      <p className="text-foreground font-bold">Lesson not found</p>
-      <button onClick={() => navigate("/courses")} className="text-primary font-semibold">Back to courses</button>
-    </div>
-  );
+  if (!lesson || !content) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
+        <Agni expression="sad" size={100} speech="Lesson not found 😢" />
+        <button onClick={() => navigate("/courses")} className="text-agni-green font-black text-sm">Back to courses</button>
+      </div>
+    );
+  }
 
   return (
-    <PageTransition>
-    <div className="flex flex-col h-screen bg-background">
-      {/* Header */}
-      <div className="bg-card px-4 py-3 border-b border-border shrink-0">
-        <div className="max-w-md mx-auto flex items-center justify-between">
-          <button onClick={() => { clearInterval(timerRef.current); navigate("/courses"); }} className="flex items-center gap-1 text-sm text-muted-foreground">
-            <ChevronLeft size={16} /> Back
-          </button>
-          <div className="text-center">
-            <div className="font-bold text-sm text-foreground truncate max-w-[180px]">{lesson.t}</div>
-            <div className="text-xs text-muted-foreground flex items-center gap-2 justify-center">
-              <span>{lesson.xp} XP</span>
-              <span className="flex items-center gap-0.5"><Timer size={10} /> {Math.floor(timer/60)}m {timer%60}s</span>
-              <span className="flex items-center gap-0.5 text-[8px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-bold">
-                <Brain size={8} /> {getActiveModelLabel()}
-              </span>
+    <div className="flex flex-col h-screen bg-background relative overflow-hidden">
+      {/* Top bar */}
+      <div className="shrink-0 px-4 pt-4 pb-2 relative z-20">
+        <div className="max-w-md mx-auto">
+          <div className="flex items-center gap-3 mb-3">
+            {/* Close button */}
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => navigate("/courses")}
+              className="w-8 h-8 rounded-xl bg-card border border-border/40 flex items-center justify-center"
+            >
+              <X size={16} className="text-muted-foreground" />
+            </motion.button>
+
+            {/* Progress bar */}
+            <div className="flex-1 h-3 bg-muted/30 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-agni-green rounded-full"
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+
+            {/* Hearts */}
+            <div className="flex items-center gap-1 bg-agni-pink/15 rounded-full px-2 py-1">
+              <Heart size={14} className="text-agni-pink fill-agni-pink" />
+              <span className="text-xs font-black text-agni-pink">{hearts}</span>
             </div>
           </div>
-          <div className="flex gap-2">
-            <button onClick={() => setShowNote(!showNote)} className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-              <StickyNote size={14} className="text-foreground" />
-            </button>
-            {!isDone ? (
-              <button onClick={markDone} className="bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1">
-                <CheckCircle2 size={12} /> Done
-              </button>
+
+          {/* Step indicator */}
+          <div className="flex items-center justify-between">
+            <span className="text-[9px] font-black text-muted-foreground">
+              {isQuizStep ? "QUIZ" : "LESSON"} {currentStep + 1}/{totalSteps}
+            </span>
+            <span className="text-[9px] font-black text-agni-green flex items-center gap-1">
+              <Zap size={10} /> {lesson.xp} XP
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main content area */}
+      <div className="flex-1 overflow-hidden px-4 py-2 relative z-10">
+        <div className="max-w-md mx-auto h-full">
+          <AnimatePresence mode="wait">
+            {phase === "complete" ? (
+              <LessonComplete
+                key="complete"
+                lessonTitle={lesson.t}
+                xpEarned={lesson.xp}
+                correctCount={correctCount}
+                totalQuizzes={content.quizzes.length}
+                timeSpent={timer}
+                onContinue={() => navigate("/courses")}
+              />
+            ) : isQuizStep ? (
+              <QuizCard
+                key={`quiz-${quizIndex}`}
+                quiz={content.quizzes[quizIndex]}
+                onAnswer={handleQuizAnswer}
+              />
             ) : (
-              <span className="text-green-500 text-xs font-bold flex items-center gap-1"><CheckCircle2 size={14} /> Done</span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Notes */}
-      {showNote && (
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 px-4 py-2 border-b border-border shrink-0">
-          <div className="max-w-md mx-auto">
-            <textarea value={note} onChange={e => setNote(e.target.value)} onBlur={saveNote} placeholder="Your notes for this lesson..." rows={3}
-              className="w-full border border-yellow-200 dark:border-yellow-800 rounded-xl p-2.5 text-sm outline-none resize-none bg-transparent text-foreground" />
-          </div>
-        </div>
-      )}
-
-      {/* Mode selector */}
-      <div className="bg-muted/50 px-4 py-2 border-b border-border shrink-0 overflow-x-auto">
-        <div className="max-w-md mx-auto flex gap-1.5 items-center">
-          <span className="text-xs text-muted-foreground shrink-0">Mode:</span>
-          {MODES.map(m => (
-            <button key={m.id} onClick={() => setMode(m.id)}
-              className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${
-                mode === m.id ? "bg-primary/10 border-primary text-primary" : "bg-card border-border text-muted-foreground"
-              }`}>{m.label}</button>
-          ))}
-        </div>
-      </div>
-
-      {/* Chat */}
-      <div className="flex-1 overflow-y-auto px-4 py-3">
-        <div className="max-w-md mx-auto space-y-3">
-          {msgs.map((msg, i) => (
-            <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[85%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
-                msg.role === "user"
-                  ? "bg-primary text-primary-foreground rounded-2xl rounded-br-sm"
-                  : "bg-card text-foreground rounded-2xl rounded-bl-sm border border-border shadow-sm"
-              }`}>{msg.text}</div>
-            </div>
-          ))}
-          {loading && (
-            <div className="flex justify-start">
-              <div className="bg-card border border-border rounded-2xl rounded-bl-sm px-5 py-3 flex gap-1.5 items-center shadow-sm">
-                {[0, 1, 2].map(i => (<span key={i} className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-pulse" style={{ animationDelay: `${i * 200}ms` }} />))}
+              <div key={`card-${currentStep}`} className="h-full flex flex-col">
+                <LessonCard {...content.cards[currentStep]} />
+                {/* Next button for concept cards */}
+                <motion.button
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  whileTap={{ scale: 0.95, y: 2 }}
+                  onClick={handleCardNext}
+                  className="mt-3 w-full py-3.5 bg-agni-green text-white font-black text-sm rounded-2xl shadow-btn-3d active:shadow-btn-3d-pressed active:translate-y-0.5"
+                >
+                  {currentStep < content.cards.length - 1 ? "Continue" : "Start Quiz 🧠"}
+                </motion.button>
               </div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* Hearts lost warning */}
+      <AnimatePresence>
+        {hearts === 0 && phase !== "complete" && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="absolute bottom-0 left-0 right-0 bg-agni-pink/95 p-5 z-30"
+          >
+            <div className="max-w-md mx-auto text-center">
+              <Agni expression="sad" size={70} speech="Out of hearts! 💔" />
+              <p className="text-white font-black text-sm mt-2">No hearts left!</p>
+              <p className="text-white/70 text-xs font-medium mt-1">You can still finish the lesson.</p>
+              <button
+                onClick={() => setHearts(1)}
+                className="mt-3 bg-white text-agni-pink font-black text-sm px-6 py-2.5 rounded-full"
+              >
+                Continue Anyway
+              </button>
             </div>
-          )}
-          <div ref={chatEnd} />
-        </div>
-      </div>
-
-      {/* Quick actions */}
-      <div className="px-4 py-1.5 bg-muted/30 border-t border-border shrink-0 overflow-x-auto">
-        <div className="max-w-md mx-auto flex gap-1.5">
-          {["Explain simpler", "Give me code", "Real example", "Quiz me", "What can I build?", "Connect to HCL", "Deep dive"].map(q => (
-            <button key={q} onClick={() => sendMsg(q)}
-              className="shrink-0 px-3 py-1 rounded-full text-xs bg-card border border-border text-muted-foreground hover:text-foreground transition-colors">{q}</button>
-          ))}
-        </div>
-      </div>
-
-      {/* Input */}
-      <div className="px-4 py-3 bg-card border-t border-border shrink-0">
-        <div className="max-w-md mx-auto flex gap-2">
-          <input value={inp} onChange={e => setInp(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMsg(); }}}
-            placeholder={`Ask about ${lesson.t}...`}
-            className="flex-1 px-4 py-2.5 rounded-2xl border border-border text-sm outline-none bg-muted/50 text-foreground focus:ring-2 focus:ring-ring" />
-          <button onClick={() => sendMsg()} disabled={loading}
-            className={`w-10 h-10 rounded-full flex items-center justify-center text-primary-foreground shrink-0 transition-all ${loading ? "bg-muted" : "bg-primary hover:scale-105"}`}>
-            <Send size={16} />
-          </button>
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
-    </PageTransition>
   );
 };
 
