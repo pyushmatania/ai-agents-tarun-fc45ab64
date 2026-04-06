@@ -280,6 +280,50 @@ const CourseDetailPage = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Quiz confirmation dialog */}
+      <AnimatePresence>
+        {showQuizConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm z-40 flex items-center justify-center p-6"
+          >
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.85, opacity: 0 }}
+              className="bg-card border border-border/40 rounded-2xl p-6 max-w-xs w-full text-center shadow-elevated"
+            >
+              <Agni expression="teaching" size={80} speech="Ready for the quiz? 🧠" />
+              <p className="text-foreground font-black text-sm mt-3">Start the Quiz?</p>
+              <p className="text-muted-foreground text-xs font-medium mt-1">
+                AGNI will generate questions based on what you just learned.
+              </p>
+              <div className="flex gap-2 mt-4">
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowQuizConfirm(false)}
+                  className="flex-1 text-[11px] font-black text-muted-foreground bg-muted/30 border border-border/40 rounded-xl py-2.5 transition-colors"
+                >
+                  Keep Learning
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    setShowQuizConfirm(false);
+                    handleQuizReady(chatMessagesRef.current);
+                  }}
+                  className="flex-1 text-[11px] font-black text-white bg-agni-green rounded-xl py-2.5 shadow-[0_3px_0_0_hsl(100,100%,31%)] active:shadow-[0_1px_0_0_hsl(100,100%,31%)] active:translate-y-[2px] transition-all"
+                >
+                  ⚡ Let's Go!
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
