@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import FloatingShapes from "@/components/illustrations/FloatingShapes";
 import { motion, AnimatePresence } from "framer-motion";
+import heroCuriosity from "@/assets/hero-curiosity.png";
 
 const CURIOSITY = [
   { id: "industry", label: "🏭 Your Industry", desc: "AI agents in semiconductor & manufacturing", query: "AI agents semiconductor manufacturing India 2026 latest", gradient: "from-orange-500/10 to-amber-500/5" },
@@ -68,30 +69,27 @@ const CuriosityPage = () => {
         <div className="max-w-md mx-auto px-4 pt-5 relative z-10">
           <Header name={displayName} progress={0} />
 
-          {/* Hero */}
+          {/* Hero Illustration */}
           <FadeIn delay={0.1}>
-            <div className="rounded-2xl p-4 mb-4 relative overflow-hidden border border-border/30"
-              style={{ background: "linear-gradient(135deg, hsl(258 40% 18%), hsl(228 20% 10%))" }}>
-              <div className="flex items-start gap-3">
-                <motion.div
-                  animate={{ y: [0, -4, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="w-12 h-12 rounded-xl bg-gradient-to-br from-secondary/30 to-primary/20 flex items-center justify-center text-2xl shrink-0"
-                >
-                  🔮
-                </motion.div>
-                <div className="relative z-10">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <Sparkles size={10} className="text-secondary" />
-                    <p className="text-[9px] font-bold text-secondary/70 tracking-widest">AI-POWERED</p>
-                  </div>
-                  <h3 className="text-base font-display font-bold text-white leading-tight mb-1">Curiosity Spark</h3>
-                  <p className="text-[11px] text-white/50 leading-relaxed">
-                    Tap a category and let AI curate the freshest insights for you.
-                  </p>
+            <div className="rounded-2xl mb-4 relative overflow-hidden">
+              <img
+                src={heroCuriosity}
+                alt="Curiosity Spark - discover AI knowledge"
+                className="w-full h-44 object-cover rounded-2xl"
+                width={800}
+                height={512}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent rounded-2xl" />
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Sparkles size={10} className="text-secondary" />
+                  <p className="text-[9px] font-bold text-secondary tracking-widest">AI-POWERED</p>
                 </div>
+                <h3 className="text-base font-display font-bold text-foreground leading-tight mb-0.5">Curiosity Spark</h3>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Tap a category and let AI curate the freshest insights for you.
+                </p>
               </div>
-              <div className="absolute -bottom-6 -right-6 w-20 h-20 rounded-full bg-secondary/5" />
             </div>
           </FadeIn>
 

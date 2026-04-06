@@ -5,6 +5,7 @@ import PageTransition, { FadeIn, StaggerContainer, StaggerItem } from "@/compone
 import { useAuth } from "@/hooks/useAuth";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, Circle, Lock, ChevronDown, ChevronRight, Rocket, Zap, Trophy, Target, Star, Flame } from "lucide-react";
+import heroRoadmap from "@/assets/hero-roadmap.png";
 
 const PHASES = [
   {
@@ -228,39 +229,37 @@ const RoadmapPage = () => {
             </div>
           </FadeIn>
 
-          {/* Hero Progress Card */}
+          {/* Hero Illustration */}
           <FadeIn delay={0.05}>
-            <div className="rounded-2xl p-4 mb-4 relative overflow-hidden border border-border/30"
-              style={{ background: "linear-gradient(135deg, hsl(258 55% 45%), hsl(228 40% 25%))" }}>
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-3">
-                  <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                    className="text-2xl"
-                  >
-                    🗺️
-                  </motion.div>
-                  <div>
-                    <p className="text-white font-bold text-sm">Your Journey</p>
-                    <p className="text-white/50 text-[10px]">Day ~{currentDay} of 90</p>
-                  </div>
+            <div className="rounded-2xl mb-4 relative overflow-hidden">
+              <img
+                src={heroRoadmap}
+                alt="90-day learning roadmap journey"
+                className="w-full h-48 object-cover rounded-2xl"
+                loading="lazy"
+                width={800}
+                height={512}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent rounded-2xl" />
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <p className="text-foreground font-bold text-sm">Your Journey</p>
+                  <span className="text-muted-foreground text-[10px]">Day ~{currentDay} of 90</span>
                 </div>
 
                 {/* Timeline bar */}
-                <div className="relative mb-3">
-                  <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                <div className="relative mb-2">
+                  <div className="w-full h-2 bg-muted/50 rounded-full overflow-hidden">
                     <motion.div
-                      className="h-full bg-gradient-to-r from-violet-400 via-orange-400 to-emerald-400 rounded-full"
+                      className="h-full bg-gradient-to-r from-violet-500 via-orange-400 to-emerald-500 rounded-full"
                       initial={{ width: 0 }}
                       animate={{ width: `${overallProgress}%` }}
                       transition={{ duration: 1, delay: 0.3 }}
                     />
                   </div>
-                  {/* Phase markers */}
-                  <div className="flex justify-between mt-1">
+                  <div className="flex justify-between mt-0.5">
                     {["Day 1", "Day 30", "Day 60", "Day 90"].map((label, i) => (
-                      <span key={i} className="text-[7px] text-white/40 font-medium">{label}</span>
+                      <span key={i} className="text-[7px] text-muted-foreground font-medium">{label}</span>
                     ))}
                   </div>
                 </div>
@@ -268,9 +267,9 @@ const RoadmapPage = () => {
                 {/* Stats row */}
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { icon: CheckCircle2, value: completedMilestones, label: "Done", color: "text-emerald-300" },
-                    { icon: Zap, value: xp, label: "XP Earned", color: "text-amber-300" },
-                    { icon: Target, value: TOTAL_MILESTONES - completedMilestones, label: "Remaining", color: "text-violet-300" },
+                    { icon: CheckCircle2, value: completedMilestones, label: "Done", color: "text-emerald-500" },
+                    { icon: Zap, value: xp, label: "XP Earned", color: "text-amber-500" },
+                    { icon: Target, value: TOTAL_MILESTONES - completedMilestones, label: "Remaining", color: "text-violet-500" },
                   ].map((s, i) => (
                     <motion.div
                       key={i}
@@ -280,13 +279,12 @@ const RoadmapPage = () => {
                       className="text-center"
                     >
                       <s.icon size={12} className={`${s.color} mx-auto mb-0.5`} />
-                      <p className="text-white font-bold text-sm leading-none">{s.value}</p>
-                      <p className="text-white/40 text-[7px] font-medium">{s.label}</p>
+                      <p className="text-foreground font-bold text-sm leading-none">{s.value}</p>
+                      <p className="text-muted-foreground text-[7px] font-medium">{s.label}</p>
                     </motion.div>
                   ))}
                 </div>
               </div>
-              <div className="absolute -bottom-8 -right-8 w-24 h-24 rounded-full bg-white/5" />
             </div>
           </FadeIn>
 
