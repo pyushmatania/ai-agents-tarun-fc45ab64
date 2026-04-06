@@ -182,7 +182,6 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
             setTimeout(() => onQuizReady(updated), 2000);
             return updated;
           });
-          setTimeout(() => onQuizReady(), 2000);
         }
       } else {
         const data = await resp.json();
@@ -191,7 +190,8 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
         setMessages(prev => [...prev, { role: "assistant", content: cleanText }]);
 
         if (text.includes("QUIZ_READY")) {
-          setTimeout(() => onQuizReady(), 2000);
+          const allMsgs = [...messages, { role: "assistant" as const, content: cleanText }];
+          setTimeout(() => onQuizReady(allMsgs), 2000);
         }
       }
 
@@ -229,7 +229,7 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
 
   const handleSkipToQuiz = () => {
     SFX.tap();
-    onQuizReady();
+    onQuizReady(messages);
   };
 
   return (
