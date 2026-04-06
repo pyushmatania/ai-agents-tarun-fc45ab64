@@ -89,6 +89,17 @@ const OnboardingPage = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
             </div>
 
+            {/* Mascot */}
+            <motion.div
+              initial={{ scale: 0, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+              className="mb-4"
+            >
+              <MascotRobot size={100} mood="waving" speech="Welcome! Let's learn AI! 🤖" />
+            </motion.div>
+            </div>
+
             {/* Title */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
