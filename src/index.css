@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,108 +6,78 @@
 
 @layer base {
   :root {
-    --background: 228 14% 8%;
-    --foreground: 210 20% 95%;
+    /* AgentDojo Dark Theme — Duolingo meets Cyberpunk */
+    --background: 195 30% 11%;        /* #131F24 */
+    --foreground: 200 20% 92%;        /* Light text */
 
-    --card: 228 14% 12%;
-    --card-foreground: 210 20% 95%;
+    --card: 195 25% 15%;              /* #1A2C32 */
+    --card-foreground: 200 20% 92%;
 
-    --popover: 228 14% 12%;
-    --popover-foreground: 210 20% 95%;
+    --popover: 195 30% 8%;            /* #0A1419 modal bg */
+    --popover-foreground: 200 20% 92%;
 
-    --primary: 24 90% 55%;
+    --primary: 100 95% 40%;           /* #58CC02 green */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 258 60% 65%;
+    --secondary: 270 100% 75%;        /* #CE82FF purple */
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 228 14% 16%;
-    --muted-foreground: 220 10% 55%;
+    --muted: 195 20% 18%;             /* Darker muted */
+    --muted-foreground: 195 15% 55%;
 
-    --accent: 258 60% 65%;
+    --accent: 200 80% 54%;            /* #1CB0F6 blue */
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 55%;
+    --destructive: 0 100% 65%;        /* #FF4B4B red */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 228 14% 18%;
-    --input: 228 14% 18%;
-    --ring: 24 90% 55%;
+    --border: 197 16% 27%;            /* #37464F */
+    --input: 197 16% 27%;
+    --ring: 100 95% 40%;
 
-    --radius: 0.875rem;
+    --radius: 1rem;
 
-    --sidebar-background: 228 14% 10%;
-    --sidebar-foreground: 210 20% 90%;
-    --sidebar-primary: 24 90% 55%;
+    --sidebar-background: 195 30% 9%;
+    --sidebar-foreground: 200 20% 90%;
+    --sidebar-primary: 100 95% 40%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 228 14% 16%;
-    --sidebar-accent-foreground: 210 20% 90%;
-    --sidebar-border: 228 14% 18%;
-    --sidebar-ring: 24 90% 55%;
+    --sidebar-accent: 195 20% 18%;
+    --sidebar-accent-foreground: 200 20% 90%;
+    --sidebar-border: 197 16% 27%;
+    --sidebar-ring: 100 95% 40%;
 
-    /* App tokens */
-    --edu-orange: 24 90% 55%;
-    --edu-orange-light: 28 85% 65%;
-    --edu-purple: 258 60% 65%;
-    --edu-dark: 228 18% 6%;
-    --edu-cream: 228 14% 8%;
-    --edu-lavender: 258 40% 22%;
-    --edu-peach: 20 50% 22%;
-    --edu-mint: 160 30% 18%;
-    --edu-glass: 228 14% 14%;
+    /* AgentDojo Semantic Tokens */
+    --agni-green: 100 95% 40%;        /* #58CC02 */
+    --agni-green-dark: 100 100% 31%;  /* #459E00 */
+    --agni-green-light: 90 78% 49%;   /* #89E219 */
+    --agni-gold: 46 100% 49%;         /* #FFC800 */
+    --agni-gold-dark: 44 100% 44%;    /* #E0AC00 */
+    --agni-red: 0 100% 65%;           /* #FF4B4B */
+    --agni-blue: 199 92% 54%;         /* #1CB0F6 */
+    --agni-blue-dark: 199 80% 47%;    /* #1899D6 */
+    --agni-purple: 270 100% 75%;      /* #CE82FF */
+    --agni-orange: 33 100% 50%;       /* #FF9600 */
+    --agni-pink: 323 100% 76%;        /* #FF86D8 */
 
-    /* Shadows for dark */
-    --shadow-card: 0 2px 12px -2px hsl(0 0% 0% / 0.25);
-    --shadow-card-hover: 0 6px 24px -4px hsl(0 0% 0% / 0.35);
-    --shadow-elevated: 0 8px 32px -6px hsl(0 0% 0% / 0.4);
-    --shadow-glow-primary: 0 0 20px hsl(24 90% 55% / 0.15);
-    --shadow-glow-secondary: 0 0 20px hsl(258 60% 65% / 0.15);
-  }
+    /* Card elevated */
+    --card-elevated: 195 22% 20%;     /* #233D45 */
 
-  .light {
-    --background: 30 45% 95%;
-    --foreground: 228 14% 10%;
+    /* Lesson states */
+    --lesson-locked: 197 18% 21%;     /* #2B3F47 */
+    --lesson-current: 100 95% 40%;
+    --lesson-completed: 100 95% 40%;
+    --lesson-perfect: 46 100% 49%;
+    --lesson-treasure: 270 100% 75%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 228 14% 10%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 228 14% 10%;
-
-    --primary: 24 90% 55%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 258 60% 65%;
-    --secondary-foreground: 0 0% 100%;
-
-    --muted: 30 20% 90%;
-    --muted-foreground: 228 8% 45%;
-
-    --accent: 258 60% 65%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 30 15% 88%;
-    --input: 30 15% 88%;
-    --ring: 24 90% 55%;
-
-    --edu-orange: 24 90% 55%;
-    --edu-orange-light: 28 85% 70%;
-    --edu-purple: 258 60% 65%;
-    --edu-dark: 228 18% 12%;
-    --edu-cream: 30 45% 95%;
-    --edu-lavender: 258 50% 90%;
-    --edu-peach: 20 80% 90%;
-    --edu-mint: 160 40% 90%;
-    --edu-glass: 0 0% 100%;
-
-    --shadow-card: 0 2px 12px -2px hsl(228 14% 50% / 0.1);
-    --shadow-card-hover: 0 6px 24px -4px hsl(228 14% 50% / 0.18);
-    --shadow-elevated: 0 8px 32px -6px hsl(228 14% 10% / 0.1);
-    --shadow-glow-primary: 0 0 20px hsl(24 90% 55% / 0.1);
-    --shadow-glow-secondary: 0 0 20px hsl(258 60% 65% / 0.1);
+    /* 3D Button shadows */
+    --shadow-btn-3d: 0 4px 0 0 hsl(100 100% 31%);
+    --shadow-btn-3d-pressed: 0 2px 0 0 hsl(100 100% 31%);
+    --shadow-card: 0 2px 12px -2px hsl(0 0% 0% / 0.35);
+    --shadow-card-hover: 0 6px 24px -4px hsl(0 0% 0% / 0.45);
+    --shadow-elevated: 0 8px 32px -6px hsl(0 0% 0% / 0.5);
+    --shadow-glow-green: 0 0 20px hsl(100 95% 40% / 0.3);
+    --shadow-glow-gold: 0 0 20px hsl(46 100% 49% / 0.3);
+    --shadow-glow-purple: 0 0 20px hsl(270 100% 75% / 0.25);
   }
 }
 
@@ -117,10 +87,11 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Nunito', system-ui, sans-serif;
   }
   h1, h2, h3, h4 {
-    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-family: 'Nunito', system-ui, sans-serif;
+    font-weight: 800;
   }
 }
 
@@ -128,10 +99,14 @@
   .shadow-card { box-shadow: var(--shadow-card); }
   .shadow-card-hover { box-shadow: var(--shadow-card-hover); }
   .shadow-elevated { box-shadow: var(--shadow-elevated); }
-  .shadow-glow-primary { box-shadow: var(--shadow-glow-primary); }
-  .shadow-glow-secondary { box-shadow: var(--shadow-glow-secondary); }
+  .shadow-glow-green { box-shadow: var(--shadow-glow-green); }
+  .shadow-glow-gold { box-shadow: var(--shadow-glow-gold); }
+  .shadow-glow-purple { box-shadow: var(--shadow-glow-purple); }
+  .shadow-btn-3d { box-shadow: var(--shadow-btn-3d); }
+  .shadow-btn-3d-pressed { box-shadow: var(--shadow-btn-3d-pressed); }
+
   .glass {
-    background: hsl(var(--edu-glass) / 0.6);
+    background: hsl(var(--card) / 0.6);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
   }
@@ -140,4 +115,34 @@
     scrollbar-width: none;
   }
   .scrollbar-none::-webkit-scrollbar { display: none; }
+
+  /* 3D button effect */
+  .btn-3d {
+    box-shadow: var(--shadow-btn-3d);
+    transform: translateY(0);
+    transition: all 100ms ease;
+  }
+  .btn-3d:active {
+    box-shadow: var(--shadow-btn-3d-pressed);
+    transform: translateY(2px);
+  }
+
+  /* Text styles */
+  .text-display {
+    font-size: 48px;
+    line-height: 1.1;
+    font-weight: 900;
+  }
+  .text-label {
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    font-size: 12px;
+  }
+  .text-micro {
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    font-size: 10px;
+  }
 }
