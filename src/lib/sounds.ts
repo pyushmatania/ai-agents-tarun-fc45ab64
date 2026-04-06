@@ -53,6 +53,12 @@ let celebrationSound: Howl | null = null;
 let streakSound: Howl | null = null;
 let xpSound: Howl | null = null;
 let levelUpSound: Howl | null = null;
+let powerupGreenSound: Howl | null = null;
+let powerupBlueSound: Howl | null = null;
+let powerupPurpleSound: Howl | null = null;
+let powerupGoldSound: Howl | null = null;
+let powerupPinkSound: Howl | null = null;
+let powerupOrangeSound: Howl | null = null;
 
 let initialized = false;
 let muted = false;
@@ -71,13 +77,21 @@ async function initSounds() {
     });
 
     // Generate real tones
-    const [successUrl, errorUrl, celebUrl, streakUrl, xpUrl, levelUrl] = await Promise.all([
-      generateChime([523, 659, 784], 0.12, 0.25), // C-E-G success
-      generateChime([392, 330], 0.2, 0.2),          // G-E error
-      generateChime([523, 659, 784, 1047], 0.15, 0.3), // celebration
-      generateChime([440, 554, 659, 880], 0.12, 0.35), // streak fire
-      generateChime([880, 1047], 0.08, 0.2),        // xp gain
-      generateChime([523, 659, 784, 1047, 1319], 0.18, 0.4), // level up
+    const [successUrl, errorUrl, celebUrl, streakUrl, xpUrl, levelUrl,
+           puGreenUrl, puBlueUrl, puPurpleUrl, puGoldUrl, puPinkUrl, puOrangeUrl] = await Promise.all([
+      generateChime([523, 659, 784], 0.12, 0.25),
+      generateChime([392, 330], 0.2, 0.2),
+      generateChime([523, 659, 784, 1047], 0.15, 0.3),
+      generateChime([440, 554, 659, 880], 0.12, 0.35),
+      generateChime([880, 1047], 0.08, 0.2),
+      generateChime([523, 659, 784, 1047, 1319], 0.18, 0.4),
+      // Powerup sounds — each a distinct short chime
+      generateChime([659, 784], 0.06, 0.3),          // green: quick rising
+      generateChime([523, 784], 0.08, 0.25),          // blue: wide interval pop
+      generateChime([440, 554, 740], 0.07, 0.28),     // purple: mystical triad
+      generateChime([880, 1108], 0.05, 0.3),          // gold: bright high ding
+      generateChime([698, 880, 1047], 0.06, 0.25),    // pink: sparkly triple
+      generateChime([587, 740], 0.07, 0.28),          // orange: warm double
     ]);
 
     successSound = new Howl({ src: [successUrl], volume: 0.3 });
@@ -86,6 +100,12 @@ async function initSounds() {
     streakSound = new Howl({ src: [streakUrl], volume: 0.3 });
     xpSound = new Howl({ src: [xpUrl], volume: 0.25 });
     levelUpSound = new Howl({ src: [levelUrl], volume: 0.4 });
+    powerupGreenSound = new Howl({ src: [puGreenUrl], volume: 0.3 });
+    powerupBlueSound = new Howl({ src: [puBlueUrl], volume: 0.3 });
+    powerupPurpleSound = new Howl({ src: [puPurpleUrl], volume: 0.3 });
+    powerupGoldSound = new Howl({ src: [puGoldUrl], volume: 0.3 });
+    powerupPinkSound = new Howl({ src: [puPinkUrl], volume: 0.3 });
+    powerupOrangeSound = new Howl({ src: [puOrangeUrl], volume: 0.3 });
   } catch (e) {
     console.warn("Sound init failed:", e);
   }
@@ -157,6 +177,24 @@ export const SFX = {
   streak: () => { if (!muted) streakSound?.play(); },
   xp: () => { if (!muted) xpSound?.play(); },
   levelUp: () => { if (!muted) levelUpSound?.play(); },
+
+  // Power-up sounds by color key
+  powerup: (color: string) => {
+    if (muted) return;
+    const map: Record<string, Howl | null> = {
+      green: powerupGreenSound,
+      blue: powerupBlueSound,
+      purple: powerupPurpleSound,
+      gold: powerupGoldSound,
+      pink: powerupPinkSound,
+      orange: powerupOrangeSound,
+    };
+    (map[color] || tapSound)?.play();
+    // Haptic feedback
+    if (navigator.vibrate) {
+      navigator.vibrate(color === "gold" ? [30, 20, 30] : [25]);
+    }
+  },
 
   mute: () => { muted = true; },
   unmute: () => { muted = false; },
