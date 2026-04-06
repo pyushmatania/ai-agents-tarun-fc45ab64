@@ -257,6 +257,7 @@ const CourseDetailPage = () => {
                 Back to Courses
               </button>
             </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
