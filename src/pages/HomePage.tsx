@@ -8,6 +8,7 @@ import Agni from "@/components/Agni";
 import DailyQuests from "@/components/DailyQuests";
 import { useGamification } from "@/hooks/useGamification";
 import { useState, useEffect } from "react";
+import { SFX } from "@/lib/sounds";
 
 const DAILY_TIPS = [
   { tip: "AI agents use a Perceive→Reason→Act loop — just like humans!", emoji: "🧠" },

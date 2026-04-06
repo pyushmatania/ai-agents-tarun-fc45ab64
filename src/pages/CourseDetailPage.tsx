@@ -8,6 +8,7 @@ import type { QuizQuestion } from "@/components/lesson/QuizCard";
 import LessonComplete from "@/components/lesson/LessonComplete";
 import Agni from "@/components/Agni";
 import { useGamification } from "@/hooks/useGamification";
+import { SFX } from "@/lib/sounds";
 // Lesson content data — each lesson has concept cards + quizzes
 const LESSON_CONTENT: Record<string, {
   cards: { title: string; content: string; type: "concept" | "diagram" | "example" | "code"; icon: string }[];
@@ -113,6 +114,7 @@ const CourseDetailPage = () => {
   }, []);
 
   const handleCardNext = () => {
+    SFX.tap();
     if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -137,6 +139,7 @@ const CourseDetailPage = () => {
 
   const handleLessonComplete = () => {
     clearInterval(timerRef.current);
+    SFX.xp();
     if (id && lesson) {
       const totalQ = content?.quizzes.length || 0;
       const isPerfect = totalQ > 0 && correctCount === totalQ;

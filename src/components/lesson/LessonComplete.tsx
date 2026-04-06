@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import Agni from "@/components/Agni";
 import { Star, Zap, Clock, ArrowRight } from "lucide-react";
+import { SFX } from "@/lib/sounds";
 
 interface LessonCompleteProps {
   lessonTitle: string;
@@ -15,6 +17,11 @@ const LessonComplete = ({ lessonTitle, xpEarned, correctCount, totalQuizzes, tim
   const accuracy = totalQuizzes > 0 ? Math.round((correctCount / totalQuizzes) * 100) : 100;
   const isPerfect = accuracy === 100;
   const minutes = Math.floor(timeSpent / 60);
+
+  useEffect(() => {
+    SFX.celebration();
+    if (isPerfect) setTimeout(() => SFX.levelUp(), 600);
+  }, []);
 
   return (
     <motion.div

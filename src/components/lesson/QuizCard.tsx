@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Agni from "@/components/Agni";
+import { SFX } from "@/lib/sounds";
 import type { AgniExpression } from "@/components/Agni";
 
 export type QuizType = "mcq" | "truefalse" | "fillin";
@@ -40,6 +41,7 @@ const QuizCard = ({ quiz, onAnswer }: QuizCardProps) => {
     }
     setIsCorrect(correct);
     setAnswered(true);
+    if (correct) SFX.success(); else SFX.error();
   };
 
   const handleContinue = () => {
