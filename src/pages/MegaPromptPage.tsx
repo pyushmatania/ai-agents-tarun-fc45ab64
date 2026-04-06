@@ -38,7 +38,7 @@ MODE: CAREER — What skills make you hireable as an AI agent engineer?
 MODE: DEBATE — Present two opposing viewpoints and argue both sides.`,
   },
   {
-    title: "🏗️ Phase 1: Foundations — "What Even Is an Agent?"",
+    title: '🏗️ Phase 1: Foundations — "What Even Is an Agent?"',
     content: `1. The Agent Mental Model
 - What separates a chatbot from an agent? (Perception → Reasoning → Action → Learning loop)
 - The ReAct pattern: Reason + Act. How LLMs "think" before they "do"
