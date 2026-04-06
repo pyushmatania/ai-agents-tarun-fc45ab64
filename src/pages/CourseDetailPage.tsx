@@ -88,8 +88,8 @@ const ALL_LESSONS: Record<string, { t: string; xp: number; topic: string }> = {
 const CourseDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { stats, loseHeart, completeLesson } = useGamification();
   const [currentStep, setCurrentStep] = useState(0);
-  const [hearts, setHearts] = useState(5);
   const [correctCount, setCorrectCount] = useState(0);
   const [phase, setPhase] = useState<"learning" | "complete">("learning");
   const [timer, setTimer] = useState(0);
@@ -124,9 +124,8 @@ const CourseDetailPage = () => {
     if (correct) {
       setCorrectCount(c => c + 1);
     } else {
-      setHearts(h => Math.max(0, h - 1));
+      loseHeart();
     }
-    // Move to next step after a delay
     setTimeout(() => {
       if (currentStep < totalSteps - 1) {
         setCurrentStep(currentStep + 1);
@@ -138,14 +137,10 @@ const CourseDetailPage = () => {
 
   const handleLessonComplete = () => {
     clearInterval(timerRef.current);
-    if (id) {
-      const done: string[] = JSON.parse(localStorage.getItem("adojo_done") || "[]");
-      if (!done.includes(id)) {
-        done.push(id);
-        localStorage.setItem("adojo_done", JSON.stringify(done));
-        const xp = parseInt(localStorage.getItem("adojo_xp") || "0") + (lesson?.xp || 0);
-        localStorage.setItem("adojo_xp", String(xp));
-      }
+    if (id && lesson) {
+      const totalQ = content?.quizzes.length || 0;
+      const isPerfect = totalQ > 0 && correctCount === totalQ;
+      completeLesson(id, lesson.xp, isPerfect);
     }
     setPhase("complete");
   };
