@@ -45,6 +45,9 @@ const HomePage = () => {
 
   const todayTip = DAILY_TIPS[new Date().getDay() % DAILY_TIPS.length];
   const greeting = new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening";
+  const dailyGoal = 50; // XP daily goal
+  const dailyXpEarned = Math.min(xp % 100, dailyGoal);
+  const dailyProgress = (dailyXpEarned / dailyGoal) * 100;
 
   useEffect(() => {
     const timer = setTimeout(() => setAgniExpression("happy"), 2000);
