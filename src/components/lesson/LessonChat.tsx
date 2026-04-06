@@ -39,39 +39,40 @@ interface PowerUp {
   emoji: string;
   color: string;
   shadowColor: string;
+  soundColor: string;
   custom?: boolean;
 }
 
 const POWERUPS: Record<string, PowerUp[]> = {
   class5: [
-    { id: "s1", label: "Simpler!", emoji: "🧸", prompt: "Explain that in even simpler terms, like I'm 5 years old.", color: "bg-[hsl(100,95%,40%)]", shadowColor: "shadow-[0_4px_0_0_hsl(100,100%,31%)]" },
-    { id: "s2", label: "Fun Example", emoji: "🎮", prompt: "Give me a fun, real-world example of this!", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]" },
-    { id: "s3", label: "Story Time", emoji: "📖", prompt: "Tell me a short story to explain this concept.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]" },
+    { id: "s1", label: "Simpler!", emoji: "🧸", prompt: "Explain that in even simpler terms, like I'm 5 years old.", color: "bg-[hsl(100,95%,40%)]", shadowColor: "shadow-[0_4px_0_0_hsl(100,100%,31%)]", soundColor: "green" },
+    { id: "s2", label: "Fun Example", emoji: "🎮", prompt: "Give me a fun, real-world example of this!", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", soundColor: "blue" },
+    { id: "s3", label: "Story Time", emoji: "📖", prompt: "Tell me a short story to explain this concept.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", soundColor: "purple" },
   ],
   engineer: [
-    { id: "e1", label: "Show Code", emoji: "💻", prompt: "Show me a code example for this concept.", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]" },
-    { id: "e2", label: "Real Example", emoji: "🏗️", prompt: "Give me a real-world production example.", color: "bg-[hsl(100,95%,40%)]", shadowColor: "shadow-[0_4px_0_0_hsl(100,100%,31%)]" },
-    { id: "e3", label: "Deep Dive", emoji: "🔬", prompt: "Go deeper into the technical details.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]" },
+    { id: "e1", label: "Show Code", emoji: "💻", prompt: "Show me a code example for this concept.", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", soundColor: "blue" },
+    { id: "e2", label: "Real Example", emoji: "🏗️", prompt: "Give me a real-world production example.", color: "bg-[hsl(100,95%,40%)]", shadowColor: "shadow-[0_4px_0_0_hsl(100,100%,31%)]", soundColor: "green" },
+    { id: "e3", label: "Deep Dive", emoji: "🔬", prompt: "Go deeper into the technical details.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", soundColor: "purple" },
   ],
   founder: [
-    { id: "f1", label: "Business Case", emoji: "💰", prompt: "What's the business case / ROI for this?", color: "bg-[hsl(46,100%,49%)]", shadowColor: "shadow-[0_4px_0_0_hsl(44,100%,38%)]" },
-    { id: "f2", label: "Build What?", emoji: "🚀", prompt: "What products or startups could I build with this?", color: "bg-[hsl(100,95%,40%)]", shadowColor: "shadow-[0_4px_0_0_hsl(100,100%,31%)]" },
-    { id: "f3", label: "Strategy", emoji: "♟️", prompt: "Go deeper into the strategic implications.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]" },
+    { id: "f1", label: "Business Case", emoji: "💰", prompt: "What's the business case / ROI for this?", color: "bg-[hsl(46,100%,49%)]", shadowColor: "shadow-[0_4px_0_0_hsl(44,100%,38%)]", soundColor: "gold" },
+    { id: "f2", label: "Build What?", emoji: "🚀", prompt: "What products or startups could I build with this?", color: "bg-[hsl(100,95%,40%)]", shadowColor: "shadow-[0_4px_0_0_hsl(100,100%,31%)]", soundColor: "green" },
+    { id: "f3", label: "Strategy", emoji: "♟️", prompt: "Go deeper into the strategic implications.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", soundColor: "purple" },
   ],
   hacker: [
-    { id: "h1", label: "Just Code", emoji: "⌨️", prompt: "Just show me the code, skip the theory.", color: "bg-[hsl(100,95%,40%)]", shadowColor: "shadow-[0_4px_0_0_hsl(100,100%,31%)]" },
-    { id: "h2", label: "Quick Start", emoji: "🏃", prompt: "How do I get started with this RIGHT NOW?", color: "bg-[hsl(33,100%,50%)]", shadowColor: "shadow-[0_4px_0_0_hsl(33,100%,38%)]" },
-    { id: "h3", label: "Advanced", emoji: "🧠", prompt: "Go deeper, show me advanced patterns.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]" },
+    { id: "h1", label: "Just Code", emoji: "⌨️", prompt: "Just show me the code, skip the theory.", color: "bg-[hsl(100,95%,40%)]", shadowColor: "shadow-[0_4px_0_0_hsl(100,100%,31%)]", soundColor: "green" },
+    { id: "h2", label: "Quick Start", emoji: "🏃", prompt: "How do I get started with this RIGHT NOW?", color: "bg-[hsl(33,100%,50%)]", shadowColor: "shadow-[0_4px_0_0_hsl(33,100%,38%)]", soundColor: "orange" },
+    { id: "h3", label: "Advanced", emoji: "🧠", prompt: "Go deeper, show me advanced patterns.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", soundColor: "purple" },
   ],
   crazy: [
-    { id: "c1", label: "Mind Blow", emoji: "🤯", prompt: "Give me the most mind-blowing implication of this!", color: "bg-[hsl(323,100%,76%)]", shadowColor: "shadow-[0_4px_0_0_hsl(323,100%,60%)]" },
-    { id: "c2", label: "Sci-Fi Mode", emoji: "🌌", prompt: "Paint a wild sci-fi scenario with this tech.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]" },
-    { id: "c3", label: "Rabbit Hole", emoji: "🕳️", prompt: "Go even deeper into the rabbit hole.", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]" },
+    { id: "c1", label: "Mind Blow", emoji: "🤯", prompt: "Give me the most mind-blowing implication of this!", color: "bg-[hsl(323,100%,76%)]", shadowColor: "shadow-[0_4px_0_0_hsl(323,100%,60%)]", soundColor: "pink" },
+    { id: "c2", label: "Sci-Fi Mode", emoji: "🌌", prompt: "Paint a wild sci-fi scenario with this tech.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", soundColor: "purple" },
+    { id: "c3", label: "Rabbit Hole", emoji: "🕳️", prompt: "Go even deeper into the rabbit hole.", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", soundColor: "blue" },
   ],
   semiconductor: [
-    { id: "sc1", label: "HCL Link", emoji: "🏭", prompt: "How does this connect to semiconductor manufacturing / HCL?", color: "bg-[hsl(33,100%,50%)]", shadowColor: "shadow-[0_4px_0_0_hsl(33,100%,38%)]" },
-    { id: "sc2", label: "Fab Example", emoji: "⚙️", prompt: "Give me a specific fab/manufacturing example.", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]" },
-    { id: "sc3", label: "Technical", emoji: "🔬", prompt: "Go deeper into the technical details.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]" },
+    { id: "sc1", label: "HCL Link", emoji: "🏭", prompt: "How does this connect to semiconductor manufacturing / HCL?", color: "bg-[hsl(33,100%,50%)]", shadowColor: "shadow-[0_4px_0_0_hsl(33,100%,38%)]", soundColor: "orange" },
+    { id: "sc2", label: "Fab Example", emoji: "⚙️", prompt: "Give me a specific fab/manufacturing example.", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", soundColor: "blue" },
+    { id: "sc3", label: "Technical", emoji: "🔬", prompt: "Go deeper into the technical details.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", soundColor: "purple" },
   ],
 };
 
@@ -252,7 +253,7 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
   };
 
   const handlePowerUpPress = (pu: PowerUp) => {
-    SFX.tap();
+    SFX.powerup(pu.soundColor);
     setPressedBtn(pu.id);
     setTimeout(() => {
       setPressedBtn(null);
