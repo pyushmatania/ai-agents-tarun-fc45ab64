@@ -1,12 +1,59 @@
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
-import { ArrowRight, MoreHorizontal } from "lucide-react";
+import { ArrowRight, MoreHorizontal, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const HomePage = () => {
+  const { user } = useAuth();
+  const [totalLessons, setTotalLessons] = useState(0);
+  const [totalHours, setTotalHours] = useState(0);
+  const [overallProgress, setOverallProgress] = useState(0);
+  const [weeklyData, setWeeklyData] = useState<{ day: string; lessons: number }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchProgress = async () => {
+      const { data, error } = await supabase
+        .from("user_progress")
+        .select("*")
+        .eq("user_id", user.id);
+
+      if (!error && data && data.length > 0) {
+        const lessons = data.reduce((sum, r) => sum + (r.lessons_completed || 0), 0);
+        const hours = data.reduce((sum, r) => sum + Number(r.hours_spent || 0), 0);
+        const avgProgress = Math.round(data.reduce((sum, r) => sum + (r.progress_percent || 0), 0) / data.length);
+
+        setTotalLessons(lessons);
+        setTotalHours(hours);
+        setOverallProgress(avgProgress);
+
+        // Group by day_of_week for chart
+        const dayOrder = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+        const byDay = dayOrder.map((day) => ({
+          day,
+          lessons: data
+            .filter((r) => r.day_of_week === day)
+            .reduce((sum, r) => sum + (r.lessons_completed || 0), 0),
+        }));
+        setWeeklyData(byDay.filter((d) => d.lessons > 0));
+      }
+      setLoading(false);
+    };
+
+    fetchProgress();
+  }, [user]);
+
+  const userName = user?.user_metadata?.full_name?.split(" ")[0] || "Learner";
+  const maxLessons = Math.max(...weeklyData.map((d) => d.lessons), 1);
+
   return (
     <div className="min-h-screen bg-background pb-24">
       <div className="max-w-md mx-auto px-4 pt-6">
-        <Header name="Jacob" progress={76} />
+        <Header name={userName} progress={overallProgress} />
 
         {/* Featured Card */}
         <div className="bg-secondary rounded-3xl p-6 mb-5 relative overflow-hidden">
@@ -21,7 +68,6 @@ const HomePage = () => {
               <ArrowRight size={20} className="text-card" />
             </button>
           </div>
-          {/* Decorative elements */}
           <div className="absolute top-4 right-4 text-6xl opacity-80">🏆</div>
           <div className="absolute bottom-6 right-8 text-sm text-secondary-foreground/50 font-mono">
             y = ?
@@ -36,7 +82,9 @@ const HomePage = () => {
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Lessons</p>
-              <p className="text-2xl font-extrabold text-foreground">78</p>
+              <p className="text-2xl font-extrabold text-foreground">
+                {loading ? <Loader2 size={20} className="animate-spin" /> : totalLessons}
+              </p>
             </div>
           </div>
           <div className="bg-card rounded-2xl p-4 border border-edu-orange/30 flex items-center gap-3">
@@ -45,7 +93,9 @@ const HomePage = () => {
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Hours</p>
-              <p className="text-2xl font-extrabold text-foreground">43</p>
+              <p className="text-2xl font-extrabold text-foreground">
+                {loading ? <Loader2 size={20} className="animate-spin" /> : totalHours}
+              </p>
             </div>
           </div>
         </div>
@@ -58,39 +108,32 @@ const HomePage = () => {
               <MoreHorizontal size={18} className="text-muted-foreground" />
             </button>
           </div>
-          <div className="flex gap-1 mb-3 h-16 items-end">
-            {[
-              { h: "60%", color: "bg-primary" },
-              { h: "80%", color: "bg-primary" },
-              { h: "45%", color: "bg-secondary" },
-              { h: "70%", color: "bg-secondary" },
-              { h: "30%", color: "bg-muted" },
-              { h: "50%", color: "bg-muted" },
-            ].map((bar, i) => (
-              <div
-                key={i}
-                className={`flex-1 ${bar.color} rounded-t-lg transition-all`}
-                style={{ height: bar.h }}
-              />
-            ))}
-          </div>
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-primary inline-block" />
-              June<br />
-              <span className="font-semibold text-foreground">23 lessons</span>
+
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="animate-spin text-muted-foreground" size={24} />
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-secondary inline-block" />
-              July<br />
-              <span className="font-semibold text-foreground">43 lessons</span>
+          ) : weeklyData.length > 0 ? (
+            <div className="space-y-2.5">
+              {weeklyData.map((d) => (
+                <div key={d.day} className="flex items-center gap-3">
+                  <span className="text-xs font-semibold text-muted-foreground w-8">{d.day}</span>
+                  <div className="flex-1 bg-muted rounded-full h-7 relative overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full flex items-center justify-end pr-2 transition-all"
+                      style={{ width: `${(d.lessons / maxLessons) * 100}%` }}
+                    >
+                      <span className="text-xs font-bold text-primary-foreground">{d.lessons}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-muted inline-block" />
-              August<br />
-              <span className="font-semibold text-foreground">12 lessons</span>
-            </div>
-          </div>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-6">
+              No progress data yet. Start a course to track your learning!
+            </p>
+          )}
         </div>
       </div>
       <BottomNav />
