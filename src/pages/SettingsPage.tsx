@@ -324,6 +324,16 @@ const SettingsPage = () => {
                 </div>
                 <Switch checked={lightMode} onCheckedChange={toggleTheme} />
               </div>
+              <div className="flex items-center justify-between p-3.5 border-b border-border/30">
+                <div className="flex items-center gap-2.5">
+                  <Bell size={15} className={soundEnabled ? "text-agni-green" : "text-muted-foreground"} />
+                  <div>
+                    <p className="font-extrabold text-foreground text-xs">Sound Effects</p>
+                    <p className="text-[10px] text-muted-foreground font-semibold">Taps, chimes & celebrations</p>
+                  </div>
+                </div>
+                <Switch checked={soundEnabled} onCheckedChange={(v) => { setSoundEnabled(v); if (v) SFX.unmute(); else SFX.mute(); }} />
+              </div>
               <button className="flex items-center justify-between w-full p-3.5 border-b border-border/30 hover:bg-muted/20 transition-colors">
                 <div className="flex items-center gap-2.5">
                   <Bell size={15} className="text-muted-foreground" />
