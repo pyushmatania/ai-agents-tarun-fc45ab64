@@ -169,6 +169,9 @@ const CourseDetailPage = () => {
             <div className="text-xs text-muted-foreground flex items-center gap-2 justify-center">
               <span>{lesson.xp} XP</span>
               <span className="flex items-center gap-0.5"><Timer size={10} /> {Math.floor(timer/60)}m {timer%60}s</span>
+              <span className="flex items-center gap-0.5 text-[8px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-bold">
+                <Brain size={8} /> {getActiveModelLabel()}
+              </span>
             </div>
           </div>
           <div className="flex gap-2">
