@@ -1,14 +1,9 @@
-import { useState, Suspense } from "react";
+import { useState, Suspense, lazy } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Sparkles, Bot } from "lucide-react";
 
-const FloatingParticles = Suspense
-  ? require("@/components/FloatingParticles").default
-  : null;
-
-import { lazy } from "react";
 const LazyParticles = lazy(() => import("@/components/FloatingParticles"));
 
 const roles = [
