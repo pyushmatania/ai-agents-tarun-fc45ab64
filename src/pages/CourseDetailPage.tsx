@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import PageTransition from "@/components/PageTransition";
 import { ChevronLeft, CheckCircle2, Send, StickyNote, Timer } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const ALL_LESSONS: Record<string, { t: string; xp: number; topic: string }> = {
   f1:{t:"What is an AI Agent?",xp:50,topic:"what AI agents are — Perceive-Reason-Act-Learn loop, how they differ from chatbots, ReAct pattern, core components: LLM + Tools + Memory + Planning + Autonomy Loop"},
@@ -60,27 +61,31 @@ const CourseDetailPage = () => {
   const done: string[] = JSON.parse(localStorage.getItem("adojo_done") || "[]");
   const isDone = id ? done.includes(id) : false;
 
+  const callAI = async (apiMessages: { role: string; content: string }[]) => {
+    const { data, error } = await supabase.functions.invoke("ai-tutor", {
+      body: {
+        system: SYS,
+        messages: apiMessages,
+      },
+    });
+    if (error) throw new Error(error.message);
+    return data?.text || "";
+  };
+
   useEffect(() => {
     if (!lesson) return;
     setNote(JSON.parse(localStorage.getItem("adojo_notes") || "{}")[id!] || "");
     timerRef.current = setInterval(() => setTimer(t => t + 1), 1000);
 
-    // Start lesson
     setMsgs([{ role: "assistant", text: "⏳ Loading lesson..." }]);
     setLoading(true);
     const mObj = MODES.find(m => m.id === mode) || MODES[1];
 
-    fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1024, system: SYS,
-        messages: [{ role: "user", content: `Teach me about: ${lesson.topic}\n\nStyle: ${mObj.prompt}\n\nBe engaging. Use examples. End with a question.` }]
-      })
-    })
-    .then(r => r.json())
-    .then(data => {
-      let txt = "";
-      for (const b of (data.content || [])) { if (b.type === "text") txt += b.text; }
-      setMsgs([{ role: "assistant", text: txt || `Welcome to **${lesson.t}**!\n\nThis covers: ${lesson.topic}\n\nSend me a message to start learning, or use the quick buttons below!` }]);
+    callAI([
+      { role: "user", content: `Teach me about: ${lesson.topic}\n\nStyle: ${mObj.prompt}\n\nBe engaging. Use examples. End with a question.` }
+    ])
+    .then(text => {
+      setMsgs([{ role: "assistant", text: text || `Welcome to **${lesson.t}**!\n\nThis covers: ${lesson.topic}\n\nSend me a message to start learning!` }]);
       setLoading(false);
     })
     .catch(() => {
@@ -104,18 +109,12 @@ const CourseDetailPage = () => {
     setLoading(true);
 
     const mObj = MODES.find(m => m.id === mode) || MODES[1];
-    const apiMsgs = newMsgs.slice(-6).map(m => ({ role: m.role === "user" ? "user" as const : "assistant" as const, content: m.text }));
+    const apiMsgs = newMsgs.slice(-6).map(m => ({ role: m.role, content: m.text }));
     apiMsgs.push({ role: "user", content: `[Context: ${lesson!.topic}. Style: ${mObj.prompt}. Under 250 words. End with question.]` });
 
     try {
-      const resp = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1024, system: SYS, messages: apiMsgs })
-      });
-      const data = await resp.json();
-      let txt = "";
-      for (const b of (data.content || [])) { if (b.type === "text") txt += b.text; }
-      setMsgs([...newMsgs, { role: "assistant", text: txt || "Could you try asking again?" }]);
+      const text = await callAI(apiMsgs);
+      setMsgs([...newMsgs, { role: "assistant", text: text || "Could you try asking again?" }]);
     } catch (err: any) {
       setMsgs([...newMsgs, { role: "assistant", text: `Connection issue: ${err.message}\n\nPlease try again.` }]);
     }
@@ -208,7 +207,7 @@ const CourseDetailPage = () => {
             <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
               <div className={`max-w-[85%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
                 msg.role === "user"
-                  ? "bg-edu-dark text-card rounded-2xl rounded-br-sm"
+                  ? "bg-primary text-primary-foreground rounded-2xl rounded-br-sm"
                   : "bg-card text-foreground rounded-2xl rounded-bl-sm border border-border shadow-sm"
               }`}>{msg.text}</div>
             </div>

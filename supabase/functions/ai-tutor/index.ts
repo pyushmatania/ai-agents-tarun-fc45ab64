@@ -10,7 +10,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { query, category } = await req.json();
+    const { messages, system } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -24,16 +24,10 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          {
-            role: "system",
-            content: `You are an AI agents expert. When given a search query about AI agents, generate 5 realistic, informative items based on your knowledge. Each item should have: "title" (string), "url" (a real https URL if you know one, otherwise a plausible one), "desc" (one sentence description), "type" (one of: tool, repo, article, video, news). Respond with ONLY a valid JSON array, no other text.`
-          },
-          {
-            role: "user",
-            content: `Generate 5 items about: ${query} (category: ${category})`
-          }
+          { role: "system", content: system || "You are a helpful AI tutor." },
+          ...messages,
         ],
-        temperature: 0.8,
+        temperature: 0.7,
       }),
     });
 
@@ -42,25 +36,27 @@ serve(async (req) => {
       const body = await response.text();
       console.error("AI gateway error:", status, body);
       if (status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded.", items: [] }), {
+        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again shortly." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (status === 402) {
+        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       throw new Error(`AI gateway returned ${status}`);
     }
 
     const data = await response.json();
-    const text = data.choices?.[0]?.message?.content || "[]";
-    const cleaned = text.replace(/```json|```/g, "").trim();
-    const match = cleaned.match(/\[[\s\S]*\]/);
-    const items = match ? JSON.parse(match[0]) : [];
+    const text = data.choices?.[0]?.message?.content || "";
 
-    return new Response(JSON.stringify({ items }), {
+    return new Response(JSON.stringify({ text }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("ai-curiosity error:", error);
-    return new Response(JSON.stringify({ error: error.message, items: [] }), {
+    console.error("ai-tutor error:", error);
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

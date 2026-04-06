@@ -415,38 +415,31 @@ const ProgressPage = () => {
             </div>
           </FadeIn>
 
-          {/* Leaderboard */}
+          {/* Your Rank */}
           <FadeIn delay={0.6}>
             <div className="bg-card rounded-xl p-3 border border-border/50 shadow-card mb-4">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-2">
                 <Trophy size={13} className="text-primary" />
-                <h4 className="text-xs font-bold text-foreground">Leaderboard</h4>
+                <h4 className="text-xs font-bold text-foreground">Your Rank</h4>
               </div>
-              <div className="space-y-2">
-                {[
-                  { name: userName, xp, rank: 1, you: true },
-                  { name: "Priya S.", xp: Math.max(xp - 50, 120), rank: 2 },
-                  { name: "Rahul M.", xp: Math.max(xp - 100, 80), rank: 3 },
-                ].map((p, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.65 + i * 0.06 }}
-                    className={`flex items-center gap-2.5 p-2 rounded-lg ${p.you ? "bg-primary/5 border border-primary/20" : ""}`}
-                  >
-                    <div className={`w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold ${
-                      p.rank === 1 ? "bg-amber-500/20 text-amber-600" : p.rank === 2 ? "bg-slate-400/20 text-slate-500" : "bg-orange-400/20 text-orange-500"
-                    }`}>
-                      {p.rank === 1 ? "🥇" : p.rank === 2 ? "🥈" : "🥉"}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-[11px] font-semibold text-foreground">{p.name} {p.you ? <span className="text-[8px] text-primary">(You)</span> : ""}</p>
-                    </div>
-                    <span className="text-[10px] font-bold text-primary">{p.xp} XP</span>
-                  </motion.div>
-                ))}
-              </div>
+              <motion.div
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.65 }}
+                className="flex items-center gap-2.5 p-2 rounded-lg bg-primary/5 border border-primary/20"
+              >
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                  <span className="text-sm font-bold text-white">🏆</span>
+                </div>
+                <div className="flex-1">
+                  <p className="text-[11px] font-semibold text-foreground">{userName}</p>
+                  <p className="text-[9px] text-muted-foreground">{done.length} lessons completed</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-sm font-bold text-primary">{xp} XP</span>
+                  <p className="text-[8px] text-muted-foreground">Level {level}</p>
+                </div>
+              </motion.div>
             </div>
           </FadeIn>
         </div>
