@@ -1,14 +1,13 @@
 import { Home, BookOpen, BarChart3, FileText, Sparkles, Compass, Map } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
+import Agni from "@/components/Agni";
 
 const tabs = [
   { icon: Home, path: "/", label: "Home" },
   { icon: BookOpen, path: "/courses", label: "Learn" },
-  { icon: Compass, path: "/sources", label: "Hub" },
   { icon: Sparkles, path: "/curiosity", label: "Spark", center: true },
   { icon: Map, path: "/roadmap", label: "Path" },
-  { icon: FileText, path: "/mega-prompt", label: "Prompt" },
   { icon: BarChart3, path: "/progress", label: "Stats" },
 ];
 
@@ -23,7 +22,7 @@ const BottomNav = () => {
           initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.4, ease: "easeOut" }}
-          className="relative glass border border-border/30 rounded-2xl px-0.5 py-1 flex items-center justify-around shadow-elevated backdrop-blur-xl"
+          className="relative bg-card/90 border border-border/40 rounded-3xl px-1 py-1.5 flex items-center justify-around shadow-elevated backdrop-blur-xl"
         >
           {tabs.map((tab) => {
             const isActive = location.pathname === tab.path;
@@ -34,20 +33,20 @@ const BottomNav = () => {
                   key={tab.path}
                   onClick={() => navigate(tab.path)}
                   whileTap={{ scale: 0.85 }}
-                  className="relative -mt-5 z-10"
+                  className="relative -mt-6 z-10"
                 >
                   <motion.div
                     animate={isActive ? { scale: [1, 1.08, 1] } : {}}
                     transition={{ duration: 2, repeat: Infinity }}
-                    className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-all ${
+                    className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all border-4 border-background ${
                       isActive
-                        ? "bg-gradient-to-br from-primary to-secondary shadow-glow-primary"
-                        : "bg-gradient-to-br from-primary/80 to-secondary/80"
+                        ? "bg-gradient-to-br from-agni-green to-agni-green-light shadow-glow-green"
+                        : "bg-gradient-to-br from-agni-green/80 to-agni-green-light/80"
                     }`}
                   >
-                    <tab.icon size={18} strokeWidth={2} className="text-white" />
+                    <tab.icon size={20} strokeWidth={2.5} className="text-white" />
                   </motion.div>
-                  <span className={`text-[7px] font-bold block text-center mt-0.5 ${isActive ? "text-primary" : "text-muted-foreground"}`}>
+                  <span className={`text-[8px] font-extrabold block text-center mt-0.5 ${isActive ? "text-agni-green" : "text-muted-foreground"}`}>
                     {tab.label}
                   </span>
                 </motion.button>
@@ -59,20 +58,20 @@ const BottomNav = () => {
                 key={tab.path}
                 onClick={() => navigate(tab.path)}
                 whileTap={{ scale: 0.9 }}
-                className={`relative flex flex-col items-center gap-0.5 px-1.5 py-1.5 rounded-xl transition-all duration-300 ${
+                className={`relative flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-2xl transition-all duration-300 ${
                   isActive
-                    ? "text-primary"
+                    ? "text-agni-green"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <tab.icon size={13} strokeWidth={isActive ? 2.5 : 1.8} />
-                <span className={`text-[7px] font-bold leading-none tracking-wide ${isActive ? "text-primary" : "text-muted-foreground"}`}>
+                <tab.icon size={16} strokeWidth={isActive ? 2.5 : 1.8} />
+                <span className={`text-[8px] font-bold leading-none tracking-wide ${isActive ? "text-agni-green" : "text-muted-foreground"}`}>
                   {tab.label}
                 </span>
                 {isActive && (
                   <motion.div
                     layoutId="nav-indicator"
-                    className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-primary shadow-glow-primary"
+                    className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-5 h-1 rounded-full bg-agni-green shadow-glow-green"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
