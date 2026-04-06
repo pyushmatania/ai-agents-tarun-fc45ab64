@@ -147,10 +147,6 @@ const CoursesPage = () => {
             <path d="M0,0 L0,35 L35,35 L35,70 L70,70 L70,100" fill="none" stroke={mod.hex} strokeWidth="1.5" strokeDasharray="4 4" />
           </svg>
         </div>
-          <div className="absolute top-[500px] -right-10 w-[180px] h-[1px] -rotate-[25deg] opacity-[0.06]"
-            style={{ background: `linear-gradient(90deg, transparent, ${mod.hex}, transparent)` }}
-          />
-        </div>
 
         <div className="max-w-md mx-auto relative z-10">
           
