@@ -62,7 +62,7 @@ MODE: DEBATE — Present two opposing viewpoints and argue both sides.`,
 - Mini-project: Build an agent that monitors semiconductor industry news and sends a daily briefing`,
   },
   {
-    title: "⚔️ Phase 2: Frameworks — "Pick Your Weapon"",
+    title: '⚔️ Phase 2: Frameworks — "Pick Your Weapon"',
     content: `4. The Framework Landscape (as of April 2026)
 
 LangChain / LangGraph — The most mature ecosystem. LangGraph uses directed graphs for stateful workflows. 47M+ PyPI downloads. Best for: production-grade systems.
