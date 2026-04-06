@@ -1,4 +1,4 @@
-import { useState, Suspense, lazy } from "react";
+import { useState, useEffect, Suspense, lazy } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,8 +17,24 @@ const roles = [
 
 const OnboardingPage = () => {
   const [name, setName] = useState("");
+  const tagline = "Master the future of intelligent automation";
+  const [displayedText, setDisplayedText] = useState("");
+  const [showCursor, setShowCursor] = useState(true);
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let i = 0;
+    const interval = setInterval(() => {
+      setDisplayedText(tagline.slice(0, i + 1));
+      i++;
+      if (i >= tagline.length) {
+        clearInterval(interval);
+        setTimeout(() => setShowCursor(false), 1200);
+      }
+    }, 45);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleStart = () => {
     if (!name.trim()) return;
@@ -47,8 +63,9 @@ const OnboardingPage = () => {
           <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
             AI Agents
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Master the future of intelligent automation
+          <p className="text-muted-foreground mt-1 text-sm h-5">
+            {displayedText}
+            {showCursor && <span className="animate-pulse ml-0.5">|</span>}
           </p>
         </div>
 
