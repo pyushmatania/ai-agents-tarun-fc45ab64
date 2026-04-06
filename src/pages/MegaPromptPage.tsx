@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import BottomNav from "@/components/BottomNav";
-import { Copy, Check, FileText, ChevronDown, ChevronUp } from "lucide-react";
+import PageTransition from "@/components/PageTransition";
+import { Copy, Check, FileText, ChevronDown, ChevronUp, Search, X } from "lucide-react";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 
 const sections = [
   {
@@ -201,12 +203,35 @@ R&D Agent — Patent research, technology scouting
   },
 ];
 
-// Full raw text for copy
-const fullText = sections.map(s => `## ${s.title}\n\n${s.content}`).join("\n\n---\n\n");
+const fullText = sections.map((s) => `## ${s.title}\n\n${s.content}`).join("\n\n---\n\n");
 
 const MegaPromptPage = () => {
   const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set([0]));
   const [copied, setCopied] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredSections = useMemo(() => {
+    if (!searchQuery.trim()) return sections.map((s, i) => ({ ...s, originalIndex: i }));
+    const q = searchQuery.toLowerCase();
+    return sections
+      .map((s, i) => ({ ...s, originalIndex: i }))
+      .filter((s) => s.title.toLowerCase().includes(q) || s.content.toLowerCase().includes(q));
+  }, [searchQuery]);
+
+  const highlightText = (text: string) => {
+    if (!searchQuery.trim()) return text;
+    const escaped = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const parts = text.split(new RegExp(`(${escaped})`, "gi"));
+    return parts.map((part, i) =>
+      part.toLowerCase() === searchQuery.toLowerCase() ? (
+        <mark key={i} className="bg-primary/30 text-foreground rounded-sm px-0.5">
+          {part}
+        </mark>
+      ) : (
+        part
+      )
+    );
+  };
 
   const toggleSection = (idx: number) => {
     setExpandedSections((prev) => {
@@ -217,9 +242,7 @@ const MegaPromptPage = () => {
     });
   };
 
-  const expandAll = () => {
-    setExpandedSections(new Set(sections.map((_, i) => i)));
-  };
+  const expandAll = () => setExpandedSections(new Set(sections.map((_, i) => i)));
 
   const handleCopy = async () => {
     try {
@@ -233,76 +256,141 @@ const MegaPromptPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <div className="max-w-md mx-auto px-4 pt-6">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-            <FileText size={20} className="text-primary-foreground" />
+    <PageTransition>
+      <div className="min-h-screen bg-background pb-24">
+        <div className="max-w-md mx-auto px-4 pt-6">
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+              <FileText size={20} className="text-primary-foreground" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-lg font-extrabold text-foreground">AI Agents Mega Prompt</h2>
+              <p className="text-xs text-muted-foreground">v2.0 by Tarun • 21 pages</p>
+            </div>
           </div>
-          <div className="flex-1">
-            <h2 className="text-lg font-extrabold text-foreground">AI Agents Mega Prompt</h2>
-            <p className="text-xs text-muted-foreground">v2.0 by Tarun • 21 pages</p>
+
+          {/* Search */}
+          <div className="relative mb-4">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (e.target.value.trim()) {
+                  // auto-expand matching sections
+                  const q = e.target.value.toLowerCase();
+                  const matching = new Set(
+                    sections
+                      .map((s, i) => ({ s, i }))
+                      .filter(({ s }) => s.title.toLowerCase().includes(q) || s.content.toLowerCase().includes(q))
+                      .map(({ i }) => i)
+                  );
+                  setExpandedSections(matching);
+                }
+              }}
+              placeholder="Search topics, frameworks, projects..."
+              className="pl-9 pr-9 rounded-2xl bg-card border-border h-11"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setExpandedSections(new Set([0]));
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
-        </div>
 
-        {/* Action buttons */}
-        <div className="flex gap-2 mb-5 mt-4">
-          <button
-            onClick={handleCopy}
-            className="flex-1 flex items-center justify-center gap-2 bg-primary text-primary-foreground font-bold py-3 rounded-2xl hover:opacity-90 transition-all active:scale-95"
+          {/* Action buttons */}
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={handleCopy}
+              className="flex-1 flex items-center justify-center gap-2 bg-primary text-primary-foreground font-bold py-3 rounded-2xl hover:opacity-90 transition-all active:scale-95"
+            >
+              {copied ? <Check size={18} /> : <Copy size={18} />}
+              {copied ? "Copied!" : "Copy All Content"}
+            </button>
+            <button
+              onClick={expandAll}
+              className="px-4 bg-card text-foreground font-semibold py-3 rounded-2xl border border-border hover:bg-muted/50 transition-all"
+            >
+              Expand All
+            </button>
+          </div>
+
+          {/* Download PDF link */}
+          <a
+            href="/TARUN_AI_AGENTS_MEGA_PROMPT_v2.pdf"
+            download
+            className="block text-center text-sm text-primary font-semibold mb-5 underline"
           >
-            {copied ? <Check size={18} /> : <Copy size={18} />}
-            {copied ? "Copied!" : "Copy All Content"}
-          </button>
-          <button
-            onClick={expandAll}
-            className="px-4 bg-card text-foreground font-semibold py-3 rounded-2xl border border-border hover:bg-muted/50 transition-all"
-          >
-            Expand All
-          </button>
-        </div>
+            📄 Download original PDF
+          </a>
 
-        {/* Download PDF link */}
-        <a
-          href="/TARUN_AI_AGENTS_MEGA_PROMPT_v2.pdf"
-          download
-          className="block text-center text-sm text-primary font-semibold mb-5 underline"
-        >
-          📄 Download original PDF
-        </a>
+          {/* Results count */}
+          {searchQuery.trim() && (
+            <p className="text-xs text-muted-foreground mb-3">
+              {filteredSections.length} section{filteredSections.length !== 1 ? "s" : ""} found
+            </p>
+          )}
 
-        {/* Sections */}
-        <div className="space-y-3">
-          {sections.map((section, idx) => {
-            const isOpen = expandedSections.has(idx);
-            return (
-              <div key={idx} className="bg-card rounded-2xl border border-border overflow-hidden">
-                <button
-                  onClick={() => toggleSection(idx)}
-                  className="w-full flex items-center justify-between p-4 text-left"
+          {/* Sections */}
+          <div className="space-y-3">
+            {filteredSections.map((section) => {
+              const isOpen = expandedSections.has(section.originalIndex);
+              return (
+                <div
+                  key={section.originalIndex}
+                  className="bg-card rounded-2xl border border-border overflow-hidden animate-fade-in"
                 >
-                  <span className="font-bold text-foreground text-sm">{section.title}</span>
-                  {isOpen ? (
-                    <ChevronUp size={18} className="text-muted-foreground shrink-0" />
-                  ) : (
-                    <ChevronDown size={18} className="text-muted-foreground shrink-0" />
-                  )}
-                </button>
-                {isOpen && (
-                  <div className="px-4 pb-4">
-                    <pre className="text-xs text-foreground/80 whitespace-pre-wrap font-sans leading-relaxed">
-                      {section.content}
-                    </pre>
+                  <button
+                    onClick={() => toggleSection(section.originalIndex)}
+                    className="w-full flex items-center justify-between p-4 text-left"
+                  >
+                    <span className="font-bold text-foreground text-sm">
+                      {searchQuery ? highlightText(section.title) : section.title}
+                    </span>
+                    {isOpen ? (
+                      <ChevronUp size={18} className="text-muted-foreground shrink-0" />
+                    ) : (
+                      <ChevronDown size={18} className="text-muted-foreground shrink-0" />
+                    )}
+                  </button>
+                  <div
+                    className="grid transition-all duration-300 ease-out"
+                    style={{
+                      gridTemplateRows: isOpen ? "1fr" : "0fr",
+                      opacity: isOpen ? 1 : 0,
+                    }}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="px-4 pb-4">
+                        <pre className="text-xs text-foreground/80 whitespace-pre-wrap font-sans leading-relaxed">
+                          {searchQuery ? highlightText(section.content) : section.content}
+                        </pre>
+                      </div>
+                    </div>
                   </div>
-                )}
+                </div>
+              );
+            })}
+
+            {filteredSections.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground">
+                <Search size={32} className="mx-auto mb-3 opacity-40" />
+                <p className="font-semibold">No results found</p>
+                <p className="text-xs mt-1">Try a different search term</p>
               </div>
-            );
-          })}
+            )}
+          </div>
         </div>
+        <BottomNav />
       </div>
-      <BottomNav />
-    </div>
+    </PageTransition>
   );
 };
 

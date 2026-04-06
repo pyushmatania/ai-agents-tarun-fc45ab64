@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
+import PageTransition from "@/components/PageTransition";
 import { ChevronDown, Eye, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -75,6 +76,7 @@ const ProgressPage = () => {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background pb-24">
       <div className="max-w-md mx-auto px-4 pt-6">
         <Header name={userName} progress={overallProgress} />
@@ -206,6 +208,7 @@ const ProgressPage = () => {
       </div>
       <BottomNav />
     </div>
+    </PageTransition>
   );
 };
 

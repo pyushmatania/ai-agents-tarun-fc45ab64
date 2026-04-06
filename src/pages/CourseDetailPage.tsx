@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
+import PageTransition from "@/components/PageTransition";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -133,6 +134,7 @@ const CourseDetailPage = () => {
   }
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background pb-24">
       <div className="max-w-md mx-auto px-4 pt-6">
         {/* Header */}
@@ -224,6 +226,7 @@ const CourseDetailPage = () => {
       </div>
       <BottomNav />
     </div>
+    </PageTransition>
   );
 };
 
