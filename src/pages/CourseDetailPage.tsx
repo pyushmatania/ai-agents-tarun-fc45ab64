@@ -59,6 +59,7 @@ const CourseDetailPage = () => {
   const [timer, setTimer] = useState(0);
   const [quizError, setQuizError] = useState("");
   const timerRef = useRef<ReturnType<typeof setInterval>>();
+  const chatMessagesRef = useRef<ChatMessage[]>([]);
 
   const teachingMode = localStorage.getItem("teaching_mode") || "engineer";
   const lesson = id ? ALL_LESSONS[id] : null;
@@ -120,7 +121,8 @@ const CourseDetailPage = () => {
 
   const handleQuizReady = (conversation: ChatMessage[]) => {
     SFX.tap();
-    generateQuizzes(conversation);
+    chatMessagesRef.current = conversation;
+    generateQuizzes(conversation.length > 0 ? conversation : [{ role: "user", content: `Teach me about ${lesson?.t}: ${lesson?.topic}` }]);
   };
 
   const handleQuizAnswer = (correct: boolean) => {
