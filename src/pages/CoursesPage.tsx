@@ -312,9 +312,16 @@ const CoursesPage = () => {
                 const showTreasure = i === 2 && (isDone || isNext);
                 const showAgniPeek = i === Math.floor(mod.lessons.length / 2);
 
-                // Milestone marker between lessons
                 const globalIndex = MODULES.slice(0, activeModule).reduce((a, m) => a + m.lessons.length, 0) + i;
                 const milestone = MILESTONES.find(m => m.at === globalIndex + 1);
+
+                // Inline path decorations at specific positions
+                const INLINE_DECOR: Record<number, { emoji: string; label: string; bg: string; text: string; side: "left" | "right" }> = {
+                  1: { emoji: "💎", label: "+50 Gems", bg: "bg-agni-blue/15 border-agni-blue/30", text: "text-agni-blue", side: "right" },
+                  3: { emoji: "🔥", label: "Streak x3", bg: "bg-agni-orange/15 border-agni-orange/30", text: "text-agni-orange", side: "left" },
+                  4: { emoji: "⚡", label: "2x XP Boost", bg: "bg-agni-gold/15 border-agni-gold/30", text: "text-agni-gold", side: "right" },
+                };
+                const decor = INLINE_DECOR[i];
 
                 return (
                   <motion.div
@@ -325,16 +332,43 @@ const CoursesPage = () => {
                     className="relative"
                     style={{ height: 120, paddingLeft: xOffset }}
                   >
-                    {/* Milestone badge */}
+                    {/* Milestone badge — colorful */}
                     {milestone && (
                       <motion.div
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="absolute -top-2 right-0 z-20"
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.5, type: "spring" }}
+                        className={`absolute -top-3 right-0 z-20`}
                       >
-                        <div className={`text-[7px] font-black ${milestone.color} bg-card border border-border/30 px-2 py-0.5 rounded-full flex items-center gap-0.5`}>
-                          <Trophy size={7} /> {milestone.label}
+                        <div className={`text-[8px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 border shadow-lg ${
+                          milestone.color === "text-agni-blue" ? "bg-agni-blue/20 border-agni-blue/40 text-agni-blue" :
+                          milestone.color === "text-agni-gold" ? "bg-agni-gold/20 border-agni-gold/40 text-agni-gold" :
+                          milestone.color === "text-agni-orange" ? "bg-agni-orange/20 border-agni-orange/40 text-agni-orange" :
+                          milestone.color === "text-agni-purple" ? "bg-agni-purple/20 border-agni-purple/40 text-agni-purple" :
+                          "bg-card border-border/30"
+                        }`}
+                          style={{ boxShadow: `0 0 12px ${mod.hex}25` }}
+                        >
+                          <Trophy size={9} /> {milestone.label}
                         </div>
+                      </motion.div>
+                    )}
+
+                    {/* Inline path decoration */}
+                    {decor && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.6 + i * 0.1, type: "spring" }}
+                        className={`absolute top-1 ${decor.side === "right" ? "right-0" : "left-0"} z-10`}
+                      >
+                        <motion.div
+                          animate={{ y: [0, -3, 0] }}
+                          transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.3 }}
+                          className={`text-[7px] font-black px-2 py-0.5 rounded-full border flex items-center gap-1 ${decor.bg} ${decor.text}`}
+                        >
+                          <span className="text-[10px]">{decor.emoji}</span> {decor.label}
+                        </motion.div>
                       </motion.div>
                     )}
 
@@ -347,8 +381,15 @@ const CoursesPage = () => {
                         disabled={isLocked}
                         className="relative flex-shrink-0"
                       >
+                        {/* Glow ring behind active/done nodes */}
+                        {(isDone || isNext) && (
+                          <div className="absolute inset-[-8px] rounded-full opacity-20 blur-md"
+                            style={{ background: isCheckpoint ? "#FFC800" : mod.hex }}
+                          />
+                        )}
+
                         {/* Outer ring */}
-                        <div className={`w-[64px] h-[64px] rounded-full flex items-center justify-center transition-all ${
+                        <div className={`w-[64px] h-[64px] rounded-full flex items-center justify-center transition-all relative ${
                           isCheckpoint
                             ? isDone ? "bg-agni-gold" : isNext ? "bg-agni-gold/80" : "bg-muted/30"
                             : isDone ? mod.color : isNext ? mod.color : "bg-muted/30"
@@ -442,7 +483,9 @@ const CoursesPage = () => {
                         animate={{ y: [0, -4, 0], rotate: [0, 5, -5, 0] }}
                         transition={{ duration: 3, repeat: Infinity }}
                       >
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-b from-agni-gold to-amber-600 flex items-center justify-center shadow-lg">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-b from-agni-gold to-amber-600 flex items-center justify-center shadow-lg"
+                          style={{ boxShadow: "0 0 15px rgba(255,200,0,0.3)" }}
+                        >
                           <span className="text-lg">🎁</span>
                         </div>
                       </motion.div>
