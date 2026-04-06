@@ -88,7 +88,7 @@ const SettingsPage = () => {
           <FadeIn>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Agni expression="happy" size={40} animate={false} />
+                <Agni expression="happy" size={50} animate={false} />
                 <div>
                   <h2 className="text-sm font-black text-foreground">Settings</h2>
                   <p className="text-[10px] text-muted-foreground font-semibold">{league.emoji} {league.name} • Level {stats.level}</p>

@@ -328,7 +328,7 @@ const CoursesPage = () => {
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ delay: 1 }}
                       >
-                        <Agni expression="thinking" size={45} speech="Keep going! 💪" />
+                        <Agni expression="thinking" size={55} speech="Keep going! 💪" />
                       </motion.div>
                     )}
                   </motion.div>
@@ -344,7 +344,7 @@ const CoursesPage = () => {
                 transition={{ type: "spring" }}
                 className="text-center py-6"
               >
-                <Agni expression="celebrating" size={100} speech="You're amazing! 🎉" />
+                <Agni expression="celebrating" size={120} speech="You're amazing! 🎉" />
                 <p className="text-foreground font-black text-sm mt-3">Module Complete! 🏆</p>
                 <p className="text-muted-foreground text-[10px] font-semibold">You've mastered {mod.title}</p>
                 {activeModule < MODULES.length - 1 && (

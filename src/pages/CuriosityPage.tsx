@@ -71,7 +71,7 @@ const CuriosityPage = () => {
           <FadeIn>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Agni expression={loading ? "thinking" : results.length > 0 ? "excited" : "happy"} size={40} animate={true} />
+                <Agni expression={loading ? "thinking" : results.length > 0 ? "excited" : "happy"} size={50} animate={true} />
                 <div>
                   <h2 className="text-sm font-black text-foreground">Curiosity Spark</h2>
                   <p className="text-[10px] text-muted-foreground font-semibold">Hey {displayName} — discover something new!</p>
