@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BUILT_IN_MODELS, BYOK_PROVIDERS, getAIConfig, saveAIConfig, type AIConfig } from "@/lib/aiConfig";
 import Agni from "@/components/Agni";
 import { useGamification } from "@/hooks/useGamification";
+import { SFX } from "@/lib/sounds";
 
 const SettingsPage = () => {
   const { user, signOut } = useAuth();
@@ -22,6 +23,7 @@ const SettingsPage = () => {
   const [role, setRole] = useState(localStorage.getItem("edu_user_role") || "");
   const [saving, setSaving] = useState(false);
   const [lightMode, setLightMode] = useState(() => document.documentElement.classList.contains("light"));
+  const [soundEnabled, setSoundEnabled] = useState(!SFX.isMuted());
 
   const [aiConfig, setAiConfig] = useState<AIConfig>(getAIConfig());
   const [showApiKey, setShowApiKey] = useState(false);
