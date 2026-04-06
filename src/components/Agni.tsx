@@ -1,4 +1,6 @@
+import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { SFX } from "@/lib/sounds";
 
 import agniDefault from "@/assets/agni-default.png";
 import agniHappy from "@/assets/agni-happy.png";
@@ -25,6 +27,8 @@ interface AgniProps {
   speech?: string;
   animate?: boolean;
   className?: string;
+  interactive?: boolean;
+  onExpressionChange?: (expr: AgniExpression) => void;
 }
 
 const EXPRESSION_IMAGES: Record<AgniExpression, string> = {
@@ -36,6 +40,49 @@ const EXPRESSION_IMAGES: Record<AgniExpression, string> = {
   teaching: agniTeaching,
   sleeping: agniSleeping,
   celebrating: agniCelebrating,
+};
+
+const CLICK_EXPRESSIONS: AgniExpression[] = ["happy", "excited", "celebrating", "teaching", "thinking", "default"];
+
+const CLICK_SPEECHES: Record<AgniExpression, string[]> = {
+  default: ["Hey there! 👋", "Tap me again!", "I'm AGNI! 🤖"],
+  happy: ["Yay! 😊", "Love it!", "You're awesome! 💚"],
+  excited: ["WOOO! 🎉", "So hyped!", "Let's GO! 🚀"],
+  thinking: ["Hmm... 🤔", "Interesting...", "Let me think..."],
+  sad: ["Oh no... 😢", "Don't go!", "I'll miss you!"],
+  teaching: ["Did you know? 📚", "Pro tip! ✨", "Learn this! 🧠"],
+  sleeping: ["Zzz... 💤", "5 more mins...", "So sleepy..."],
+  celebrating: ["PARTY! 🎊", "We did it! 🏆", "Champion! 👑"],
+};
+
+const GLOW_COLORS: Record<AgniExpression, string> = {
+  happy: "hsl(100 95% 40%)",
+  excited: "hsl(46 100% 49%)",
+  celebrating: "hsl(46 100% 49%)",
+  sad: "hsl(199 92% 54%)",
+  thinking: "hsl(270 100% 75%)",
+  teaching: "hsl(100 95% 40%)",
+  sleeping: "hsl(199 92% 54%)",
+  default: "hsl(100 95% 40%)",
+};
+
+interface Particle {
+  id: number;
+  x: number;
+  y: number;
+  emoji: string;
+  color: string;
+}
+
+const PARTICLE_EMOJIS: Record<AgniExpression, string[]> = {
+  happy: ["💚", "✨", "😊", "🌟"],
+  excited: ["🔥", "⚡", "💥", "🎆"],
+  celebrating: ["🎉", "🎊", "🏆", "👑"],
+  thinking: ["💭", "🧠", "❓", "💡"],
+  sad: ["💧", "🌧️", "😢"],
+  teaching: ["📖", "🎓", "✏️", "💡"],
+  sleeping: ["💤", "🌙", "⭐"],
+  default: ["✨", "💚", "🤖"],
 };
 
 const getBodyAnimation = (expression: AgniExpression) => {
@@ -71,23 +118,135 @@ const getGlowColor = (expression: AgniExpression) => {
   }
 };
 
-const Agni = ({ expression = "default", size = 100, speech, animate = true, className = "" }: AgniProps) => {
+const Agni = ({ expression = "default", size = 100, speech, animate = true, className = "", interactive = false, onExpressionChange }: AgniProps) => {
+  const [clickExprIndex, setClickExprIndex] = useState(0);
+  const [activeExpr, setActiveExpr] = useState<AgniExpression | null>(null);
+  const [clickSpeech, setClickSpeech] = useState<string | null>(null);
+  const [particles, setParticles] = useState<Particle[]>([]);
+  const [tapCount, setTapCount] = useState(0);
+  const [showRing, setShowRing] = useState(false);
+  const particleId = useRef(0);
+  const resetTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  const currentExpr = activeExpr ?? expression;
+  const displaySpeech = clickSpeech ?? speech;
+
+  const spawnParticles = useCallback((expr: AgniExpression) => {
+    const emojis = PARTICLE_EMOJIS[expr];
+    const color = GLOW_COLORS[expr];
+    const count = expr === "celebrating" ? 8 : 5;
+    const newParticles: Particle[] = [];
+    for (let i = 0; i < count; i++) {
+      newParticles.push({
+        id: particleId.current++,
+        x: (Math.random() - 0.5) * size * 1.5,
+        y: -(Math.random() * size * 0.8 + size * 0.3),
+        emoji: emojis[Math.floor(Math.random() * emojis.length)],
+        color,
+      });
+    }
+    setParticles((prev) => [...prev, ...newParticles]);
+    setTimeout(() => {
+      setParticles((prev) => prev.filter((p) => !newParticles.find((np) => np.id === p.id)));
+    }, 1200);
+  }, [size]);
+
+  const handleClick = useCallback(() => {
+    if (!interactive) return;
+    SFX.tap();
+
+    const nextIndex = (clickExprIndex + 1) % CLICK_EXPRESSIONS.length;
+    const nextExpr = CLICK_EXPRESSIONS[nextIndex];
+    setClickExprIndex(nextIndex);
+    setActiveExpr(nextExpr);
+
+    const speeches = CLICK_SPEECHES[nextExpr];
+    setClickSpeech(speeches[Math.floor(Math.random() * speeches.length)]);
+
+    setTapCount((c) => c + 1);
+    spawnParticles(nextExpr);
+    setShowRing(true);
+    setTimeout(() => setShowRing(false), 400);
+
+    onExpressionChange?.(nextExpr);
+
+    if (resetTimer.current) clearTimeout(resetTimer.current);
+    resetTimer.current = setTimeout(() => {
+      setActiveExpr(null);
+      setClickSpeech(null);
+    }, 4000);
+  }, [interactive, clickExprIndex, spawnParticles, onExpressionChange]);
+
   return (
-    <div className={`relative inline-flex flex-col items-center ${className}`}>
+    <div className={`relative inline-flex flex-col items-center ${className}`} style={{ cursor: interactive ? "pointer" : "default" }} onClick={handleClick}>
+      {/* Tap counter badge */}
+      <AnimatePresence>
+        {interactive && tapCount > 0 && (
+          <motion.div
+            key={tapCount}
+            initial={{ opacity: 0, scale: 0.5, y: 5 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            className="absolute -top-2 -right-2 z-30 bg-agni-pink text-white text-[8px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-lg"
+          >
+            {tapCount}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Click ring pulse */}
+      <AnimatePresence>
+        {showRing && (
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0.8 }}
+            animate={{ scale: 2, opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="absolute inset-0 rounded-full pointer-events-none z-10"
+            style={{
+              border: `2px solid ${GLOW_COLORS[currentExpr]}`,
+              width: size,
+              height: size,
+              left: "50%",
+              top: "50%",
+              marginLeft: -size / 2,
+              marginTop: -size / 2,
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Particles */}
+      <AnimatePresence>
+        {particles.map((p) => (
+          <motion.span
+            key={p.id}
+            initial={{ opacity: 1, x: 0, y: 0, scale: 0 }}
+            animate={{ opacity: 0, x: p.x, y: p.y, scale: 1.2, rotate: Math.random() * 360 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="absolute text-sm pointer-events-none z-30"
+            style={{ left: "50%", top: "50%" }}
+          >
+            {p.emoji}
+          </motion.span>
+        ))}
+      </AnimatePresence>
+
       {/* Speech bubble */}
       <AnimatePresence>
-        {speech && (
+        {displaySpeech && (
           <motion.div
             initial={{ opacity: 0, y: 8, scale: 0.7 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.7 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
             className="absolute -top-9 left-1/2 -translate-x-1/2 z-20"
-            style={{ minWidth: Math.max(80, speech.length * 6.5) }}
+            style={{ minWidth: Math.max(80, displaySpeech.length * 6.5) }}
           >
             <div className="bg-card border border-agni-green/20 rounded-2xl px-3 py-1.5 text-[10px] font-bold text-foreground whitespace-nowrap shadow-elevated relative">
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-agni-green/5 to-transparent pointer-events-none" />
-              <span className="relative z-10">{speech}</span>
+              <span className="relative z-10">{displaySpeech}</span>
               <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-card border-b border-r border-agni-green/20 rotate-45" />
             </div>
           </motion.div>
@@ -101,7 +260,7 @@ const Agni = ({ expression = "default", size = 100, speech, animate = true, clas
           style={{
             width: size * 0.6,
             height: size * 0.15,
-            background: "radial-gradient(ellipse, hsl(100 95% 40% / 0.25), transparent 70%)",
+            background: `radial-gradient(ellipse, ${GLOW_COLORS[currentExpr]}40, transparent 70%)`,
           }}
           animate={{ opacity: [0.4, 0.8, 0.4], scaleX: [0.9, 1.1, 0.9] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
@@ -111,21 +270,21 @@ const Agni = ({ expression = "default", size = 100, speech, animate = true, clas
       {/* AGNI Body */}
       <AnimatePresence mode="wait">
         <motion.div
-          key={expression}
+          key={currentExpr}
           initial={{ opacity: 0, scale: 0.85 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.85 }}
           transition={{ duration: 0.25 }}
         >
           <motion.img
-            src={EXPRESSION_IMAGES[expression]}
-            alt={`AGNI ${expression}`}
+            src={EXPRESSION_IMAGES[currentExpr]}
+            alt={`AGNI ${currentExpr}`}
             width={size}
             height={size}
-            animate={animate ? getBodyAnimation(expression) : {}}
+            animate={animate ? getBodyAnimation(currentExpr) : {}}
             className="object-contain select-none"
             style={{
-              filter: `drop-shadow(${getGlowColor(expression)})`,
+              filter: `drop-shadow(${getGlowColor(currentExpr)})`,
             }}
             draggable={false}
           />
