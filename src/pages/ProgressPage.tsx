@@ -76,6 +76,7 @@ const ProgressPage = () => {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background pb-24">
       <div className="max-w-md mx-auto px-4 pt-6">
         <Header name={userName} progress={overallProgress} />
@@ -207,6 +208,7 @@ const ProgressPage = () => {
       </div>
       <BottomNav />
     </div>
+    </PageTransition>
   );
 };
 

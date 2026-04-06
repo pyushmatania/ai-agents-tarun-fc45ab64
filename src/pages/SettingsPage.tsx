@@ -65,6 +65,7 @@ const SettingsPage = () => {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background pb-24">
       <div className="max-w-md mx-auto px-4 pt-6">
         <h2 className="text-2xl font-extrabold text-foreground mb-6">Settings</h2>
@@ -174,6 +175,7 @@ const SettingsPage = () => {
       </div>
       <BottomNav />
     </div>
+    </PageTransition>
   );
 };
 

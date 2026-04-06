@@ -91,6 +91,7 @@ const CoursesPage = () => {
     : courses;
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background pb-24">
       <div className="max-w-md mx-auto px-4 pt-6">
         <div className="flex items-center gap-3 mb-4">
@@ -225,6 +226,7 @@ const CoursesPage = () => {
       </div>
       <BottomNav />
     </div>
+    </PageTransition>
   );
 };
 
