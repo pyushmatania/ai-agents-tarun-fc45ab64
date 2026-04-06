@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import Agni from "@/components/Agni";
 import { Star, Zap, Clock, ArrowRight } from "lucide-react";
+import { SFX } from "@/lib/sounds";
 
 interface LessonCompleteProps {
   lessonTitle: string;

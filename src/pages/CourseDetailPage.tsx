@@ -8,6 +8,7 @@ import type { QuizQuestion } from "@/components/lesson/QuizCard";
 import LessonComplete from "@/components/lesson/LessonComplete";
 import Agni from "@/components/Agni";
 import { useGamification } from "@/hooks/useGamification";
+import { SFX } from "@/lib/sounds";
 // Lesson content data — each lesson has concept cards + quizzes
 const LESSON_CONTENT: Record<string, {
   cards: { title: string; content: string; type: "concept" | "diagram" | "example" | "code"; icon: string }[];

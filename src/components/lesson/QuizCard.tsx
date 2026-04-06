@@ -41,6 +41,7 @@ const QuizCard = ({ quiz, onAnswer }: QuizCardProps) => {
     }
     setIsCorrect(correct);
     setAnswered(true);
+    if (correct) SFX.success(); else SFX.error();
   };
 
   const handleContinue = () => {
