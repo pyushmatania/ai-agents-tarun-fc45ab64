@@ -142,48 +142,38 @@ const CourseDetailPage = () => {
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => navigate("/courses")}
-              className="w-8 h-8 rounded-xl bg-card border border-border/40 flex items-center justify-center"
+              className="text-xs font-bold text-muted-foreground flex items-center gap-1"
             >
-              <X size={16} className="text-muted-foreground" />
+              <X size={14} /> Back
             </motion.button>
 
-            {/* Progress bar with phase indicators */}
-            <div className="flex-1 relative">
-              <div className="h-3 bg-muted/30 rounded-full overflow-hidden">
-                <motion.div
-                  className={`h-full rounded-full ${phase === "chat" ? "bg-agni-blue" : phase === "quiz" ? "bg-agni-gold" : "bg-agni-green"}`}
-                  animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.3 }}
-                />
-              </div>
-              {/* Phase dots */}
-              <div className="absolute -bottom-3 left-0 right-0 flex justify-between px-1">
-                {(["chat", "quiz", "complete"] as Phase[]).map((p, i) => (
-                  <div
-                    key={p}
-                    className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                      phase === p ? "bg-agni-green" : 
-                      (["chat", "quiz", "complete"].indexOf(phase) > i) ? "bg-agni-green/50" : "bg-muted/40"
-                    }`}
-                  />
-                ))}
+            <div className="flex-1 text-center">
+              <p className="text-sm font-black text-foreground truncate">{lesson.t}</p>
+              <div className="flex items-center justify-center gap-2 mt-0.5">
+                <span className="text-[9px] font-black text-agni-green">{lesson.xp} XP</span>
+                <span className="text-[9px] text-muted-foreground">⏱ {Math.floor(timer / 60)}m {timer % 60}s</span>
+                <span className="text-[8px] font-bold text-agni-gold bg-agni-gold/10 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                  ⚡ Gemini Flash
+                </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-1 bg-agni-pink/15 rounded-full px-2 py-1">
-              <Heart size={14} className="text-agni-pink fill-agni-pink" />
-              <span className="text-xs font-black text-agni-pink">{stats.hearts}</span>
-            </div>
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => { if (phase === "chat") handleQuizReady(); else navigate("/courses"); }}
+              className="text-[10px] font-black text-white bg-agni-green px-3 py-1.5 rounded-full flex items-center gap-1"
+            >
+              ✅ Done
+            </motion.button>
           </div>
 
-          {/* Phase + XP indicator */}
-          <div className="flex items-center justify-between mt-1">
-            <span className={`text-[9px] font-black flex items-center gap-1 ${PHASE_INFO[phase].color}`}>
-              <PhaseIcon size={10} /> {PHASE_INFO[phase].label}
-            </span>
-            <span className="text-[9px] font-black text-agni-green flex items-center gap-1">
-              <Zap size={10} /> {lesson.xp} XP
-            </span>
+          {/* Progress bar */}
+          <div className="mt-2 h-2 bg-muted/30 rounded-full overflow-hidden">
+            <motion.div
+              className={`h-full rounded-full ${phase === "chat" ? "bg-agni-blue" : phase === "quiz" ? "bg-agni-gold" : "bg-agni-green"}`}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.3 }}
+            />
           </div>
         </div>
       </div>
