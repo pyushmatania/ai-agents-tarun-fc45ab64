@@ -239,7 +239,7 @@ const CourseDetailPage = () => {
 
       {/* Hearts lost warning */}
       <AnimatePresence>
-        {hearts === 0 && phase !== "complete" && (
+        {stats.hearts === 0 && phase !== "complete" && (
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
@@ -251,11 +251,13 @@ const CourseDetailPage = () => {
               <p className="text-white font-black text-sm mt-2">No hearts left!</p>
               <p className="text-white/70 text-xs font-medium mt-1">You can still finish the lesson.</p>
               <button
-                onClick={() => setHearts(1)}
+                onClick={() => navigate("/courses")}
                 className="mt-3 bg-white text-agni-pink font-black text-sm px-6 py-2.5 rounded-full"
               >
-                Continue Anyway
+                Back to Courses
               </button>
+            </div>
+          </motion.div>
             </div>
           </motion.div>
         )}
