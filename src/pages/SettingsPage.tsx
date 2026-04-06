@@ -7,14 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { User, LogOut, Moon, Sun, ChevronRight, Shield, Bell, Loader2 } from "lucide-react";
+import { LogOut, Moon, Sun, ChevronRight, Shield, Bell, Loader2, LogIn } from "lucide-react";
 
 const SettingsPage = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const [fullName, setFullName] = useState("");
+  const [fullName, setFullName] = useState(localStorage.getItem("edu_user_name") || "");
+  const [role, setRole] = useState(localStorage.getItem("edu_user_role") || "");
   const [saving, setSaving] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(() =>
     document.documentElement.classList.contains("dark")
   );
@@ -28,7 +28,6 @@ const SettingsPage = () => {
         .eq("user_id", user.id)
         .single();
       if (data?.full_name) setFullName(data.full_name);
-      setLoading(false);
     };
     fetchProfile();
   }, [user]);
@@ -41,20 +40,27 @@ const SettingsPage = () => {
   };
 
   const handleSave = async () => {
-    if (!user) return;
     setSaving(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({ full_name: fullName })
-      .eq("user_id", user.id);
-    if (error) toast.error("Failed to save");
-    else toast.success("Profile updated!");
+    localStorage.setItem("edu_user_name", fullName);
+    localStorage.setItem("edu_user_role", role);
+
+    if (user) {
+      await supabase
+        .from("profiles")
+        .update({ full_name: fullName })
+        .eq("user_id", user.id);
+    }
+
+    toast.success("Profile updated!");
     setSaving(false);
   };
 
   const handleLogout = async () => {
-    await signOut();
-    navigate("/auth");
+    if (user) await signOut();
+    localStorage.removeItem("edu_onboarded");
+    localStorage.removeItem("edu_user_name");
+    localStorage.removeItem("edu_user_role");
+    navigate("/welcome");
   };
 
   return (
@@ -69,23 +75,31 @@ const SettingsPage = () => {
               👤
             </div>
             <div className="flex-1">
-              <p className="font-bold text-foreground text-lg">
-                {loading ? "..." : fullName || "Your Name"}
-              </p>
-              <p className="text-sm text-muted-foreground">{user?.email}</p>
+              <p className="font-bold text-foreground text-lg">{fullName || "Your Name"}</p>
+              <p className="text-sm text-muted-foreground">{role || "Learner"}</p>
+              {user && <p className="text-xs text-muted-foreground mt-0.5">{user.email}</p>}
             </div>
           </div>
 
           <div className="space-y-3">
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Full Name
-            </label>
-            <Input
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Enter your name"
-              className="h-12 rounded-2xl bg-background border-border text-foreground"
-            />
+            <div>
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Name</label>
+              <Input
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Enter your name"
+                className="h-12 rounded-2xl bg-background border-border text-foreground mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Role</label>
+              <Input
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                placeholder="e.g. Developer, Student"
+                className="h-12 rounded-2xl bg-background border-border text-foreground mt-1"
+              />
+            </div>
             <Button
               onClick={handleSave}
               disabled={saving}
@@ -96,6 +110,17 @@ const SettingsPage = () => {
             </Button>
           </div>
         </div>
+
+        {/* Sign in prompt */}
+        {!user && (
+          <button
+            onClick={() => navigate("/auth")}
+            className="w-full bg-secondary/20 border border-secondary/30 text-foreground font-bold rounded-3xl p-4 flex items-center justify-center gap-2 hover:bg-secondary/30 transition-colors mb-4"
+          >
+            <LogIn size={18} />
+            Sign in to sync progress
+          </button>
+        )}
 
         {/* Preferences */}
         <div className="bg-card rounded-3xl border border-border overflow-hidden mb-4">
@@ -139,7 +164,7 @@ const SettingsPage = () => {
           className="w-full bg-destructive/10 text-destructive font-bold rounded-3xl p-4 flex items-center justify-center gap-2 hover:bg-destructive/20 transition-colors"
         >
           <LogOut size={18} />
-          Log Out
+          {user ? "Log Out" : "Reset & Start Over"}
         </button>
 
         <p className="text-center text-xs text-muted-foreground mt-6">
