@@ -46,40 +46,38 @@ const OnboardingPage = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* 3D Background */}
       <Suspense fallback={null}>
         <LazyParticles />
       </Suspense>
 
-      {/* Gradient overlays */}
-      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-background/40 via-background/70 to-background pointer-events-none" />
+      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-background/30 via-background/60 to-background pointer-events-none" />
 
-      <div className="relative z-10 max-w-md mx-auto px-6 pt-10 pb-8 flex flex-col min-h-screen">
+      <div className="relative z-10 max-w-md mx-auto px-5 pt-12 pb-6 flex flex-col min-h-screen">
         {/* Logo */}
-        <div className="text-center mb-6">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary to-secondary mx-auto mb-4 flex items-center justify-center shadow-xl shadow-primary/20">
-            <Bot size={40} className="text-primary-foreground" />
+        <div className="text-center mb-5">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-secondary mx-auto mb-3 flex items-center justify-center shadow-glow-primary">
+            <Bot size={28} className="text-primary-foreground" />
           </div>
-          <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
+          <h1 className="text-xl font-display font-bold text-foreground tracking-tight">
             AI Agents
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm h-5">
+          <p className="text-muted-foreground mt-1 text-xs h-4">
             {displayedText}
             {showCursor && <span className="animate-pulse ml-0.5">|</span>}
           </p>
         </div>
 
-        {/* Sparkle banner */}
-        <div className="bg-card/60 backdrop-blur-xl rounded-2xl p-4 mb-5 flex items-start gap-3 border border-border/50 shadow-sm">
-          <Sparkles size={18} className="text-secondary shrink-0 mt-0.5" />
-          <p className="text-sm text-foreground/80">
+        {/* Banner */}
+        <div className="glass rounded-xl p-3 mb-4 flex items-start gap-2 border border-border/40">
+          <Sparkles size={14} className="text-secondary shrink-0 mt-0.5" />
+          <p className="text-[11px] text-foreground/70 leading-relaxed">
             No account needed! Tell us your name and role — we'll personalize your learning.
           </p>
         </div>
 
-        {/* Name input */}
-        <div className="mb-5">
-          <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 block">
+        {/* Name */}
+        <div className="mb-4">
+          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">
             What's your name?
           </label>
           <Input
@@ -87,30 +85,30 @@ const OnboardingPage = () => {
             placeholder="Enter your name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="h-14 rounded-2xl bg-card/70 backdrop-blur-sm border-border/50 text-foreground text-lg font-semibold"
+            className="h-11 rounded-xl glass border-border/40 text-foreground text-sm font-medium"
             autoFocus
           />
         </div>
 
-        {/* Role selection */}
-        <div className="mb-6">
-          <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 block">
+        {/* Role */}
+        <div className="mb-5">
+          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2 block">
             What's your role?
           </label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-1.5">
             {roles.map((role, i) => (
               <button
                 key={role.label}
                 onClick={() => setSelectedRole(role.label)}
-                className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border backdrop-blur-sm transition-all animate-fade-in opacity-0 ${
+                className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border transition-all animate-fade-in opacity-0 ${
                   selectedRole === role.label
-                    ? "bg-primary/15 border-primary text-foreground shadow-md shadow-primary/10 scale-105"
-                    : "bg-card/60 border-border/50 text-foreground hover:bg-card/80 hover:scale-105"
+                    ? "bg-primary/10 border-primary/30 text-foreground shadow-glow-primary"
+                    : "glass border-border/40 text-foreground hover:border-border"
                 }`}
-                style={{ animationDelay: `${i * 100}ms`, animationFillMode: "forwards" }}
+                style={{ animationDelay: `${i * 80}ms`, animationFillMode: "forwards" }}
               >
-                <span className="text-2xl">{role.emoji}</span>
-                <span className="text-xs font-semibold">{role.label}</span>
+                <span className="text-lg">{role.emoji}</span>
+                <span className="text-[10px] font-semibold">{role.label}</span>
               </button>
             ))}
           </div>
@@ -120,14 +118,13 @@ const OnboardingPage = () => {
           <Button
             onClick={handleStart}
             disabled={!name.trim()}
-            className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-secondary text-primary-foreground font-bold text-base hover:opacity-90 transition-all disabled:opacity-40 shadow-lg shadow-primary/25"
+            className="w-full h-11 rounded-xl bg-gradient-to-r from-primary to-secondary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all disabled:opacity-30 shadow-glow-primary"
           >
             Start Learning
-            <ArrowRight size={18} className="ml-2" />
+            <ArrowRight size={15} className="ml-1.5" />
           </Button>
-
-          <p className="text-center text-xs text-muted-foreground mt-4">
-            Your progress is saved locally. Sign in later to sync across devices.
+          <p className="text-center text-[10px] text-muted-foreground mt-3">
+            Progress saved locally. Sign in later to sync.
           </p>
         </div>
       </div>

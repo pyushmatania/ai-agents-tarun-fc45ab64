@@ -6,10 +6,10 @@ import { ArrowRight, RefreshCw, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 const CURIOSITY = [
-  { id: "industry", label: "🏭 Your Industry", desc: "AI agents in semiconductor, manufacturing & HCL's world", query: "AI agents semiconductor manufacturing India 2026 latest", color: "from-primary to-edu-orange-light" },
-  { id: "general", label: "🌍 General", desc: "What people are building with AI agents right now", query: "amazing AI agent projects people built 2026 showcase", color: "from-secondary to-accent" },
-  { id: "crazy", label: "🤯 Crazy Future", desc: "Mind-bending futuristic agent applications", query: "most crazy futuristic AI agent applications autonomous 2026", color: "from-edu-dark to-foreground" },
-  { id: "daily", label: "💼 Daily Work", desc: "How agents make employees' daily work easier", query: "AI agents automate daily office work productivity examples 2026", color: "from-edu-lavender to-secondary" },
+  { id: "industry", label: "🏭 Your Industry", desc: "AI agents in semiconductor & manufacturing", query: "AI agents semiconductor manufacturing India 2026 latest" },
+  { id: "general", label: "🌍 General", desc: "What people are building with AI agents", query: "amazing AI agent projects people built 2026 showcase" },
+  { id: "crazy", label: "🤯 Crazy Future", desc: "Mind-bending futuristic agent apps", query: "most crazy futuristic AI agent applications autonomous 2026" },
+  { id: "daily", label: "💼 Daily Work", desc: "Agents for daily productivity", query: "AI agents automate daily office work productivity examples 2026" },
 ];
 
 const typeIcons: Record<string, string> = { tool: "🔧", repo: "📦", article: "📰", video: "🎬", news: "📡" };
@@ -29,7 +29,6 @@ const CuriosityPage = () => {
     setResults([]);
     setError("");
     setLoading(true);
-
     try {
       const resp = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -58,83 +57,82 @@ const CuriosityPage = () => {
 
   return (
     <PageTransition>
-    <div className="min-h-screen bg-background pb-24">
-      <div className="max-w-md mx-auto px-4 pt-6">
+    <div className="min-h-screen bg-background pb-20">
+      <div className="max-w-md mx-auto px-4 pt-5">
         <Header name={displayName} progress={0} />
 
         {/* Hero */}
-        <div className="rounded-4xl p-6 mb-5 relative overflow-hidden shadow-elevated"
-          style={{ background: "hsl(var(--edu-dark))" }}>
+        <div className="rounded-2xl p-4 mb-4 relative overflow-hidden"
+          style={{ background: "linear-gradient(135deg, hsl(228 20% 14%), hsl(228 20% 10%))" }}>
           <div className="relative z-10">
-            <h3 className="text-2xl font-black text-white leading-tight mb-2">Curiosity<br/>Spark</h3>
-            <p className="text-sm text-white/60 max-w-[240px] font-semibold">
-              Discover what's happening in AI agents — get inspired!
+            <p className="text-[10px] font-bold text-white/40 tracking-widest mb-0.5">DISCOVER</p>
+            <h3 className="text-base font-display font-bold text-white leading-tight mb-1">Curiosity Spark</h3>
+            <p className="text-[11px] text-white/50 max-w-[220px] leading-relaxed">
+              Explore what's happening in AI agents — get inspired!
             </p>
           </div>
-          <div className="absolute top-4 right-4 text-6xl opacity-15 animate-float">🔮</div>
-          <div className="absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-white/5" />
+          <div className="absolute top-3 right-3 text-3xl opacity-10 animate-float">🔮</div>
         </div>
 
         {/* Categories */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           {CURIOSITY.map(cat => {
             const isActive = activeId === cat.id;
             return (
               <div key={cat.id}>
                 <button onClick={() => fetchCuriosity(cat)}
-                  className={`w-full bg-card rounded-3xl p-4 border text-left transition-all shadow-card ${
-                    isActive ? "border-primary shadow-card-hover" : "border-border hover:border-primary/30"
+                  className={`w-full bg-card rounded-xl p-3 border text-left transition-all shadow-card ${
+                    isActive ? "border-primary/30 shadow-glow-primary" : "border-border/50 hover:border-border"
                   }`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-extrabold text-foreground">{cat.label}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5 font-semibold">{cat.desc}</p>
+                      <h4 className="text-xs font-bold text-foreground">{cat.label}</h4>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{cat.desc}</p>
                     </div>
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all ${
-                      isActive && loading ? "bg-primary/10" : isActive ? "bg-primary shadow-card" : "bg-muted"
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+                      isActive && loading ? "bg-primary/10" : isActive ? "bg-primary" : "bg-muted/50"
                     }`}>
                       {isActive && loading ? (
-                        <Loader2 size={16} className="animate-spin text-primary" />
+                        <Loader2 size={13} className="animate-spin text-primary" />
                       ) : (
-                        <ArrowRight size={16} className={isActive ? "text-primary-foreground" : "text-muted-foreground"} />
+                        <ArrowRight size={13} className={isActive ? "text-white" : "text-muted-foreground"} />
                       )}
                     </div>
                   </div>
                 </button>
 
                 {isActive && loading && (
-                  <div className="mt-2 ml-4 space-y-2">
+                  <div className="mt-1.5 ml-3 space-y-1.5">
                     {[1, 2, 3].map(i => (
-                      <div key={i} className="h-12 rounded-2xl bg-muted animate-pulse" />
+                      <div key={i} className="h-10 rounded-lg bg-muted/30 animate-pulse" />
                     ))}
                   </div>
                 )}
 
                 {isActive && error && (
-                  <div className="mt-2 ml-4 bg-destructive/5 border border-destructive/20 rounded-2xl p-3">
-                    <p className="text-sm text-destructive font-semibold">{error}</p>
-                    <button onClick={() => fetchCuriosity(cat)}
-                      className="mt-2 text-xs font-bold text-primary flex items-center gap-1">
-                      <RefreshCw size={12} /> Try again
+                  <div className="mt-1.5 ml-3 bg-destructive/5 border border-destructive/20 rounded-lg p-2.5">
+                    <p className="text-[11px] text-destructive">{error}</p>
+                    <button onClick={() => fetchCuriosity(cat)} className="mt-1.5 text-[10px] font-semibold text-primary flex items-center gap-1">
+                      <RefreshCw size={10} /> Try again
                     </button>
                   </div>
                 )}
 
                 {isActive && !loading && results.length > 0 && (
-                  <div className="mt-2 ml-4 space-y-2">
+                  <div className="mt-1.5 ml-3 space-y-1.5">
                     {results.map((r: any, i: number) => (
                       <a key={i} href={r.url || "#"} target="_blank" rel="noopener noreferrer"
-                        className="block bg-card rounded-2xl p-3 border border-border hover:shadow-card-hover transition-all shadow-card">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">{typeIcons[r.type] || "📄"}</span>
-                          <span className="text-sm font-bold text-foreground">{r.title}</span>
+                        className="block bg-card rounded-lg p-2.5 border border-border/50 hover:border-primary/20 transition-all shadow-card">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs">{typeIcons[r.type] || "📄"}</span>
+                          <span className="text-[11px] font-semibold text-foreground">{r.title}</span>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1 ml-6 font-semibold">{r.desc || ""}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5 ml-5">{r.desc || ""}</p>
                       </a>
                     ))}
                     <button onClick={() => fetchCuriosity(cat)}
-                      className="flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/5 border border-primary/20 rounded-full px-3 py-1.5 mt-1">
-                      <RefreshCw size={12} /> Refresh
+                      className="flex items-center gap-1 text-[10px] font-semibold text-primary bg-primary/5 border border-primary/20 rounded-md px-2.5 py-1 mt-1">
+                      <RefreshCw size={10} /> Refresh
                     </button>
                   </div>
                 )}
