@@ -123,7 +123,7 @@ const OnboardingPage = () => {
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: "spring", delay: 0.2 }}
               >
-                <Agni expression={SLIDES[step].agniExpr} size={120} />
+                <Agni expression={SLIDES[step].agniExpr} size={140} />
               </motion.div>
             </motion.div>
 
@@ -208,7 +208,7 @@ const OnboardingPage = () => {
 
             {/* AGNI greeting */}
             <div className="flex justify-center mb-6">
-              <Agni expression="teaching" size={80} speech="Tell me about you! 📝" />
+              <Agni expression="teaching" size={100} speech="Tell me about you! 📝" />
             </div>
 
             <motion.h2

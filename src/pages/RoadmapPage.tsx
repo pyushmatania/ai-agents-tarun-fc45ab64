@@ -73,7 +73,7 @@ const RoadmapPage = () => {
           <FadeIn>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Agni expression={completedMilestones >= TOTAL_MILESTONES ? "celebrating" : "teaching"} size={40} animate={true} />
+                <Agni expression={completedMilestones >= TOTAL_MILESTONES ? "celebrating" : "teaching"} size={50} animate={true} />
                 <div>
                   <h2 className="text-sm font-black text-foreground">90-Day Roadmap</h2>
                   <p className="text-[10px] text-muted-foreground font-semibold">Day ~{currentDay} • {league.emoji} {league.name}</p>

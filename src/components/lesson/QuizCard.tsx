@@ -71,7 +71,7 @@ const QuizCard = ({ quiz, onAnswer }: QuizCardProps) => {
 
         {/* AGNI */}
         <div className="flex justify-center mb-3">
-          <Agni expression={agniExpr} size={60} speech={agniSpeech} />
+          <Agni expression={agniExpr} size={75} speech={agniSpeech} />
         </div>
 
         {/* Question */}

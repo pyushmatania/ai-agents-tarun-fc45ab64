@@ -151,7 +151,7 @@ const CourseDetailPage = () => {
   if (!lesson || !content) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
-        <Agni expression="sad" size={100} speech="Lesson not found 😢" />
+        <Agni expression="sad" size={120} speech="Lesson not found 😢" />
         <button onClick={() => navigate("/courses")} className="text-agni-green font-black text-sm">Back to courses</button>
       </div>
     );
@@ -250,7 +250,7 @@ const CourseDetailPage = () => {
             className="absolute bottom-0 left-0 right-0 bg-agni-pink/95 p-5 z-30"
           >
             <div className="max-w-md mx-auto text-center">
-              <Agni expression="sad" size={70} speech="Out of hearts! 💔" />
+              <Agni expression="sad" size={90} speech="Out of hearts! 💔" />
               <p className="text-white font-black text-sm mt-2">No hearts left!</p>
               <p className="text-white/70 text-xs font-medium mt-1">You can still finish the lesson.</p>
               <button
