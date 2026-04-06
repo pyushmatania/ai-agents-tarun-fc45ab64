@@ -59,6 +59,7 @@ const CourseDetailPage = () => {
   const [timer, setTimer] = useState(0);
   const [quizError, setQuizError] = useState("");
   const [showQuizConfirm, setShowQuizConfirm] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>();
   const chatMessagesRef = useRef<ChatMessage[]>([]);
 
@@ -296,30 +297,84 @@ const CourseDetailPage = () => {
               exit={{ scale: 0.85, opacity: 0 }}
               className="bg-card border border-border/40 rounded-2xl p-6 max-w-xs w-full text-center shadow-elevated"
             >
-              <Agni expression="teaching" size={80} speech="Ready for the quiz? 🧠" />
-              <p className="text-foreground font-black text-sm mt-3">Start the Quiz?</p>
-              <p className="text-muted-foreground text-xs font-medium mt-1">
-                AGNI will generate questions based on what you just learned.
-              </p>
-              <div className="flex gap-2 mt-4">
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setShowQuizConfirm(false)}
-                  className="flex-1 text-[11px] font-black text-muted-foreground bg-muted/30 border border-border/40 rounded-xl py-2.5 transition-colors"
-                >
-                  Keep Learning
-                </motion.button>
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => {
-                    setShowQuizConfirm(false);
-                    handleQuizReady(chatMessagesRef.current);
-                  }}
-                  className="flex-1 text-[11px] font-black text-white bg-agni-green rounded-xl py-2.5 shadow-[0_3px_0_0_hsl(100,100%,31%)] active:shadow-[0_1px_0_0_hsl(100,100%,31%)] active:translate-y-[2px] transition-all"
-                >
-                  ⚡ Let's Go!
-                </motion.button>
-              </div>
+              {countdown === null ? (
+                <>
+                  <Agni expression="teaching" size={80} speech="Ready for the quiz? 🧠" />
+                  <p className="text-foreground font-black text-sm mt-3">Start the Quiz?</p>
+                  <p className="text-muted-foreground text-xs font-medium mt-1">
+                    AGNI will generate questions based on what you just learned.
+                  </p>
+                  <div className="flex gap-2 mt-4">
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setShowQuizConfirm(false)}
+                      className="flex-1 text-[11px] font-black text-muted-foreground bg-muted/30 border border-border/40 rounded-xl py-2.5 transition-colors"
+                    >
+                      Keep Learning
+                    </motion.button>
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        setCountdown(3);
+                        let c = 3;
+                        const iv = setInterval(() => {
+                          c -= 1;
+                          if (c <= 0) {
+                            clearInterval(iv);
+                            setShowQuizConfirm(false);
+                            setCountdown(null);
+                            handleQuizReady(chatMessagesRef.current);
+                          } else {
+                            setCountdown(c);
+                          }
+                        }, 800);
+                      }}
+                      className="flex-1 text-[11px] font-black text-white bg-agni-green rounded-xl py-2.5 shadow-[0_3px_0_0_hsl(100,100%,31%)] active:shadow-[0_1px_0_0_hsl(100,100%,31%)] active:translate-y-[2px] transition-all"
+                    >
+                      ⚡ Let's Go!
+                    </motion.button>
+                  </div>
+                </>
+              ) : (
+                <div className="py-4">
+                  <Agni expression="happy" size={70} speech="Here we go! 🔥" />
+                  <div className="relative w-24 h-24 mx-auto mt-4">
+                    {/* Background ring */}
+                    <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                      <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--muted)/0.3)" strokeWidth="6" />
+                      <motion.circle
+                        cx="50" cy="50" r="42"
+                        fill="none"
+                        stroke="hsl(var(--agni-green))"
+                        strokeWidth="6"
+                        strokeLinecap="round"
+                        strokeDasharray={264}
+                        initial={{ strokeDashoffset: 0 }}
+                        animate={{ strokeDashoffset: 264 }}
+                        transition={{ duration: 2.4, ease: "linear" }}
+                      />
+                    </svg>
+                    {/* Number */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <AnimatePresence mode="wait">
+                        <motion.span
+                          key={countdown}
+                          initial={{ scale: 1.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.5, opacity: 0 }}
+                          transition={{ duration: 0.3, ease: "easeOut" }}
+                          className="text-3xl font-black text-agni-green"
+                        >
+                          {countdown}
+                        </motion.span>
+                      </AnimatePresence>
+                    </div>
+                  </div>
+                  <p className="text-muted-foreground text-[10px] font-bold mt-3 uppercase tracking-widest">
+                    Generating quiz...
+                  </p>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}
