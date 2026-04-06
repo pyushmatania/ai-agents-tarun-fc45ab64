@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import FloatingShapes from "@/components/illustrations/FloatingShapes";
 import NetworkIllustration from "@/components/illustrations/NetworkIllustration";
 import { motion } from "framer-motion";
+import heroHome from "@/assets/hero-home.png";
 import { useState } from "react";
 
 const DAILY_TIPS = [
@@ -105,38 +106,42 @@ const HomePage = () => {
             </div>
           </FadeIn>
 
-          {/* Hero Card */}
+          {/* Hero Illustration Card */}
           <FadeIn delay={0.15}>
             <motion.div
-              className="relative rounded-2xl p-4 mb-4 overflow-hidden cursor-pointer group"
-              style={{ background: "linear-gradient(135deg, hsl(258 60% 50%), hsl(258 55% 40%))" }}
+              className="relative rounded-2xl mb-4 overflow-hidden cursor-pointer group"
               onClick={() => navigate("/courses")}
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
             >
-              <div className="relative z-10">
-                <p className="text-[10px] font-bold text-white/50 tracking-widest mb-1">MASTERCLASS</p>
-                <h3 className="text-lg font-display font-bold text-white leading-snug mb-1">AI Agents</h3>
-                <p className="text-[11px] text-white/60 mb-3 max-w-[200px] leading-relaxed">
-                  Build <span className="text-primary font-semibold">autonomous AI systems</span> for enterprise & startups
+              <img
+                src={heroHome}
+                alt="AI Agents Academy - Learn with AI"
+                className="w-full h-48 object-cover rounded-2xl"
+                width={800}
+                height={512}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent rounded-2xl" />
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <p className="text-[10px] font-bold text-primary tracking-widest mb-0.5">MASTERCLASS</p>
+                <h3 className="text-lg font-display font-bold text-foreground leading-snug mb-1">AI Agents</h3>
+                <p className="text-[11px] text-muted-foreground mb-2 max-w-[220px] leading-relaxed">
+                  Build autonomous AI systems for enterprise & startups
                 </p>
                 <div className="flex items-center gap-2">
-                  <div className="bg-white/10 rounded-lg px-2.5 py-1 text-[10px] font-semibold text-white/80">{done.length}/{totalLessons} lessons</div>
-                  <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center group-hover:bg-white/25 transition-colors">
-                    <ArrowRight size={13} className="text-white" />
+                  <div className="bg-primary/10 rounded-lg px-2.5 py-1 text-[10px] font-semibold text-primary">{done.length}/{totalLessons} lessons</div>
+                  <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <ArrowRight size={13} className="text-primary" />
                   </div>
                 </div>
-              </div>
-              <div className="absolute top-3 right-3 text-4xl opacity-20 animate-float">🧠</div>
-              <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-white/5" />
-              <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-primary/10" />
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10">
-                <motion.div
-                  className="h-full bg-primary/80"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${overallProgress}%` }}
-                  transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
-                />
+                <div className="mt-2 h-1 bg-muted/50 rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full bg-primary rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${overallProgress}%` }}
+                    transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+                  />
+                </div>
               </div>
             </motion.div>
           </FadeIn>
