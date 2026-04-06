@@ -77,24 +77,17 @@ const OnboardingPage = () => {
             transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-5 flex flex-col min-h-screen items-center justify-center"
           >
-            {/* Big Hero Illustration */}
-            <motion.div
-              initial={{ scale: 0.85, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.15, duration: 0.6, ease: "easeOut" }}
-              className="relative mb-4 w-full"
-            >
+            {/* Full-screen Hero Illustration */}
+            <div className="absolute inset-0 z-0">
               <img
                 src={heroSplash}
                 alt="AI Agents Academy - Robot teaching students"
-                className="w-full max-w-[320px] mx-auto rounded-3xl shadow-2xl"
-                width={800}
-                height={1024}
+                className="w-full h-full object-cover"
+                width={1080}
+                height={1920}
               />
-              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-card/90 backdrop-blur-md border border-border/40 rounded-2xl px-4 py-1.5 shadow-lg">
-                <p className="text-[10px] font-bold text-primary flex items-center gap-1"><Sparkles size={10} /> Powered by AI</p>
-              </div>
-            </motion.div>
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+            </div>
 
             {/* Title */}
             <motion.h1
