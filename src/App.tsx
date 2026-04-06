@@ -36,6 +36,7 @@ const App = () => (
           <Route path="/courses" element={<OnboardedRoute><CoursesPage /></OnboardedRoute>} />
           <Route path="/curiosity" element={<OnboardedRoute><CuriosityPage /></OnboardedRoute>} />
           <Route path="/progress" element={<OnboardedRoute><ProgressPage /></OnboardedRoute>} />
+          <Route path="/sources" element={<OnboardedRoute><SourcesPage /></OnboardedRoute>} />
           <Route path="/settings" element={<OnboardedRoute><SettingsPage /></OnboardedRoute>} />
           <Route path="/course/:id" element={<OnboardedRoute><CourseDetailPage /></OnboardedRoute>} />
           <Route path="/mega-prompt" element={<OnboardedRoute><MegaPromptPage /></OnboardedRoute>} />
