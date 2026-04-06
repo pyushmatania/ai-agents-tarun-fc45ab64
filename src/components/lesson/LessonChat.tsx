@@ -11,11 +11,13 @@ interface Message {
   content: string;
 }
 
+export type { Message as ChatMessage };
+
 interface LessonChatProps {
   lessonTitle: string;
   lessonTopic: string;
   teachingMode: string;
-  onQuizReady: () => void;
+  onQuizReady: (conversation: Message[]) => void;
 }
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -177,6 +179,7 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
           setMessages(prev => {
             const updated = [...prev];
             updated[updated.length - 1] = { role: "assistant", content: cleanText };
+            setTimeout(() => onQuizReady(updated), 2000);
             return updated;
           });
           setTimeout(() => onQuizReady(), 2000);
