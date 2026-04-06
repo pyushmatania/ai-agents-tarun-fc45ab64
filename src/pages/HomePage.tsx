@@ -109,7 +109,7 @@ const HomePage = () => {
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Agni expression={agniExpression} size={75} speech={agniSpeech} />
+                    <Agni expression={agniExpression} size={75} speech={agniSpeech} interactive />
                   </div>
                 </div>
               </div>
