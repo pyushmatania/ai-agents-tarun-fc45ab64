@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Heart, Zap, ChevronLeft } from "lucide-react";
+import { X, Heart, Zap } from "lucide-react";
 import LessonCard from "@/components/lesson/LessonCard";
 import QuizCard from "@/components/lesson/QuizCard";
 import type { QuizQuestion } from "@/components/lesson/QuizCard";
 import LessonComplete from "@/components/lesson/LessonComplete";
 import Agni from "@/components/Agni";
-
+import { useGamification } from "@/hooks/useGamification";
 // Lesson content data — each lesson has concept cards + quizzes
 const LESSON_CONTENT: Record<string, {
   cards: { title: string; content: string; type: "concept" | "diagram" | "example" | "code"; icon: string }[];
@@ -88,8 +88,8 @@ const ALL_LESSONS: Record<string, { t: string; xp: number; topic: string }> = {
 const CourseDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { stats, loseHeart, completeLesson } = useGamification();
   const [currentStep, setCurrentStep] = useState(0);
-  const [hearts, setHearts] = useState(5);
   const [correctCount, setCorrectCount] = useState(0);
   const [phase, setPhase] = useState<"learning" | "complete">("learning");
   const [timer, setTimer] = useState(0);
@@ -124,9 +124,8 @@ const CourseDetailPage = () => {
     if (correct) {
       setCorrectCount(c => c + 1);
     } else {
-      setHearts(h => Math.max(0, h - 1));
+      loseHeart();
     }
-    // Move to next step after a delay
     setTimeout(() => {
       if (currentStep < totalSteps - 1) {
         setCurrentStep(currentStep + 1);
@@ -138,14 +137,10 @@ const CourseDetailPage = () => {
 
   const handleLessonComplete = () => {
     clearInterval(timerRef.current);
-    if (id) {
-      const done: string[] = JSON.parse(localStorage.getItem("adojo_done") || "[]");
-      if (!done.includes(id)) {
-        done.push(id);
-        localStorage.setItem("adojo_done", JSON.stringify(done));
-        const xp = parseInt(localStorage.getItem("adojo_xp") || "0") + (lesson?.xp || 0);
-        localStorage.setItem("adojo_xp", String(xp));
-      }
+    if (id && lesson) {
+      const totalQ = content?.quizzes.length || 0;
+      const isPerfect = totalQ > 0 && correctCount === totalQ;
+      completeLesson(id, lesson.xp, isPerfect);
     }
     setPhase("complete");
   };
@@ -186,7 +181,7 @@ const CourseDetailPage = () => {
             {/* Hearts */}
             <div className="flex items-center gap-1 bg-agni-pink/15 rounded-full px-2 py-1">
               <Heart size={14} className="text-agni-pink fill-agni-pink" />
-              <span className="text-xs font-black text-agni-pink">{hearts}</span>
+              <span className="text-xs font-black text-agni-pink">{stats.hearts}</span>
             </div>
           </div>
 
@@ -244,7 +239,7 @@ const CourseDetailPage = () => {
 
       {/* Hearts lost warning */}
       <AnimatePresence>
-        {hearts === 0 && phase !== "complete" && (
+        {stats.hearts === 0 && phase !== "complete" && (
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
@@ -256,10 +251,10 @@ const CourseDetailPage = () => {
               <p className="text-white font-black text-sm mt-2">No hearts left!</p>
               <p className="text-white/70 text-xs font-medium mt-1">You can still finish the lesson.</p>
               <button
-                onClick={() => setHearts(1)}
+                onClick={() => navigate("/courses")}
                 className="mt-3 bg-white text-agni-pink font-black text-sm px-6 py-2.5 rounded-full"
               >
-                Continue Anyway
+                Back to Courses
               </button>
             </div>
           </motion.div>
