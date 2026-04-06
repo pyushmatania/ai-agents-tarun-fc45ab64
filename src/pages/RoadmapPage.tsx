@@ -287,7 +287,6 @@ const RoadmapPage = () => {
               </div>
             </div>
           </FadeIn>
-          </FadeIn>
 
           {/* Phases */}
           <StaggerContainer className="space-y-3">
