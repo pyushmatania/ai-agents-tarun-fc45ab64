@@ -114,6 +114,7 @@ const CourseDetailPage = () => {
   }, []);
 
   const handleCardNext = () => {
+    SFX.tap();
     if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -138,6 +139,7 @@ const CourseDetailPage = () => {
 
   const handleLessonComplete = () => {
     clearInterval(timerRef.current);
+    SFX.xp();
     if (id && lesson) {
       const totalQ = content?.quizzes.length || 0;
       const isPerfect = totalQ > 0 && correctCount === totalQ;

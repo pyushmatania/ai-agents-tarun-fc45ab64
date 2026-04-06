@@ -18,6 +18,11 @@ const LessonComplete = ({ lessonTitle, xpEarned, correctCount, totalQuizzes, tim
   const isPerfect = accuracy === 100;
   const minutes = Math.floor(timeSpent / 60);
 
+  useEffect(() => {
+    SFX.celebration();
+    if (isPerfect) setTimeout(() => SFX.levelUp(), 600);
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
