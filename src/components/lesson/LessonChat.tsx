@@ -21,25 +21,73 @@ interface LessonChatProps {
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-const LessonChat = ({ lessonTitle, lessonTopic, teachingMode, onQuizReady }: LessonChatProps) => {
+const MODES = [
+  { key: "class5", label: "Simple", emoji: "🚀" },
+  { key: "engineer", label: "Engineer", emoji: "🔧" },
+  { key: "founder", label: "Founder", emoji: "💼" },
+  { key: "hacker", label: "Hacker", emoji: "⚡" },
+  { key: "crazy", label: "Crazy", emoji: "🤯" },
+  { key: "semiconductor", label: "Semi", emoji: "🏭" },
+];
+
+const QUICK_CHIPS: Record<string, { label: string; prompt: string }[]> = {
+  class5: [
+    { label: "Explain simpler", prompt: "Explain that in even simpler terms, like I'm 5 years old." },
+    { label: "Fun example", prompt: "Give me a fun, real-world example of this!" },
+    { label: "Quiz me", prompt: "Quiz me on what we just learned!" },
+    { label: "Tell a story", prompt: "Tell me a short story to explain this concept." },
+  ],
+  engineer: [
+    { label: "Explain simpler", prompt: "Break this down more simply." },
+    { label: "Give me code", prompt: "Show me a code example for this concept." },
+    { label: "Real example", prompt: "Give me a real-world production example." },
+    { label: "Quiz me", prompt: "Quiz me on this topic." },
+  ],
+  founder: [
+    { label: "Business case", prompt: "What's the business case / ROI for this?" },
+    { label: "What can I build?", prompt: "What products or startups could I build with this?" },
+    { label: "Deep dive", prompt: "Go deeper into the strategic implications." },
+    { label: "Quiz me", prompt: "Quiz me on this topic." },
+  ],
+  hacker: [
+    { label: "Give me code", prompt: "Just show me the code, skip the theory." },
+    { label: "Quick start", prompt: "How do I get started with this RIGHT NOW?" },
+    { label: "Deep dive", prompt: "Go deeper, show me advanced patterns." },
+    { label: "Quiz me", prompt: "Quiz me on this." },
+  ],
+  crazy: [
+    { label: "Mind blow me", prompt: "Give me the most mind-blowing implication of this!" },
+    { label: "Sci-fi scenario", prompt: "Paint a wild sci-fi scenario with this tech." },
+    { label: "Deep dive", prompt: "Go even deeper into the rabbit hole." },
+    { label: "Quiz me", prompt: "Quiz me on this!" },
+  ],
+  semiconductor: [
+    { label: "Connect to HCL", prompt: "How does this connect to semiconductor manufacturing / HCL?" },
+    { label: "Fab example", prompt: "Give me a specific fab/manufacturing example." },
+    { label: "Deep dive", prompt: "Go deeper into the technical details." },
+    { label: "Quiz me", prompt: "Quiz me on this." },
+  ],
+};
+
+const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQuizReady }: LessonChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [exchangeCount, setExchangeCount] = useState(0);
+  const [activeMode, setActiveMode] = useState(initialMode);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const agniExpr: AgniExpression = isLoading ? "thinking" : messages.length === 0 ? "teaching" : "happy";
+  const chips = QUICK_CHIPS[activeMode] || QUICK_CHIPS.engineer;
 
-  // Auto-scroll to bottom
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, isLoading]);
 
-  // Start with AGNI's intro message
   useEffect(() => {
     sendToAI([{ role: "user", content: `Start teaching me about "${lessonTitle}". Topic: ${lessonTopic}. Begin with an engaging introduction.` }], true);
   }, []);
@@ -51,7 +99,7 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode, onQuizReady }: Les
     const aiConfig = getAIConfig();
     const body: any = {
       messages: chatMessages,
-      teachingMode,
+      teachingMode: activeMode,
       lessonTitle,
       lessonTopic,
       stream: true,
@@ -61,7 +109,7 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode, onQuizReady }: Les
       body.customApiKey = aiConfig.byokApiKey;
       body.provider = aiConfig.byokProvider;
       body.model = aiConfig.byokModel;
-      body.stream = false; // BYOK doesn't support streaming through our proxy
+      body.stream = false;
     } else {
       body.model = aiConfig.builtinModel || "google/gemini-3-flash-preview";
     }
@@ -82,13 +130,11 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode, onQuizReady }: Les
       }
 
       if (body.stream && resp.headers.get("content-type")?.includes("text/event-stream")) {
-        // Streaming response
         let assistantText = "";
         const reader = resp.body!.getReader();
         const decoder = new TextDecoder();
         let textBuffer = "";
 
-        // Add empty assistant message
         setMessages(prev => [...prev, { role: "assistant", content: "" }]);
 
         while (true) {
@@ -126,9 +172,7 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode, onQuizReady }: Les
           }
         }
 
-        // Check if QUIZ_READY
         if (assistantText.includes("QUIZ_READY")) {
-          // Clean the marker from displayed text
           const cleanText = assistantText.replace(/QUIZ_READY/g, "").trim();
           setMessages(prev => {
             const updated = [...prev];
@@ -138,7 +182,6 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode, onQuizReady }: Les
           setTimeout(() => onQuizReady(), 2000);
         }
       } else {
-        // Non-streaming response
         const data = await resp.json();
         const text = data.text || "I couldn't generate a response. Let's try again!";
         const cleanText = text.replace(/QUIZ_READY/g, "").trim();
@@ -163,15 +206,22 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode, onQuizReady }: Les
       setIsLoading(false);
       setIsStreaming(false);
     }
-  }, [teachingMode, lessonTitle, lessonTopic, onQuizReady]);
+  }, [activeMode, lessonTitle, lessonTopic, onQuizReady]);
 
-  const handleSend = () => {
-    if (!input.trim() || isLoading) return;
-    const userMsg: Message = { role: "user", content: input.trim() };
+  const handleSend = (text?: string) => {
+    const msg = text || input.trim();
+    if (!msg || isLoading) return;
+    const userMsg: Message = { role: "user", content: msg };
     const updatedMessages = [...messages, userMsg];
     setMessages(updatedMessages);
     setInput("");
     sendToAI(updatedMessages);
+  };
+
+  const handleModeChange = (mode: string) => {
+    SFX.tap();
+    setActiveMode(mode);
+    localStorage.setItem("teaching_mode", mode);
   };
 
   const handleSkipToQuiz = () => {
@@ -185,6 +235,27 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode, onQuizReady }: Les
       animate={{ opacity: 1 }}
       className="flex flex-col h-full"
     >
+      {/* Mode selector tabs */}
+      <div className="shrink-0 mb-2">
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1">
+          <span className="text-[9px] font-black text-muted-foreground shrink-0">Mode:</span>
+          {MODES.map((m) => (
+            <motion.button
+              key={m.key}
+              whileTap={{ scale: 0.92 }}
+              onClick={() => handleModeChange(m.key)}
+              className={`shrink-0 text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 transition-colors border ${
+                activeMode === m.key
+                  ? "bg-agni-green/10 text-agni-green border-agni-green/50"
+                  : "bg-card text-muted-foreground border-border/30 hover:border-border/60"
+              }`}
+            >
+              <span>{m.emoji}</span> {m.label}
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
       {/* Chat header */}
       <div className="flex items-center gap-2 mb-2 px-1">
         <Agni expression={agniExpr} size={40} animate />
@@ -193,9 +264,6 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode, onQuizReady }: Les
           <p className="text-[9px] text-muted-foreground font-semibold truncate">{lessonTitle}</p>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="text-[8px] font-black text-muted-foreground bg-muted/30 px-2 py-0.5 rounded-full">
-            {teachingMode.toUpperCase()}
-          </span>
           {exchangeCount >= 2 && (
             <motion.button
               initial={{ opacity: 0, scale: 0.8 }}
@@ -256,9 +324,11 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode, onQuizReady }: Les
             animate={{ opacity: 1 }}
             className="flex justify-start"
           >
-            <div className="bg-card border border-border/40 rounded-2xl rounded-bl-md px-4 py-3">
+            <div className="bg-card border border-border/40 rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-2">
+              <span className="text-sm">⏳</span>
+              <span className="text-[11px] font-semibold text-muted-foreground">Loading lesson...</span>
               <motion.div
-                className="flex gap-1"
+                className="flex gap-1 ml-1"
                 animate={{ opacity: [0.4, 1, 0.4] }}
                 transition={{ duration: 1.2, repeat: Infinity }}
               >
@@ -271,20 +341,37 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode, onQuizReady }: Les
         )}
       </div>
 
+      {/* Quick action chips */}
+      <div className="shrink-0 py-1.5">
+        <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
+          {chips.map((chip) => (
+            <motion.button
+              key={chip.label}
+              whileTap={{ scale: 0.92 }}
+              onClick={() => handleSend(chip.prompt)}
+              disabled={isLoading}
+              className="shrink-0 text-[10px] font-bold text-foreground bg-card border border-border/40 rounded-full px-3 py-1.5 hover:border-agni-green/40 transition-colors disabled:opacity-40"
+            >
+              {chip.label}
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
       {/* Input */}
-      <div className="flex items-center gap-2 pt-2">
+      <div className="flex items-center gap-2 pt-1">
         <input
           ref={inputRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          placeholder="Ask AGNI anything..."
+          placeholder={`Ask about ${lessonTitle}...`}
           disabled={isLoading}
           className="flex-1 bg-card border border-border/40 rounded-2xl px-4 py-3 text-[12px] font-medium text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-agni-green/50 transition-colors disabled:opacity-50"
         />
         <motion.button
           whileTap={{ scale: 0.85 }}
-          onClick={handleSend}
+          onClick={() => handleSend()}
           disabled={!input.trim() || isLoading}
           className="w-10 h-10 rounded-2xl bg-agni-green flex items-center justify-center shadow-btn-3d disabled:opacity-30 disabled:shadow-none"
         >
