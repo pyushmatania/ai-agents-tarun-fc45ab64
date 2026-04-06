@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Heart, Zap, ChevronLeft } from "lucide-react";
+import { X, Heart, Zap } from "lucide-react";
 import LessonCard from "@/components/lesson/LessonCard";
 import QuizCard from "@/components/lesson/QuizCard";
 import type { QuizQuestion } from "@/components/lesson/QuizCard";
 import LessonComplete from "@/components/lesson/LessonComplete";
 import Agni from "@/components/Agni";
-
+import { useGamification } from "@/hooks/useGamification";
 // Lesson content data — each lesson has concept cards + quizzes
 const LESSON_CONTENT: Record<string, {
   cards: { title: string; content: string; type: "concept" | "diagram" | "example" | "code"; icon: string }[];
