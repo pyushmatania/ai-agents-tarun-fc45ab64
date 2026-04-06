@@ -17,8 +17,24 @@ const roles = [
 
 const OnboardingPage = () => {
   const [name, setName] = useState("");
+  const tagline = "Master the future of intelligent automation";
+  const [displayedText, setDisplayedText] = useState("");
+  const [showCursor, setShowCursor] = useState(true);
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let i = 0;
+    const interval = setInterval(() => {
+      setDisplayedText(tagline.slice(0, i + 1));
+      i++;
+      if (i >= tagline.length) {
+        clearInterval(interval);
+        setTimeout(() => setShowCursor(false), 1200);
+      }
+    }, 45);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleStart = () => {
     if (!name.trim()) return;
