@@ -99,17 +99,17 @@ const HomePage = () => {
                   </div>
                 </div>
                 <div className="relative">
-                  <svg viewBox="0 0 110 110" className="w-[100px] h-[100px] -rotate-90">
-                    <circle cx="55" cy="55" r="50" fill="none" stroke="hsl(var(--muted))" strokeWidth="4" opacity="0.3" />
+                  <svg viewBox="0 0 130 130" className="w-[120px] h-[120px] -rotate-90">
+                    <circle cx="65" cy="65" r="58" fill="none" stroke="hsl(var(--muted))" strokeWidth="4" opacity="0.3" />
                     <motion.circle
-                      cx="55" cy="55" r="50" fill="none" stroke="hsl(var(--agni-green))" strokeWidth="4" strokeLinecap="round"
-                      initial={{ strokeDasharray: "0 314" }}
-                      animate={{ strokeDasharray: `${dailyProgress * 3.14} 314` }}
+                      cx="65" cy="65" r="58" fill="none" stroke="hsl(var(--agni-green))" strokeWidth="4" strokeLinecap="round"
+                      initial={{ strokeDasharray: "0 365" }}
+                      animate={{ strokeDasharray: `${dailyProgress * 3.65} 365` }}
                       transition={{ duration: 1.2, delay: 0.3 }}
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Agni expression={agniExpression} size={75} speech={agniSpeech} interactive />
+                    <Agni expression={agniExpression} size={90} speech={agniSpeech} interactive />
                   </div>
                 </div>
               </div>
@@ -234,7 +234,7 @@ const HomePage = () => {
             <div className="bg-card border border-agni-green/20 rounded-2xl p-3.5 mb-4 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-20 h-20 bg-agni-green/5 rounded-full -mr-6 -mt-6" />
               <div className="flex items-start gap-3">
-                <Agni expression="teaching" size={55} animate={false} />
+                <Agni expression="teaching" size={65} animate={false} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 mb-1">
                     <Lightbulb size={10} className="text-agni-gold" />
@@ -271,7 +271,7 @@ const HomePage = () => {
             <FadeIn delay={0.55}>
               <motion.button whileTap={{ scale: 0.98 }} onClick={() => navigate("/auth")}
                 className="w-full bg-card border-2 border-dashed border-agni-green/30 rounded-2xl px-4 py-3 mb-4 flex items-center gap-3">
-                <Agni expression="default" size={45} animate={false} />
+                <Agni expression="default" size={55} animate={false} />
                 <div className="text-left">
                   <span className="text-xs font-extrabold text-foreground block">Sign in to sync progress</span>
                   <span className="text-[10px] text-muted-foreground font-semibold">Never lose your streak! 🔥</span>
