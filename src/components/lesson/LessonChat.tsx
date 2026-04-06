@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Zap, Shield, Flame, Star, Rocket, Brain, Wand2 } from "lucide-react";
+import { Send, Sparkles, Zap, Shield, Flame, Star, Rocket, Brain, Wand2, Plus, X } from "lucide-react";
 import Agni from "@/components/Agni";
 import type { AgniExpression } from "@/components/Agni";
 import { SFX } from "@/lib/sounds";
@@ -32,47 +32,46 @@ const MODES = [
   { key: "semiconductor", label: "Semi", emoji: "🏭" },
 ];
 
-// Powerup-style icons for static chips
-const POWERUP_ICONS = [Zap, Shield, Flame, Star, Rocket, Brain, Wand2, Sparkles];
-const POWERUP_COLORS = [
-  "from-agni-gold/20 to-agni-orange/10 border-agni-gold/40 text-agni-gold",
-  "from-agni-blue/20 to-agni-purple/10 border-agni-blue/40 text-agni-blue",
-  "from-agni-pink/20 to-agni-red/10 border-agni-pink/40 text-agni-pink",
-  "from-agni-green/20 to-agni-green-light/10 border-agni-green/40 text-agni-green",
-  "from-agni-purple/20 to-agni-blue/10 border-agni-purple/40 text-agni-purple",
-  "from-agni-orange/20 to-agni-gold/10 border-agni-orange/40 text-agni-orange",
-];
+interface PowerUp {
+  id: string;
+  label: string;
+  prompt: string;
+  emoji: string;
+  color: string;
+  shadowColor: string;
+  custom?: boolean;
+}
 
-const QUICK_CHIPS: Record<string, { label: string; prompt: string }[]> = {
+const POWERUPS: Record<string, PowerUp[]> = {
   class5: [
-    { label: "Explain simpler", prompt: "Explain that in even simpler terms, like I'm 5 years old." },
-    { label: "Fun example", prompt: "Give me a fun, real-world example of this!" },
-    { label: "Tell a story", prompt: "Tell me a short story to explain this concept." },
+    { id: "s1", label: "Simpler!", emoji: "🧸", prompt: "Explain that in even simpler terms, like I'm 5 years old.", color: "bg-[hsl(100,95%,40%)]", shadowColor: "shadow-[0_4px_0_0_hsl(100,100%,31%)]" },
+    { id: "s2", label: "Fun Example", emoji: "🎮", prompt: "Give me a fun, real-world example of this!", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]" },
+    { id: "s3", label: "Story Time", emoji: "📖", prompt: "Tell me a short story to explain this concept.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]" },
   ],
   engineer: [
-    { label: "Explain simpler", prompt: "Break this down more simply." },
-    { label: "Give me code", prompt: "Show me a code example for this concept." },
-    { label: "Real example", prompt: "Give me a real-world production example." },
+    { id: "e1", label: "Show Code", emoji: "💻", prompt: "Show me a code example for this concept.", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]" },
+    { id: "e2", label: "Real Example", emoji: "🏗️", prompt: "Give me a real-world production example.", color: "bg-[hsl(100,95%,40%)]", shadowColor: "shadow-[0_4px_0_0_hsl(100,100%,31%)]" },
+    { id: "e3", label: "Deep Dive", emoji: "🔬", prompt: "Go deeper into the technical details.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]" },
   ],
   founder: [
-    { label: "Business case", prompt: "What's the business case / ROI for this?" },
-    { label: "What can I build?", prompt: "What products or startups could I build with this?" },
-    { label: "Deep dive", prompt: "Go deeper into the strategic implications." },
+    { id: "f1", label: "Business Case", emoji: "💰", prompt: "What's the business case / ROI for this?", color: "bg-[hsl(46,100%,49%)]", shadowColor: "shadow-[0_4px_0_0_hsl(44,100%,38%)]" },
+    { id: "f2", label: "Build What?", emoji: "🚀", prompt: "What products or startups could I build with this?", color: "bg-[hsl(100,95%,40%)]", shadowColor: "shadow-[0_4px_0_0_hsl(100,100%,31%)]" },
+    { id: "f3", label: "Strategy", emoji: "♟️", prompt: "Go deeper into the strategic implications.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]" },
   ],
   hacker: [
-    { label: "Give me code", prompt: "Just show me the code, skip the theory." },
-    { label: "Quick start", prompt: "How do I get started with this RIGHT NOW?" },
-    { label: "Deep dive", prompt: "Go deeper, show me advanced patterns." },
+    { id: "h1", label: "Just Code", emoji: "⌨️", prompt: "Just show me the code, skip the theory.", color: "bg-[hsl(100,95%,40%)]", shadowColor: "shadow-[0_4px_0_0_hsl(100,100%,31%)]" },
+    { id: "h2", label: "Quick Start", emoji: "🏃", prompt: "How do I get started with this RIGHT NOW?", color: "bg-[hsl(33,100%,50%)]", shadowColor: "shadow-[0_4px_0_0_hsl(33,100%,38%)]" },
+    { id: "h3", label: "Advanced", emoji: "🧠", prompt: "Go deeper, show me advanced patterns.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]" },
   ],
   crazy: [
-    { label: "Mind blow me", prompt: "Give me the most mind-blowing implication of this!" },
-    { label: "Sci-fi scenario", prompt: "Paint a wild sci-fi scenario with this tech." },
-    { label: "Deep dive", prompt: "Go even deeper into the rabbit hole." },
+    { id: "c1", label: "Mind Blow", emoji: "🤯", prompt: "Give me the most mind-blowing implication of this!", color: "bg-[hsl(323,100%,76%)]", shadowColor: "shadow-[0_4px_0_0_hsl(323,100%,60%)]" },
+    { id: "c2", label: "Sci-Fi Mode", emoji: "🌌", prompt: "Paint a wild sci-fi scenario with this tech.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]" },
+    { id: "c3", label: "Rabbit Hole", emoji: "🕳️", prompt: "Go even deeper into the rabbit hole.", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]" },
   ],
   semiconductor: [
-    { label: "Connect to HCL", prompt: "How does this connect to semiconductor manufacturing / HCL?" },
-    { label: "Fab example", prompt: "Give me a specific fab/manufacturing example." },
-    { label: "Deep dive", prompt: "Go deeper into the technical details." },
+    { id: "sc1", label: "HCL Link", emoji: "🏭", prompt: "How does this connect to semiconductor manufacturing / HCL?", color: "bg-[hsl(33,100%,50%)]", shadowColor: "shadow-[0_4px_0_0_hsl(33,100%,38%)]" },
+    { id: "sc2", label: "Fab Example", emoji: "⚙️", prompt: "Give me a specific fab/manufacturing example.", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]" },
+    { id: "sc3", label: "Technical", emoji: "🔬", prompt: "Go deeper into the technical details.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]" },
   ],
 };
 
@@ -92,11 +91,16 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
   const [exchangeCount, setExchangeCount] = useState(0);
   const [activeMode, setActiveMode] = useState(initialMode);
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+  const [customPowerups, setCustomPowerups] = useState<PowerUp[]>([]);
+  const [showAddCustom, setShowAddCustom] = useState(false);
+  const [customLabel, setCustomLabel] = useState("");
+  const [customPrompt, setCustomPrompt] = useState("");
+  const [pressedBtn, setPressedBtn] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const agniExpr: AgniExpression = isLoading ? "thinking" : messages.length === 0 ? "teaching" : "happy";
-  const chips = QUICK_CHIPS[activeMode] || QUICK_CHIPS.engineer;
+  const powerups = [...(POWERUPS[activeMode] || POWERUPS.engineer), ...customPowerups];
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -190,7 +194,6 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
           }
         }
 
-        // Parse suggestions from final text
         const { clean: finalClean, suggestions } = parseSuggestions(assistantText);
         setMessages(prev => {
           const updated = [...prev];
@@ -248,6 +251,15 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
     sendToAI(updatedMessages);
   };
 
+  const handlePowerUpPress = (pu: PowerUp) => {
+    SFX.tap();
+    setPressedBtn(pu.id);
+    setTimeout(() => {
+      setPressedBtn(null);
+      handleSend(pu.prompt);
+    }, 150);
+  };
+
   const handleModeChange = (mode: string) => {
     SFX.tap();
     setActiveMode(mode);
@@ -259,16 +271,42 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
     onQuizReady(messages);
   };
 
+  const handleAddCustom = () => {
+    if (!customLabel.trim() || !customPrompt.trim()) return;
+    const colors = [
+      { color: "bg-[hsl(46,100%,49%)]", shadowColor: "shadow-[0_4px_0_0_hsl(44,100%,38%)]" },
+      { color: "bg-[hsl(323,100%,76%)]", shadowColor: "shadow-[0_4px_0_0_hsl(323,100%,60%)]" },
+      { color: "bg-[hsl(33,100%,50%)]", shadowColor: "shadow-[0_4px_0_0_hsl(33,100%,38%)]" },
+    ];
+    const c = colors[customPowerups.length % colors.length];
+    setCustomPowerups(prev => [...prev, {
+      id: `custom-${Date.now()}`,
+      label: customLabel.trim().slice(0, 15),
+      prompt: customPrompt.trim(),
+      emoji: "✨",
+      custom: true,
+      ...c,
+    }]);
+    setCustomLabel("");
+    setCustomPrompt("");
+    setShowAddCustom(false);
+    SFX.tap();
+  };
+
+  const removeCustom = (id: string) => {
+    setCustomPowerups(prev => prev.filter(p => p.id !== id));
+    SFX.tap();
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="flex flex-col h-full"
     >
-      {/* Mode selector - scrollable pill bar */}
-      <div className="shrink-0 mb-2">
+      {/* Mode selector */}
+      <div className="shrink-0 mb-1.5">
         <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1">
-          <span className="text-[9px] font-black text-muted-foreground shrink-0 uppercase tracking-wider">Mode:</span>
           {MODES.map((m) => (
             <motion.button
               key={m.key}
@@ -276,8 +314,8 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
               onClick={() => handleModeChange(m.key)}
               className={`shrink-0 text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 transition-all border ${
                 activeMode === m.key
-                  ? "bg-agni-green/15 text-agni-green border-agni-green/50 shadow-glow-green"
-                  : "bg-card text-muted-foreground border-border/30 hover:border-border/60"
+                  ? "bg-[hsl(var(--agni-green)/0.15)] text-agni-green border-[hsl(var(--agni-green)/0.5)]"
+                  : "bg-card text-muted-foreground border-border/30"
               }`}
             >
               <span>{m.emoji}</span> {m.label}
@@ -286,79 +324,70 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
         </div>
       </div>
 
-      {/* Chat header with glow */}
-      <div className="flex items-center gap-2 mb-2 px-1 py-1.5 rounded-xl bg-gradient-to-r from-agni-green/5 to-transparent border border-agni-green/10">
+      {/* Chat header */}
+      <div className="flex items-center gap-2 mb-2 px-2 py-1.5 rounded-xl bg-card border border-border/30">
         <div className="relative">
-          <Agni expression={agniExpr} size={40} animate />
+          <Agni expression={agniExpr} size={36} animate />
           <motion.div
-            className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-agni-green rounded-full border-2 border-background"
-            animate={{ scale: [1, 1.2, 1] }}
+            className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-agni-green rounded-full border-2 border-card"
+            animate={{ scale: [1, 1.3, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-black text-agni-green flex items-center gap-1">
-            <Sparkles size={10} className="text-agni-gold" /> AGNI is teaching
-          </p>
+          <p className="text-[10px] font-black text-agni-green">AGNI is teaching</p>
           <p className="text-[9px] text-muted-foreground font-semibold truncate">{lessonTitle}</p>
         </div>
-        <div className="flex items-center gap-1.5">
-          {exchangeCount >= 2 && (
-            <motion.button
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={handleSkipToQuiz}
-              className="text-[8px] font-black text-white bg-gradient-to-r from-agni-green to-agni-green-light px-2.5 py-1 rounded-full flex items-center gap-1 shadow-glow-green"
-            >
-              <Zap size={8} /> QUIZ →
-            </motion.button>
-          )}
-        </div>
+        {exchangeCount >= 2 && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={handleSkipToQuiz}
+            className="text-[9px] font-black text-white bg-agni-green px-3 py-1.5 rounded-full flex items-center gap-1 shadow-[0_3px_0_0_hsl(100,100%,31%)] active:shadow-[0_1px_0_0_hsl(100,100%,31%)] active:translate-y-[2px] transition-all"
+          >
+            <Zap size={10} /> QUIZ
+          </motion.button>
+        )}
       </div>
 
       {/* Messages */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto space-y-3 px-1 pb-2 scrollbar-none"
+        className="flex-1 overflow-y-auto space-y-2.5 px-1 pb-2 scrollbar-none"
       >
         <AnimatePresence>
           {messages.map((msg, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 12, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25 }}
+              className={`flex items-end gap-1.5 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
               {msg.role === "assistant" && (
-                <div className="shrink-0 mr-1.5 mt-1">
-                  <div className="w-6 h-6 rounded-full bg-agni-green/15 border border-agni-green/30 flex items-center justify-center">
-                    <Brain size={12} className="text-agni-green" />
-                  </div>
+                <div className="shrink-0 w-7 h-7 rounded-full bg-card border-2 border-agni-green/30 flex items-center justify-center mb-0.5">
+                  <span className="text-[12px]">🤖</span>
                 </div>
               )}
               <div
-                className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-[12px] leading-relaxed font-medium relative ${
+                className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-[12.5px] leading-[1.6] font-semibold ${
                   msg.role === "user"
-                    ? "bg-gradient-to-br from-agni-green to-agni-green-dark text-white rounded-br-sm shadow-glow-green"
-                    : "bg-gradient-to-br from-card to-card-elevated border border-border/40 text-foreground rounded-bl-sm"
+                    ? "bg-agni-green text-white rounded-br-sm shadow-[0_2px_0_0_hsl(100,100%,31%)]"
+                    : "bg-card border border-border/30 text-foreground rounded-bl-sm"
                 }`}
               >
-                {msg.role === "assistant" && (
-                  <div className="absolute -top-1 -left-1 w-2 h-2 rounded-full bg-agni-green/40" />
-                )}
                 {msg.content.split("\n").map((line, j) => (
                   <p key={j} className={j > 0 ? "mt-1.5" : ""}>
                     {line.startsWith("**") ? (
-                      <span className="font-black">{line.replace(/\*\*/g, "")}</span>
+                      <span className="font-black text-agni-gold">{line.replace(/\*\*/g, "")}</span>
                     ) : line.startsWith("- ") || line.startsWith("• ") ? (
-                      <span className="pl-2 flex items-start gap-1">
-                        <span className="text-agni-green mt-0.5">▸</span>
+                      <span className="flex items-start gap-1.5 pl-1">
+                        <span className="text-agni-green text-[10px] mt-0.5">●</span>
                         <span>{line.replace(/^[-•]\s/, "")}</span>
                       </span>
                     ) : line.startsWith("`") ? (
-                      <code className="bg-muted/40 px-1.5 py-0.5 rounded text-[11px] font-mono text-agni-blue">
+                      <code className="bg-[hsl(var(--muted)/0.5)] px-1.5 py-0.5 rounded text-[11px] font-mono text-agni-blue border border-agni-blue/20">
                         {line.replace(/`/g, "")}
                       </code>
                     ) : (
@@ -375,150 +404,175 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex justify-start"
+            className="flex items-end gap-1.5"
           >
-            <div className="shrink-0 mr-1.5 mt-1">
-              <div className="w-6 h-6 rounded-full bg-agni-green/15 border border-agni-green/30 flex items-center justify-center">
-                <Brain size={12} className="text-agni-green" />
-              </div>
+            <div className="w-7 h-7 rounded-full bg-card border-2 border-agni-green/30 flex items-center justify-center">
+              <span className="text-[12px]">🤖</span>
             </div>
-            <div className="bg-gradient-to-br from-card to-card-elevated border border-border/40 rounded-2xl rounded-bl-sm px-4 py-3 flex items-center gap-2">
+            <div className="bg-card border border-border/30 rounded-2xl rounded-bl-sm px-4 py-3">
               <motion.div
-                className="flex gap-1"
+                className="flex gap-1.5"
                 animate={{ opacity: [0.3, 1, 0.3] }}
-                transition={{ duration: 1.4, repeat: Infinity }}
+                transition={{ duration: 1.2, repeat: Infinity }}
               >
                 <div className="w-2 h-2 rounded-full bg-agni-green" />
                 <div className="w-2 h-2 rounded-full bg-agni-blue" />
-                <div className="w-2 h-2 rounded-full bg-agni-gold" />
+                <div className="w-2 h-2 rounded-full bg-agni-purple" />
               </motion.div>
-              <span className="text-[11px] font-bold text-muted-foreground">AGNI thinking...</span>
             </div>
           </motion.div>
         )}
       </div>
 
-      {/* Powerup-style action bar */}
-      <div className="shrink-0 py-1.5 space-y-1.5">
-        {/* AI Predictive Suggestions - appear after AI responds */}
+      {/* === BOTTOM ACTION AREA === */}
+      <div className="shrink-0 pt-1 pb-0.5 space-y-2">
+
+        {/* AI Predictive Suggestions - horizontal scroll */}
         <AnimatePresence>
           {aiSuggestions.length > 0 && !isLoading && (
             <motion.div
-              initial={{ opacity: 0, y: 8 }}
+              initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              className="space-y-1"
+              exit={{ opacity: 0, y: -6 }}
             >
-              <div className="flex items-center gap-1.5 px-1">
-                <motion.div
-                  animate={{ rotate: [0, 15, -15, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <Wand2 size={10} className="text-agni-purple" />
-                </motion.div>
+              <div className="flex items-center gap-1.5 px-1 mb-1">
+                <Sparkles size={10} className="text-agni-purple" />
                 <span className="text-[8px] font-black text-agni-purple uppercase tracking-widest">AI Suggests</span>
-                <div className="flex-1 h-px bg-gradient-to-r from-agni-purple/30 to-transparent" />
+                <div className="flex-1 h-px bg-[hsl(var(--agni-purple)/0.2)]" />
               </div>
-              <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
-                {aiSuggestions.map((suggestion, i) => {
-                  const colorSet = POWERUP_COLORS[(i + 3) % POWERUP_COLORS.length];
-                  return (
-                    <motion.button
-                      key={`ai-${i}`}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      whileHover={{ scale: 1.03 }}
-                      onClick={() => handleSend(suggestion)}
-                      disabled={isLoading}
-                      className={`shrink-0 text-[10px] font-bold bg-gradient-to-br ${colorSet} border rounded-xl px-3 py-2 transition-all disabled:opacity-40 flex items-center gap-1.5 relative overflow-hidden`}
-                    >
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0"
-                        animate={{ x: ["-100%", "100%"] }}
-                        transition={{ duration: 2, repeat: Infinity, delay: i * 0.3 }}
-                      />
-                      <Sparkles size={10} className="shrink-0" />
-                      <span className="relative">{suggestion}</span>
-                    </motion.button>
-                  );
-                })}
+              <div className="flex gap-2 overflow-x-auto scrollbar-none px-0.5">
+                {aiSuggestions.map((suggestion, i) => (
+                  <motion.button
+                    key={`ai-${i}`}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.08 }}
+                    whileTap={{ scale: 0.95, y: 2 }}
+                    onClick={() => handleSend(suggestion)}
+                    disabled={isLoading}
+                    className="shrink-0 text-[10px] font-bold text-foreground bg-card border border-agni-purple/30 rounded-xl px-3 py-2 disabled:opacity-40 flex items-center gap-1.5 hover:border-agni-purple/60 transition-colors shadow-[0_3px_0_0_hsl(270,60%,25%)] active:shadow-[0_1px_0_0_hsl(270,60%,25%)] active:translate-y-[2px]"
+                  >
+                    <Wand2 size={10} className="text-agni-purple shrink-0" />
+                    <span>{suggestion}</span>
+                  </motion.button>
+                ))}
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Static powerup chips - scrollable */}
-        <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
-          {chips.map((chip, i) => {
-            const Icon = POWERUP_ICONS[i % POWERUP_ICONS.length];
-            const colorSet = POWERUP_COLORS[i % POWERUP_COLORS.length];
-            return (
-              <motion.button
-                key={chip.label}
-                whileTap={{ scale: 0.9 }}
-                whileHover={{ scale: 1.03, y: -1 }}
-                onClick={() => handleSend(chip.prompt)}
-                disabled={isLoading}
-                className={`shrink-0 text-[10px] font-black bg-gradient-to-br ${colorSet} border rounded-xl px-3 py-2 transition-all disabled:opacity-40 flex items-center gap-1.5 relative overflow-hidden`}
-              >
-                <Icon size={11} className="shrink-0" />
-                {chip.label}
-              </motion.button>
-            );
-          })}
-          {/* Quiz powerup - always last */}
-          {exchangeCount >= 1 && (
+        {/* Power-Up Buttons — Duolingo 3D style */}
+        <div>
+          <div className="flex items-center gap-1.5 px-1 mb-1.5">
+            <Zap size={10} className="text-agni-gold" />
+            <span className="text-[8px] font-black text-agni-gold uppercase tracking-widest">Power-Ups</span>
+            <div className="flex-1 h-px bg-[hsl(var(--agni-gold)/0.2)]" />
             <motion.button
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
               whileTap={{ scale: 0.9 }}
-              whileHover={{ scale: 1.03, y: -1 }}
-              onClick={handleSkipToQuiz}
-              disabled={isLoading}
-              className="shrink-0 text-[10px] font-black bg-gradient-to-br from-agni-green/25 to-agni-gold/15 border border-agni-green/50 text-agni-green rounded-xl px-3 py-2 flex items-center gap-1.5 shadow-glow-green disabled:opacity-40"
+              onClick={() => setShowAddCustom(!showAddCustom)}
+              className="w-5 h-5 rounded-full bg-card border border-border/40 flex items-center justify-center"
             >
-              <Zap size={11} /> Quiz me! ⚡
+              {showAddCustom ? <X size={10} className="text-muted-foreground" /> : <Plus size={10} className="text-muted-foreground" />}
             </motion.button>
-          )}
+          </div>
+
+          {/* Add custom powerup form */}
+          <AnimatePresence>
+            {showAddCustom && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden mb-2"
+              >
+                <div className="bg-card border border-border/30 rounded-xl p-2.5 space-y-1.5">
+                  <input
+                    value={customLabel}
+                    onChange={e => setCustomLabel(e.target.value)}
+                    placeholder="Button label (e.g. Analogy)"
+                    maxLength={15}
+                    className="w-full bg-background border border-border/30 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-agni-gold/50"
+                  />
+                  <input
+                    value={customPrompt}
+                    onChange={e => setCustomPrompt(e.target.value)}
+                    placeholder="What should AGNI do? (e.g. Give me an analogy)"
+                    className="w-full bg-background border border-border/30 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-agni-gold/50"
+                  />
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleAddCustom}
+                    disabled={!customLabel.trim() || !customPrompt.trim()}
+                    className="w-full text-[10px] font-black text-white bg-agni-gold rounded-lg py-1.5 shadow-[0_3px_0_0_hsl(44,100%,38%)] active:shadow-[0_1px_0_0_hsl(44,100%,38%)] active:translate-y-[2px] transition-all disabled:opacity-40"
+                  >
+                    + ADD POWER-UP
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Powerup grid — 3D buttons */}
+          <div className="flex gap-2 overflow-x-auto scrollbar-none px-0.5 pb-0.5">
+            {powerups.map((pu) => (
+              <motion.button
+                key={pu.id}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => handlePowerUpPress(pu)}
+                disabled={isLoading}
+                className={`shrink-0 relative rounded-xl px-3.5 py-2 ${pu.color} ${
+                  pressedBtn === pu.id ? "shadow-[0_1px_0_0_rgba(0,0,0,0.3)] translate-y-[3px]" : pu.shadowColor
+                } transition-all disabled:opacity-40 flex items-center gap-1.5 min-w-[80px] justify-center`}
+              >
+                <span className="text-[13px]">{pu.emoji}</span>
+                <span className="text-[10px] font-black text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]">{pu.label}</span>
+                {pu.custom && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); removeCustom(pu.id); }}
+                    className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-background border border-border/50 flex items-center justify-center"
+                  >
+                    <X size={8} className="text-muted-foreground" />
+                  </button>
+                )}
+              </motion.button>
+            ))}
+
+            {/* Quiz powerup */}
+            {exchangeCount >= 1 && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={handleSkipToQuiz}
+                disabled={isLoading}
+                className="shrink-0 rounded-xl px-3.5 py-2 bg-agni-green shadow-[0_4px_0_0_hsl(100,100%,31%)] active:shadow-[0_1px_0_0_hsl(100,100%,31%)] active:translate-y-[3px] transition-all disabled:opacity-40 flex items-center gap-1.5 min-w-[80px] justify-center"
+              >
+                <span className="text-[13px]">⚡</span>
+                <span className="text-[10px] font-black text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]">Quiz Me!</span>
+              </motion.button>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Input with glow border */}
-      <div className="flex items-center gap-2 pt-1">
-        <div className="flex-1 relative">
-          <input
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder={`Ask about ${lessonTitle}...`}
-            disabled={isLoading}
-            className="w-full bg-gradient-to-r from-card to-card-elevated border border-border/40 rounded-2xl px-4 py-3 text-[12px] font-medium text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-agni-green/50 focus:shadow-glow-green transition-all disabled:opacity-50"
-          />
-          {input.trim() && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] text-agni-green/60 font-bold"
-            >
-              ENTER ↵
-            </motion.div>
-          )}
-        </div>
+      {/* Input */}
+      <div className="flex items-center gap-2 pt-1.5">
+        <input
+          ref={inputRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSend()}
+          placeholder={`Ask AGNI anything...`}
+          disabled={isLoading}
+          className="flex-1 bg-card border-2 border-border/30 rounded-2xl px-4 py-2.5 text-[12px] font-semibold text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-agni-green/50 transition-all disabled:opacity-50"
+        />
         <motion.button
           whileTap={{ scale: 0.85 }}
           onClick={() => handleSend()}
           disabled={!input.trim() || isLoading}
-          className="w-11 h-11 rounded-2xl bg-gradient-to-br from-agni-green to-agni-green-dark flex items-center justify-center shadow-btn-3d disabled:opacity-30 disabled:shadow-none relative overflow-hidden"
+          className="w-10 h-10 rounded-xl bg-agni-green flex items-center justify-center shadow-[0_4px_0_0_hsl(100,100%,31%)] active:shadow-[0_1px_0_0_hsl(100,100%,31%)] active:translate-y-[3px] transition-all disabled:opacity-30 disabled:shadow-none"
         >
-          <Send size={16} className="text-white relative z-10" />
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-t from-white/0 to-white/20"
-            animate={{ opacity: [0, 0.3, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          />
+          <Send size={16} className="text-white" />
         </motion.button>
       </div>
     </motion.div>
