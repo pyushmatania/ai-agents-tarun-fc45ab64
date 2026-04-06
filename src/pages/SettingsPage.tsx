@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { LogOut, Moon, Sun, ChevronRight, Shield, Bell, Loader2, LogIn } from "lucide-react";
-import { motion } from "framer-motion";
+import { LogOut, Moon, Sun, ChevronRight, Shield, Bell, Loader2, LogIn, Brain, Key, Check, Eye, EyeOff } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { BUILT_IN_MODELS, BYOK_PROVIDERS, getAIConfig, saveAIConfig, type AIConfig } from "@/lib/aiConfig";
 
 const SettingsPage = () => {
   const { user, signOut } = useAuth();
@@ -20,6 +21,11 @@ const SettingsPage = () => {
   const [lightMode, setLightMode] = useState(() =>
     document.documentElement.classList.contains("light")
   );
+
+  // AI Config state
+  const [aiConfig, setAiConfig] = useState<AIConfig>(getAIConfig());
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [aiExpanded, setAiExpanded] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -56,9 +62,17 @@ const SettingsPage = () => {
     navigate("/welcome");
   };
 
+  const updateAIConfig = (partial: Partial<AIConfig>) => {
+    const updated = { ...aiConfig, ...partial };
+    setAiConfig(updated);
+    saveAIConfig(updated);
+  };
+
+  const selectedByokProvider = BYOK_PROVIDERS.find(p => p.id === aiConfig.byokProvider);
+
   return (
     <PageTransition>
-      <div className="min-h-screen bg-background pb-20">
+      <div className="min-h-screen bg-background pb-24">
         <div className="max-w-md mx-auto px-4 pt-5">
           <FadeIn>
             <h2 className="text-base font-display font-bold text-foreground mb-4">Settings</h2>
@@ -77,7 +91,6 @@ const SettingsPage = () => {
                   {user && <p className="text-[10px] text-muted-foreground">{user.email}</p>}
                 </div>
               </div>
-
               <div className="space-y-2.5">
                 <div>
                   <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Name</label>
@@ -109,6 +122,162 @@ const SettingsPage = () => {
               </motion.button>
             </FadeIn>
           )}
+
+          {/* AI Model Settings */}
+          <FadeIn delay={0.18}>
+            <div className="bg-card rounded-2xl border border-border/50 mb-3 shadow-card overflow-hidden">
+              <motion.button
+                whileTap={{ scale: 0.99 }}
+                onClick={() => setAiExpanded(!aiExpanded)}
+                className="flex items-center justify-between w-full p-3.5"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center">
+                    <Brain size={15} className="text-primary" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-foreground text-xs">AI Model</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {aiConfig.mode === "builtin"
+                        ? BUILT_IN_MODELS.find(m => m.id === aiConfig.builtinModel)?.label || "Gemini Flash"
+                        : `${selectedByokProvider?.label || "Custom"}: ${aiConfig.byokModel || "—"}`
+                      }
+                    </p>
+                  </div>
+                </div>
+                <motion.div animate={{ rotate: aiExpanded ? 90 : 0 }}>
+                  <ChevronRight size={14} className="text-muted-foreground" />
+                </motion.div>
+              </motion.button>
+
+              <AnimatePresence>
+                {aiExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-3.5 pb-3.5 space-y-3">
+                      {/* Mode Toggle */}
+                      <div className="flex gap-1.5">
+                        {(["builtin", "byok"] as const).map(mode => (
+                          <button
+                            key={mode}
+                            onClick={() => updateAIConfig({ mode })}
+                            className={`flex-1 px-3 py-2 rounded-lg text-[10px] font-bold border transition-all ${
+                              aiConfig.mode === mode
+                                ? "bg-primary/10 border-primary/30 text-primary"
+                                : "bg-muted/30 border-border/50 text-muted-foreground"
+                            }`}
+                          >
+                            {mode === "builtin" ? "⚡ Built-in Models" : "🔑 Your API Key"}
+                          </button>
+                        ))}
+                      </div>
+
+                      {aiConfig.mode === "builtin" ? (
+                        <div className="space-y-1.5">
+                          <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Select Model</p>
+                          {BUILT_IN_MODELS.map(model => (
+                            <motion.button
+                              key={model.id}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => updateAIConfig({ builtinModel: model.id })}
+                              className={`w-full flex items-center gap-2.5 p-2.5 rounded-lg border transition-all ${
+                                aiConfig.builtinModel === model.id
+                                  ? "bg-primary/5 border-primary/25"
+                                  : "border-border/30 hover:border-border/60"
+                              }`}
+                            >
+                              <span className="text-base">{model.emoji}</span>
+                              <div className="flex-1 text-left">
+                                <p className="text-[11px] font-bold text-foreground">{model.label}</p>
+                                <p className="text-[9px] text-muted-foreground">{model.desc}</p>
+                              </div>
+                              {aiConfig.builtinModel === model.id && (
+                                <Check size={12} className="text-primary" />
+                              )}
+                            </motion.button>
+                          ))}
+                          <p className="text-[8px] text-muted-foreground text-center pt-1">No API key needed — powered by Lovable AI</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2.5">
+                          {/* Provider selector */}
+                          <div>
+                            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Provider</p>
+                            <div className="flex gap-1.5">
+                              {BYOK_PROVIDERS.map(p => (
+                                <button
+                                  key={p.id}
+                                  onClick={() => updateAIConfig({ byokProvider: p.id, byokModel: p.models[0] })}
+                                  className={`flex-1 px-2 py-2 rounded-lg text-[10px] font-bold border transition-all text-center ${
+                                    aiConfig.byokProvider === p.id
+                                      ? "bg-primary/10 border-primary/30 text-primary"
+                                      : "bg-muted/30 border-border/50 text-muted-foreground"
+                                  }`}
+                                >
+                                  {p.emoji} {p.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Model selector */}
+                          {selectedByokProvider && (
+                            <div>
+                              <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Model</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {selectedByokProvider.models.map(m => (
+                                  <button
+                                    key={m}
+                                    onClick={() => updateAIConfig({ byokModel: m })}
+                                    className={`px-2.5 py-1.5 rounded-lg text-[10px] font-semibold border transition-all ${
+                                      aiConfig.byokModel === m
+                                        ? "bg-primary/10 border-primary/30 text-primary"
+                                        : "bg-muted/30 border-border/50 text-muted-foreground"
+                                    }`}
+                                  >
+                                    {m}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* API Key input */}
+                          <div>
+                            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                              <Key size={9} /> API Key
+                            </p>
+                            <div className="relative">
+                              <Input
+                                type={showApiKey ? "text" : "password"}
+                                value={aiConfig.byokApiKey}
+                                onChange={(e) => updateAIConfig({ byokApiKey: e.target.value })}
+                                placeholder="sk-... or AIza..."
+                                className="h-9 rounded-lg bg-muted/50 border-border/50 text-foreground text-[11px] pr-9"
+                              />
+                              <button
+                                onClick={() => setShowApiKey(!showApiKey)}
+                                className="absolute right-2 top-1/2 -translate-y-1/2"
+                              >
+                                {showApiKey ? <EyeOff size={12} className="text-muted-foreground" /> : <Eye size={12} className="text-muted-foreground" />}
+                              </button>
+                            </div>
+                            <p className="text-[8px] text-muted-foreground mt-1">
+                              🔒 Stored locally on your device. Never sent to our servers.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </FadeIn>
 
           {/* Preferences */}
           <FadeIn delay={0.2}>

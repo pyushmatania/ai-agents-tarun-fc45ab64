@@ -4,6 +4,8 @@ import PageTransition from "@/components/PageTransition";
 import { ChevronLeft, CheckCircle2, Send, StickyNote, Timer } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { getAIConfig, getActiveModelLabel } from "@/lib/aiConfig";
+import { Brain } from "lucide-react";
 
 const ALL_LESSONS: Record<string, { t: string; xp: number; topic: string }> = {
   f1:{t:"What is an AI Agent?",xp:50,topic:"what AI agents are — Perceive-Reason-Act-Learn loop, how they differ from chatbots, ReAct pattern, core components: LLM + Tools + Memory + Planning + Autonomy Loop"},
@@ -62,12 +64,19 @@ const CourseDetailPage = () => {
   const isDone = id ? done.includes(id) : false;
 
   const callAI = async (apiMessages: { role: string; content: string }[]) => {
-    const { data, error } = await supabase.functions.invoke("ai-tutor", {
-      body: {
-        system: SYS,
-        messages: apiMessages,
-      },
-    });
+    const config = getAIConfig();
+    const body: any = {
+      system: SYS,
+      messages: apiMessages,
+    };
+    if (config.mode === "byok" && config.byokApiKey) {
+      body.customApiKey = config.byokApiKey;
+      body.provider = config.byokProvider;
+      body.model = config.byokModel;
+    } else {
+      body.model = config.builtinModel;
+    }
+    const { data, error } = await supabase.functions.invoke("ai-tutor", { body });
     if (error) throw new Error(error.message);
     return data?.text || "";
   };
@@ -160,6 +169,9 @@ const CourseDetailPage = () => {
             <div className="text-xs text-muted-foreground flex items-center gap-2 justify-center">
               <span>{lesson.xp} XP</span>
               <span className="flex items-center gap-0.5"><Timer size={10} /> {Math.floor(timer/60)}m {timer%60}s</span>
+              <span className="flex items-center gap-0.5 text-[8px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-bold">
+                <Brain size={8} /> {getActiveModelLabel()}
+              </span>
             </div>
           </div>
           <div className="flex gap-2">
