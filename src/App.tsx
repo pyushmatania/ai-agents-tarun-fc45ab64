@@ -3,21 +3,21 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useAuth } from "@/hooks/useAuth";
 import HomePage from "./pages/HomePage";
 import CoursesPage from "./pages/CoursesPage";
 import ProgressPage from "./pages/ProgressPage";
 import SettingsPage from "./pages/SettingsPage";
 import CourseDetailPage from "./pages/CourseDetailPage";
+import MegaPromptPage from "./pages/MegaPromptPage";
+import OnboardingPage from "./pages/OnboardingPage";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen bg-background flex items-center justify-center text-foreground">Loading...</div>;
-  if (!user) return <Navigate to="/auth" replace />;
+const OnboardedRoute = ({ children }: { children: React.ReactNode }) => {
+  const isOnboarded = localStorage.getItem("edu_onboarded") === "true";
+  if (!isOnboarded) return <Navigate to="/welcome" replace />;
   return <>{children}</>;
 };
 
@@ -28,12 +28,14 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          <Route path="/welcome" element={<OnboardingPage />} />
           <Route path="/auth" element={<AuthPage />} />
-          <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-          <Route path="/courses" element={<ProtectedRoute><CoursesPage /></ProtectedRoute>} />
-          <Route path="/progress" element={<ProtectedRoute><ProgressPage /></ProtectedRoute>} />
-          <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-          <Route path="/course/:id" element={<ProtectedRoute><CourseDetailPage /></ProtectedRoute>} />
+          <Route path="/" element={<OnboardedRoute><HomePage /></OnboardedRoute>} />
+          <Route path="/courses" element={<OnboardedRoute><CoursesPage /></OnboardedRoute>} />
+          <Route path="/progress" element={<OnboardedRoute><ProgressPage /></OnboardedRoute>} />
+          <Route path="/settings" element={<OnboardedRoute><SettingsPage /></OnboardedRoute>} />
+          <Route path="/course/:id" element={<OnboardedRoute><CourseDetailPage /></OnboardedRoute>} />
+          <Route path="/mega-prompt" element={<OnboardedRoute><MegaPromptPage /></OnboardedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

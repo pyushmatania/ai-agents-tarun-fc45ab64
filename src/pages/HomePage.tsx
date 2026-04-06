@@ -13,8 +13,14 @@ const HomePage = () => {
   const [weeklyData, setWeeklyData] = useState<{ day: string; lessons: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const storedName = localStorage.getItem("edu_user_name") || "Learner";
+  const displayName = user?.user_metadata?.full_name?.split(" ")[0] || storedName;
+
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     const fetchProgress = async () => {
       const { data, error } = await supabase
@@ -31,7 +37,6 @@ const HomePage = () => {
         setTotalHours(hours);
         setOverallProgress(avgProgress);
 
-        // Group by day_of_week for chart
         const dayOrder = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
         const byDay = dayOrder.map((day) => ({
           day,
@@ -47,13 +52,12 @@ const HomePage = () => {
     fetchProgress();
   }, [user]);
 
-  const userName = user?.user_metadata?.full_name?.split(" ")[0] || "Learner";
   const maxLessons = Math.max(...weeklyData.map((d) => d.lessons), 1);
 
   return (
     <div className="min-h-screen bg-background pb-24">
       <div className="max-w-md mx-auto px-4 pt-6">
-        <Header name={userName} progress={overallProgress} />
+        <Header name={displayName} progress={overallProgress} />
 
         {/* Featured Card */}
         <div className="bg-secondary rounded-3xl p-6 mb-5 relative overflow-hidden">
@@ -99,6 +103,14 @@ const HomePage = () => {
             </div>
           </div>
         </div>
+
+        {/* Sign in prompt if not authenticated */}
+        {!user && (
+          <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 mb-5 text-center">
+            <p className="text-sm text-foreground mb-2">Sign in to save your progress across devices</p>
+            <a href="/auth" className="text-primary font-bold text-sm underline">Sign in →</a>
+          </div>
+        )}
 
         {/* Progress Performance */}
         <div className="bg-card rounded-2xl p-5 border border-border">

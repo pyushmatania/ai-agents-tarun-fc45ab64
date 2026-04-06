@@ -1,5 +1,4 @@
 import { Bell } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
 
 interface HeaderProps {
   name: string;
