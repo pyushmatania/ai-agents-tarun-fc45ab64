@@ -98,7 +98,6 @@ const OnboardingPage = () => {
             >
               <MascotRobot size={100} mood="waving" speech="Welcome! Let's learn AI! 🤖" />
             </motion.div>
-            </div>
 
             {/* Title */}
             <motion.h1
