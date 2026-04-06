@@ -503,8 +503,6 @@ const CoursesPage = () => {
                       </motion.div>
                     )}
                   </motion.div>
-                    )}
-                  </motion.div>
                 );
               })}
             </div>
