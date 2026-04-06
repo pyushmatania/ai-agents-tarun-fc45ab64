@@ -22,7 +22,7 @@ const BottomNav = () => {
           initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.4, ease: "easeOut" }}
-          className="relative bg-card/90 border border-border/40 rounded-3xl px-1 py-1.5 flex items-center justify-around shadow-elevated backdrop-blur-xl"
+          className="relative bg-card/90 border border-agni-green/10 rounded-3xl px-1 py-1.5 flex items-center justify-around shadow-elevated backdrop-blur-xl"
         >
           {tabs.map((tab) => {
             const isActive = location.pathname === tab.path;
