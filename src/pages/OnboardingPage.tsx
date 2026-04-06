@@ -63,8 +63,9 @@ const OnboardingPage = () => {
           <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
             AI Agents
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Master the future of intelligent automation
+          <p className="text-muted-foreground mt-1 text-sm h-5">
+            {displayedText}
+            {showCursor && <span className="animate-pulse ml-0.5">|</span>}
           </p>
         </div>
 
