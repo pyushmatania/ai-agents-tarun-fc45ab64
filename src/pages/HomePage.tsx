@@ -84,7 +84,7 @@ const HomePage = () => {
 
           {/* AGNI Hero Section */}
           <FadeIn delay={0.1}>
-            <motion.div className="relative rounded-3xl mb-4 overflow-hidden bg-card border border-border/40 shadow-card">
+            <motion.div className="relative rounded-3xl mb-4 overflow-hidden bg-gradient-card-accent border border-border/40 shadow-card">
               <div className="flex items-center px-4 py-4">
                 <div className="flex-1">
                   <p className="text-micro text-agni-green mb-1">{greeting.toUpperCase()}</p>
@@ -134,7 +134,7 @@ const HomePage = () => {
               { icon: Flame, value: `${stats.streak}d`, label: "Streak", color: "bg-agni-orange" },
             ].map((stat, i) => (
               <StaggerItem key={i}>
-                <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.95 }} className="bg-card rounded-2xl p-3 border border-border/40 text-center shadow-card">
+                <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.95 }} className="bg-gradient-card rounded-2xl p-3 border border-border/40 text-center shadow-card">
                   <div className={`w-8 h-8 rounded-xl ${stat.color} flex items-center justify-center mx-auto mb-1.5 shadow-md`}>
                     <stat.icon size={14} className="text-white" />
                   </div>
@@ -150,7 +150,7 @@ const HomePage = () => {
             <motion.button
               whileTap={{ scale: 0.97, y: 2 }}
               onClick={() => navigate("/courses")}
-              className="w-full bg-agni-green rounded-2xl p-4 mb-4 shadow-btn-3d flex items-center gap-3 group active:shadow-btn-3d-pressed active:translate-y-0.5 transition-all"
+              className="w-full bg-gradient-to-r from-agni-green to-agni-green-light rounded-2xl p-4 mb-4 shadow-btn-3d flex items-center gap-3 group active:shadow-btn-3d-pressed active:translate-y-0.5 transition-all"
             >
               <div className="bg-white/20 rounded-xl p-2.5"><ArrowRight size={18} className="text-white" /></div>
               <div className="flex-1 text-left">
