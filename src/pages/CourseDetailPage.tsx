@@ -58,6 +58,7 @@ const CourseDetailPage = () => {
   const [correctCount, setCorrectCount] = useState(0);
   const [timer, setTimer] = useState(0);
   const [quizError, setQuizError] = useState("");
+  const [showQuizConfirm, setShowQuizConfirm] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval>>();
   const chatMessagesRef = useRef<ChatMessage[]>([]);
 
@@ -186,7 +187,7 @@ const CourseDetailPage = () => {
 
             <motion.button
               whileTap={{ scale: 0.9 }}
-              onClick={() => { if (phase === "chat") handleQuizReady(chatMessagesRef.current); else navigate("/courses"); }}
+              onClick={() => { if (phase === "chat") setShowQuizConfirm(true); else navigate("/courses"); }}
               className="text-[10px] font-black text-white bg-agni-green px-3 py-1.5 rounded-full flex items-center gap-1"
             >
               ✅ Done
