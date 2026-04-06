@@ -13,7 +13,7 @@ const Header = ({ name, progress }: HeaderProps) => {
           👤
         </div>
         <div>
-          <h2 className="text-lg font-bold text-foreground">Hello, {name}</h2>
+          <h2 className="text-lg font-bold text-foreground">Hey, {name}</h2>
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <span className="text-edu-orange">⚡</span>
             <span>Progress: {progress}%</span>
