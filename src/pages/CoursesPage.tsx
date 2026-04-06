@@ -5,6 +5,7 @@ import PageTransition, { FadeIn, StaggerContainer, StaggerItem } from "@/compone
 import { ArrowRight, ChevronLeft, Bookmark, BookmarkCheck, CheckCircle2, Users, Clock, Award, Filter } from "lucide-react";
 import FloatingShapes from "@/components/illustrations/FloatingShapes";
 import { motion, AnimatePresence } from "framer-motion";
+import heroCourses from "@/assets/hero-courses.png";
 
 const MODULES = [
   { id:"found", title:"Foundations", sub:"START HERE", icon:"🧬", color: "from-violet-600 to-purple-800", lessons:[
@@ -93,39 +94,33 @@ const CoursesPage = () => {
             </div>
           </FadeIn>
 
-          {/* Hero */}
+          {/* Hero Illustration */}
           <FadeIn delay={0.1}>
-            <div className="rounded-2xl p-4 mb-4 relative overflow-hidden"
-              style={{ background: "linear-gradient(135deg, hsl(24 90% 48%), hsl(24 80% 38%))" }}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-bold text-white/50 tracking-widest mb-0.5">AI AGENTS</p>
-                  <h3 className="text-lg font-display font-bold text-white leading-tight">Mastery Path</h3>
-                  <p className="text-[10px] text-white/50 mt-1">From zero to autonomous AI builder</p>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-1 bg-white/15 rounded-lg px-2 py-1">
-                    <Users size={9} className="text-white/70" />
-                    <span className="text-[9px] font-semibold text-white/80">2.4K learners</span>
+            <div className="rounded-2xl mb-4 relative overflow-hidden">
+              <img
+                src={heroCourses}
+                alt="AI learning journey - climbing knowledge staircase"
+                className="w-full h-44 object-cover rounded-2xl"
+                width={800}
+                height={512}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent rounded-2xl" />
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <p className="text-[10px] font-bold text-primary tracking-widest mb-0.5">AI AGENTS</p>
+                <h3 className="text-lg font-display font-bold text-foreground leading-tight">Mastery Path</h3>
+                <p className="text-[10px] text-muted-foreground mt-1">From zero to autonomous AI builder</p>
+                <div className="mt-2 flex items-center gap-2">
+                  <div className="flex-1 h-1.5 bg-muted/50 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-primary rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.round(done.length / totalLessons * 100)}%` }}
+                      transition={{ duration: 0.8, delay: 0.3 }}
+                    />
                   </div>
-                  <div className="flex items-center gap-1 bg-white/10 rounded-lg px-2 py-1">
-                    <Clock size={9} className="text-white/60" />
-                    <span className="text-[9px] font-semibold text-white/70">~8 hrs</span>
-                  </div>
+                  <span className="text-[10px] text-muted-foreground font-semibold">{Math.round(done.length / totalLessons * 100)}%</span>
                 </div>
               </div>
-              <div className="mt-3 flex items-center gap-2">
-                <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-white/60 rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${Math.round(done.length / totalLessons * 100)}%` }}
-                    transition={{ duration: 0.8, delay: 0.3 }}
-                  />
-                </div>
-                <span className="text-[10px] text-white/60 font-semibold">{Math.round(done.length / totalLessons * 100)}%</span>
-              </div>
-              <div className="absolute -bottom-4 -right-4 text-5xl opacity-10">🎓</div>
             </div>
           </FadeIn>
 
