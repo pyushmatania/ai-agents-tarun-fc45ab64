@@ -98,15 +98,16 @@ const OnboardingPage = () => {
             What's your role?
           </label>
           <div className="grid grid-cols-3 gap-2">
-            {roles.map((role) => (
+            {roles.map((role, i) => (
               <button
                 key={role.label}
                 onClick={() => setSelectedRole(role.label)}
-                className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border backdrop-blur-sm transition-all ${
+                className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border backdrop-blur-sm transition-all animate-fade-in opacity-0 ${
                   selectedRole === role.label
-                    ? "bg-primary/15 border-primary text-foreground shadow-md shadow-primary/10"
-                    : "bg-card/60 border-border/50 text-foreground hover:bg-card/80"
+                    ? "bg-primary/15 border-primary text-foreground shadow-md shadow-primary/10 scale-105"
+                    : "bg-card/60 border-border/50 text-foreground hover:bg-card/80 hover:scale-105"
                 }`}
+                style={{ animationDelay: `${i * 100}ms`, animationFillMode: "forwards" }}
               >
                 <span className="text-2xl">{role.emoji}</span>
                 <span className="text-xs font-semibold">{role.label}</span>
