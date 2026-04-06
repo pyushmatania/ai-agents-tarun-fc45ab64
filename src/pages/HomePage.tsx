@@ -5,6 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Agni from "@/components/Agni";
+import DailyQuests from "@/components/DailyQuests";
+import { useGamification } from "@/hooks/useGamification";
 import { useState, useEffect } from "react";
 
 const DAILY_TIPS = [
@@ -29,81 +31,51 @@ const TEACHING_MODES = [
 const HomePage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { stats, dailyQuests, streakDays, league } = useGamification();
   const storedName = localStorage.getItem("edu_user_name") || "Learner";
   const displayName = user?.user_metadata?.full_name?.split(" ")[0] || storedName;
-  const [activeMode, setActiveMode] = useState("engineer");
+  const [activeMode, setActiveMode] = useState(localStorage.getItem("teaching_mode") || "engineer");
   const [agniExpression, setAgniExpression] = useState<"default" | "happy" | "excited">("default");
 
-  const done: string[] = JSON.parse(localStorage.getItem("adojo_done") || "[]");
-  const xp = parseInt(localStorage.getItem("adojo_xp") || "0");
   const totalLessons = 22;
-  const overallProgress = Math.round((done.length / totalLessons) * 100);
-  const streak = Math.min(done.length, 7);
-  const level = Math.floor(xp / 500) + 1;
-  const hearts = 5;
-  const gems = xp * 2;
-
+  const overallProgress = Math.round((stats.done.length / totalLessons) * 100);
   const todayTip = DAILY_TIPS[new Date().getDay() % DAILY_TIPS.length];
   const greeting = new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening";
-  const dailyGoal = 50; // XP daily goal
-  const dailyXpEarned = Math.min(xp % 100, dailyGoal);
-  const dailyProgress = (dailyXpEarned / dailyGoal) * 100;
+  const dailyProgress = (Math.min(stats.dailyXp, stats.dailyGoal) / stats.dailyGoal) * 100;
 
   useEffect(() => {
     const timer = setTimeout(() => setAgniExpression("happy"), 2000);
     return () => clearTimeout(timer);
   }, []);
 
-  const agniSpeech = done.length === 0 ? "Let's learn AI! 🤖" : done.length < 5 ? "Great start! 🔥" : done.length < 15 ? "You're crushing it!" : "Almost a master! 🏆";
-
-  const streakDays = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (6 - i));
-    return {
-      label: d.toLocaleDateString("en", { weekday: "narrow" }),
-      date: d.getDate(),
-      active: i >= 7 - streak,
-    };
-  });
+  const agniSpeech = stats.done.length === 0 ? "Let's learn AI! 🤖" : stats.done.length < 5 ? "Great start! 🔥" : stats.done.length < 15 ? "You're crushing it!" : "Almost a master! 🏆";
 
   return (
     <PageTransition>
       <div className="min-h-screen bg-background pb-24 relative">
         <div className="max-w-md mx-auto px-4 pt-5 relative z-10">
 
-          {/* Top bar - Duolingo style */}
+          {/* Top bar */}
           <FadeIn>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <motion.div
-                  whileTap={{ scale: 0.9 }}
-                  className="flex items-center gap-1 bg-agni-orange/15 rounded-full px-2.5 py-1"
-                >
+                <motion.div whileTap={{ scale: 0.9 }} className="flex items-center gap-1 bg-agni-orange/15 rounded-full px-2.5 py-1">
                   <Flame size={14} className="text-agni-orange" />
-                  <span className="text-xs font-black text-agni-orange">{streak}</span>
+                  <span className="text-xs font-black text-agni-orange">{stats.streak}</span>
                 </motion.div>
-                <motion.div
-                  whileTap={{ scale: 0.9 }}
-                  className="flex items-center gap-1 bg-agni-gold/15 rounded-full px-2.5 py-1"
-                >
+                <motion.div whileTap={{ scale: 0.9 }} className="flex items-center gap-1 bg-agni-gold/15 rounded-full px-2.5 py-1">
                   <Diamond size={14} className="text-agni-gold" />
-                  <span className="text-xs font-black text-agni-gold">{gems}</span>
+                  <span className="text-xs font-black text-agni-gold">{stats.gems}</span>
                 </motion.div>
               </div>
               <div className="flex items-center gap-2">
-                <motion.div
-                  whileTap={{ scale: 0.9 }}
-                  className="flex items-center gap-1 bg-agni-pink/15 rounded-full px-2.5 py-1"
-                >
+                <motion.div whileTap={{ scale: 0.9 }} className="flex items-center gap-1 bg-agni-pink/15 rounded-full px-2.5 py-1">
                   <Heart size={14} className="text-agni-pink fill-agni-pink" />
-                  <span className="text-xs font-black text-agni-pink">{hearts}</span>
+                  <span className="text-xs font-black text-agni-pink">{stats.hearts}</span>
                 </motion.div>
-                <motion.div
-                  whileTap={{ scale: 0.9 }}
-                  className="flex items-center gap-1 bg-agni-green/15 rounded-full px-2.5 py-1"
-                >
+                <motion.div whileTap={{ scale: 0.9 }} className="flex items-center gap-1 bg-agni-green/15 rounded-full px-2.5 py-1">
                   <Zap size={14} className="text-agni-green" />
-                  <span className="text-xs font-black text-agni-green">{xp}</span>
+                  <span className="text-xs font-black text-agni-green">{stats.xp}</span>
                 </motion.div>
               </div>
             </div>
@@ -115,19 +87,16 @@ const HomePage = () => {
               <div className="flex items-center px-4 py-4">
                 <div className="flex-1">
                   <p className="text-micro text-agni-green mb-1">{greeting.toUpperCase()}</p>
-                  <h2 className="text-xl font-black text-foreground leading-snug mb-2">
-                    Hey, {displayName}! 👋
-                  </h2>
+                  <h2 className="text-xl font-black text-foreground leading-snug mb-2">Hey, {displayName}! 👋</h2>
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] bg-agni-green/15 text-agni-green font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1">
-                      <Flame size={10} /> {streak}d streak
+                      <Flame size={10} /> {stats.streak}d streak
                     </span>
                     <span className="text-[10px] bg-agni-purple/15 text-agni-purple font-extrabold px-2.5 py-1 rounded-full">
-                      Level {level}
+                      {league.emoji} {league.name}
                     </span>
                   </div>
                 </div>
-                {/* Daily Goal Ring around AGNI */}
                 <div className="relative">
                   <svg viewBox="0 0 110 110" className="w-[100px] h-[100px] -rotate-90">
                     <circle cx="55" cy="55" r="50" fill="none" stroke="hsl(var(--muted))" strokeWidth="4" opacity="0.3" />
@@ -143,19 +112,13 @@ const HomePage = () => {
                   </div>
                 </div>
               </div>
-              {/* Daily goal bar */}
               <div className="px-4 pb-3">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[9px] font-bold text-muted-foreground">DAILY GOAL</span>
-                  <span className="text-[9px] font-black text-agni-green">{dailyXpEarned}/{dailyGoal} XP</span>
+                  <span className="text-[9px] font-black text-agni-green">{Math.min(stats.dailyXp, stats.dailyGoal)}/{stats.dailyGoal} XP</span>
                 </div>
                 <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-agni-green rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${dailyProgress}%` }}
-                    transition={{ duration: 1, delay: 0.5 }}
-                  />
+                  <motion.div className="h-full bg-agni-green rounded-full" initial={{ width: 0 }} animate={{ width: `${dailyProgress}%` }} transition={{ duration: 1, delay: 0.5 }} />
                 </div>
               </div>
             </motion.div>
@@ -164,17 +127,13 @@ const HomePage = () => {
           {/* Stats Row */}
           <StaggerContainer className="grid grid-cols-4 gap-2 mb-4">
             {[
-              { icon: BookOpen, value: done.length, label: "Lessons", color: "bg-agni-blue" },
-              { icon: Zap, value: xp, label: "XP", color: "bg-agni-green" },
-              { icon: Clock, value: Math.round(xp / 60), label: "Hours", color: "bg-agni-purple" },
-              { icon: Flame, value: `${streak}d`, label: "Streak", color: "bg-agni-orange" },
+              { icon: BookOpen, value: stats.totalLessons, label: "Lessons", color: "bg-agni-blue" },
+              { icon: Zap, value: stats.xp, label: "XP", color: "bg-agni-green" },
+              { icon: Clock, value: `L${stats.level}`, label: "Level", color: "bg-agni-purple" },
+              { icon: Flame, value: `${stats.streak}d`, label: "Streak", color: "bg-agni-orange" },
             ].map((stat, i) => (
               <StaggerItem key={i}>
-                <motion.div
-                  whileHover={{ y: -3, scale: 1.02 }}
-                  whileTap={{ scale: 0.95, y: 2 }}
-                  className="bg-card rounded-2xl p-3 border border-border/40 text-center shadow-card"
-                >
+                <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.95 }} className="bg-card rounded-2xl p-3 border border-border/40 text-center shadow-card">
                   <div className={`w-8 h-8 rounded-xl ${stat.color} flex items-center justify-center mx-auto mb-1.5 shadow-md`}>
                     <stat.icon size={14} className="text-white" />
                   </div>
@@ -185,26 +144,23 @@ const HomePage = () => {
             ))}
           </StaggerContainer>
 
-          {/* Continue Learning - 3D Button */}
+          {/* Continue Learning */}
           <FadeIn delay={0.2}>
             <motion.button
               whileTap={{ scale: 0.97, y: 2 }}
               onClick={() => navigate("/courses")}
               className="w-full bg-agni-green rounded-2xl p-4 mb-4 shadow-btn-3d flex items-center gap-3 group active:shadow-btn-3d-pressed active:translate-y-0.5 transition-all"
             >
-              <div className="bg-white/20 rounded-xl p-2.5">
-                <ArrowRight size={18} className="text-white" />
-              </div>
+              <div className="bg-white/20 rounded-xl p-2.5"><ArrowRight size={18} className="text-white" /></div>
               <div className="flex-1 text-left">
                 <p className="text-white font-black text-sm">CONTINUE LEARNING</p>
-                <p className="text-white/60 text-[10px] font-semibold">{done.length}/{totalLessons} lessons • {overallProgress}%</p>
+                <p className="text-white/60 text-[10px] font-semibold">{stats.done.length}/{totalLessons} lessons • {overallProgress}%</p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
                 <div className="relative w-8 h-8">
                   <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
                     <circle cx="18" cy="18" r="14" fill="none" stroke="white" strokeWidth="3" opacity="0.2" />
-                    <motion.circle
-                      cx="18" cy="18" r="14" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round"
+                    <motion.circle cx="18" cy="18" r="14" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round"
                       initial={{ strokeDasharray: "0 88" }}
                       animate={{ strokeDasharray: `${overallProgress * 0.88} 88` }}
                       transition={{ duration: 1, delay: 0.5 }}
@@ -216,6 +172,13 @@ const HomePage = () => {
             </motion.button>
           </FadeIn>
 
+          {/* Daily Quests */}
+          <FadeIn delay={0.25}>
+            <div className="mb-4">
+              <DailyQuests quests={dailyQuests} />
+            </div>
+          </FadeIn>
+
           {/* Streak Calendar */}
           <FadeIn delay={0.3}>
             <div className="bg-card rounded-2xl p-3.5 border border-border/40 shadow-card mb-4">
@@ -224,23 +187,13 @@ const HomePage = () => {
                   <Flame size={14} className="text-white" />
                 </div>
                 <h4 className="text-xs font-extrabold text-foreground">Streak</h4>
-                <div className="ml-auto text-[10px] font-black text-agni-orange bg-agni-orange/15 px-2.5 py-0.5 rounded-full">{streak} days 🔥</div>
+                <div className="ml-auto text-[10px] font-black text-agni-orange bg-agni-orange/15 px-2.5 py-0.5 rounded-full">{stats.streak} days 🔥</div>
               </div>
               <div className="flex justify-between gap-1">
                 {streakDays.map((d, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.4 + i * 0.05, type: "spring" }}
-                    className="flex flex-col items-center gap-1"
-                  >
+                  <motion.div key={i} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.35 + i * 0.05, type: "spring" }} className="flex flex-col items-center gap-1">
                     <span className="text-[8px] text-muted-foreground font-bold">{d.label}</span>
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-[11px] font-black transition-all ${
-                      d.active
-                        ? "bg-agni-orange text-white shadow-lg"
-                        : "bg-muted/50 text-muted-foreground"
-                    }`}>
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-[11px] font-black ${d.active ? "bg-agni-orange text-white shadow-lg" : "bg-muted/50 text-muted-foreground"}`}>
                       {d.active ? "🔥" : d.date}
                     </div>
                   </motion.div>
@@ -263,15 +216,8 @@ const HomePage = () => {
                   <motion.button
                     key={mode.id}
                     whileTap={{ scale: 0.92, y: 2 }}
-                    onClick={() => {
-                      setActiveMode(mode.id);
-                      localStorage.setItem("teaching_mode", mode.id);
-                    }}
-                    className={`rounded-2xl p-2.5 text-center transition-all border-2 ${
-                      activeMode === mode.id
-                        ? "border-agni-green/50 bg-agni-green/10 shadow-md"
-                        : "border-border/30 bg-card hover:border-border"
-                    }`}
+                    onClick={() => { setActiveMode(mode.id); localStorage.setItem("teaching_mode", mode.id); }}
+                    className={`rounded-2xl p-2.5 text-center transition-all border-2 ${activeMode === mode.id ? "border-agni-green/50 bg-agni-green/10 shadow-md" : "border-border/30 bg-card hover:border-border"}`}
                   >
                     <span className="text-xl block">{mode.emoji}</span>
                     <span className="text-[10px] font-extrabold block text-foreground mt-0.5">{mode.label}</span>
@@ -282,7 +228,7 @@ const HomePage = () => {
             </div>
           </FadeIn>
 
-          {/* Daily Tip with AGNI */}
+          {/* Daily Tip */}
           <FadeIn delay={0.4}>
             <div className="bg-card border border-agni-green/20 rounded-2xl p-3.5 mb-4 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-20 h-20 bg-agni-green/5 rounded-full -mr-6 -mt-6" />
@@ -307,12 +253,8 @@ const HomePage = () => {
               { nav: "/mega-prompt", emoji: "📋", label: "Prompt", sub: "Reference", color: "bg-agni-orange" },
             ].map((a, i) => (
               <StaggerItem key={i}>
-                <motion.button
-                  whileHover={{ y: -3 }}
-                  whileTap={{ scale: 0.93, y: 2 }}
-                  onClick={() => navigate(a.nav)}
-                  className="bg-card rounded-2xl p-3 text-left relative overflow-hidden border border-border/40 shadow-card w-full"
-                >
+                <motion.button whileHover={{ y: -3 }} whileTap={{ scale: 0.93, y: 2 }} onClick={() => navigate(a.nav)}
+                  className="bg-card rounded-2xl p-3 text-left relative overflow-hidden border border-border/40 shadow-card w-full">
                   <div className={`w-9 h-9 rounded-xl ${a.color} flex items-center justify-center mb-2 shadow-md`}>
                     <span className="text-base">{a.emoji}</span>
                   </div>
@@ -326,11 +268,8 @@ const HomePage = () => {
           {/* Sign in prompt */}
           {!user && (
             <FadeIn delay={0.55}>
-              <motion.button
-                whileTap={{ scale: 0.98 }}
-                onClick={() => navigate("/auth")}
-                className="w-full bg-card border-2 border-dashed border-agni-green/30 rounded-2xl px-4 py-3 mb-4 flex items-center gap-3"
-              >
+              <motion.button whileTap={{ scale: 0.98 }} onClick={() => navigate("/auth")}
+                className="w-full bg-card border-2 border-dashed border-agni-green/30 rounded-2xl px-4 py-3 mb-4 flex items-center gap-3">
                 <Agni expression="default" size={45} animate={false} />
                 <div className="text-left">
                   <span className="text-xs font-extrabold text-foreground block">Sign in to sync progress</span>
