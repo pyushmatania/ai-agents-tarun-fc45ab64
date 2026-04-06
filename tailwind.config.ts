@@ -62,10 +62,13 @@ export default {
         },
         edu: {
           orange: "hsl(var(--edu-orange))",
+          "orange-light": "hsl(var(--edu-orange-light))",
           purple: "hsl(var(--edu-purple))",
           dark: "hsl(var(--edu-dark))",
           cream: "hsl(var(--edu-cream))",
           lavender: "hsl(var(--edu-lavender))",
+          peach: "hsl(var(--edu-peach))",
+          mint: "hsl(var(--edu-mint))",
         },
       },
       borderRadius: {
@@ -74,6 +77,7 @@ export default {
         sm: "calc(var(--radius) - 4px)",
         "2xl": "1.25rem",
         "3xl": "1.5rem",
+        "4xl": "2rem",
       },
       keyframes: {
         "accordion-down": {
@@ -84,10 +88,15 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "float": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-6px)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "float": "float 3s ease-in-out infinite",
       },
     },
   },
