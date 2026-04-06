@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Heart, Zap, MessageCircle, Brain, BookOpen } from "lucide-react";
+import { X, Heart, Zap, MessageCircle, Brain, BookOpen, Loader2 } from "lucide-react";
 import LessonChat from "@/components/lesson/LessonChat";
+import type { ChatMessage } from "@/components/lesson/LessonChat";
 import QuizCard from "@/components/lesson/QuizCard";
 import type { QuizQuestion } from "@/components/lesson/QuizCard";
 import LessonComplete from "@/components/lesson/LessonComplete";
@@ -10,27 +11,8 @@ import Agni from "@/components/Agni";
 import { useGamification } from "@/hooks/useGamification";
 import { SFX } from "@/lib/sounds";
 
-// Quiz data per lesson
-const LESSON_QUIZZES: Record<string, QuizQuestion[]> = {
-  f1: [
-    { type: "mcq", question: "What makes an AI agent different from a chatbot?", options: ["It uses GPT-4", "It can take autonomous actions", "It has a better UI", "It's faster"], correctIndex: 1, explanation: "Agents can autonomously decide and execute multi-step actions, while chatbots just respond to messages." },
-    { type: "truefalse", question: "The ReAct pattern stands for Reason + Act.", correctAnswer: true, explanation: "ReAct combines reasoning (thinking through steps) with acting (executing tools) in a loop." },
-    { type: "fillin", question: "The 5 core components of an agent are: LLM, Tools, Memory, Planning, and _____ Loop.", correctText: "Autonomy", explanation: "The Autonomy Loop is what allows agents to self-direct their execution without human intervention at each step." },
-  ],
-  f2: [
-    { type: "mcq", question: "Which model has the largest context window?", options: ["GPT-4o (128K)", "Claude 3.5 (200K)", "Gemini 2.5 (1M+)", "Llama 3.1 (128K)"], correctIndex: 2, explanation: "Gemini 2.5 offers 1M+ tokens, the largest context window among major models." },
-    { type: "truefalse", question: "Open-source models like Llama cannot be used for AI agents.", correctAnswer: false, explanation: "Llama 3.1 and other open-source models work great for agents, especially when cost and privacy matter." },
-  ],
-  f3: [
-    { type: "mcq", question: "What do tools give an AI agent?", options: ["Better language", "Ability to act in the real world", "Faster thinking", "More memory"], correctIndex: 1, explanation: "Tools let agents interact with external systems — search, write files, call APIs, and more." },
-    { type: "truefalse", question: "The LLM directly executes tool functions.", correctAnswer: false, explanation: "The LLM decides which tool to call and generates arguments, but your application code actually executes the tool." },
-  ],
-};
-
-// Generate default quizzes for lessons without specific content
-const getDefaultQuizzes = (title: string, topic: string): QuizQuestion[] => [
-  { type: "mcq" as const, question: `What is the main focus of "${title}"?`, options: ["Basic programming", topic.split(",")[0]?.trim() || "AI concepts", "Web development", "Data entry"], correctIndex: 1, explanation: `This lesson focuses on ${topic.split(",")[0]?.trim() || "AI agent concepts"}.` },
-];
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 const ALL_LESSONS: Record<string, { t: string; xp: number; topic: string }> = {
   f1: { t: "What is an AI Agent?", xp: 50, topic: "what AI agents are, Perceive-Reason-Act-Learn loop, ReAct pattern, core components" },
@@ -57,10 +39,11 @@ const ALL_LESSONS: Record<string, { t: string; xp: number; topic: string }> = {
   r5: { t: "Final Boss", xp: 200, topic: "capstone: 10+ agent autonomous company" },
 };
 
-type Phase = "chat" | "quiz" | "complete";
+type Phase = "chat" | "generating" | "quiz" | "complete";
 
-const PHASE_INFO = {
+const PHASE_INFO: Record<string, { icon: typeof MessageCircle; label: string; color: string }> = {
   chat: { icon: MessageCircle, label: "LEARN", color: "text-agni-blue" },
+  generating: { icon: Brain, label: "GENERATING QUIZ", color: "text-agni-gold" },
   quiz: { icon: Brain, label: "QUIZ", color: "text-agni-gold" },
   complete: { icon: BookOpen, label: "DONE", color: "text-agni-green" },
 };
@@ -70,21 +53,18 @@ const CourseDetailPage = () => {
   const navigate = useNavigate();
   const { stats, loseHeart, completeLesson } = useGamification();
   const [phase, setPhase] = useState<Phase>("chat");
+  const [quizzes, setQuizzes] = useState<QuizQuestion[]>([]);
   const [quizIndex, setQuizIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [timer, setTimer] = useState(0);
+  const [quizError, setQuizError] = useState("");
   const timerRef = useRef<ReturnType<typeof setInterval>>();
 
   const teachingMode = localStorage.getItem("teaching_mode") || "engineer";
   const lesson = id ? ALL_LESSONS[id] : null;
-  const quizzes = id && LESSON_QUIZZES[id]
-    ? LESSON_QUIZZES[id]
-    : id && lesson
-      ? getDefaultQuizzes(lesson.t, lesson.topic)
-      : [];
 
-  const totalSteps = quizzes.length + 1; // chat phase counts as 1
-  const currentStep = phase === "chat" ? 0 : phase === "quiz" ? quizIndex + 1 : totalSteps;
+  const totalSteps = Math.max(quizzes.length, 1) + 1;
+  const currentStep = phase === "chat" || phase === "generating" ? 0 : phase === "quiz" ? quizIndex + 1 : totalSteps;
   const progress = phase === "complete" ? 100 : ((currentStep) / totalSteps) * 100;
 
   useEffect(() => {
@@ -92,9 +72,55 @@ const CourseDetailPage = () => {
     return () => clearInterval(timerRef.current);
   }, []);
 
-  const handleQuizReady = () => {
+  const generateQuizzes = async (conversation: ChatMessage[]) => {
+    setPhase("generating");
+    setQuizError("");
+    try {
+      const resp = await fetch(`${SUPABASE_URL}/functions/v1/ai-quiz`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${SUPABASE_KEY}`,
+        },
+        body: JSON.stringify({
+          conversation,
+          lessonTitle: lesson?.t,
+          lessonTopic: lesson?.topic,
+          teachingMode,
+        }),
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(err.error || `Error ${resp.status}`);
+      }
+
+      const data = await resp.json();
+      if (data.quizzes && data.quizzes.length > 0) {
+        setQuizzes(data.quizzes);
+        SFX.tap();
+        setPhase("quiz");
+      } else {
+        throw new Error("No quiz questions generated");
+      }
+    } catch (error: any) {
+      console.error("Quiz generation error:", error);
+      setQuizError(error.message);
+      // Fallback: go to quiz with a simple generated question
+      setQuizzes([{
+        type: "mcq",
+        question: `What is the main focus of "${lesson?.t}"?`,
+        options: ["Basic programming", lesson?.topic.split(",")[0]?.trim() || "AI concepts", "Web development", "Data entry"],
+        correctIndex: 1,
+        explanation: `This lesson focuses on ${lesson?.topic.split(",")[0]?.trim() || "AI concepts"}.`,
+      }]);
+      setPhase("quiz");
+    }
+  };
+
+  const handleQuizReady = (conversation: ChatMessage[]) => {
     SFX.tap();
-    setPhase("quiz");
+    generateQuizzes(conversation);
   };
 
   const handleQuizAnswer = (correct: boolean) => {
@@ -131,8 +157,6 @@ const CourseDetailPage = () => {
     );
   }
 
-  const PhaseIcon = PHASE_INFO[phase].icon;
-
   return (
     <div className="flex flex-col h-screen bg-background relative overflow-hidden">
       {/* Top bar */}
@@ -160,7 +184,7 @@ const CourseDetailPage = () => {
 
             <motion.button
               whileTap={{ scale: 0.9 }}
-              onClick={() => { if (phase === "chat") handleQuizReady(); else navigate("/courses"); }}
+              onClick={() => { if (phase === "chat") handleQuizReady([]); else navigate("/courses"); }}
               className="text-[10px] font-black text-white bg-agni-green px-3 py-1.5 rounded-full flex items-center gap-1"
             >
               ✅ Done
@@ -170,7 +194,9 @@ const CourseDetailPage = () => {
           {/* Progress bar */}
           <div className="mt-2 h-2 bg-muted/30 rounded-full overflow-hidden">
             <motion.div
-              className={`h-full rounded-full ${phase === "chat" ? "bg-agni-blue" : phase === "quiz" ? "bg-agni-gold" : "bg-agni-green"}`}
+              className={`h-full rounded-full ${
+                phase === "chat" || phase === "generating" ? "bg-agni-blue" : phase === "quiz" ? "bg-agni-gold" : "bg-agni-green"
+              }`}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.3 }}
             />
@@ -192,6 +218,23 @@ const CourseDetailPage = () => {
                 timeSpent={timer}
                 onContinue={() => navigate("/courses")}
               />
+            ) : phase === "generating" ? (
+              <motion.div
+                key="generating"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                className="h-full flex flex-col items-center justify-center gap-4"
+              >
+                <Agni expression="thinking" size={100} speech="Cooking up your quiz! 🧪" />
+                <div className="flex items-center gap-2 text-agni-gold">
+                  <Loader2 size={18} className="animate-spin" />
+                  <p className="text-sm font-black">Generating quiz from your lesson...</p>
+                </div>
+                <p className="text-[10px] text-muted-foreground font-medium text-center max-w-[250px]">
+                  AGNI is creating personalized questions based on what you just learned
+                </p>
+              </motion.div>
             ) : phase === "quiz" ? (
               <QuizCard
                 key={`quiz-${quizIndex}`}
