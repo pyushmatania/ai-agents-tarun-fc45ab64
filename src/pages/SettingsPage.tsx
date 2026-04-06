@@ -68,24 +68,24 @@ const SettingsPage = () => {
     <PageTransition>
     <div className="min-h-screen bg-background pb-24">
       <div className="max-w-md mx-auto px-4 pt-6">
-        <h2 className="text-2xl font-extrabold text-foreground mb-6">Settings</h2>
+        <h2 className="text-2xl font-black text-foreground mb-6">Settings</h2>
 
         {/* Profile Card */}
-        <div className="bg-card rounded-3xl p-5 border border-border mb-4">
+        <div className="bg-card rounded-4xl p-5 border border-border mb-4 shadow-card">
           <div className="flex items-center gap-4 mb-5">
-            <div className="w-16 h-16 rounded-2xl bg-edu-lavender flex items-center justify-center text-3xl">
-              👤
+            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-edu-peach to-edu-orange-light flex items-center justify-center text-3xl shadow-card">
+              🧑‍💻
             </div>
             <div className="flex-1">
-              <p className="font-bold text-foreground text-lg">{fullName || "Your Name"}</p>
-              <p className="text-sm text-muted-foreground">{role || "Learner"}</p>
+              <p className="font-black text-foreground text-lg">{fullName || "Your Name"}</p>
+              <p className="text-sm text-muted-foreground font-semibold">{role || "Learner"}</p>
               {user && <p className="text-xs text-muted-foreground mt-0.5">{user.email}</p>}
             </div>
           </div>
 
           <div className="space-y-3">
             <div>
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Name</label>
+              <label className="text-xs font-black text-muted-foreground uppercase tracking-wider">Name</label>
               <Input
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
@@ -94,7 +94,7 @@ const SettingsPage = () => {
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Role</label>
+              <label className="text-xs font-black text-muted-foreground uppercase tracking-wider">Role</label>
               <Input
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
@@ -105,7 +105,7 @@ const SettingsPage = () => {
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-bold"
+              className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-black shadow-card"
             >
               {saving ? <Loader2 size={18} className="animate-spin mr-2" /> : null}
               {saving ? "Saving..." : "Save Profile"}
@@ -117,7 +117,7 @@ const SettingsPage = () => {
         {!user && (
           <button
             onClick={() => navigate("/auth")}
-            className="w-full bg-secondary/20 border border-secondary/30 text-foreground font-bold rounded-3xl p-4 flex items-center justify-center gap-2 hover:bg-secondary/30 transition-colors mb-4"
+            className="w-full bg-secondary/10 border border-secondary/30 text-foreground font-bold rounded-3xl p-4 flex items-center justify-center gap-2 hover:bg-secondary/20 transition-colors mb-4 shadow-card"
           >
             <LogIn size={18} />
             Sign in to sync progress
@@ -125,13 +125,13 @@ const SettingsPage = () => {
         )}
 
         {/* Preferences */}
-        <div className="bg-card rounded-3xl border border-border overflow-hidden mb-4">
+        <div className="bg-card rounded-4xl border border-border overflow-hidden mb-4 shadow-card">
           <div className="flex items-center justify-between p-5 border-b border-border">
             <div className="flex items-center gap-3">
               {darkMode ? <Moon size={20} className="text-secondary" /> : <Sun size={20} className="text-primary" />}
               <div>
-                <p className="font-semibold text-foreground text-sm">Dark Mode</p>
-                <p className="text-xs text-muted-foreground">Switch appearance</p>
+                <p className="font-bold text-foreground text-sm">Dark Mode</p>
+                <p className="text-xs text-muted-foreground font-semibold">Switch appearance</p>
               </div>
             </div>
             <Switch checked={darkMode} onCheckedChange={toggleDarkMode} />
@@ -141,8 +141,8 @@ const SettingsPage = () => {
             <div className="flex items-center gap-3">
               <Bell size={20} className="text-muted-foreground" />
               <div className="text-left">
-                <p className="font-semibold text-foreground text-sm">Notifications</p>
-                <p className="text-xs text-muted-foreground">Manage alerts</p>
+                <p className="font-bold text-foreground text-sm">Notifications</p>
+                <p className="text-xs text-muted-foreground font-semibold">Manage alerts</p>
               </div>
             </div>
             <ChevronRight size={18} className="text-muted-foreground" />
@@ -152,8 +152,8 @@ const SettingsPage = () => {
             <div className="flex items-center gap-3">
               <Shield size={20} className="text-muted-foreground" />
               <div className="text-left">
-                <p className="font-semibold text-foreground text-sm">Privacy</p>
-                <p className="text-xs text-muted-foreground">Data & security</p>
+                <p className="font-bold text-foreground text-sm">Privacy</p>
+                <p className="text-xs text-muted-foreground font-semibold">Data & security</p>
               </div>
             </div>
             <ChevronRight size={18} className="text-muted-foreground" />
@@ -163,14 +163,14 @@ const SettingsPage = () => {
         {/* Logout */}
         <button
           onClick={handleLogout}
-          className="w-full bg-destructive/10 text-destructive font-bold rounded-3xl p-4 flex items-center justify-center gap-2 hover:bg-destructive/20 transition-colors"
+          className="w-full bg-destructive/10 text-destructive font-bold rounded-3xl p-4 flex items-center justify-center gap-2 hover:bg-destructive/20 transition-colors shadow-card"
         >
           <LogOut size={18} />
           {user ? "Log Out" : "Reset & Start Over"}
         </button>
 
-        <p className="text-center text-xs text-muted-foreground mt-6">
-          EduLearn v1.0 • Made with ❤️
+        <p className="text-center text-xs text-muted-foreground mt-6 font-semibold">
+          AI Agents v1.0 • Made with ❤️
         </p>
       </div>
       <BottomNav />

@@ -6,33 +6,33 @@
 
 @layer base {
   :root {
-    --background: 30 50% 95%;
+    --background: 30 45% 93%;
     --foreground: 240 10% 10%;
 
-    --card: 0 0% 100%;
+    --card: 30 40% 98%;
     --card-foreground: 240 10% 10%;
 
-    --popover: 0 0% 100%;
+    --popover: 30 40% 98%;
     --popover-foreground: 240 10% 10%;
 
-    --primary: 24 85% 62%;
+    --primary: 24 85% 58%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 245 60% 72%;
+    --secondary: 250 55% 68%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 30 30% 90%;
+    --muted: 30 25% 88%;
     --muted-foreground: 240 5% 45%;
 
-    --accent: 245 60% 72%;
+    --accent: 250 55% 68%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 30 20% 88%;
-    --input: 30 20% 88%;
-    --ring: 24 85% 62%;
+    --border: 30 20% 85%;
+    --input: 30 20% 85%;
+    --ring: 24 85% 58%;
 
     --radius: 1rem;
 
@@ -46,41 +46,50 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
 
     /* Custom app tokens */
-    --edu-orange: 24 85% 62%;
-    --edu-purple: 245 60% 72%;
-    --edu-dark: 240 10% 15%;
-    --edu-cream: 30 50% 95%;
-    --edu-lavender: 245 50% 88%;
+    --edu-orange: 24 85% 58%;
+    --edu-orange-light: 28 90% 72%;
+    --edu-purple: 250 55% 68%;
+    --edu-dark: 240 15% 13%;
+    --edu-cream: 30 45% 93%;
+    --edu-lavender: 250 50% 90%;
+    --edu-peach: 20 80% 88%;
+    --edu-mint: 160 40% 88%;
+
+    /* Shadows */
+    --shadow-card: 0 4px 20px -4px hsl(30 20% 50% / 0.15);
+    --shadow-card-hover: 0 8px 30px -4px hsl(30 20% 50% / 0.25);
+    --shadow-elevated: 0 12px 40px -8px hsl(240 10% 10% / 0.12);
+    --shadow-nav: 0 -4px 30px hsl(240 10% 10% / 0.08);
   }
 
   .dark {
-    --background: 240 10% 8%;
+    --background: 240 12% 7%;
     --foreground: 30 30% 95%;
 
-    --card: 240 10% 12%;
+    --card: 240 12% 11%;
     --card-foreground: 30 30% 95%;
 
-    --popover: 240 10% 12%;
+    --popover: 240 12% 11%;
     --popover-foreground: 30 30% 95%;
 
-    --primary: 24 85% 62%;
+    --primary: 24 85% 58%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 245 60% 72%;
+    --secondary: 250 55% 68%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 240 10% 18%;
+    --muted: 240 12% 16%;
     --muted-foreground: 240 5% 60%;
 
-    --accent: 245 60% 72%;
+    --accent: 250 55% 68%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 10% 20%;
-    --input: 240 10% 20%;
-    --ring: 24 85% 62%;
+    --border: 240 12% 18%;
+    --input: 240 12% 18%;
+    --ring: 24 85% 58%;
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -90,6 +99,20 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --edu-orange: 24 85% 58%;
+    --edu-orange-light: 28 90% 42%;
+    --edu-purple: 250 55% 68%;
+    --edu-dark: 240 15% 8%;
+    --edu-cream: 240 12% 7%;
+    --edu-lavender: 250 30% 20%;
+    --edu-peach: 20 40% 18%;
+    --edu-mint: 160 20% 16%;
+
+    --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.3);
+    --shadow-card-hover: 0 8px 30px -4px hsl(0 0% 0% / 0.4);
+    --shadow-elevated: 0 12px 40px -8px hsl(0 0% 0% / 0.5);
+    --shadow-nav: 0 -4px 30px hsl(0 0% 0% / 0.3);
   }
 }
 
@@ -101,5 +124,20 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Nunito', sans-serif;
+  }
+}
+
+@layer utilities {
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  .shadow-card-hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
+  .shadow-nav {
+    box-shadow: var(--shadow-nav);
   }
 }

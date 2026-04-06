@@ -31,12 +31,7 @@ const ProgressPage = () => {
   useEffect(() => {
     if (!user) return;
     const fetch = async () => {
-      // Get progress with course info
-      const { data: progress } = await supabase
-        .from("user_progress")
-        .select("*")
-        .eq("user_id", user.id);
-
+      const { data: progress } = await supabase.from("user_progress").select("*").eq("user_id", user.id);
       const { data: courses } = await supabase.from("courses").select("id, title, subject");
 
       if (progress && courses) {
@@ -71,6 +66,11 @@ const ProgressPage = () => {
   const userName = user?.user_metadata?.full_name?.split(" ")[0] || "Learner";
   const maxValue = Math.max(...weeklyData.map((d) => d.value), 1);
 
+  const barColors = [
+    "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--edu-orange-light)))",
+    "linear-gradient(90deg, hsl(var(--edu-orange-light)), hsl(var(--primary)))",
+  ];
+
   const subjectEmojis: Record<string, string> = {
     Math: "🌀", Biology: "🧬", Literature: "📖", Chemistry: "⚗️",
   };
@@ -81,22 +81,22 @@ const ProgressPage = () => {
       <div className="max-w-md mx-auto px-4 pt-6">
         <Header name={userName} progress={overallProgress} />
 
-        <h2 className="text-2xl font-extrabold text-foreground mb-4">Progress</h2>
+        <h2 className="text-2xl font-black text-foreground mb-4">Progress</h2>
 
         <div className="flex items-center gap-2 mb-5">
-          <button className="bg-card rounded-full px-4 py-2 flex items-center gap-2 text-sm font-semibold text-foreground border border-border">
+          <button className="bg-card rounded-full px-4 py-2.5 flex items-center gap-2 text-sm font-bold text-foreground border border-border shadow-card">
             📊 All subjects
             <ChevronDown size={14} />
           </button>
         </div>
 
         {/* Stats Card */}
-        <div className="bg-card rounded-3xl p-5 border border-border mb-5">
+        <div className="bg-card rounded-4xl p-5 border border-border mb-5 shadow-card">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">📊</div>
+            <div className="w-9 h-9 rounded-xl bg-secondary/10 flex items-center justify-center">📊</div>
             <div className="flex bg-muted rounded-full p-1">
-              <button className="bg-card rounded-full px-3 py-1 text-xs font-bold text-foreground shadow-sm">Weekly</button>
-              <button className="rounded-full px-3 py-1 text-xs font-semibold text-muted-foreground">Month</button>
+              <button className="bg-card rounded-full px-4 py-1.5 text-xs font-black text-foreground shadow-card">Weekly</button>
+              <button className="rounded-full px-4 py-1.5 text-xs font-bold text-muted-foreground">Month</button>
             </div>
           </div>
 
@@ -106,35 +106,38 @@ const ProgressPage = () => {
             </div>
           ) : (
             <>
-              <div className="flex gap-6 mb-5">
+              <div className="flex gap-8 mb-5">
                 <div>
-                  <p className="text-3xl font-extrabold text-foreground">{totalLessons}</p>
-                  <p className="text-xs text-muted-foreground">lessons</p>
+                  <p className="text-3xl font-black text-foreground">{totalLessons}</p>
+                  <p className="text-xs text-muted-foreground font-bold">lessons</p>
                 </div>
                 <div>
-                  <p className="text-3xl font-extrabold text-foreground">{totalHours}</p>
-                  <p className="text-xs text-muted-foreground">hours</p>
+                  <p className="text-3xl font-black text-foreground">{totalHours}</p>
+                  <p className="text-xs text-muted-foreground font-bold">hours</p>
                 </div>
               </div>
 
               {weeklyData.length > 0 ? (
                 <div className="space-y-3">
-                  {weeklyData.map((d) => (
+                  {weeklyData.map((d, i) => (
                     <div key={d.day} className="flex items-center gap-3">
-                      <span className="text-xs font-semibold text-muted-foreground w-8">{d.day}</span>
-                      <div className="flex-1 bg-muted rounded-full h-7 relative overflow-hidden">
+                      <span className="text-xs font-bold text-muted-foreground w-8">{d.day}</span>
+                      <div className="flex-1 bg-muted rounded-full h-8 relative overflow-hidden">
                         <div
-                          className="h-full bg-primary rounded-full flex items-center justify-end pr-2 transition-all"
-                          style={{ width: `${(d.value / maxValue) * 100}%` }}
+                          className="h-full rounded-full flex items-center justify-end pr-3 transition-all duration-500"
+                          style={{
+                            width: `${Math.max((d.value / maxValue) * 100, 15)}%`,
+                            background: barColors[i % 2],
+                          }}
                         >
-                          <span className="text-xs font-bold text-primary-foreground">{d.value}</span>
+                          <span className="text-xs font-black text-white">{d.value}</span>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">
+                <p className="text-sm text-muted-foreground text-center py-4 font-semibold">
                   Enroll in courses to start tracking progress!
                 </p>
               )}
@@ -152,9 +155,9 @@ const ProgressPage = () => {
           </div>
         </div>
 
-        {/* Enrolled Courses Breakdown */}
+        {/* Enrolled Courses */}
         <div className="mb-5">
-          <h3 className="font-bold text-foreground mb-3">Enrolled courses</h3>
+          <h3 className="font-extrabold text-foreground mb-3">Enrolled courses</h3>
           {loading ? (
             <div className="flex justify-center py-6">
               <Loader2 className="animate-spin text-muted-foreground" size={24} />
@@ -165,18 +168,18 @@ const ProgressPage = () => {
                 <button
                   key={p.id}
                   onClick={() => navigate(`/course/${p.course_id}`)}
-                  className="w-full bg-card rounded-2xl p-4 border border-border flex items-center gap-3 hover:bg-muted/50 transition-colors text-left"
+                  className="w-full bg-card rounded-3xl p-4 border border-border flex items-center gap-3 hover:shadow-card-hover transition-all text-left shadow-card"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-edu-lavender flex items-center justify-center text-lg">
+                  <div className="w-10 h-10 rounded-2xl bg-edu-lavender flex items-center justify-center text-lg">
                     {subjectEmojis[p.course_subject || ""] || "📘"}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-foreground text-sm truncate">{p.course_title || "Course"}</p>
-                    <p className="text-xs text-muted-foreground">{p.lessons_completed || 0} lessons • {Number(p.hours_spent || 0)}h</p>
+                    <p className="font-bold text-foreground text-sm truncate">{p.course_title || "Course"}</p>
+                    <p className="text-xs text-muted-foreground font-semibold">{p.lessons_completed || 0} lessons • {Number(p.hours_spent || 0)}h</p>
                   </div>
                   <div className="flex flex-col items-end">
-                    <p className="text-sm font-extrabold text-primary">{p.progress_percent || 0}%</p>
-                    <div className="w-16 h-1.5 bg-muted rounded-full mt-1 overflow-hidden">
+                    <p className="text-sm font-black text-primary">{p.progress_percent || 0}%</p>
+                    <div className="w-16 h-2 bg-muted rounded-full mt-1 overflow-hidden">
                       <div className="h-full bg-primary rounded-full" style={{ width: `${p.progress_percent || 0}%` }} />
                     </div>
                   </div>
@@ -184,23 +187,23 @@ const ProgressPage = () => {
               ))}
             </div>
           ) : (
-            <div className="bg-card rounded-2xl p-5 border border-border text-center">
-              <p className="text-sm text-muted-foreground">No courses enrolled yet</p>
+            <div className="bg-card rounded-3xl p-5 border border-border text-center shadow-card">
+              <p className="text-sm text-muted-foreground font-semibold">No courses enrolled yet</p>
             </div>
           )}
         </div>
 
         {/* Rating */}
-        <div className="bg-card rounded-2xl p-5 border border-border">
+        <div className="bg-card rounded-3xl p-5 border border-border shadow-card">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-lg">🏆</div>
             <div className="flex-1">
-              <h4 className="font-bold text-foreground">Rating of students</h4>
-              <p className="text-xs text-muted-foreground">10 best students</p>
+              <h4 className="font-extrabold text-foreground">Rating of students</h4>
+              <p className="text-xs text-muted-foreground font-semibold">10 best students</p>
             </div>
             <div className="flex -space-x-2">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="w-7 h-7 rounded-full bg-muted border-2 border-card flex items-center justify-center text-xs">👤</div>
+                <div key={i} className="w-7 h-7 rounded-full bg-edu-peach border-2 border-card flex items-center justify-center text-xs">👤</div>
               ))}
             </div>
           </div>
