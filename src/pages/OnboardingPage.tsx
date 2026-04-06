@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, Sparkles, Shield, Wifi, Cpu } from "lucide-react";
+import { ArrowRight, Sparkles, Shield, Wifi, Cpu, Zap, BookOpen, Users } from "lucide-react";
 import BotIllustration from "@/components/illustrations/BotIllustration";
 import FloatingShapes from "@/components/illustrations/FloatingShapes";
+import { motion, AnimatePresence } from "framer-motion";
 
 const roles = [
   { label: "Student", emoji: "🎓", desc: "Learning AI" },
@@ -21,13 +22,19 @@ const features = [
   { icon: Cpu, text: "AI-powered learning" },
 ];
 
+const testimonials = [
+  { name: "Priya S.", role: "Developer", text: "Best AI agents resource I've found!", avatar: "👩‍💻" },
+  { name: "Rahul M.", role: "Founder", text: "Went from zero to building agents in a week.", avatar: "🧑‍💼" },
+  { name: "Ankit K.", role: "Student", text: "The mega prompt is insanely detailed.", avatar: "🎓" },
+];
+
 const OnboardingPage = () => {
   const [name, setName] = useState("");
   const tagline = "Master the future of intelligent automation";
   const [displayedText, setDisplayedText] = useState("");
   const [showCursor, setShowCursor] = useState(true);
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
-  const [step, setStep] = useState(0); // 0=splash, 1=form
+  const [step, setStep] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -48,6 +55,9 @@ const OnboardingPage = () => {
     localStorage.setItem("edu_user_name", name.trim());
     localStorage.setItem("edu_user_role", selectedRole || "Learner");
     localStorage.setItem("edu_onboarded", "true");
+    // Default to light theme on first setup
+    localStorage.setItem("theme", "light");
+    document.documentElement.classList.add("light");
     navigate("/");
   };
 
@@ -55,170 +65,287 @@ const OnboardingPage = () => {
     <div className="min-h-screen bg-background relative overflow-hidden">
       <FloatingShapes />
 
-      {step === 0 ? (
-        /* ── Splash Screen ── */
-        <div className="relative z-10 max-w-md mx-auto px-5 flex flex-col min-h-screen items-center justify-center">
-          {/* Illustrated Hero */}
-          <div className="relative mb-6">
-            {/* Glowing ring behind bot */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-36 h-36 rounded-full border border-primary/10 animate-pulse-glow" />
-              <div className="absolute w-44 h-44 rounded-full border border-secondary/5" style={{ animationDelay: "1s" }} />
-            </div>
-            <BotIllustration size={140} className="relative z-10 drop-shadow-2xl" />
-          </div>
-
-          {/* Title */}
-          <h1 className="text-2xl font-display font-bold text-foreground tracking-tight text-center mb-1">
-            AI Agents Academy
-          </h1>
-          <p className="text-muted-foreground text-center text-xs h-4 mb-6">
-            {displayedText}
-            {showCursor && <span className="animate-pulse ml-0.5">|</span>}
-          </p>
-
-          {/* Feature pills */}
-          <div className="flex flex-wrap justify-center gap-2 mb-8">
-            {features.map((f, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-1.5 bg-card/80 border border-border/40 rounded-full px-3 py-1.5 animate-fade-in opacity-0"
-                style={{ animationDelay: `${i * 150 + 800}ms`, animationFillMode: "forwards" }}
-              >
-                <f.icon size={11} className="text-primary" />
-                <span className="text-[10px] font-semibold text-foreground/70">{f.text}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Stats showcase */}
-          <div className="glass border border-border/30 rounded-2xl p-4 w-full mb-6 animate-fade-in opacity-0" style={{ animationDelay: "1.2s", animationFillMode: "forwards" }}>
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div>
-                <p className="text-lg font-bold text-primary">21+</p>
-                <p className="text-[9px] text-muted-foreground font-medium">Lessons</p>
-              </div>
-              <div className="border-x border-border/30">
-                <p className="text-lg font-bold text-secondary">4</p>
-                <p className="text-[9px] text-muted-foreground font-medium">Modules</p>
-              </div>
-              <div>
-                <p className="text-lg font-bold text-primary">∞</p>
-                <p className="text-[9px] text-muted-foreground font-medium">Curiosity</p>
-              </div>
-            </div>
-          </div>
-
-          {/* CTA */}
-          <Button
-            onClick={() => setStep(1)}
-            className="w-full h-12 rounded-2xl bg-gradient-to-r from-primary to-secondary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all shadow-glow-primary animate-fade-in opacity-0"
-            style={{ animationDelay: "1.5s", animationFillMode: "forwards" }}
+      <AnimatePresence mode="wait">
+        {step === 0 ? (
+          <motion.div
+            key="splash"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, x: -40 }}
+            transition={{ duration: 0.35 }}
+            className="relative z-10 max-w-md mx-auto px-5 flex flex-col min-h-screen items-center justify-center"
           >
-            Get Started
-            <ArrowRight size={15} className="ml-1.5" />
-          </Button>
-
-          <p className="text-center text-[10px] text-muted-foreground mt-3 animate-fade-in opacity-0" style={{ animationDelay: "1.8s", animationFillMode: "forwards" }}>
-            Free forever • No credit card required
-          </p>
-        </div>
-      ) : (
-        /* ── Form Screen ── */
-        <div className="relative z-10 max-w-md mx-auto px-5 pt-8 pb-6 flex flex-col min-h-screen animate-fade-in">
-          {/* Mini header */}
-          <div className="flex items-center gap-3 mb-6">
-            <button onClick={() => setStep(0)} className="w-8 h-8 rounded-xl glass border border-border/40 flex items-center justify-center">
-              <ArrowRight size={14} className="text-foreground rotate-180" />
-            </button>
-            <div>
-              <h2 className="text-sm font-display font-bold text-foreground">Personalize</h2>
-              <p className="text-[10px] text-muted-foreground">Step 2 of 2</p>
-            </div>
-          </div>
-
-          {/* Illustration card */}
-          <div className="glass border border-border/30 rounded-2xl p-4 mb-5 flex items-center gap-4">
-            <BotIllustration size={56} />
-            <div className="flex-1">
-              <div className="flex items-center gap-1.5 mb-1">
-                <Sparkles size={12} className="text-secondary" />
-                <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">Personalized</span>
-              </div>
-              <p className="text-[11px] text-foreground/70 leading-relaxed">
-                Tell us about yourself — we'll tailor your AI learning journey.
-              </p>
-            </div>
-          </div>
-
-          {/* Name */}
-          <div className="mb-5">
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2 block">
-              What's your name?
-            </label>
-            <Input
-              type="text"
-              placeholder="Enter your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="h-12 rounded-xl glass border-border/40 text-foreground text-sm font-medium"
-              autoFocus
-            />
-          </div>
-
-          {/* Role */}
-          <div className="mb-5">
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2 block">
-              What's your role?
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {roles.map((role, i) => (
-                <button
-                  key={role.label}
-                  onClick={() => setSelectedRole(role.label)}
-                  className={`flex flex-col items-center gap-0.5 p-3 rounded-xl border transition-all animate-fade-in opacity-0 ${
-                    selectedRole === role.label
-                      ? "bg-primary/10 border-primary/30 text-foreground shadow-glow-primary"
-                      : "glass border-border/40 text-foreground hover:border-border"
-                  }`}
-                  style={{ animationDelay: `${i * 80}ms`, animationFillMode: "forwards" }}
-                >
-                  <span className="text-xl">{role.emoji}</span>
-                  <span className="text-[10px] font-bold">{role.label}</span>
-                  <span className="text-[8px] text-muted-foreground">{role.desc}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* What you'll learn preview */}
-          <div className="glass border border-border/30 rounded-xl p-3 mb-5">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">What you'll master</p>
-            <div className="space-y-1.5">
-              {["🧬 AI Agent Foundations & Architecture", "⚔️ Frameworks: LangGraph, CrewAI, AutoGen", "🏢 Multi-Agent Orchestration", "🚀 Real-World Deployment"].map((item, i) => (
-                <div key={i} className="flex items-center gap-2 text-[11px] text-foreground/70">
-                  <span>{item.slice(0, 2)}</span>
-                  <span>{item.slice(3)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-auto">
-            <Button
-              onClick={handleStart}
-              disabled={!name.trim()}
-              className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-secondary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all disabled:opacity-30 shadow-glow-primary"
+            {/* Illustrated Hero */}
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
+              className="relative mb-6"
             >
-              Start Learning
-              <ArrowRight size={15} className="ml-1.5" />
-            </Button>
-            <p className="text-center text-[10px] text-muted-foreground mt-3">
-              Progress saved locally • Sign in later to sync
-            </p>
-          </div>
-        </div>
-      )}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-36 h-36 rounded-full border border-primary/10 animate-pulse-glow" />
+                <div className="absolute w-44 h-44 rounded-full border border-secondary/5" />
+              </div>
+              <BotIllustration size={140} className="relative z-10 drop-shadow-2xl" />
+            </motion.div>
+
+            {/* Title */}
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="text-2xl font-display font-bold text-foreground tracking-tight text-center mb-1"
+            >
+              AI Agents Academy
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="text-muted-foreground text-center text-xs h-4 mb-6"
+            >
+              {displayedText}
+              {showCursor && <span className="animate-pulse ml-0.5">|</span>}
+            </motion.p>
+
+            {/* Feature pills */}
+            <div className="flex flex-wrap justify-center gap-2 mb-6">
+              {features.map((f, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 + i * 0.12 }}
+                  className="flex items-center gap-1.5 bg-card/80 border border-border/40 rounded-full px-3 py-1.5"
+                >
+                  <f.icon size={11} className="text-primary" />
+                  <span className="text-[10px] font-semibold text-foreground/70">{f.text}</span>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Stats showcase */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9 }}
+              className="glass border border-border/30 rounded-2xl p-4 w-full mb-4"
+            >
+              <div className="grid grid-cols-3 gap-3 text-center">
+                {[
+                  { value: "22+", label: "Lessons", icon: BookOpen },
+                  { value: "4", label: "Modules", icon: Zap },
+                  { value: "∞", label: "Curiosity", icon: Sparkles },
+                ].map((s, i) => (
+                  <motion.div key={i} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 1 + i * 0.1, type: "spring" }}>
+                    <p className="text-lg font-bold text-primary">{s.value}</p>
+                    <p className="text-[9px] text-muted-foreground font-medium">{s.label}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Testimonials */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.1 }}
+              className="w-full mb-6"
+            >
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                {testimonials.map((t, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 1.2 + i * 0.1 }}
+                    className="min-w-[180px] bg-card/80 border border-border/40 rounded-xl p-3 shrink-0"
+                  >
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-base">{t.avatar}</span>
+                      <div>
+                        <p className="text-[10px] font-bold text-foreground">{t.name}</p>
+                        <p className="text-[8px] text-muted-foreground">{t.role}</p>
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-foreground/70 italic">"{t.text}"</p>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* CTA */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.3 }}
+              className="w-full"
+            >
+              <Button
+                onClick={() => setStep(1)}
+                className="w-full h-12 rounded-2xl bg-gradient-to-r from-primary to-secondary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all shadow-glow-primary"
+              >
+                Get Started
+                <ArrowRight size={15} className="ml-1.5" />
+              </Button>
+              <p className="text-center text-[10px] text-muted-foreground mt-3">
+                Free forever • No credit card required
+              </p>
+            </motion.div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="form"
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -40 }}
+            transition={{ duration: 0.35 }}
+            className="relative z-10 max-w-md mx-auto px-5 pt-8 pb-6 flex flex-col min-h-screen"
+          >
+            {/* Mini header */}
+            <div className="flex items-center gap-3 mb-6">
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setStep(0)}
+                className="w-8 h-8 rounded-xl glass border border-border/40 flex items-center justify-center"
+              >
+                <ArrowRight size={14} className="text-foreground rotate-180" />
+              </motion.button>
+              <div>
+                <h2 className="text-sm font-display font-bold text-foreground">Personalize</h2>
+                <p className="text-[10px] text-muted-foreground">Step 2 of 2</p>
+              </div>
+              {/* Progress dots */}
+              <div className="ml-auto flex gap-1.5">
+                <div className="w-6 h-1 rounded-full bg-primary" />
+                <div className="w-6 h-1 rounded-full bg-primary/40" />
+              </div>
+            </div>
+
+            {/* Illustration card */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="glass border border-border/30 rounded-2xl p-4 mb-5 flex items-center gap-4"
+            >
+              <BotIllustration size={56} />
+              <div className="flex-1">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Sparkles size={12} className="text-secondary" />
+                  <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">Personalized</span>
+                </div>
+                <p className="text-[11px] text-foreground/70 leading-relaxed">
+                  Tell us about yourself — we'll tailor your AI learning journey.
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Name */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="mb-5"
+            >
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2 block">
+                What's your name?
+              </label>
+              <Input
+                type="text"
+                placeholder="Enter your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="h-12 rounded-xl glass border-border/40 text-foreground text-sm font-medium"
+                autoFocus
+              />
+            </motion.div>
+
+            {/* Role */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="mb-5"
+            >
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2 block">
+                What's your role?
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {roles.map((role, i) => (
+                  <motion.button
+                    key={role.label}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.35 + i * 0.06 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setSelectedRole(role.label)}
+                    className={`flex flex-col items-center gap-0.5 p-3 rounded-xl border transition-all ${
+                      selectedRole === role.label
+                        ? "bg-primary/10 border-primary/30 text-foreground shadow-glow-primary"
+                        : "glass border-border/40 text-foreground hover:border-border"
+                    }`}
+                  >
+                    <span className="text-xl">{role.emoji}</span>
+                    <span className="text-[10px] font-bold">{role.label}</span>
+                    <span className="text-[8px] text-muted-foreground">{role.desc}</span>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* What you'll learn preview */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="glass border border-border/30 rounded-xl p-3 mb-5"
+            >
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">What you'll master</p>
+              <div className="space-y-1.5">
+                {[
+                  "🧬 AI Agent Foundations & Architecture",
+                  "⚔️ Frameworks: LangGraph, CrewAI, AutoGen",
+                  "🏢 Multi-Agent Orchestration",
+                  "🚀 Real-World Deployment",
+                  "🤯 Bleeding Edge: Swarms & Digital Twins",
+                ].map((item, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.55 + i * 0.05 }}
+                    className="flex items-center gap-2 text-[11px] text-foreground/70"
+                  >
+                    <span>{item.slice(0, 2)}</span>
+                    <span>{item.slice(3)}</span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            <div className="mt-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+              >
+                <Button
+                  onClick={handleStart}
+                  disabled={!name.trim()}
+                  className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-secondary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all disabled:opacity-30 shadow-glow-primary"
+                >
+                  Start Learning
+                  <ArrowRight size={15} className="ml-1.5" />
+                </Button>
+                <p className="text-center text-[10px] text-muted-foreground mt-3">
+                  Progress saved locally • Sign in later to sync
+                </p>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
