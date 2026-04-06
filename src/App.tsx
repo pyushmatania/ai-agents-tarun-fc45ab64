@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import HomePage from "./pages/HomePage";
 import CoursesPage from "./pages/CoursesPage";
 import ProgressPage from "./pages/ProgressPage";
+import SettingsPage from "./pages/SettingsPage";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 
