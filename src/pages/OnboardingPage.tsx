@@ -75,7 +75,7 @@ const OnboardingPage = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, x: -40 }}
             transition={{ duration: 0.35 }}
-            className="relative z-10 max-w-md mx-auto px-5 flex flex-col min-h-screen items-center justify-center"
+            className="relative z-10 max-w-md mx-auto px-5 flex flex-col min-h-screen items-center justify-end pb-8"
           >
             {/* Full-screen Hero Illustration */}
             <div className="absolute inset-0 z-0">
