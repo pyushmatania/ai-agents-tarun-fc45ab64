@@ -1,12 +1,12 @@
-import { Home, BookOpen, BarChart3, FileText, Settings } from "lucide-react";
+import { Home, BookOpen, BarChart3, FileText, Settings, Sparkles } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const tabs = [
   { icon: Home, path: "/", label: "Home" },
   { icon: BookOpen, path: "/courses", label: "Courses" },
+  { icon: Sparkles, path: "/curiosity", label: "Curiosity" },
   { icon: FileText, path: "/mega-prompt", label: "Prompt" },
   { icon: BarChart3, path: "/progress", label: "Progress" },
-  { icon: Settings, path: "/settings", label: "Settings" },
 ];
 
 const BottomNav = () => {

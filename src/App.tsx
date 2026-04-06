@@ -11,6 +11,7 @@ import CourseDetailPage from "./pages/CourseDetailPage";
 import MegaPromptPage from "./pages/MegaPromptPage";
 import OnboardingPage from "./pages/OnboardingPage";
 import AuthPage from "./pages/AuthPage";
+import CuriosityPage from "./pages/CuriosityPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/" element={<OnboardedRoute><HomePage /></OnboardedRoute>} />
           <Route path="/courses" element={<OnboardedRoute><CoursesPage /></OnboardedRoute>} />
+          <Route path="/curiosity" element={<OnboardedRoute><CuriosityPage /></OnboardedRoute>} />
           <Route path="/progress" element={<OnboardedRoute><ProgressPage /></OnboardedRoute>} />
           <Route path="/settings" element={<OnboardedRoute><SettingsPage /></OnboardedRoute>} />
           <Route path="/course/:id" element={<OnboardedRoute><CourseDetailPage /></OnboardedRoute>} />
