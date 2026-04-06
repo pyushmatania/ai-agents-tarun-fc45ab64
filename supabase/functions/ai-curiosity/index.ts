@@ -12,18 +12,18 @@ serve(async (req) => {
   try {
     const { query, category } = await req.json();
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://api.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
+        "Authorization": `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "google/gemini-2.5-flash",
         messages: [
           {
             role: "system",
-            content: `You are an AI agents expert. When given a search query about AI agents, generate 5 realistic, informative items. Each item should have: "title" (string), "url" (a plausible https URL), "desc" (one sentence description), "type" (one of: tool, repo, article, video, news). Respond with ONLY a JSON array.`
+            content: `You are an AI agents expert. When given a search query about AI agents, generate 5 realistic, informative items based on your knowledge. Each item should have: "title" (string), "url" (a real https URL if you know one, otherwise a plausible one), "desc" (one sentence description), "type" (one of: tool, repo, article, video, news). Respond with ONLY a valid JSON array, no other text.`
           },
           {
             role: "user",
