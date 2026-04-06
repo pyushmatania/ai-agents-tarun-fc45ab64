@@ -4,6 +4,7 @@ import PageTransition from "@/components/PageTransition";
 import Header from "@/components/Header";
 import { ArrowRight, RefreshCw, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const CURIOSITY = [
   { id: "industry", label: "🏭 Your Industry", desc: "AI agents in semiconductor & manufacturing", query: "AI agents semiconductor manufacturing India 2026 latest" },
@@ -30,25 +31,18 @@ const CuriosityPage = () => {
     setError("");
     setLoading(true);
     try {
-      const resp = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514", max_tokens: 1024,
-          tools: [{ type: "web_search_20250305", name: "web_search" }],
-          messages: [{ role: "user", content: `Search the web for: ${cat.query}\n\nThen compile findings into a JSON array of exactly 5 items. Each: "title" (string), "url" (string starting with https), "desc" (one sentence), "type" (tool/repo/article/video/news).\n\nRespond with ONLY the JSON array.` }]
-        })
+      const { data, error: fnError } = await supabase.functions.invoke("ai-curiosity", {
+        body: { query: cat.query, category: cat.id },
       });
-      const data = await resp.json();
-      let txt = "";
-      for (const b of (data.content || [])) { if (b.type === "text" && b.text) txt += b.text; }
-      const cleaned = txt.replace(/```json|```/g, "").trim();
-      const match = cleaned.match(/\[[\s\S]*\]/);
-      if (match) {
-        const parsed = JSON.parse(match[0]);
-        if (Array.isArray(parsed) && parsed.length > 0) { setResults(parsed); setLoading(false); return; }
+
+      if (fnError) throw new Error(fnError.message);
+
+      const items = data?.items || [];
+      if (items.length > 0) {
+        setResults(items);
+      } else {
+        setError("No results found. Try again!");
       }
-      if (txt.trim()) { setResults([{ title: "Results found", url: "#", desc: txt.slice(0, 250), type: "article" }]); }
-      else { setError("No results found. Try again!"); }
     } catch (e: any) {
       setError(e.message || "Failed to fetch. Try again!");
     }
