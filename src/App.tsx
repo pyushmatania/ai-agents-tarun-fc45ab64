@@ -12,6 +12,7 @@ import MegaPromptPage from "./pages/MegaPromptPage";
 import OnboardingPage from "./pages/OnboardingPage";
 import AuthPage from "./pages/AuthPage";
 import CuriosityPage from "./pages/CuriosityPage";
+import SourcesPage from "./pages/SourcesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
