@@ -91,34 +91,62 @@ const CoursesPage = () => {
       <div className="min-h-screen bg-background pb-24 relative overflow-hidden">
         {/* ===== Background decorations ===== */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* S-curve path */}
-          <svg className="absolute top-[220px] left-1/2 -translate-x-1/2 w-[300px] h-[900px] opacity-[0.04]" viewBox="0 0 300 900">
+          {/* S-curve path — more visible */}
+          <svg className="absolute top-[220px] left-1/2 -translate-x-1/2 w-[300px] h-[900px] opacity-[0.12]" viewBox="0 0 300 900">
             <path d="M150 0 Q30 120 150 240 Q270 360 150 480 Q30 600 150 720 Q270 840 150 900" fill="none" stroke="currentColor" strokeWidth="50" className="text-foreground" />
           </svg>
 
           {/* Grid dots */}
-          <div className="absolute inset-0 opacity-[0.03]" style={{
+          <div className="absolute inset-0 opacity-[0.07]" style={{
             backgroundImage: "radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
+            backgroundSize: "28px 28px",
           }} />
 
-          {/* Gradient glow top */}
-          <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[400px] h-[200px] rounded-full opacity-[0.06]"
+          {/* Gradient glow top — module-colored */}
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-[500px] h-[250px] rounded-full opacity-[0.15]"
             style={{ background: `radial-gradient(ellipse, ${mod.hex}, transparent 70%)` }}
           />
 
-          {/* Floating orbs */}
-          <FloatingOrb delay={0} x="10%" y="15%" size={60} color={`${mod.hex}18`} />
-          <FloatingOrb delay={2} x="80%" y="25%" size={40} color="hsla(100,95%,40%,0.08)" />
-          <FloatingOrb delay={4} x="5%" y="55%" size={50} color="hsla(199,92%,54%,0.08)" />
-          <FloatingOrb delay={1} x="85%" y="65%" size={35} color="hsla(270,100%,75%,0.08)" />
-          <FloatingOrb delay={3} x="50%" y="80%" size={45} color="hsla(46,100%,49%,0.08)" />
-          <FloatingOrb delay={5} x="25%" y="40%" size={30} color={`${mod.hex}12`} />
+          {/* Gradient glow bottom */}
+          <div className="absolute bottom-20 left-1/4 w-[350px] h-[200px] rounded-full opacity-[0.08]"
+            style={{ background: `radial-gradient(ellipse, ${mod.hex}, transparent 70%)` }}
+          />
+
+          {/* Floating orbs — much more visible */}
+          <FloatingOrb delay={0} x="8%" y="12%" size={80} color={`${mod.hex}40`} />
+          <FloatingOrb delay={2} x="82%" y="22%" size={55} color="hsla(100,95%,40%,0.2)" />
+          <FloatingOrb delay={4} x="3%" y="50%" size={70} color="hsla(199,92%,54%,0.15)" />
+          <FloatingOrb delay={1} x="88%" y="60%" size={50} color="hsla(270,100%,75%,0.18)" />
+          <FloatingOrb delay={3} x="45%" y="78%" size={60} color="hsla(46,100%,49%,0.15)" />
+          <FloatingOrb delay={5} x="20%" y="38%" size={45} color={`${mod.hex}30`} />
 
           {/* Diagonal accent lines */}
-          <div className="absolute top-[300px] -left-10 w-[200px] h-[1px] rotate-[35deg] opacity-[0.06]"
+          <div className="absolute top-[280px] -left-10 w-[250px] h-[2px] rotate-[35deg] opacity-[0.15]"
             style={{ background: `linear-gradient(90deg, transparent, ${mod.hex}, transparent)` }}
           />
+          <div className="absolute top-[480px] -right-10 w-[220px] h-[2px] -rotate-[25deg] opacity-[0.15]"
+            style={{ background: `linear-gradient(90deg, transparent, ${mod.hex}, transparent)` }}
+          />
+          <div className="absolute top-[700px] -left-5 w-[180px] h-[2px] rotate-[20deg] opacity-[0.12]"
+            style={{ background: `linear-gradient(90deg, transparent, ${mod.hex}, transparent)` }}
+          />
+
+          {/* Hexagon decorations */}
+          <svg className="absolute top-[150px] right-[10%] w-16 h-16 opacity-[0.08]" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="none" stroke={mod.hex} strokeWidth="2" />
+          </svg>
+          <svg className="absolute top-[450px] left-[5%] w-12 h-12 opacity-[0.06]" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="none" stroke={mod.hex} strokeWidth="2" />
+          </svg>
+
+          {/* Circuit-style corner lines */}
+          <svg className="absolute top-[60px] right-0 w-[120px] h-[120px] opacity-[0.08]" viewBox="0 0 120 120">
+            <path d="M120,0 L120,40 L80,40 L80,80 L40,80 L40,120" fill="none" stroke={mod.hex} strokeWidth="1.5" strokeDasharray="4 4" />
+          </svg>
+          <svg className="absolute bottom-[120px] left-0 w-[100px] h-[100px] opacity-[0.08]" viewBox="0 0 100 100">
+            <path d="M0,0 L0,35 L35,35 L35,70 L70,70 L70,100" fill="none" stroke={mod.hex} strokeWidth="1.5" strokeDasharray="4 4" />
+          </svg>
+        </div>
           <div className="absolute top-[500px] -right-10 w-[180px] h-[1px] -rotate-[25deg] opacity-[0.06]"
             style={{ background: `linear-gradient(90deg, transparent, ${mod.hex}, transparent)` }}
           />
