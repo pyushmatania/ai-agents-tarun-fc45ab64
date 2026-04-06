@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Sparkles, Shield, Wifi, Cpu, Zap, BookOpen, Users } from "lucide-react";
-import BotIllustration from "@/components/illustrations/BotIllustration";
+import MascotRobot from "@/components/MascotRobot";
 import heroSplash from "@/assets/hero-splash.png";
 import heroOnboarding from "@/assets/hero-onboarding.png";
 import FloatingShapes from "@/components/illustrations/FloatingShapes";
@@ -88,6 +88,16 @@ const OnboardingPage = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
             </div>
+
+            {/* Mascot */}
+            <motion.div
+              initial={{ scale: 0, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+              className="mb-4"
+            >
+              <MascotRobot size={100} mood="waving" speech="Welcome! Let's learn AI! 🤖" />
+            </motion.div>
 
             {/* Title */}
             <motion.h1

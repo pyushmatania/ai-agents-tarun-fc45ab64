@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import MascotRobot from "@/components/MascotRobot";
 
 interface ProgressWithCourse {
   id: string;
@@ -93,10 +94,16 @@ const ProgressPage = () => {
         <div className="max-w-md mx-auto px-4 pt-5">
           <Header name={userName} progress={displayProgress} />
 
-          {/* Page Title */}
+          {/* Page Title with Mascot */}
           <FadeIn>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-display font-bold text-foreground">Your Stats</h2>
+              <div className="flex items-center gap-3">
+                <MascotRobot size={50} mood={done.length >= 22 ? "celebrating" : done.length > 10 ? "excited" : "happy"} animate={true} />
+                <div>
+                  <h2 className="text-base font-display font-bold text-foreground">Your Stats</h2>
+                  <p className="text-[10px] text-muted-foreground">Level {level} • {xp} XP</p>
+                </div>
+              </div>
               <div className="flex items-center gap-1 bg-primary/10 rounded-lg px-2.5 py-1">
                 <Star size={10} className="text-primary" />
                 <span className="text-[10px] font-bold text-primary">Level {level}</span>
