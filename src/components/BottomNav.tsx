@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 const tabs = [
   { icon: Home, path: "/", label: "Home" },
-  { icon: BookOpen, path: "/courses", label: "Courses" },
+  { icon: BookOpen, path: "/courses", label: "Learn" },
   { icon: Sparkles, path: "/curiosity", label: "Spark" },
   { icon: Compass, path: "/sources", label: "Hub" },
   { icon: FileText, path: "/mega-prompt", label: "Prompt" },
@@ -17,25 +17,25 @@ const BottomNav = () => {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50">
       <div className="max-w-md mx-auto px-3 pb-2">
-        <div className="glass border border-border/40 rounded-2xl px-1 py-1.5 flex items-center justify-around">
+        <div className="glass border border-border/30 rounded-2xl px-1 py-1 flex items-center justify-around shadow-elevated backdrop-blur-xl">
           {tabs.map((tab) => {
             const isActive = location.pathname === tab.path;
             return (
               <button
                 key={tab.path}
                 onClick={() => navigate(tab.path)}
-                className={`relative flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all duration-200 ${
+                className={`relative flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-xl transition-all duration-300 ${
                   isActive
-                    ? "bg-primary/15 text-primary"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "bg-primary/15 text-primary scale-105"
+                    : "text-muted-foreground hover:text-foreground active:scale-95"
                 }`}
               >
-                <tab.icon size={15} strokeWidth={isActive ? 2.5 : 1.8} />
-                <span className={`text-[8px] font-semibold leading-none ${isActive ? "text-primary" : "text-muted-foreground"}`}>
+                <tab.icon size={14} strokeWidth={isActive ? 2.5 : 1.8} />
+                <span className={`text-[7px] font-bold leading-none tracking-wide ${isActive ? "text-primary" : "text-muted-foreground"}`}>
                   {tab.label}
                 </span>
                 {isActive && (
-                  <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-primary" />
+                  <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-primary shadow-glow-primary" />
                 )}
               </button>
             );
