@@ -89,7 +89,7 @@ Decision matrix:
 6. A2A (Agent-to-Agent Protocol) — Google's protocol for agents from different frameworks to discover and communicate.`,
   },
   {
-    title: "🏢 Phase 3: Multi-Agent Systems — "Build Your AI Startup Team"",
+    title: '🏢 Phase 3: Multi-Agent Systems — "Build Your AI Startup Team"',
     content: `7. The AI Organization — Design a multi-agent system that mirrors a real organization:
 
 CEO Agent — Strategic decisions, goal-setting, conflict resolution
