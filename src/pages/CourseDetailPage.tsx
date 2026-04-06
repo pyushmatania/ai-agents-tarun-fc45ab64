@@ -181,7 +181,7 @@ const CourseDetailPage = () => {
             {/* Hearts */}
             <div className="flex items-center gap-1 bg-agni-pink/15 rounded-full px-2 py-1">
               <Heart size={14} className="text-agni-pink fill-agni-pink" />
-              <span className="text-xs font-black text-agni-pink">{hearts}</span>
+              <span className="text-xs font-black text-agni-pink">{stats.hearts}</span>
             </div>
           </div>
 
