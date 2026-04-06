@@ -1,15 +1,6 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SFX } from "@/lib/sounds";
-
-import agniDefault from "@/assets/agni-default.png";
-import agniHappy from "@/assets/agni-happy.png";
-import agniExcited from "@/assets/agni-excited.png";
-import agniThinking from "@/assets/agni-thinking.png";
-import agniSad from "@/assets/agni-sad.png";
-import agniTeaching from "@/assets/agni-teaching.png";
-import agniSleeping from "@/assets/agni-sleeping.png";
-import agniCelebrating from "@/assets/agni-celebrating.png";
 
 export type AgniExpression =
   | "default"
@@ -31,16 +22,41 @@ interface AgniProps {
   onExpressionChange?: (expr: AgniExpression) => void;
 }
 
-const EXPRESSION_IMAGES: Record<AgniExpression, string> = {
-  default: agniDefault,
-  happy: agniHappy,
-  excited: agniExcited,
-  thinking: agniThinking,
-  sad: agniSad,
-  teaching: agniTeaching,
-  sleeping: agniSleeping,
-  celebrating: agniCelebrating,
+// Only eagerly import default; lazy-load the rest
+import agniDefault from "@/assets/agni-default.png";
+
+const LAZY_IMPORTS: Partial<Record<AgniExpression, () => Promise<{ default: string }>>> = {
+  happy: () => import("@/assets/agni-happy.png"),
+  excited: () => import("@/assets/agni-excited.png"),
+  thinking: () => import("@/assets/agni-thinking.png"),
+  sad: () => import("@/assets/agni-sad.png"),
+  teaching: () => import("@/assets/agni-teaching.png"),
+  sleeping: () => import("@/assets/agni-sleeping.png"),
+  celebrating: () => import("@/assets/agni-celebrating.png"),
 };
+
+// Cache resolved URLs
+const imageCache: Record<string, string> = { default: agniDefault };
+
+function useAgniImage(expression: AgniExpression): string {
+  const [src, setSrc] = useState(imageCache[expression] || agniDefault);
+
+  useEffect(() => {
+    if (imageCache[expression]) {
+      setSrc(imageCache[expression]);
+      return;
+    }
+    const loader = LAZY_IMPORTS[expression];
+    if (loader) {
+      loader().then((mod) => {
+        imageCache[expression] = mod.default;
+        setSrc(mod.default);
+      });
+    }
+  }, [expression]);
+
+  return src;
+}
 
 const CLICK_EXPRESSIONS: AgniExpression[] = ["happy", "excited", "celebrating", "teaching", "thinking", "default"];
 
@@ -130,6 +146,7 @@ const Agni = ({ expression = "default", size = 100, speech, animate = true, clas
 
   const currentExpr = activeExpr ?? expression;
   const displaySpeech = clickSpeech ?? speech;
+  const imageSrc = useAgniImage(currentExpr);
 
   const spawnParticles = useCallback((expr: AgniExpression) => {
     const emojis = PARTICLE_EMOJIS[expr];
@@ -277,10 +294,11 @@ const Agni = ({ expression = "default", size = 100, speech, animate = true, clas
           transition={{ duration: 0.25 }}
         >
           <motion.img
-            src={EXPRESSION_IMAGES[currentExpr]}
+            src={imageSrc}
             alt={`AGNI ${currentExpr}`}
             width={size}
             height={size}
+            loading="lazy"
             animate={animate ? getBodyAnimation(currentExpr) : {}}
             className="object-contain select-none"
             style={{
