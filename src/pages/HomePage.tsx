@@ -45,6 +45,9 @@ const HomePage = () => {
 
   const todayTip = DAILY_TIPS[new Date().getDay() % DAILY_TIPS.length];
   const greeting = new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening";
+  const dailyGoal = 50; // XP daily goal
+  const dailyXpEarned = Math.min(xp % 100, dailyGoal);
+  const dailyProgress = (dailyXpEarned / dailyGoal) * 100;
 
   useEffect(() => {
     const timer = setTimeout(() => setAgniExpression("happy"), 2000);
@@ -124,7 +127,36 @@ const HomePage = () => {
                     </span>
                   </div>
                 </div>
-                <Agni expression={agniExpression} size={100} speech={agniSpeech} />
+                {/* Daily Goal Ring around AGNI */}
+                <div className="relative">
+                  <svg viewBox="0 0 110 110" className="w-[100px] h-[100px] -rotate-90">
+                    <circle cx="55" cy="55" r="50" fill="none" stroke="hsl(var(--muted))" strokeWidth="4" opacity="0.3" />
+                    <motion.circle
+                      cx="55" cy="55" r="50" fill="none" stroke="hsl(var(--agni-green))" strokeWidth="4" strokeLinecap="round"
+                      initial={{ strokeDasharray: "0 314" }}
+                      animate={{ strokeDasharray: `${dailyProgress * 3.14} 314` }}
+                      transition={{ duration: 1.2, delay: 0.3 }}
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Agni expression={agniExpression} size={75} speech={agniSpeech} />
+                  </div>
+                </div>
+              </div>
+              {/* Daily goal bar */}
+              <div className="px-4 pb-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[9px] font-bold text-muted-foreground">DAILY GOAL</span>
+                  <span className="text-[9px] font-black text-agni-green">{dailyXpEarned}/{dailyGoal} XP</span>
+                </div>
+                <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full bg-agni-green rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${dailyProgress}%` }}
+                    transition={{ duration: 1, delay: 0.5 }}
+                  />
+                </div>
               </div>
             </motion.div>
           </FadeIn>
