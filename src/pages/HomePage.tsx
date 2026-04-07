@@ -390,6 +390,31 @@ const HomePage = () => {
                     </div>
                   </div>
                 ))}
+                {/* Custom mode input */}
+                <div className="mt-1">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-agni-purple to-agni-pink flex items-center justify-center shrink-0">
+                      <Sparkles size={12} className="text-white" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Type your own mode..."
+                      className="flex-1 bg-muted/20 border border-dashed border-agni-purple/25 rounded-full px-3 py-1.5 text-[10px] font-bold text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-agni-purple/50"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && (e.target as HTMLInputElement).value.trim()) {
+                          const val = (e.target as HTMLInputElement).value.trim();
+                          setActiveMode(val);
+                          localStorage.setItem("teaching_mode", val);
+                          window.dispatchEvent(new Event("storage"));
+                          SFX.tap();
+                          toast(`✨ ${val}`, { description: "Custom mode activated!", duration: 1500 });
+                          (e.target as HTMLInputElement).value = "";
+                        }
+                      }}
+                    />
+                  </div>
+                  <p className="text-[7px] text-muted-foreground/50 mt-0.5 pl-9 font-semibold">Press Enter to set</p>
+                </div>
               </CollapsibleContent>
             </Collapsible>
           </FadeIn>
