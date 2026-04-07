@@ -597,7 +597,66 @@ const OnboardingPage = () => {
           </motion.div>
         )}
 
-        {/* ═══════ STEP 7: VIBE ═══════ */}
+        {/* ═══════ STEP 6: MISSION FOLLOW-UP ═══════ */}
+        {step === 6 && selectedMission && MISSION_FOLLOWUPS[selectedMission] && (
+          <motion.div key="missionfollowup" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-agni-gold/15 to-transparent pointer-events-none" />
+
+            <div className="flex flex-col flex-1 min-h-0 relative z-10">
+              <div className="flex justify-center mb-3 shrink-0">
+                <Agni expression="excited" size={80} speech="Let me understand your goal better! 🎯" animate />
+              </div>
+
+              <h2 className="text-xl font-black text-foreground text-center mb-1 shrink-0">
+                {MISSION_MODES.find(m => m.id === selectedMission)?.emoji} Deep Dive
+              </h2>
+              <p className="text-xs text-muted-foreground text-center mb-4 shrink-0">
+                A few quick questions to personalize your {MISSION_MODES.find(m => m.id === selectedMission)?.label} journey
+              </p>
+
+              <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
+                <div className="space-y-4">
+                  {MISSION_FOLLOWUPS[selectedMission].map((q, i) => (
+                    <motion.div key={q.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.08 }}>
+                      <label className="text-[11px] font-extrabold text-foreground block mb-2">{q.label}</label>
+                      {q.type === "text" ? (
+                        <Input
+                          type="text"
+                          placeholder={q.placeholder}
+                          value={missionFollowup[q.id] || ""}
+                          onChange={(e) => setMissionFollowup(prev => ({ ...prev, [q.id]: e.target.value }))}
+                          className="h-12 rounded-xl bg-card border-2 border-border text-sm font-bold focus:border-agni-green"
+                        />
+                      ) : (
+                        <div className="flex flex-wrap gap-2">
+                          {q.options?.map(opt => (
+                            <motion.button key={opt} whileTap={{ scale: 0.95 }} onClick={() => setMissionFollowup(prev => ({ ...prev, [q.id]: opt }))}
+                              className={`px-3 py-2 rounded-xl text-[11px] font-bold border-2 transition-all ${
+                                missionFollowup[q.id] === opt ? "border-agni-green bg-agni-green/10 text-agni-green" : "border-border bg-card text-muted-foreground"
+                              }`}
+                            >{opt}</motion.button>
+                          ))}
+                        </div>
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 shrink-0">
+              <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-2xl border-2 border-border text-sm font-bold">Skip</Button>
+              <Button onClick={goNext} className="flex-1 h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d">
+                CONTINUE <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+        {/* Skip mission followup if no questions for this mission */}
+        {step === 6 && (!selectedMission || !MISSION_FOLLOWUPS[selectedMission]) && (() => { goNext(); return null; })()}
+
         {step === 7 && (
           <motion.div key="vibe" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
