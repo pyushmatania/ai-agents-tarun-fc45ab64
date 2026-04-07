@@ -321,6 +321,7 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
     SFX.tap();
     setActiveMode(mode);
     localStorage.setItem("teaching_mode", mode);
+    window.dispatchEvent(new Event("storage"));
     const modeInfo = MODES.find(m => m.key === mode);
     if (modeInfo) {
       setMessages(prev => [...prev, { role: "assistant", content: `${modeInfo.emoji} **Mode switched to ${modeInfo.label}!** I'll adjust my teaching style accordingly.` }]);

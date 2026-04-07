@@ -356,6 +356,7 @@ const HomePage = () => {
                         onClick={() => {
                           setActiveMode(mode.id);
                           localStorage.setItem("teaching_mode", mode.id);
+                          window.dispatchEvent(new Event("storage"));
                           SFX.tap();
                           toast(`${mode.emoji} ${mode.label} mode activated`, { description: mode.desc, duration: 2000 });
                         }}
