@@ -1,4 +1,4 @@
-import { Bell, Settings, Flame, Sparkles, User } from "lucide-react";
+import { Bell, Settings, Flame, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useState, useCallback, useRef } from "react";
@@ -6,6 +6,8 @@ import Agni, { AgniExpression } from "./Agni";
 import MascotProfileModal from "./MascotProfileModal";
 import { hasPersona } from "@/lib/neuralOS";
 import { SFX } from "@/lib/sounds";
+import UserAvatar from "./UserAvatar";
+import { useAvatar } from "@/hooks/useAvatar";
 
 const EXPRESSIONS: AgniExpression[] = ["default", "happy", "excited", "thinking", "teaching", "celebrating"];
 
@@ -28,6 +30,7 @@ interface HeaderProps {
 const Header = ({ name, progress }: HeaderProps) => {
   const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
+  const { avatarUrl } = useAvatar();
   const xp = parseInt(localStorage.getItem("adojo_xp") || "0");
   const level = Math.floor(xp / 100) + 1;
   const personaActive = hasPersona();
@@ -100,14 +103,12 @@ const Header = ({ name, progress }: HeaderProps) => {
           </div>
         </div>
         <div className="flex items-center gap-1.5">
-          <motion.button
-            whileTap={{ scale: 0.9 }}
+          <UserAvatar
+            avatarUrl={avatarUrl}
+            name={name}
+            size="sm"
             onClick={() => navigate("/settings")}
-            className="w-8 h-8 rounded-xl glass flex items-center justify-center border border-border/50 hover:border-primary/30 transition-colors"
-            title="Profile"
-          >
-            <User size={14} className="text-muted-foreground" />
-          </motion.button>
+          />
           <motion.button
             whileTap={{ scale: 0.9 }}
             className="w-8 h-8 rounded-xl glass flex items-center justify-center border border-border/50 hover:border-primary/30 transition-colors relative"

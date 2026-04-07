@@ -30,7 +30,7 @@ const SettingsPage = () => {
   const navigate = useNavigate();
   const { stats, league } = useGamification();
   const { ctx, updateContext, loaded: ctxLoaded } = useUserContext();
-  const { avatarUrl, uploading, uploadAvatar } = useAvatar();
+  const { avatarUrl, uploading, generating, uploadAvatar, generateAIAvatar, removeAvatar } = useAvatar();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fullName, setFullName] = useState(localStorage.getItem("edu_user_name") || "");
   const [role, setRole] = useState(localStorage.getItem("edu_user_role") || "");
@@ -158,6 +158,30 @@ const SettingsPage = () => {
                     }}
                   />
                 </div>
+                {user && (
+                  <div className="flex gap-1.5 mt-1.5">
+                    <button 
+                      onClick={async () => {
+                        const url = await generateAIAvatar();
+                        if (url) toast.success("AI avatar generated! 🎨");
+                        else toast.error("Generation failed, try again");
+                      }}
+                      disabled={generating}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gradient-to-r from-agni-purple/20 to-agni-pink/20 border border-agni-purple/30 text-[9px] font-bold text-agni-purple hover:from-agni-purple/30 hover:to-agni-pink/30 transition-all disabled:opacity-50"
+                    >
+                      {generating ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} />}
+                      {generating ? "Creating..." : "AI Avatar"}
+                    </button>
+                    {avatarUrl && (
+                      <button 
+                        onClick={async () => { await removeAvatar(); toast.success("Avatar removed"); }}
+                        className="flex items-center gap-1 px-2 py-1 rounded-lg bg-destructive/10 border border-destructive/20 text-[9px] font-bold text-destructive hover:bg-destructive/20 transition-all"
+                      >
+                        <Trash2 size={9} /> Remove
+                      </button>
+                    )}
+                  </div>
+                )}
                 <div className="flex-1">
                   <p className="font-black text-foreground text-sm">{fullName || "Your Name"}</p>
                   <p className="text-[10px] text-muted-foreground font-semibold">{role || "Learner"}</p>
