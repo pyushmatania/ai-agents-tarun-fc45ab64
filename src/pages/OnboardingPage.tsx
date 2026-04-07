@@ -1091,7 +1091,7 @@ const OnboardingPage = () => {
           <motion.div key="whymatters" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
-            <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.whyMatters.bg} pointer-events-none`} />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#FFF8E1] via-[#FFE0B2] to-[#FADADD] pointer-events-none" />
             
             {/* Floating emojis */}
             {["🔥", "⚡", "🧠", "🎯", "🚀", "✨"].map((emoji, i) => (
