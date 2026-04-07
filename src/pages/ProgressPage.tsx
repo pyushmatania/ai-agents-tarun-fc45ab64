@@ -1,6 +1,6 @@
 import BottomNav from "@/components/BottomNav";
 import PageTransition, { FadeIn, StaggerContainer, StaggerItem } from "@/components/PageTransition";
-import { Trophy, Target, Flame, Zap, Calendar, BookOpen, Star, Award, Lock, Heart, Diamond, Shield, Crown, TrendingUp, ChevronRight } from "lucide-react";
+import { Trophy, Target, Flame, Zap, Calendar, BookOpen, Star, Award, Lock, Heart, Diamond, Shield, Crown, TrendingUp, ChevronRight, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -49,6 +49,14 @@ const ProgressPage = () => {
                 </div>
               </div>
               <div className="flex items-center gap-1.5">
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => navigate("/settings")}
+                  className="w-8 h-8 rounded-xl bg-card flex items-center justify-center border border-border/50 hover:border-primary/30 transition-colors"
+                  title="Profile"
+                >
+                  <User size={14} className="text-muted-foreground" />
+                </motion.button>
                 <div className="flex items-center gap-1 bg-agni-pink/15 rounded-full px-2 py-0.5">
                   <Heart size={10} className="text-agni-pink fill-agni-pink" />
                   <span className="text-[10px] font-black text-agni-pink">{stats.hearts}</span>
