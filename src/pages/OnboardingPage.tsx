@@ -145,6 +145,67 @@ const slideVariants = {
   center: { x: 0, opacity: 1 },
   exit: (dir: number) => ({ x: dir > 0 ? -300 : 300, opacity: 0 }),
 };
+/* ── Organic Blob Card (outside component to avoid re-mount flicker) ── */
+const ColorPill = ({ emoji, label, desc, selected, onClick, index }: {
+  emoji: string; label: string; desc: string; selected: boolean; onClick: () => void; index: number;
+}) => {
+  const blob = BLOB_STYLES[index % BLOB_STYLES.length];
+  return (
+    <motion.button
+      initial={{ opacity: 0, scale: 0.8, y: 15 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ delay: 0.05 + index * 0.04, type: "spring", stiffness: 300, damping: 20 }}
+      whileTap={{ scale: 0.92 }}
+      onClick={() => { SFX.select(); onClick(); }}
+      className={`relative px-3.5 py-3.5 ${blob.radius} text-left transition-all overflow-hidden ${blob.bg} ${
+        selected ? "ring-[3px] ring-[#58CC02] shadow-[0_0_20px_rgba(88,204,2,0.3)] scale-[1.03]" : "shadow-sm hover:shadow-md"
+      }`}
+    >
+      {selected && (
+        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#58CC02] flex items-center justify-center z-10 shadow-md">
+          <Check size={13} className="text-white" strokeWidth={3} />
+        </motion.div>
+      )}
+      <div className="flex items-center gap-2.5">
+        <span className="text-3xl">{emoji}</span>
+        <div className="min-w-0 flex-1">
+          <span className={`text-[13px] font-extrabold block leading-tight ${blob.text}`}>{label}</span>
+          <span className={`text-[9px] leading-tight block mt-0.5 ${blob.text} opacity-70`}>{desc}</span>
+        </div>
+      </div>
+    </motion.button>
+  );
+};
+
+/* ── Blob List Option (outside component to avoid re-mount flicker) ── */
+const ColorListOption = ({ emoji, label, desc, selected, onClick, index }: {
+  emoji: string; label: string; desc: string; selected: boolean; onClick: () => void; index: number;
+}) => {
+  const blob = BLOB_STYLES[index % BLOB_STYLES.length];
+  return (
+    <motion.button
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: 0.05 + index * 0.04 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={() => { SFX.select(); onClick(); }}
+      className={`w-full p-3.5 ${blob.radius} text-left flex items-center gap-3 transition-all ${blob.bg} ${
+        selected ? "ring-[3px] ring-[#58CC02] shadow-[0_0_20px_rgba(88,204,2,0.3)] scale-[1.02]" : "shadow-sm hover:shadow-md"
+      }`}
+    >
+      <span className="text-3xl shrink-0">{emoji}</span>
+      <div className="flex-1 min-w-0">
+        <span className={`text-[13px] font-extrabold block ${blob.text}`}>{label}</span>
+        <span className={`text-[10px] block mt-0.5 ${blob.text} opacity-70`}>{desc}</span>
+      </div>
+      {selected && (
+        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-6 h-6 rounded-full bg-[#58CC02] flex items-center justify-center shrink-0 shadow-md">
+          <Check size={14} className="text-white" strokeWidth={3} />
+        </motion.div>
+      )}
+    </motion.button>
+  );
+};
 
 const OnboardingPage = () => {
   const navigate = useNavigate();
