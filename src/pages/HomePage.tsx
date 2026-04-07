@@ -286,6 +286,7 @@ const HomePage = () => {
           )}
         </div>
         <BottomNav />
+        <MascotProfileModal open={showProfile} onClose={() => setShowProfile(false)} />
       </div>
     </PageTransition>
   );
