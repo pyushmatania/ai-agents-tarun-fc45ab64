@@ -15,7 +15,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { InterestPill } from "@/components/InterestPill";
 import type { AgniExpression } from "@/components/Agni";
 import { motion, AnimatePresence } from "framer-motion";
-import { savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona } from "@/lib/neuralOS";
+import { savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona, getSubFilters, getSubFilterCount } from "@/lib/neuralOS";
 
 /* ── EXPANDED ROLES ── */
 const ROLES = [
@@ -86,21 +86,7 @@ const slideVariants = {
   exit: (dir: number) => ({ x: dir > 0 ? -300 : 300, opacity: 0 }),
 };
 
-/** Extract unique sub-filter tags from a category's suggestions */
-function getSubFilters(cat: typeof SUGGESTION_CATEGORIES[0]): string[] {
-  const tagMap: Record<string, number> = {};
-  cat.suggestions.forEach(s => {
-    const tag = s.tag || "";
-    if (tag) {
-      // Normalize: use the broader group tag (e.g. "Cricket" from "Cricket", "Anime" from "Anime sci-fi")
-      const key = tag.split(" ")[0]; // simplify
-      tagMap[key] = (tagMap[key] || 0) + 1;
-    }
-  });
-  // Only show sub-filters if there are 3+ distinct groups with 2+ items
-  const groups = Object.entries(tagMap).filter(([, c]) => c >= 2).map(([k]) => k);
-  return groups.length >= 3 ? groups.slice(0, 8) : [];
-}
+// getSubFilters is now imported from neuralOS
 
 const OnboardingPage = () => {
   const navigate = useNavigate();
