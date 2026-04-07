@@ -98,14 +98,17 @@ const OnboardingPage = () => {
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [customRole, setCustomRole] = useState("");
   const [selectedVibe, setSelectedVibe] = useState<string | null>(null);
+  const [selectedMission, setSelectedMission] = useState<string | null>(null);
+  const [selectedBrain, setSelectedBrain] = useState<string | null>(null);
   const [persona, setPersona] = useState<Partial<NeuralOSPersona>>({});
   const [search, setSearch] = useState("");
   const [activeSubFilter, setActiveSubFilter] = useState<string | null>(null);
 
-  const categoryIndex = step >= 5 ? step - 5 : -1;
+  // Steps: 0=splash, 1=name, 2=role, 3=mission, 4=vibe, 5=brain, 6=why-matters, 7+=categories, last=confirm
+  const categoryIndex = step >= 7 ? step - 7 : -1;
   const activeCategory = categoryIndex >= 0 && categoryIndex < SUGGESTION_CATEGORIES.length
     ? SUGGESTION_CATEGORIES[categoryIndex] : null;
-  const isConfirmStep = step === 5 + SUGGESTION_CATEGORIES.length;
+  const isConfirmStep = step === 7 + SUGGESTION_CATEGORIES.length;
 
   const currentItems = activeCategory
     ? ((persona[activeCategory.field] as string[]) || [])
