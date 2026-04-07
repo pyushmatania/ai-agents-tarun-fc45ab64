@@ -9,7 +9,7 @@ import { Mail, Lock, User, ArrowRight, Eye, EyeOff, ArrowLeft, Sparkles } from "
 import { motion, AnimatePresence } from "framer-motion";
 import MascotRobot from "@/components/MascotRobot";
 
-type AuthView = "signin" | "signup" | "forgot";
+type AuthView = "signin" | "signup" | "forgot" | "verify";
 
 const AuthPage = () => {
   const [view, setView] = useState<AuthView>("signin");
