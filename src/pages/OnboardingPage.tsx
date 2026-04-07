@@ -634,18 +634,23 @@ const OnboardingPage = () => {
           <motion.div key="role" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
-            <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.identity.bg} pointer-events-none`} />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#F0E6FA] via-[#F5E0F0] to-[#FADADD] pointer-events-none" />
 
             <div className="flex-1 relative z-10 overflow-y-auto scrollbar-none">
+              <div className="flex justify-center mb-2">
+                <div className="bg-white/70 backdrop-blur-sm rounded-full px-4 py-1.5 shadow-sm border border-white/50">
+                  <span className="text-xs font-bold text-gray-600">Choose your character! 🎭</span>
+                </div>
+              </div>
               <div className="flex justify-center mb-3">
-                <Agni expression="thinking" size={80} speech="Choose your character! 🎭" animate />
+                <Agni expression="thinking" size={90} animate />
               </div>
 
-              <h2 className="text-2xl font-black text-foreground text-center mb-0.5">🎭 Pick Your Avatar</h2>
-              <p className="text-xs text-muted-foreground text-center mb-1">
-                <span className="text-agni-purple font-bold">Like choosing a character in a game!</span>
+              <h2 className="text-2xl font-black text-gray-800 text-center mb-0.5">🎭 Pick Your Avatar</h2>
+              <p className="text-xs text-center mb-1">
+                <span className="text-[#8B3FCF] font-bold">Like choosing a character in a game!</span>
               </p>
-              <p className="text-[10px] text-muted-foreground/70 text-center mb-4">
+              <p className="text-[10px] text-gray-500 text-center mb-4">
                 Your identity shapes how AGNI teaches — pick the world you live in
               </p>
 
