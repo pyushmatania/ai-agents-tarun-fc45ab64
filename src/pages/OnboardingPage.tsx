@@ -342,7 +342,65 @@ const OnboardingPage = () => {
           </motion.div>
         )}
 
-        {/* ═══════ STEP 3: ROLE (expanded) ═══════ */}
+        {/* ═══════ STEP 2: ABOUT YOU (age/gender) ═══════ */}
+        {step === 2 && (
+          <motion.div key="aboutyou" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-agni-pink/15 to-transparent pointer-events-none" />
+
+            <div className="flex-1 flex flex-col items-center justify-center relative z-10">
+              <Agni expression="happy" size={100} speech={`Nice to meet you, ${name}! 🤝`} animate />
+
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="w-full mt-6">
+                <h2 className="text-2xl font-black text-foreground text-center mb-1">Tell me about yourself</h2>
+                <p className="text-xs text-muted-foreground text-center mb-6">This helps AGNI pick the right examples & language</p>
+
+                <div className="space-y-4">
+                  {/* Age Range */}
+                  <div>
+                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2">🎂 Age Range</label>
+                    <div className="flex flex-wrap gap-2">
+                      {AGE_RANGES.map(age => (
+                        <motion.button key={age} whileTap={{ scale: 0.95 }} onClick={() => setAgeRange(age)}
+                          className={`px-3.5 py-2 rounded-xl text-xs font-bold border-2 transition-all ${
+                            ageRange === age ? "border-agni-green bg-agni-green/10 text-agni-green shadow-glow-green" : "border-border bg-card text-muted-foreground"
+                          }`}
+                        >
+                          {age}
+                        </motion.button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Gender */}
+                  <div>
+                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2">👤 Gender</label>
+                    <div className="flex flex-wrap gap-2">
+                      {GENDERS.map(g => (
+                        <motion.button key={g} whileTap={{ scale: 0.95 }} onClick={() => setGender(g)}
+                          className={`px-3.5 py-2 rounded-xl text-xs font-bold border-2 transition-all ${
+                            gender === g ? "border-agni-green bg-agni-green/10 text-agni-green shadow-glow-green" : "border-border bg-card text-muted-foreground"
+                          }`}
+                        >
+                          {g}
+                        </motion.button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-2xl border-2 border-border text-sm font-bold">Skip</Button>
+              <Button onClick={goNext} disabled={!ageRange && !gender} className="flex-1 h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none">
+                CONTINUE <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
         {step === 3 && (
           <motion.div key="role" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
