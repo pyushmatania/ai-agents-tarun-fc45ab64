@@ -372,11 +372,6 @@ const SettingsPage = () => {
                     <ChevronRight size={14} className="text-muted-foreground" />
                   </motion.div>
                 </div>
-                  </div>
-                </div>
-                <motion.div animate={{ rotate: neuralExpanded ? 90 : 0 }}>
-                  <ChevronRight size={14} className="text-muted-foreground" />
-                </motion.div>
               </motion.button>
 
               <AnimatePresence>
