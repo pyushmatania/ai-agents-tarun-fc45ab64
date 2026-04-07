@@ -72,6 +72,7 @@ const MascotProfileModal = ({ open, onClose }: MascotProfileModalProps) => {
   if (!open) return null;
 
   return (
+    <>
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
