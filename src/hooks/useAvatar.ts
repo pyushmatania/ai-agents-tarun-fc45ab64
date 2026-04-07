@@ -8,13 +8,14 @@ const LOCAL_KEY = "user_avatar_url";
 /**
  * Hook for user avatar management
  * - Upload DP to Cloud storage
- * - Generate fallback based on gender/interests
+ * - Generate AI avatar based on gender/interests
  * - Show across all pages
  */
 export function useAvatar() {
   const { user } = useAuth();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(() => localStorage.getItem(LOCAL_KEY));
   const [uploading, setUploading] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
   // Load avatar from profile on mount
   useEffect(() => {
@@ -39,21 +40,18 @@ export function useAvatar() {
       const ext = file.name.split(".").pop() || "jpg";
       const filePath = `${user.id}/avatar.${ext}`;
 
-      // Upload to storage
       const { error: uploadError } = await supabase.storage
         .from("avatars")
         .upload(filePath, file, { upsert: true });
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
       const { data: urlData } = supabase.storage
         .from("avatars")
         .getPublicUrl(filePath);
 
-      const url = urlData.publicUrl + `?t=${Date.now()}`; // Cache bust
+      const url = urlData.publicUrl + `?t=${Date.now()}`;
 
-      // Update profile
       await supabase
         .from("profiles")
         .update({ avatar_url: url })
@@ -67,6 +65,46 @@ export function useAvatar() {
       return null;
     } finally {
       setUploading(false);
+    }
+  }, [user]);
+
+  const generateAIAvatar = useCallback(async () => {
+    if (!user) return null;
+    setGenerating(true);
+    try {
+      const persona = getPersona();
+      const ctx = (() => {
+        try { return JSON.parse(localStorage.getItem("user_context") || "{}"); }
+        catch { return {}; }
+      })();
+
+      const interests = [
+        ...(persona.shows || []),
+        ...(persona.sports || []),
+        ...(persona.music || []),
+        ...(persona.games || []),
+      ].slice(0, 5);
+
+      const { data, error } = await supabase.functions.invoke("ai-avatar", {
+        body: {
+          gender: ctx.gender || null,
+          interests,
+          name: persona.name || localStorage.getItem("edu_user_name") || "User",
+        },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        setAvatarUrl(data.url);
+        localStorage.setItem(LOCAL_KEY, data.url);
+        return data.url;
+      }
+      return null;
+    } catch (e) {
+      console.error("AI Avatar generation failed:", e);
+      return null;
+    } finally {
+      setGenerating(false);
     }
   }, [user]);
 
@@ -84,7 +122,7 @@ export function useAvatar() {
     }
   }, [user]);
 
-  return { avatarUrl, uploading, uploadAvatar, removeAvatar };
+  return { avatarUrl, uploading, generating, uploadAvatar, generateAIAvatar, removeAvatar };
 }
 
 /**
