@@ -68,7 +68,20 @@ const TABS = [
   { id: "explore", label: "Explore", icon: Sparkles },
 ] as const;
 
-/** AI Learn Modal — NotebookLM-style content breakdown */
+/** Share a feed item via native share or clipboard */
+async function shareItem(item: { title: string; desc?: string; url?: string }) {
+  const text = `${item.title}${item.desc ? `\n${item.desc}` : ""}${item.url ? `\n${item.url}` : ""}`;
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: item.title, text: item.desc || "", url: item.url || "" });
+      return;
+    } catch {}
+  }
+  await navigator.clipboard.writeText(text);
+  toast.success("Link copied to clipboard! 📋");
+}
+
+
 function AILearnModal({ item, onClose }: { item: any; onClose: () => void }) {
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<any>(null);
