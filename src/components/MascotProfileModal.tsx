@@ -175,9 +175,18 @@ const MascotProfileModal = ({ open, onClose }: MascotProfileModalProps) => {
                   </div>
 
                   {noExactMatch && (
-                    <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="mt-1.5 text-[10px] text-agni-green font-bold">
-                      ✨ Add "<span className="text-foreground">{searchQuery.trim()}</span>" — press Enter
-                    </motion.p>
+                    <motion.button
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => addCustomFromSearch()}
+                      className="mt-1.5 w-full text-left bg-agni-purple/5 border border-agni-purple/20 rounded-xl px-3 py-2 flex items-center gap-2"
+                    >
+                      <Brain size={12} className="text-agni-purple shrink-0" />
+                      <span className="text-[10px] text-agni-purple font-bold">
+                        🔍 Search "<span className="text-foreground">{searchQuery.trim()}</span>" with AI — press Enter
+                      </span>
+                    </motion.button>
                   )}
 
                   {/* Sub-filter chips */}
