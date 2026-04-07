@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import PageTransition, { FadeIn } from "@/components/PageTransition";
-import { ExternalLink, Search, Zap, User, Star, BookOpen, Wrench, Code2, Mic, Newspaper, GraduationCap, Users, FlaskConical, X, RefreshCw, Loader2, ChevronRight, Clock, Rocket, DollarSign, Lightbulb, Shield, GitBranch } from "lucide-react";
+import { ExternalLink, Search, Zap, User, Star, BookOpen, Wrench, Code2, Mic, Newspaper, GraduationCap, Users, FlaskConical, X, RefreshCw, Loader2, ChevronRight, Clock, Rocket, DollarSign, Lightbulb, Shield, GitBranch, Flame, Heart, Diamond, TrendingUp } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import Agni from "@/components/Agni";
 import { useGamification } from "@/hooks/useGamification";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,15 +62,6 @@ const SOURCES: Source[] = [
   { title: "Chain-of-Thought", desc: "Enabling reasoning in LLMs", url: "https://arxiv.org/abs/2201.11903", icon: "🔬", type: "paper" },
 ];
 
-const NEWS_CATEGORY_ICONS: Record<string, typeof Rocket> = {
-  launch: Rocket,
-  funding: DollarSign,
-  research: Lightbulb,
-  product: Zap,
-  policy: Shield,
-  "open-source": GitBranch,
-};
-
 const NEWS_CATEGORY_COLORS: Record<string, string> = {
   launch: "#FF4B4B",
   funding: "#58CC02",
@@ -78,6 +69,93 @@ const NEWS_CATEGORY_COLORS: Record<string, string> = {
   product: "#1CB0F6",
   policy: "#FF9600",
   "open-source": "#FFC800",
+};
+
+const NEWS_CATEGORY_EMOJIS: Record<string, string> = {
+  launch: "🚀",
+  funding: "💰",
+  research: "🔬",
+  product: "⚡",
+  policy: "🛡️",
+  "open-source": "🌐",
+};
+
+// Swipeable news card component
+const SwipeableNewsCard = ({ news, index, total, onNext, onPrev }: {
+  news: NewsItem; index: number; total: number;
+  onNext: () => void; onPrev: () => void;
+}) => {
+  const x = useMotionValue(0);
+  const rotate = useTransform(x, [-200, 200], [-8, 8]);
+  const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0.5, 1, 1, 1, 0.5]);
+  const catColor = NEWS_CATEGORY_COLORS[news.category] || "#1CB0F6";
+  const catEmoji = NEWS_CATEGORY_EMOJIS[news.category] || "📰";
+
+  const handleDragEnd = (_: any, info: PanInfo) => {
+    if (info.offset.x < -60) onNext();
+    else if (info.offset.x > 60) onPrev();
+  };
+
+  return (
+    <motion.div
+      key={`news-${index}`}
+      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.9, y: -20 }}
+      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.15}
+      onDragEnd={handleDragEnd}
+      style={{ x, rotate, opacity }}
+      className="rounded-3xl overflow-hidden cursor-grab active:cursor-grabbing touch-pan-y"
+      whileTap={{ scale: 0.98 }}
+    >
+      {/* Colored top banner */}
+      <div className="p-3 pb-2 relative" style={{ background: catColor }}>
+        <div className="absolute -right-6 -top-6 w-20 h-20 rounded-full bg-white/10" />
+        <div className="absolute right-8 bottom-0 w-10 h-10 rounded-full bg-white/5" />
+        <div className="flex items-center gap-2 relative z-10">
+          <span className="text-lg">{catEmoji}</span>
+          <span className="text-[9px] font-black text-white/90 tracking-wider uppercase">{news.category}</span>
+          <span className="ml-auto text-[8px] text-white/60 font-bold flex items-center gap-0.5">
+            <Clock size={8} /> {news.timeAgo}
+          </span>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="bg-card p-4 border-x-2 border-b-2 border-border/30 rounded-b-3xl"
+        style={{ boxShadow: `0 4px 0 0 ${catColor}30` }}
+      >
+        <h3 className="text-[14px] font-black text-foreground leading-tight mb-2">{news.title}</h3>
+        <p className="text-[10px] text-muted-foreground leading-relaxed mb-3">{news.summary}</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <div className="w-4 h-4 rounded-full flex items-center justify-center text-[8px]" style={{ background: `${catColor}20` }}>
+              📰
+            </div>
+            <span className="text-[9px] font-bold text-muted-foreground">{news.source}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-[9px] font-black" style={{ color: catColor }}>{index + 1}</span>
+            <span className="text-[9px] text-muted-foreground/40 font-bold">/ {total}</span>
+          </div>
+        </div>
+
+        {/* Swipe hint */}
+        <div className="flex items-center justify-center mt-3 gap-1">
+          <motion.div
+            className="text-[8px] text-muted-foreground/30 font-bold"
+            animate={{ x: [-3, 3, -3] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            ← swipe →
+          </motion.div>
+        </div>
+      </div>
+    </motion.div>
+  );
 };
 
 const SourcesPage = () => {
@@ -89,8 +167,8 @@ const SourcesPage = () => {
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [newsLoading, setNewsLoading] = useState(true);
   const [activeNewsIdx, setActiveNewsIdx] = useState(0);
+  const [swipeDir, setSwipeDir] = useState<"left" | "right">("left");
 
-  // Fetch news on mount
   useEffect(() => {
     const fetchNews = async () => {
       setNewsLoading(true);
@@ -106,25 +184,42 @@ const SourcesPage = () => {
     fetchNews();
   }, []);
 
-  const getZoneSources = (zoneId: string) => SOURCES.filter(s => s.type === zoneId);
+  const goNextNews = () => {
+    if (activeNewsIdx < newsItems.length - 1) {
+      setSwipeDir("left");
+      setActiveNewsIdx(prev => prev + 1);
+    }
+  };
+  const goPrevNews = () => {
+    if (activeNewsIdx > 0) {
+      setSwipeDir("right");
+      setActiveNewsIdx(prev => prev - 1);
+    }
+  };
 
+  const getZoneSources = (zoneId: string) => SOURCES.filter(s => s.type === zoneId);
   const searchResults = searchQuery
     ? SOURCES.filter(s => s.title.toLowerCase().includes(searchQuery.toLowerCase()) || s.desc.toLowerCase().includes(searchQuery.toLowerCase()))
     : [];
-
   const filteredSources = activeZone ? getZoneSources(activeZone) : [];
   const activeZoneData = ZONES.find(z => z.id === activeZone);
 
   return (
     <PageTransition>
       <div className="min-h-screen bg-background pb-24 relative overflow-hidden">
-        {/* Subtle background */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full opacity-[0.08]"
-            style={{ background: "radial-gradient(ellipse, #1CB0F6, transparent 70%)" }}
+        {/* Colorful background blobs */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute -top-20 -left-20 w-[350px] h-[350px] rounded-full opacity-[0.07]"
+            style={{ background: "radial-gradient(circle, #FF4B4B, transparent 70%)" }}
           />
-          <div className="absolute bottom-[30%] -left-20 w-[300px] h-[300px] rounded-full opacity-[0.06]"
+          <div className="absolute top-[20%] -right-20 w-[300px] h-[300px] rounded-full opacity-[0.06]"
+            style={{ background: "radial-gradient(circle, #1CB0F6, transparent 70%)" }}
+          />
+          <div className="absolute bottom-[20%] -left-10 w-[250px] h-[250px] rounded-full opacity-[0.05]"
             style={{ background: "radial-gradient(circle, #58CC02, transparent 70%)" }}
+          />
+          <div className="absolute bottom-[5%] right-0 w-[200px] h-[200px] rounded-full opacity-[0.06]"
+            style={{ background: "radial-gradient(circle, #CE82FF, transparent 70%)" }}
           />
         </div>
 
@@ -133,24 +228,48 @@ const SourcesPage = () => {
           <FadeIn>
             <div className="px-4 pt-4 pb-2 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1 bg-agni-orange/15 rounded-full px-2 py-1">
+                  <Flame size={12} className="text-agni-orange" />
+                  <span className="text-[10px] font-black text-agni-orange">{stats.streak}</span>
+                </div>
                 <div className="flex items-center gap-1 bg-agni-green/15 rounded-full px-2 py-1">
                   <Zap size={12} className="text-agni-green" />
                   <span className="text-[10px] font-black text-agni-green">{stats.xp}</span>
                 </div>
-                <div className="flex items-center gap-1 bg-agni-gold/15 rounded-full px-2 py-1">
-                  <Star size={12} className="text-agni-gold fill-agni-gold" />
-                  <span className="text-[10px] font-black text-agni-gold">{SOURCES.length}</span>
-                </div>
               </div>
               <h1 className="text-sm font-black text-foreground">Hub</h1>
-              <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate("/settings")} className="w-7 h-7 rounded-xl bg-card flex items-center justify-center border border-border/50">
-                <User size={12} className="text-muted-foreground" />
-              </motion.button>
+              <div className="flex items-center gap-1.5">
+                <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate("/settings")} className="w-7 h-7 rounded-xl bg-card flex items-center justify-center border border-border/50">
+                  <User size={12} className="text-muted-foreground" />
+                </motion.button>
+                <div className="flex items-center gap-1 bg-agni-pink/15 rounded-full px-2 py-1">
+                  <Heart size={12} className="text-agni-pink fill-agni-pink" />
+                  <span className="text-[10px] font-black text-agni-pink">5</span>
+                </div>
+              </div>
+            </div>
+          </FadeIn>
+
+          {/* Hero banner */}
+          <FadeIn delay={0.05}>
+            <div className="mx-4 rounded-3xl p-4 mb-4 relative overflow-hidden"
+              style={{ background: "linear-gradient(135deg, #1CB0F6, #CE82FF)", boxShadow: "0 4px 0 0 #1899D680" }}
+            >
+              <div className="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-white/10" />
+              <div className="absolute left-[20%] -bottom-8 w-20 h-20 rounded-full bg-white/5" />
+              <div className="flex items-center gap-3 relative z-10">
+                <Agni expression="happy" size={48} animate={true} />
+                <div className="flex-1">
+                  <p className="text-white/50 text-[7px] font-black tracking-[0.2em]">KNOWLEDGE CENTER</p>
+                  <h3 className="text-white font-black text-base leading-tight">Resource Hub 🗂️</h3>
+                  <p className="text-white/60 text-[9px] font-bold mt-0.5">{SOURCES.length} curated resources</p>
+                </div>
+              </div>
             </div>
           </FadeIn>
 
           {/* Search */}
-          <FadeIn delay={0.05}>
+          <FadeIn delay={0.08}>
             <div className="px-4 mb-3">
               <div className="relative">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -159,7 +278,8 @@ const SourcesPage = () => {
                   placeholder="Search resources..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="w-full h-10 pl-9 pr-4 bg-card border border-border/40 rounded-2xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-agni-green/50 transition-colors"
+                  className="w-full h-10 pl-9 pr-4 bg-card border-2 border-border/30 rounded-2xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-agni-blue/50 transition-colors"
+                  style={{ boxShadow: "0 2px 0 0 hsl(var(--border) / 0.1)" }}
                 />
                 {searchQuery && (
                   <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -170,88 +290,74 @@ const SourcesPage = () => {
             </div>
           </FadeIn>
 
-          {/* ========== NEWS WIDGET — Inshorts Style ========== */}
-          <FadeIn delay={0.1}>
-            <div className="px-4 mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-1.5">
-                  <Newspaper size={13} className="text-agni-blue" />
-                  <span className="text-[11px] font-black text-foreground">AI Headlines</span>
-                </div>
-                <button onClick={() => window.location.reload()} className="text-[9px] font-bold text-muted-foreground flex items-center gap-1">
-                  <RefreshCw size={9} /> Refresh
-                </button>
-              </div>
-
-              {newsLoading ? (
-                <div className="space-y-2">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="h-24 rounded-2xl bg-muted/20 animate-pulse" />
-                  ))}
-                </div>
-              ) : newsItems.length > 0 ? (
-                <div className="relative">
-                  <AnimatePresence mode="wait">
+          {/* ========== SWIPEABLE NEWS WIDGET ========== */}
+          {!searchQuery && (
+            <FadeIn delay={0.1}>
+              <div className="px-4 mb-4">
+                <div className="flex items-center justify-between mb-2.5">
+                  <div className="flex items-center gap-1.5">
                     <motion.div
-                      key={activeNewsIdx}
-                      initial={{ opacity: 0, x: 40 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -40 }}
-                      transition={{ duration: 0.25 }}
-                      className="bg-card rounded-2xl border border-border/40 overflow-hidden"
+                      className="w-6 h-6 rounded-lg flex items-center justify-center"
+                      style={{ background: "#FF4B4B20" }}
+                      animate={{ rotate: [0, 5, -5, 0] }}
+                      transition={{ duration: 3, repeat: Infinity }}
                     >
-                      {(() => {
-                        const news = newsItems[activeNewsIdx];
-                        const catColor = NEWS_CATEGORY_COLORS[news.category] || "#1CB0F6";
-                        const CatIcon = NEWS_CATEGORY_ICONS[news.category] || Zap;
-                        return (
-                          <div className="p-4">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: `${catColor}20` }}>
-                                <CatIcon size={12} style={{ color: catColor }} />
-                              </div>
-                              <span className="text-[8px] font-black tracking-wider uppercase" style={{ color: catColor }}>
-                                {news.category}
-                              </span>
-                              <span className="ml-auto text-[8px] text-muted-foreground font-semibold flex items-center gap-0.5">
-                                <Clock size={8} /> {news.timeAgo}
-                              </span>
-                            </div>
-                            <h3 className="text-[13px] font-black text-foreground leading-tight mb-1.5">{news.title}</h3>
-                            <p className="text-[10px] text-muted-foreground leading-relaxed mb-2">{news.summary}</p>
-                            <div className="flex items-center justify-between">
-                              <span className="text-[8px] font-bold text-muted-foreground/60">{news.source}</span>
-                              <span className="text-[8px] font-bold text-muted-foreground/40">{activeNewsIdx + 1}/{newsItems.length}</span>
-                            </div>
-                          </div>
-                        );
-                      })()}
+                      <TrendingUp size={12} className="text-agni-red" />
                     </motion.div>
-                  </AnimatePresence>
+                    <span className="text-[11px] font-black text-foreground">AI Headlines</span>
+                    <span className="text-[8px] font-bold text-agni-red bg-agni-red/10 px-1.5 py-0.5 rounded-full">LIVE</span>
+                  </div>
+                  <button onClick={() => window.location.reload()} className="text-[9px] font-bold text-muted-foreground flex items-center gap-1 bg-card px-2 py-1 rounded-xl border border-border/30">
+                    <RefreshCw size={9} /> Refresh
+                  </button>
+                </div>
 
-                  {/* Swipe dots + navigation */}
-                  <div className="flex items-center justify-center gap-1.5 mt-2.5">
-                    {newsItems.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setActiveNewsIdx(i)}
-                        className="rounded-full transition-all duration-200"
-                        style={{
-                          width: i === activeNewsIdx ? 16 : 5,
-                          height: 5,
-                          background: i === activeNewsIdx ? "#1CB0F6" : "hsl(var(--muted-foreground) / 0.2)",
-                        }}
-                      />
+                {newsLoading ? (
+                  <div className="space-y-2">
+                    {[1, 2].map(i => (
+                      <div key={i} className="h-32 rounded-3xl bg-muted/15 animate-pulse" style={{ animationDelay: `${i * 200}ms` }} />
                     ))}
                   </div>
-                </div>
-              ) : (
-                <div className="bg-card rounded-2xl p-4 border border-border/40 text-center">
-                  <p className="text-[10px] text-muted-foreground">Could not load news. Pull to refresh.</p>
-                </div>
-              )}
-            </div>
-          </FadeIn>
+                ) : newsItems.length > 0 ? (
+                  <div className="relative overflow-hidden">
+                    <AnimatePresence mode="wait">
+                      <SwipeableNewsCard
+                        key={activeNewsIdx}
+                        news={newsItems[activeNewsIdx]}
+                        index={activeNewsIdx}
+                        total={newsItems.length}
+                        onNext={goNextNews}
+                        onPrev={goPrevNews}
+                      />
+                    </AnimatePresence>
+
+                    {/* Progress dots */}
+                    <div className="flex items-center justify-center gap-1.5 mt-3">
+                      {newsItems.map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setActiveNewsIdx(i)}
+                          className="rounded-full transition-all duration-300"
+                          style={{
+                            width: i === activeNewsIdx ? 20 : 6,
+                            height: 6,
+                            background: i === activeNewsIdx
+                              ? NEWS_CATEGORY_COLORS[newsItems[i].category] || "#1CB0F6"
+                              : "hsl(var(--muted-foreground) / 0.15)",
+                            boxShadow: i === activeNewsIdx ? `0 0 8px ${NEWS_CATEGORY_COLORS[newsItems[i].category] || "#1CB0F6"}40` : "none",
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-card rounded-3xl p-4 border-2 border-border/30 text-center" style={{ boxShadow: "0 3px 0 0 hsl(var(--border) / 0.1)" }}>
+                    <p className="text-[10px] text-muted-foreground">Could not load news. Tap refresh.</p>
+                  </div>
+                )}
+              </div>
+            </FadeIn>
+          )}
 
           {/* Search Results */}
           <AnimatePresence>
@@ -268,16 +374,17 @@ const SourcesPage = () => {
                         initial={{ opacity: 0, y: 5 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.03 }}
-                        className="flex items-center gap-2.5 bg-card rounded-xl p-2.5 border border-border/40 hover:border-agni-green/20 transition-all"
+                        className="flex items-center gap-2.5 bg-card rounded-2xl p-3 border-2 border-border/30 active:scale-[0.98] transition-all"
+                        style={{ boxShadow: "0 2px 0 0 hsl(var(--border) / 0.1)" }}
                       >
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm" style={{ background: `${zone?.color || "#58CC02"}18` }}>
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-base" style={{ background: `${zone?.color || "#58CC02"}18` }}>
                           {s.icon}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-[11px] font-extrabold text-foreground truncate">{s.title}</p>
                           <p className="text-[9px] text-muted-foreground truncate">{s.desc}</p>
                         </div>
-                        <ExternalLink size={10} className="text-muted-foreground shrink-0" />
+                        <ExternalLink size={10} className="text-muted-foreground/30 shrink-0" />
                       </motion.a>
                     );
                   })}
@@ -286,7 +393,7 @@ const SourcesPage = () => {
             )}
           </AnimatePresence>
 
-          {/* Category chips — horizontal scroll */}
+          {/* Category chips */}
           {!searchQuery && (
             <>
               <FadeIn delay={0.15}>
@@ -297,22 +404,27 @@ const SourcesPage = () => {
                       return (
                         <motion.button
                           key={zone.id}
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: 0.15 + i * 0.04 }}
-                          whileTap={{ scale: 0.92 }}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.15 + i * 0.04, type: "spring", stiffness: 300 }}
+                          whileTap={{ scale: 0.92, y: 2 }}
                           onClick={() => setActiveZone(prev => prev === zone.id ? null : zone.id)}
-                          className="flex items-center gap-1.5 px-3 py-2 rounded-2xl border-2 whitespace-nowrap shrink-0 transition-all"
+                          className="flex items-center gap-1.5 px-3 py-2.5 rounded-2xl border-2 whitespace-nowrap shrink-0 transition-all"
                           style={{
                             background: isActive ? zone.color : "hsl(var(--card))",
-                            borderColor: isActive ? zone.color : "hsl(var(--border) / 0.4)",
-                            boxShadow: isActive ? `0 3px 0 0 ${zone.color}80` : "0 2px 0 0 hsl(var(--border) / 0.2)",
+                            borderColor: isActive ? zone.color : "hsl(var(--border) / 0.3)",
+                            boxShadow: isActive ? `0 3px 0 0 ${zone.color}80` : "0 2px 0 0 hsl(var(--border) / 0.15)",
                           }}
                         >
                           <span className="text-sm">{zone.icon}</span>
                           <span className="text-[10px] font-black" style={{ color: isActive ? "#fff" : "hsl(var(--foreground))" }}>
                             {zone.label}
                           </span>
+                          {isActive && (
+                            <span className="text-[8px] font-bold text-white/70 bg-white/20 px-1 py-0.5 rounded-full">
+                              {getZoneSources(zone.id).length}
+                            </span>
+                          )}
                         </motion.button>
                       );
                     })}
@@ -325,18 +437,19 @@ const SourcesPage = () => {
                 {activeZone && activeZoneData && (
                   <motion.div
                     key={activeZone}
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     className="px-4 mb-4"
                   >
                     {/* Zone header */}
-                    <div className="rounded-2xl p-3 mb-3 relative overflow-hidden"
+                    <div className="rounded-3xl p-3.5 mb-3 relative overflow-hidden"
                       style={{ background: activeZoneData.color, boxShadow: `0 4px 0 0 ${activeZoneData.color}80` }}
                     >
-                      <div className="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-white/10" />
-                      <div className="flex items-center gap-2 relative z-10">
-                        <span className="text-xl">{activeZoneData.icon}</span>
+                      <div className="absolute -right-6 -top-6 w-20 h-20 rounded-full bg-white/10" />
+                      <div className="absolute left-[40%] -bottom-4 w-14 h-14 rounded-full bg-white/5" />
+                      <div className="flex items-center gap-2.5 relative z-10">
+                        <span className="text-2xl">{activeZoneData.icon}</span>
                         <div>
                           <h3 className="text-white font-black text-sm">{activeZoneData.label}</h3>
                           <p className="text-white/60 text-[9px] font-bold">{activeZoneData.desc} · {filteredSources.length} resources</p>
@@ -344,17 +457,16 @@ const SourcesPage = () => {
                       </div>
                     </div>
 
-                    {/* Resource cards */}
                     <div className="space-y-2">
                       {filteredSources.map((s, i) => (
                         <motion.a
                           key={i}
                           href={s.url} target="_blank" rel="noopener noreferrer"
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.04 }}
-                          className="flex items-center gap-3 bg-card rounded-2xl p-3 border-2 border-border/30 hover:border-border/60 transition-all active:scale-[0.98]"
-                          style={{ boxShadow: "0 2px 0 0 hsl(var(--border) / 0.15)" }}
+                          initial={{ opacity: 0, x: -15 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.04, type: "spring", stiffness: 200 }}
+                          className="flex items-center gap-3 bg-card rounded-2xl p-3 border-2 border-border/30 active:scale-[0.98] transition-all"
+                          style={{ boxShadow: `0 2px 0 0 ${activeZoneData.color}15` }}
                         >
                           <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0"
                             style={{ background: `${activeZoneData.color}15` }}
@@ -365,7 +477,9 @@ const SourcesPage = () => {
                             <p className="text-[12px] font-extrabold text-foreground truncate">{s.title}</p>
                             <p className="text-[9px] text-muted-foreground truncate">{s.desc}</p>
                           </div>
-                          <ChevronRight size={14} className="text-muted-foreground/40 shrink-0" />
+                          <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: `${activeZoneData.color}10` }}>
+                            <ChevronRight size={12} style={{ color: activeZoneData.color }} />
+                          </div>
                         </motion.a>
                       ))}
                     </div>
@@ -373,39 +487,39 @@ const SourcesPage = () => {
                 )}
               </AnimatePresence>
 
-              {/* Default state: Featured grid when no zone selected */}
+              {/* Default grid when no zone selected */}
               {!activeZone && !searchQuery && (
                 <FadeIn delay={0.2}>
                   <div className="px-4">
-                    <p className="text-[10px] font-black text-muted-foreground tracking-wider mb-2">EXPLORE ZONES</p>
-                    <div className="grid grid-cols-2 gap-2">
+                    <p className="text-[10px] font-black text-muted-foreground tracking-wider mb-2.5">EXPLORE ZONES</p>
+                    <div className="grid grid-cols-2 gap-2.5">
                       {ZONES.map((zone, i) => {
                         const sources = getZoneSources(zone.id);
-                        const LucideIcon = zone.lucide;
                         return (
                           <motion.button
                             key={zone.id}
-                            initial={{ opacity: 0, y: 15 }}
-                            animate={{ opacity: 1, y: 0 }}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: 0.2 + i * 0.05, type: "spring", stiffness: 200 }}
-                            whileTap={{ scale: 0.95, y: 2 }}
+                            whileTap={{ scale: 0.93, y: 3 }}
                             onClick={() => setActiveZone(zone.id)}
                             className="bg-card rounded-2xl p-3.5 border-2 border-border/30 text-left relative overflow-hidden"
-                            style={{ boxShadow: `0 4px 0 0 ${zone.color}25` }}
+                            style={{ boxShadow: `0 4px 0 0 ${zone.color}30` }}
                           >
-                            <div className="absolute -right-3 -top-3 w-12 h-12 rounded-full opacity-[0.08]"
-                              style={{ background: zone.color }}
-                            />
-                            <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-2"
-                              style={{ background: `${zone.color}18` }}
+                            {/* Color accent top strip */}
+                            <div className="absolute top-0 left-0 right-0 h-1 rounded-t-2xl" style={{ background: zone.color }} />
+                            <div className="absolute -right-3 -top-3 w-14 h-14 rounded-full opacity-[0.1]" style={{ background: zone.color }} />
+
+                            <div className="w-11 h-11 rounded-2xl flex items-center justify-center mb-2"
+                              style={{ background: `${zone.color}18`, boxShadow: `0 2px 0 0 ${zone.color}20` }}
                             >
                               <span className="text-xl">{zone.icon}</span>
                             </div>
                             <p className="text-[11px] font-black text-foreground">{zone.label}</p>
-                            <p className="text-[8px] text-muted-foreground font-semibold">{sources.length} resources</p>
-                            <div className="flex items-center gap-0.5 mt-1">
-                              <LucideIcon size={8} style={{ color: zone.color }} />
-                              <span className="text-[7px] font-bold" style={{ color: zone.color }}>{zone.desc}</span>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: `${zone.color}15`, color: zone.color }}>
+                                {sources.length} resources
+                              </span>
                             </div>
                           </motion.button>
                         );
