@@ -13,6 +13,7 @@ import Agni from "@/components/Agni";
 import { getSuggestionImage, getPillColor } from "@/lib/suggestionImages";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { InterestPill } from "@/components/InterestPill";
+import SmartInterestSearch from "@/components/SmartInterestSearch";
 import type { AgniExpression } from "@/components/Agni";
 import { motion, AnimatePresence } from "framer-motion";
 import { savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona, getSubFilters, getSubFilterCount, POPULAR_PICKS } from "@/lib/neuralOS";
@@ -103,6 +104,8 @@ const OnboardingPage = () => {
   const [persona, setPersona] = useState<Partial<NeuralOSPersona>>({});
   const [search, setSearch] = useState("");
   const [activeSubFilter, setActiveSubFilter] = useState<string | null>(null);
+  const [smartSearchOpen, setSmartSearchOpen] = useState(false);
+  const [smartSearchQuery, setSmartSearchQuery] = useState("");
 
   // Steps: 0=splash, 1=name, 2=role, 3=mission, 4=vibe, 5=brain, 6=why-matters, 7+=categories, last=confirm
   const categoryIndex = step >= 7 ? step - 7 : -1;
@@ -144,13 +147,22 @@ const OnboardingPage = () => {
   // Search filters suggestions AND allows adding custom via Enter
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && search.trim() && activeCategory) {
-      const field = activeCategory.field as keyof NeuralOSPersona;
-      const current = (persona[field] as string[]) || [];
-      if (!current.includes(search.trim())) {
-        setPersona({ ...persona, [field]: [...current, search.trim()] });
-      }
-      setSearch("");
+      // Open smart AI search instead of directly adding
+      setSmartSearchQuery(search.trim());
+      setSmartSearchOpen(true);
     }
+  };
+
+  const handleSmartSearchSelect = (item: { name: string; category: string; subCategory: string }) => {
+    // Find the right category to add to
+    const targetCat = SUGGESTION_CATEGORIES.find(c => c.id === item.category) || activeCategory;
+    if (!targetCat) return;
+    const field = targetCat.field as keyof NeuralOSPersona;
+    const current = (persona[field] as string[]) || [];
+    if (!current.includes(item.name)) {
+      setPersona({ ...persona, [field]: [...current, item.name] });
+    }
+    setSearch("");
   };
 
   const subFilters = activeCategory ? getSubFilters(activeCategory) : [];
@@ -710,29 +722,29 @@ const OnboardingPage = () => {
                 </div>
               </div>
 
-              {/* Add custom — prominent card when typing something new */}
+              {/* Add custom — AI Smart Search when typing something new */}
               {showAddCustom && (
                 <motion.button
                   initial={{ opacity: 0, y: -8, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                  onClick={() => { toggleItem(search.trim()); setSearch(""); }}
-                  className="mb-2 shrink-0 w-full text-left overflow-hidden rounded-2xl border-2 border-dashed border-agni-gold/40 bg-gradient-to-r from-agni-gold/10 via-agni-orange/5 to-agni-pink/10 hover:border-agni-gold/60 transition-all"
+                  onClick={() => { setSmartSearchQuery(search.trim()); setSmartSearchOpen(true); }}
+                  className="mb-2 shrink-0 w-full text-left overflow-hidden rounded-2xl border-2 border-dashed border-agni-purple/40 bg-gradient-to-r from-agni-purple/10 via-agni-blue/5 to-agni-green/10 hover:border-agni-purple/60 transition-all"
                 >
                   <div className="flex items-center gap-3 px-4 py-3">
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-agni-gold to-agni-orange flex items-center justify-center shadow-lg shrink-0">
-                      <Sparkles size={16} className="text-white" />
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-agni-purple to-agni-blue flex items-center justify-center shadow-lg shrink-0">
+                      <Brain size={16} className="text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-extrabold text-foreground">
-                        Add "<span className="text-agni-gold">{search.trim()}</span>" as custom
+                        🔍 Search "<span className="text-agni-purple">{search.trim()}</span>" with AI
                       </p>
                       <p className="text-[9px] text-muted-foreground mt-0.5">
-                        Not in the list? No problem — tap to add it!
+                        AI will find the exact match across all categories
                       </p>
                     </div>
-                    <div className="shrink-0 bg-agni-gold/20 rounded-lg px-2 py-1 flex items-center gap-1">
-                      <span className="text-[9px] font-bold text-agni-gold">↵ Enter</span>
+                    <div className="shrink-0 bg-agni-purple/20 rounded-lg px-2 py-1 flex items-center gap-1">
+                      <span className="text-[9px] font-bold text-agni-purple">↵ Enter</span>
                     </div>
                   </div>
                 </motion.button>
@@ -1000,6 +1012,15 @@ const OnboardingPage = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Smart AI Interest Search Modal */}
+      <SmartInterestSearch
+        query={smartSearchQuery}
+        currentCategory={activeCategory?.id || ""}
+        open={smartSearchOpen}
+        onClose={() => { setSmartSearchOpen(false); setSmartSearchQuery(""); }}
+        onSelect={handleSmartSearchSelect}
+      />
     </div>
   );
 };

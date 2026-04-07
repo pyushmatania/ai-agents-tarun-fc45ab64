@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Search, Sparkles, Check, ArrowLeft, TrendingUp } from "lucide-react";
+import { X, Search, Sparkles, Check, ArrowLeft, TrendingUp, Brain } from "lucide-react";
 import { getPersona, savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona, getSubFilters, getSubFilterCount, POPULAR_PICKS } from "@/lib/neuralOS";
 import { InterestPill } from "./InterestPill";
 import Agni from "./Agni";
+import SmartInterestSearch from "./SmartInterestSearch";
 
 interface MascotProfileModalProps {
   open: boolean;
@@ -15,6 +16,8 @@ const MascotProfileModal = ({ open, onClose }: MascotProfileModalProps) => {
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSubFilter, setActiveSubFilter] = useState<string | null>(null);
+  const [smartSearchOpen, setSmartSearchOpen] = useState(false);
+  const [smartSearchQuery, setSmartSearchQuery] = useState("");
 
   useEffect(() => {
     if (open) setPersona(getPersona());
@@ -34,12 +37,21 @@ const MascotProfileModal = ({ open, onClose }: MascotProfileModalProps) => {
 
   const addCustomFromSearch = () => {
     if (!searchQuery.trim() || !activeCategory) return;
-    const field = activeCategory.field as keyof NeuralOSPersona;
+    // Open smart search instead of directly adding
+    setSmartSearchQuery(searchQuery.trim());
+    setSmartSearchOpen(true);
+  };
+
+  const handleSmartSearchSelect = (item: { name: string; category: string; subCategory: string }) => {
+    const targetCat = SUGGESTION_CATEGORIES.find(c => c.id === item.category) || activeCategory;
+    if (!targetCat) return;
+    const field = targetCat.field as keyof NeuralOSPersona;
     const current = (persona[field] as string[]) || [];
-    if (current.includes(searchQuery.trim())) return;
-    const updated = [...current, searchQuery.trim()];
-    setPersona({ ...persona, [field]: updated });
-    savePersona({ [field]: updated });
+    if (!current.includes(item.name)) {
+      const updated = [...current, item.name];
+      setPersona({ ...persona, [field]: updated });
+      savePersona({ [field]: updated });
+    }
     setSearchQuery("");
   };
 
@@ -60,6 +72,7 @@ const MascotProfileModal = ({ open, onClose }: MascotProfileModalProps) => {
   if (!open) return null;
 
   return (
+    <>
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
@@ -163,9 +176,18 @@ const MascotProfileModal = ({ open, onClose }: MascotProfileModalProps) => {
                   </div>
 
                   {noExactMatch && (
-                    <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="mt-1.5 text-[10px] text-agni-green font-bold">
-                      ✨ Add "<span className="text-foreground">{searchQuery.trim()}</span>" — press Enter
-                    </motion.p>
+                    <motion.button
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => addCustomFromSearch()}
+                      className="mt-1.5 w-full text-left bg-agni-purple/5 border border-agni-purple/20 rounded-xl px-3 py-2 flex items-center gap-2"
+                    >
+                      <Brain size={12} className="text-agni-purple shrink-0" />
+                      <span className="text-[10px] text-agni-purple font-bold">
+                        🔍 Search "<span className="text-foreground">{searchQuery.trim()}</span>" with AI — press Enter
+                      </span>
+                    </motion.button>
                   )}
 
                   {/* Sub-filter chips */}
@@ -299,8 +321,14 @@ const MascotProfileModal = ({ open, onClose }: MascotProfileModalProps) => {
                   {filteredSuggestions.length === 0 && searchQuery && (
                     <div className="text-center py-8">
                       <p className="text-2xl mb-2">🔍</p>
-                      <p className="text-xs text-muted-foreground">No matches found</p>
-                      <p className="text-[10px] text-agni-green font-bold mt-1">Press Enter to add "{searchQuery.trim()}"</p>
+                      <p className="text-xs text-muted-foreground">No matches in our list</p>
+                      <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => addCustomFromSearch()}
+                        className="mt-2 bg-agni-purple/15 text-agni-purple text-[11px] font-bold px-4 py-2 rounded-full mx-auto flex items-center gap-1.5"
+                      >
+                        <Brain size={12} /> Search with AI
+                      </motion.button>
                     </div>
                   )}
                 </div>
@@ -323,6 +351,16 @@ const MascotProfileModal = ({ open, onClose }: MascotProfileModalProps) => {
         </motion.div>
       </motion.div>
     </AnimatePresence>
+
+    {/* Smart AI Interest Search Modal */}
+    <SmartInterestSearch
+      query={smartSearchQuery}
+      currentCategory={activeCategory?.id || ""}
+      open={smartSearchOpen}
+      onClose={() => { setSmartSearchOpen(false); setSmartSearchQuery(""); }}
+      onSelect={handleSmartSearchSelect}
+    />
+  </>
   );
 };
 
