@@ -38,7 +38,7 @@ const CuriosityPage = () => {
   const [error, setError] = useState("");
   const [sparkIdx, setSparkIdx] = useState(0);
   const [copied, setCopied] = useState(false);
-
+  const [refreshing, setRefreshing] = useState(false);
   // Load cached results for a category
   const getCachedResults = (catId: string): any[] => {
     try {
