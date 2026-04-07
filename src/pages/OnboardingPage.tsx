@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -130,7 +130,15 @@ const OnboardingPage = () => {
   const goNext = () => { setDir(1); setStep(s => s + 1); setSearch(""); setActiveSubFilter(null); };
   const goBack = () => { setDir(-1); setStep(s => Math.max(0, s - 1)); setSearch(""); setActiveSubFilter(null); };
 
-  const toggleItem = (item: string) => {
+  // Auto-skip mission followup step if no questions for selected mission
+  useEffect(() => {
+    if (step === 6 && (!selectedMission || !MISSION_FOLLOWUPS[selectedMission])) {
+      setDir(1);
+      setStep(7);
+    }
+  }, [step, selectedMission]);
+
+
     if (!activeCategory) return;
     const field = activeCategory.field as keyof NeuralOSPersona;
     const current = (persona[field] as string[]) || [];
