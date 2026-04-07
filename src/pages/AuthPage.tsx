@@ -5,7 +5,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Mail, Lock, User, ArrowRight, Eye, EyeOff, ArrowLeft, Sparkles } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Eye, EyeOff, ArrowLeft, Sparkles, CheckCircle, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MascotRobot from "@/components/MascotRobot";
 
@@ -13,6 +13,7 @@ type AuthView = "signin" | "signup" | "forgot" | "verify";
 
 const AuthPage = () => {
   const [view, setView] = useState<AuthView>("signin");
+  const [signupEmail, setSignupEmail] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -53,7 +54,8 @@ const AuthPage = () => {
           },
         });
         if (error) throw error;
-        toast.success("Account created! Check your email to verify.");
+        setSignupEmail(email);
+        setView("verify");
       }
     } catch (error: any) {
       toast.error(error.message);
