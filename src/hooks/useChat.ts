@@ -246,6 +246,21 @@ export function useChat(tab: ChatTab) {
     }
   }, [user, tab]);
 
+  const regenerateLast = useCallback(async (extraContext?: Record<string, any>) => {
+    if (isLoading || messages.length === 0) return;
+    // Find the last user message
+    const lastUserIdx = [...messages].reverse().findIndex(m => m.role === "user");
+    if (lastUserIdx === -1) return;
+    const actualIdx = messages.length - 1 - lastUserIdx;
+    const lastUserMsg = messages[actualIdx];
+    // Remove messages from that user message onward (re-send it)
+    setMessages(prev => prev.slice(0, actualIdx));
+    // Small delay to let state settle, then re-send
+    setTimeout(() => {
+      sendMessage(lastUserMsg.content, extraContext);
+    }, 50);
+  }, [messages, isLoading, sendMessage]);
+
   return {
     messages,
     isLoading,
@@ -253,5 +268,6 @@ export function useChat(tab: ChatTab) {
     sendMessage,
     stopStreaming,
     clearHistory,
+    regenerateLast,
   };
 }

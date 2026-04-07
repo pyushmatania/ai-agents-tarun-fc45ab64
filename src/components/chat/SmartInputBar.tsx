@@ -35,6 +35,8 @@ interface SmartInputBarProps {
   onQuizReady?: (difficulty?: string) => void;
   onModeChange?: (mode: string) => void;
   activeMode?: string;
+  hasMessages?: boolean;
+  onRecookLast?: () => void;
 }
 
 // Interest-based prompt resolver
@@ -63,6 +65,7 @@ export default function SmartInputBar({
   value, onChange, onSend, onStop, isLoading, isLearnTab,
   suggestions = [], onSuggestionClick, placeholder, accentColor = "#58CC02",
   lessonTitle, exchangeCount = 0, onQuizReady, onModeChange, activeMode = "engineer",
+  hasMessages = false, onRecookLast,
 }: SmartInputBarProps) {
   const [activePanel, setActivePanel] = useState<Panel>("none");
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -115,12 +118,15 @@ export default function SmartInputBar({
   const handleInterestSelect = (catId: string, item: string) => {
     SFX.select();
     setActivePanel("none");
-    // Set the interest as universe vibe so it becomes part of the recipe
-    setTeachingSelection("vibe", currentVibe); // keep current vibe
-    // Store selected interest as universe context
+    setTeachingSelection("vibe", currentVibe);
     localStorage.setItem("teaching_universe_vibe", item);
     window.dispatchEvent(new Event("storage"));
     setSelectedInterest(item);
+    if (hasMessages && !value.trim() && onRecookLast) setTimeout(() => onRecookLast(), 100);
+  };
+
+  const maybeRecook = () => {
+    if (hasMessages && !value.trim() && onRecookLast) setTimeout(() => onRecookLast(), 100);
   };
 
   // Get labels for active selections — check against defaults to know if truly active
@@ -221,7 +227,10 @@ export default function SmartInputBar({
             {/* Motive panel (replaces Teaching Mode) */}
             {activePanel === "motive" && (
               <div className="py-3">
-                <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">🎯 Motive — Why are you learning?</p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-wider">🎯 Motive — Why are you learning?</p>
+                  <button onClick={() => setActivePanel("none")} className="w-5 h-5 rounded-full bg-muted/30 flex items-center justify-center"><X size={10} className="text-muted-foreground" /></button>
+                </div>
                 <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto scrollbar-none">
                   {MISSION_MODES.map(m => (
                     <motion.button
@@ -232,6 +241,7 @@ export default function SmartInputBar({
                         setTeachingSelection("mission", m.id);
                         setCurrentMotive(m.id);
                         setActivePanel("none");
+                        maybeRecook();
                       }}
                       className={`text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all border ${
                         currentMotive === m.id
@@ -249,7 +259,10 @@ export default function SmartInputBar({
             {/* Power-ups panel (one-time actions) */}
             {activePanel === "powerups" && (
               <div className="py-3">
-                <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">⚡ Quick Actions — one-time use</p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-wider">⚡ Quick Actions — one-time use</p>
+                  <button onClick={() => setActivePanel("none")} className="w-5 h-5 rounded-full bg-muted/30 flex items-center justify-center"><X size={10} className="text-muted-foreground" /></button>
+                </div>
                 <div className="flex flex-wrap gap-1.5">
                   {powerups.map(pu => (
                     <motion.button
@@ -280,7 +293,10 @@ export default function SmartInputBar({
             {/* Quiz difficulty picker */}
             {activePanel === "quiz" && (
               <div className="py-3">
-                <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">Pick Quiz Difficulty</p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-wider">Pick Quiz Difficulty</p>
+                  <button onClick={() => setActivePanel("none")} className="w-5 h-5 rounded-full bg-muted/30 flex items-center justify-center"><X size={10} className="text-muted-foreground" /></button>
+                </div>
                 <div className="flex flex-wrap gap-1.5">
                   {QUIZ_DIFFICULTIES.map(q => (
                     <motion.button
@@ -301,7 +317,10 @@ export default function SmartInputBar({
             {/* Vibe panel */}
             {activePanel === "vibe" && (
               <div className="py-3">
-                <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">🎨 Teaching Vibe — How should I teach?</p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-wider">🎨 Teaching Vibe — How should I teach?</p>
+                  <button onClick={() => setActivePanel("none")} className="w-5 h-5 rounded-full bg-muted/30 flex items-center justify-center"><X size={10} className="text-muted-foreground" /></button>
+                </div>
                 <div className="flex flex-wrap gap-1.5">
                   {TEACHING_VIBES.map(v => (
                     <motion.button
@@ -312,6 +331,7 @@ export default function SmartInputBar({
                         setTeachingSelection("vibe", v.id);
                         setCurrentVibe(v.id);
                         setActivePanel("none");
+                        maybeRecook();
                       }}
                       className={`text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all border ${
                         currentVibe === v.id
@@ -329,7 +349,10 @@ export default function SmartInputBar({
             {/* Brain level panel */}
             {activePanel === "brain" && (
               <div className="py-3">
-                <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">🧠 Brain Level — How deep?</p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-wider">🧠 Brain Level — How deep?</p>
+                  <button onClick={() => setActivePanel("none")} className="w-5 h-5 rounded-full bg-muted/30 flex items-center justify-center"><X size={10} className="text-muted-foreground" /></button>
+                </div>
                 <div className="flex flex-wrap gap-1.5">
                   {brainLevels.map(b => (
                     <motion.button
@@ -340,6 +363,7 @@ export default function SmartInputBar({
                         setTeachingSelection("brain", b.id);
                         setCurrentBrain(b.id);
                         setActivePanel("none");
+                        maybeRecook();
                       }}
                       className={`text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all border ${
                         currentBrain === b.id
@@ -357,7 +381,10 @@ export default function SmartInputBar({
             {/* Interests panel (My World) */}
             {activePanel === "interests" && (
               <div className="py-3">
-                <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">🌍 My World — Teach using my interests</p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-wider">🌍 My World — Teach using my interests</p>
+                  <button onClick={() => setActivePanel("none")} className="w-5 h-5 rounded-full bg-muted/30 flex items-center justify-center"><X size={10} className="text-muted-foreground" /></button>
+                </div>
                 {interestCategories.length > 0 ? (
                   <div className="space-y-2 max-h-48 overflow-y-auto scrollbar-none">
                     {interestCategories.map(cat => (

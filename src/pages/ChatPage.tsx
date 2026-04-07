@@ -238,6 +238,8 @@ export default function ChatPage() {
           activeMode={activeMode}
           onModeChange={handleModeChange}
           exchangeCount={chat.messages.filter(m => m.role === "user").length}
+          hasMessages={chat.messages.length > 0}
+          onRecookLast={() => chat.regenerateLast(buildTeachingContext())}
         />
       </div>
     </div>
