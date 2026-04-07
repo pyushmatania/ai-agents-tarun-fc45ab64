@@ -96,12 +96,25 @@ export default function ChatPage() {
     }
   }, [chat.messages]);
 
+  // Build a snapshot of current settings for the blueprint stamp
+  const buildSettingsSnapshot = () => {
+    const ctx = buildTeachingContext();
+    const parts: { key: string; emoji: string; value: string }[] = [];
+    if (ctx.universeVibe) parts.push({ key: "World", emoji: "🌍", value: ctx.universeVibe });
+    if (ctx.vibe) parts.push({ key: "Vibe", emoji: "🎨", value: ctx.vibe.split(" — ")[0] });
+    if (ctx.level) parts.push({ key: "Brain", emoji: "🧠", value: ctx.level.split(" — ")[0] });
+    if (ctx.identity) parts.push({ key: "Identity", emoji: "🪪", value: ctx.identity.split(" — ")[0] });
+    if (ctx.mission) parts.push({ key: "Mission", emoji: "🎯", value: ctx.mission.split(" — ")[0] });
+    return parts;
+  };
+
   const handleSend = (text?: string, hiddenPrompt?: string) => {
     const msg = text || input.trim();
     if (!msg) return;
     const ctx = buildTeachingContext();
+    const snapshot = buildSettingsSnapshot();
     const opts = hiddenPrompt ? { hiddenPrompt, hideUserMessage: true } : undefined;
-    chat.sendMessage(msg, ctx, opts);
+    chat.sendMessage(msg, ctx, opts, snapshot);
     setInput("");
   };
 
