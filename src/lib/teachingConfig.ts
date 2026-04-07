@@ -145,7 +145,7 @@ export const UNIVERSE_VIBE_CATEGORIES = [
 // 🧠 DIMENSION 4: BRAIN LEVEL — How deep
 // ═══════════════════════════════════════════════
 
-// Academic track
+// Classroom track (formerly Academic)
 export const BRAIN_LEVELS_ACADEMIC: BrainLevel[] = [
   { id: "class5", label: "Class 5 Student", emoji: "👶", desc: "Pure analogies, no jargon", color: "from-green-300 to-emerald-200" },
   { id: "class8", label: "Class 8 Student", emoji: "🎒", desc: "Slightly bigger words", color: "from-green-400 to-emerald-300" },
