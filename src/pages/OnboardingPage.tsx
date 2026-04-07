@@ -112,6 +112,22 @@ const PILL_SELECTED_COLORS = [
   "bg-agni-green/30 border-agni-green text-agni-green shadow-glow-green",
 ];
 
+/* ── Pastel card colors for avatar/identity grid (matches screenshot) ── */
+const PASTEL_CARD_COLORS = [
+  { bg: "bg-[#C8F7C5]/70", border: "border-[#7ED957]", text: "text-[#2D8C2D]" },
+  { bg: "bg-[#E8D5F5]/70", border: "border-[#C291E2]", text: "text-[#8B3FCF]" },
+  { bg: "bg-[#D0EAFF]/70", border: "border-[#7CB8E8]", text: "text-[#2878B5]" },
+  { bg: "bg-[#FFF3C4]/70", border: "border-[#E8C84A]", text: "text-[#B8860B]" },
+  { bg: "bg-[#FFD6D6]/70", border: "border-[#F28B82]", text: "text-[#CC3333]" },
+  { bg: "bg-[#FFD6EC]/70", border: "border-[#F28BC8]", text: "text-[#CC3399]" },
+  { bg: "bg-[#FFE0C2]/70", border: "border-[#E8A54A]", text: "text-[#CC6600]" },
+  { bg: "bg-[#D6F5E0]/70", border: "border-[#7ED9A0]", text: "text-[#2D8C50]" },
+  { bg: "bg-[#E0D6F5]/70", border: "border-[#A091E2]", text: "text-[#5B3FCF]" },
+  { bg: "bg-[#D6EBF5]/70", border: "border-[#7CBAE8]", text: "text-[#2878B5]" },
+  { bg: "bg-[#F5E6D6]/70", border: "border-[#D9A97E]", text: "text-[#8C5B2D]" },
+  { bg: "bg-[#F5D6E6]/70", border: "border-[#E282B5]", text: "text-[#B5286E]" },
+];
+
 const TOTAL_STEPS = 10 + SUGGESTION_CATEGORIES.length + 1;
 
 const slideVariants = {
