@@ -93,10 +93,10 @@ const OnboardingPage = () => {
   const [persona, setPersona] = useState<Partial<NeuralOSPersona>>({});
   const [search, setSearch] = useState("");
 
-  const categoryIndex = step >= 4 ? step - 4 : -1;
+  const categoryIndex = step >= 5 ? step - 5 : -1;
   const activeCategory = categoryIndex >= 0 && categoryIndex < SUGGESTION_CATEGORIES.length
     ? SUGGESTION_CATEGORIES[categoryIndex] : null;
-  const isConfirmStep = step === 4 + SUGGESTION_CATEGORIES.length;
+  const isConfirmStep = step === 5 + SUGGESTION_CATEGORIES.length;
 
   const currentItems = activeCategory
     ? ((persona[activeCategory.field] as string[]) || [])
