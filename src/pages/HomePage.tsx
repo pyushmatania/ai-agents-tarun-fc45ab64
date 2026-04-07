@@ -331,52 +331,45 @@ const HomePage = () => {
             </div>
           </FadeIn>
 
-          {/* Teaching Modes - Swipeable Categories */}
+          {/* Teaching Modes — Minimal Chips */}
           <FadeIn delay={0.35}>
             <div className="mb-4">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-7 h-7 rounded-xl bg-agni-purple flex items-center justify-center">
-                  <Brain size={14} className="text-white" />
-                </div>
-                <h4 className="text-xs font-extrabold text-foreground">Learning Mode</h4>
-                <span className="ml-auto text-[9px] font-bold text-muted-foreground bg-muted/30 px-2 py-0.5 rounded-full">
+              <div className="flex items-center justify-between mb-2.5">
+                <h4 className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Learning Mode</h4>
+                <span className="text-[9px] font-bold text-muted-foreground/60">
                   {TEACHING_MODES.find(m => m.id === activeMode)?.emoji} {TEACHING_MODES.find(m => m.id === activeMode)?.label}
                 </span>
               </div>
               {TEACHING_MODE_CATEGORIES.map((cat) => (
-                <div key={cat.category} className="mb-3">
-                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-wider mb-1.5 px-0.5">
+                <div key={cat.category} className="mb-2">
+                  <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1 px-0.5">
                     {cat.emoji} {cat.category}
                   </p>
-                  <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-none -mx-1 px-1" style={{ scrollSnapType: "x mandatory" }}>
-                    {cat.modes.map((mode) => (
-                      <motion.button
-                        key={mode.id}
-                        whileTap={{ scale: 0.93, y: 2 }}
-                        onClick={() => {
-                          setActiveMode(mode.id);
-                          localStorage.setItem("teaching_mode", mode.id);
-                          window.dispatchEvent(new Event("storage"));
-                          SFX.tap();
-                          toast(`${mode.emoji} ${mode.label} mode activated`, { description: mode.desc, duration: 2000 });
-                        }}
-                        className={`relative shrink-0 rounded-2xl px-5 py-3 flex items-center gap-2.5 transition-all border-2 shadow-btn-3d active:shadow-btn-3d-pressed active:translate-y-0.5 ${
-                          activeMode === mode.id
-                            ? "border-white/30 ring-2 ring-agni-green/40"
-                            : "border-transparent opacity-80 hover:opacity-100"
-                        } bg-gradient-to-r ${mode.color}`}
-                        style={{ scrollSnapAlign: "start", minWidth: "140px" }}
-                      >
-                        <span className="text-2xl">{mode.emoji}</span>
-                        <span className="text-sm font-black text-white whitespace-nowrap">{mode.label}</span>
-                        {activeMode === mode.id && (
-                          <motion.span
-                            initial={{ scale: 0 }} animate={{ scale: 1 }}
-                            className="absolute -top-1 -right-1 w-5 h-5 bg-agni-green rounded-full flex items-center justify-center text-[10px] text-white font-black shadow-lg border-2 border-background"
-                          >✓</motion.span>
-                        )}
-                      </motion.button>
-                    ))}
+                  <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1">
+                    {cat.modes.map((mode) => {
+                      const isSelected = activeMode === mode.id;
+                      return (
+                        <motion.button
+                          key={mode.id}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => {
+                            setActiveMode(mode.id);
+                            localStorage.setItem("teaching_mode", mode.id);
+                            window.dispatchEvent(new Event("storage"));
+                            SFX.tap();
+                            toast(`${mode.emoji} ${mode.label}`, { description: mode.desc, duration: 1500 });
+                          }}
+                          className={`shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold flex items-center gap-1 transition-all ${
+                            isSelected
+                              ? "bg-agni-green/15 text-agni-green border border-agni-green/30"
+                              : "bg-muted/30 text-muted-foreground border border-transparent hover:bg-muted/50"
+                          }`}
+                        >
+                          <span className="text-xs">{mode.emoji}</span>
+                          <span>{mode.label}</span>
+                        </motion.button>
+                      );
+                    })}
                   </div>
                 </div>
               ))}
