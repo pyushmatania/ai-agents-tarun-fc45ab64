@@ -94,10 +94,10 @@ const PILL_COLORS = [
   "bg-[#58CC02]/15 border-[#58CC02]/40 text-[#58CC02]",
   "bg-[#CE82FF]/15 border-[#CE82FF]/40 text-[#CE82FF]",
   "bg-[#1CB0F6]/15 border-[#1CB0F6]/40 text-[#1CB0F6]",
-  "bg-[#FFC800]/15 border-[#FFC800]/40 text-[#FFC800]",
+  "bg-[#FFC800]/15 border-[#FFC800]/40 text-[#B8960F]",
   "bg-[#FF4B4B]/15 border-[#FF4B4B]/40 text-[#FF4B4B]",
   "bg-[#FF86D8]/15 border-[#FF86D8]/40 text-[#FF86D8]",
-  "bg-[#FF9600]/15 border-[#FF9600]/40 text-[#FF9600]",
+  "bg-[#FF9600]/15 border-[#FF9600]/40 text-[#CC7A00]",
   "bg-agni-green/15 border-agni-green/40 text-agni-green",
 ];
 
@@ -105,10 +105,10 @@ const PILL_SELECTED_COLORS = [
   "bg-[#58CC02]/30 border-[#58CC02] text-[#58CC02] shadow-[0_0_12px_hsl(100_95%_40%/0.3)]",
   "bg-[#CE82FF]/30 border-[#CE82FF] text-[#CE82FF] shadow-[0_0_12px_hsl(270_100%_75%/0.3)]",
   "bg-[#1CB0F6]/30 border-[#1CB0F6] text-[#1CB0F6] shadow-[0_0_12px_hsl(199_92%_54%/0.3)]",
-  "bg-[#FFC800]/30 border-[#FFC800] text-[#FFC800] shadow-[0_0_12px_hsl(46_100%_49%/0.3)]",
+  "bg-[#FFC800]/30 border-[#FFC800] text-[#B8960F] shadow-[0_0_12px_hsl(46_100%_49%/0.3)]",
   "bg-[#FF4B4B]/30 border-[#FF4B4B] text-[#FF4B4B] shadow-[0_0_12px_hsl(0_100%_65%/0.3)]",
   "bg-[#FF86D8]/30 border-[#FF86D8] text-[#FF86D8] shadow-[0_0_12px_hsl(323_100%_76%/0.3)]",
-  "bg-[#FF9600]/30 border-[#FF9600] text-[#FF9600] shadow-[0_0_12px_hsl(33_100%_50%/0.3)]",
+  "bg-[#FF9600]/30 border-[#FF9600] text-[#CC7A00] shadow-[0_0_12px_hsl(33_100%_50%/0.3)]",
   "bg-agni-green/30 border-agni-green text-agni-green shadow-glow-green",
 ];
 
