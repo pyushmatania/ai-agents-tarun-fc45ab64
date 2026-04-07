@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { getPersona } from "@/lib/neuralOS";
 import { supabase } from "@/integrations/supabase/client";
 import { InterestPill } from "@/components/InterestPill";
+import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection } from "@/lib/teachingConfig";
 
 const DAILY_TIPS = [
   { tip: "AI agents use a Perceive→Reason→Act loop — just like humans!", emoji: "🧠" },
