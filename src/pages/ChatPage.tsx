@@ -92,6 +92,14 @@ export default function ChatPage() {
     };
   };
 
+  // Auto-send prefill from navigation (e.g. "Take to Chat")
+  useEffect(() => {
+    if (autoSend && prefill && !hasAutoSent.current && !chat.isLoadingHistory) {
+      hasAutoSent.current = true;
+      setTimeout(() => handleSend(prefill), 300);
+    }
+  }, [autoSend, prefill, chat.isLoadingHistory]);
+
   // Scroll to bottom on new messages
   useEffect(() => {
     if (scrollRef.current) {
@@ -99,13 +107,17 @@ export default function ChatPage() {
     }
   }, [chat.messages]);
 
-  // Scroll to bottom on mount and tab switch
+  // Scroll to bottom on mount, tab switch, and after history loads
   useEffect(() => {
-    setTimeout(() => {
-      if (scrollRef.current) {
-        scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "auto" });
-      }
-    }, 100);
+    if (chat.isLoadingHistory) return;
+    const raf = requestAnimationFrame(() => {
+      setTimeout(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "auto" });
+        }
+      }, 50);
+    });
+    return () => cancelAnimationFrame(raf);
   }, [activeTab, chat.isLoadingHistory]);
 
   // Build a snapshot of current settings for the blueprint stamp
