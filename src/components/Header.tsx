@@ -36,17 +36,27 @@ const Header = ({ name, progress }: HeaderProps) => {
   const [currentExpr, setCurrentExpr] = useState<AgniExpression>("default");
   const resetTimer = useRef<ReturnType<typeof setTimeout>>();
 
+  const tapCount = useRef(0);
+
   const handleMascotTap = useCallback(() => {
+    tapCount.current += 1;
     const nextIdx = (exprIndex + 1) % EXPRESSIONS.length;
     const nextExpr = EXPRESSIONS[nextIdx];
     setExprIndex(nextIdx);
     setCurrentExpr(nextExpr);
     EXPR_SOUNDS[nextExpr]();
 
+    // Open profile modal after cycling through all expressions
+    if (tapCount.current >= EXPRESSIONS.length) {
+      tapCount.current = 0;
+      setShowProfile(true);
+    }
+
     if (resetTimer.current) clearTimeout(resetTimer.current);
     resetTimer.current = setTimeout(() => {
       setCurrentExpr("default");
       setExprIndex(0);
+      tapCount.current = 0;
     }, 4000);
   }, [exprIndex]);
 
