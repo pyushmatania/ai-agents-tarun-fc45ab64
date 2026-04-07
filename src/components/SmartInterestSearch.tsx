@@ -98,27 +98,18 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
     }
   }, [open]);
 
-  // Auto-search as user types with short debounce — no button needed
-  useEffect(() => {
-    if (!open) return;
+  // Manual search: only triggered by pressing send/enter
+  const handleManualSearch = useCallback(() => {
     const trimmed = liveQuery.trim();
-    if (!trimmed) {
-      setResults(null);
-      setError(null);
+    if (trimmed) {
+      // Force re-search even if same query
       lastSearchedQuery.current = "";
-      return;
-    }
-    if (trimmed === lastSearchedQuery.current) return;
-
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
       doSearch(trimmed);
-    }, 400); // faster debounce for real-time feel
-
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [liveQuery, open, doSearch]);
+    } else if (results) {
+      // Blank query + press send → keep showing last results (iterate)
+      // Do nothing, results stay visible
+    }
+  }, [liveQuery, doSearch, results]);
 
   const handleSelect = (r: AIResult) => {
     onSelect({
