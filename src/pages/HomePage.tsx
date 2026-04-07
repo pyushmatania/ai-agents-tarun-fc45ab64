@@ -359,7 +359,10 @@ const HomePage = () => {
                         return (
                           <motion.button
                             key={mode.id}
-                            whileTap={{ scale: 0.95 }}
+                            whileTap={{ scale: 0.93 }}
+                            whileHover={{ scale: 1.05 }}
+                            animate={isSelected ? { scale: [1, 1.1, 1], transition: { duration: 0.3 } } : {}}
+                            layout
                             onClick={() => {
                               setActiveMode(mode.id);
                               localStorage.setItem("teaching_mode", mode.id);
@@ -367,9 +370,9 @@ const HomePage = () => {
                               SFX.tap();
                               toast(`${mode.emoji} ${mode.label}`, { description: mode.desc, duration: 1500 });
                             }}
-                            className={`shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold flex items-center gap-1 transition-all ${
+                            className={`shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold flex items-center gap-1 transition-colors duration-200 ${
                               isSelected
-                                ? "bg-agni-green/15 text-agni-green border border-agni-green/30"
+                                ? "bg-agni-green/15 text-agni-green border border-agni-green/30 shadow-[0_0_8px_hsl(var(--agni-green)/0.2)]"
                                 : "bg-muted/30 text-muted-foreground border border-transparent hover:bg-muted/50"
                             }`}
                           >
