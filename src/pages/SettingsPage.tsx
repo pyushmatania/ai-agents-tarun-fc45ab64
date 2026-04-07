@@ -16,6 +16,7 @@ import { BUILT_IN_MODELS, BYOK_PROVIDERS, getAIConfig, saveAIConfig, type AIConf
 import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection, getAllOptions, saveCustomOption, getCustomOptions, IDENTITIES, MISSION_MODES, TEACHING_VIBES, BRAIN_LEVELS_SKILL, BRAIN_LEVELS_ACADEMIC, getAllExplainStyles, getActiveExplainStyleIds, setActiveExplainStyleIds, saveCustomExplainStyle, removeCustomExplainStyle, type ExplainStyle } from "@/lib/teachingConfig";
 import CustomOptionInput from "@/components/CustomOptionInput";
 import { getPersona, savePersona, SUGGESTION_CATEGORIES, getSubFilters, getSubFilterCount, POPULAR_PICKS, type NeuralOSPersona } from "@/lib/neuralOS";
+import SmartInterestSearch from "@/components/SmartInterestSearch";
 import Agni from "@/components/Agni";
 import StatsSection from "@/components/StatsSection";
 import { useGamification } from "@/hooks/useGamification";
@@ -56,6 +57,8 @@ const SettingsPage = () => {
   const [neuralSearch, setNeuralSearch] = useState("");
   const [neuralCustom, setNeuralCustom] = useState("");
   const [settingsSubFilter, setSettingsSubFilter] = useState<string | null>(null);
+  const [settingsSmartSearchOpen, setSettingsSmartSearchOpen] = useState(false);
+  const [settingsSmartSearchCategory, setSettingsSmartSearchCategory] = useState("");
 
   // Explain Styles state
   const [explainExpanded, setExplainExpanded] = useState(false);
@@ -63,6 +66,25 @@ const SettingsPage = () => {
   const [customExplainLabel, setCustomExplainLabel] = useState("");
   const [customExplainPrompt, setCustomExplainPrompt] = useState("");
   const [showAddExplain, setShowAddExplain] = useState(false);
+
+  const openSettingsSmartSearch = (categoryId: string) => {
+    setSettingsSmartSearchCategory(categoryId);
+    setSettingsSmartSearchOpen(true);
+  };
+
+  const handleSettingsSmartSearchSelect = (item: { name: string; category: string; subCategory: string }) => {
+    const targetCat = SUGGESTION_CATEGORIES.find((cat) => cat.id === item.category) || SUGGESTION_CATEGORIES.find((cat) => cat.id === settingsSmartSearchCategory);
+    if (!targetCat) return;
+
+    const field = targetCat.field as keyof NeuralOSPersona;
+    const current = (persona[field] as string[]) || [];
+    if (current.includes(item.name)) return;
+
+    const newPersona = savePersona({ [field]: [...current, item.name] });
+    setPersonaState(newPersona);
+    setNeuralSearch("");
+  };
+
   // Re-sync persona when page gains focus (e.g. after editing in modal elsewhere)
   useEffect(() => {
     const sync = () => setPersonaState(getPersona());
@@ -880,19 +902,19 @@ const SettingsPage = () => {
 
                               {/* Search */}
                               <div className="relative">
-                                <Search size={10} className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                                <input value={neuralSearch} onChange={e => setNeuralSearch(e.target.value)}
-                                  onKeyDown={e => {
-                                    if (e.key === "Enter" && neuralSearch.trim() && !selected.includes(neuralSearch.trim())) {
-                                      const updated = [...selected, neuralSearch.trim()];
-                                      const newPersona = savePersona({ [field]: updated });
-                                      setPersonaState(newPersona);
-                                      setNeuralSearch("");
-                                    }
-                                  }}
-                                  placeholder={`Search or add custom ${cat.label.toLowerCase()}...`}
-                                  className="w-full h-7 pl-6 pr-2 bg-card border border-border/30 rounded-lg text-[10px] text-foreground placeholder:text-muted-foreground focus:outline-none"
-                                />
+                                <Search size={10} className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                                <button
+                                  type="button"
+                                  onClick={() => openSettingsSmartSearch(cat.id)}
+                                  className="h-7 w-full rounded-lg border border-border/30 bg-card pl-6 pr-2 text-left transition-colors hover:border-agni-purple/30"
+                                >
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className="truncate text-[10px] text-muted-foreground">
+                                      Search or add custom {cat.label.toLowerCase()}...
+                                    </span>
+                                    <span className="text-[8px] font-bold text-agni-purple">AI</span>
+                                  </div>
+                                </button>
                               </div>
 
                               {/* Sub-filter chips */}
@@ -1182,6 +1204,16 @@ const SettingsPage = () => {
         </div>
         <FloatingChatButton tab="general" />
         <BottomNav />
+        <SmartInterestSearch
+          query=""
+          currentCategory={settingsSmartSearchCategory || activeCatId || ""}
+          open={settingsSmartSearchOpen}
+          onClose={() => {
+            setSettingsSmartSearchOpen(false);
+            setSettingsSmartSearchCategory("");
+          }}
+          onSelect={handleSettingsSmartSearchSelect}
+        />
       </div>
     </PageTransition>
   );

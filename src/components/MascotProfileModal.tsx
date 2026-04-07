@@ -35,11 +35,15 @@ const MascotProfileModal = ({ open, onClose }: MascotProfileModalProps) => {
     savePersona({ [field]: updated });
   };
 
-  const addCustomFromSearch = () => {
-    if (!searchQuery.trim() || !activeCategory) return;
-    // Open smart search instead of directly adding
-    setSmartSearchQuery(searchQuery.trim());
+  const openSmartSearch = (initialQuery = "") => {
+    if (!activeCategory) return;
+    setSmartSearchQuery(initialQuery);
     setSmartSearchOpen(true);
+  };
+
+  const addCustomFromSearch = () => {
+    if (!activeCategory) return;
+    openSmartSearch(searchQuery.trim());
   };
 
   const handleSmartSearchSelect = (item: { name: string; category: string; subCategory: string }) => {
@@ -164,31 +168,23 @@ const MascotProfileModal = ({ open, onClose }: MascotProfileModalProps) => {
 
                   {/* Search bar */}
                   <div className="relative">
-                    <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter" && noExactMatch) addCustomFromSearch(); }}
-                      placeholder={`Search or add custom ${activeCategory.label.toLowerCase()}...`}
-                      className="w-full bg-muted/60 border border-border rounded-xl pl-8 pr-3 py-2 text-xs outline-none focus:border-agni-green/50 transition-colors"
-                    />
-                  </div>
-
-                  {noExactMatch && (
-                    <motion.button
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => addCustomFromSearch()}
-                      className="mt-1.5 w-full text-left bg-agni-purple/5 border border-agni-purple/20 rounded-xl px-3 py-2 flex items-center gap-2"
+                    <button
+                      type="button"
+                      onClick={() => openSmartSearch()}
+                      className="flex w-full items-center gap-3 rounded-xl border border-border bg-muted/60 px-3 py-2 text-left transition-colors hover:border-agni-green/40"
                     >
-                      <Brain size={12} className="text-agni-purple shrink-0" />
-                      <span className="text-[10px] text-agni-purple font-bold">
-                        🔍 Search "<span className="text-foreground">{searchQuery.trim()}</span>" with AI — press Enter
-                      </span>
-                    </motion.button>
-                  )}
+                      <Search size={13} className="shrink-0 text-muted-foreground" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs text-muted-foreground">
+                          Search or add custom {activeCategory.label.toLowerCase()}...
+                        </p>
+                        <p className="mt-0.5 text-[9px] font-bold text-agni-purple">AI autocomplete + typo fix</p>
+                      </div>
+                      <div className="rounded-lg border border-agni-purple/20 bg-agni-purple/10 px-2 py-1">
+                        <span className="text-[8px] font-bold text-agni-purple">AI</span>
+                      </div>
+                    </button>
+                  </div>
 
                   {/* Sub-filter chips */}
                   {subFilters.length > 0 && !searchQuery && (
