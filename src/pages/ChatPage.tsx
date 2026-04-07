@@ -95,7 +95,8 @@ export default function ChatPage() {
   const handleSend = (text?: string, hiddenPrompt?: string) => {
     const msg = text || input.trim();
     if (!msg) return;
-    chat.sendMessage(msg, teachingContext, hiddenPrompt ? { hiddenPrompt } : undefined);
+    const opts = hiddenPrompt ? { hiddenPrompt, hideUserMessage: true } : undefined;
+    chat.sendMessage(msg, teachingContext, opts);
     setInput("");
   };
 
