@@ -383,27 +383,38 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
                   <span className="text-[12px]">🤖</span>
                 </div>
               )}
-              <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-[12.5px] leading-[1.6] font-semibold ${
-                msg.role === "user"
-                  ? "bg-agni-green text-white rounded-br-sm shadow-[0_2px_0_0_hsl(100,100%,31%)]"
-                  : "bg-card border border-border/30 text-foreground rounded-bl-sm"
-              }`}>
-                {msg.content.split("\n").map((line, j) => (
-                  <p key={j} className={j > 0 ? "mt-1.5" : ""}>
-                    {line.startsWith("**") ? (
-                      <span className="font-black text-agni-gold">{line.replace(/\*\*/g, "")}</span>
-                    ) : line.startsWith("- ") || line.startsWith("• ") ? (
-                      <span className="flex items-start gap-1.5 pl-1">
-                        <span className="text-agni-green text-[10px] mt-0.5">●</span>
-                        <span>{line.replace(/^[-•]\s/, "")}</span>
-                      </span>
-                    ) : line.startsWith("`") ? (
-                      <code className="bg-[hsl(var(--muted)/0.5)] px-1.5 py-0.5 rounded text-[11px] font-mono text-agni-blue border border-agni-blue/20">
-                        {line.replace(/`/g, "")}
-                      </code>
-                    ) : line}
-                  </p>
-                ))}
+              <div>
+                {msg.role === "assistant" && i === 0 && persona.completedAt && (
+                  <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
+                    className="flex items-center gap-1 mb-1"
+                  >
+                    <span className="text-[8px] font-black text-agni-purple bg-agni-purple/10 px-2 py-0.5 rounded-full">
+                      ✨ Personalized for you
+                    </span>
+                  </motion.div>
+                )}
+                <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-[12.5px] leading-[1.6] font-semibold ${
+                  msg.role === "user"
+                    ? "bg-agni-green text-white rounded-br-sm shadow-[0_2px_0_0_hsl(100,100%,31%)]"
+                    : "bg-card border border-border/30 text-foreground rounded-bl-sm"
+                }`}>
+                  {msg.content.split("\n").map((line, j) => (
+                    <p key={j} className={j > 0 ? "mt-1.5" : ""}>
+                      {line.startsWith("**") ? (
+                        <span className="font-black text-agni-gold">{line.replace(/\*\*/g, "")}</span>
+                      ) : line.startsWith("- ") || line.startsWith("• ") ? (
+                        <span className="flex items-start gap-1.5 pl-1">
+                          <span className="text-agni-green text-[10px] mt-0.5">●</span>
+                          <span>{line.replace(/^[-•]\s/, "")}</span>
+                        </span>
+                      ) : line.startsWith("`") ? (
+                        <code className="bg-[hsl(var(--muted)/0.5)] px-1.5 py-0.5 rounded text-[11px] font-mono text-agni-blue border border-agni-blue/20">
+                          {line.replace(/`/g, "")}
+                        </code>
+                      ) : line}
+                    </p>
+                  ))}
+                </div>
               </div>
             </motion.div>
           ))}
