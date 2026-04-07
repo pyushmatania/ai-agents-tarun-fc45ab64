@@ -12,6 +12,7 @@ import { LogOut, Moon, Sun, ChevronRight, Shield, Bell, Loader2, LogIn, Brain, K
 import { InterestPill } from "@/components/InterestPill";
 import { motion, AnimatePresence } from "framer-motion";
 import { BUILT_IN_MODELS, BYOK_PROVIDERS, getAIConfig, saveAIConfig, type AIConfig } from "@/lib/aiConfig";
+import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection } from "@/lib/teachingConfig";
 import { getPersona, savePersona, SUGGESTION_CATEGORIES, getSubFilters, getSubFilterCount, POPULAR_PICKS, type NeuralOSPersona } from "@/lib/neuralOS";
 import Agni from "@/components/Agni";
 import StatsSection from "@/components/StatsSection";
@@ -383,76 +384,64 @@ const SettingsPage = () => {
                     className="overflow-hidden"
                   >
                     <div className="px-3.5 pb-3.5 space-y-3">
-                      {/* Vibe selector */}
-                      <div>
-                        <p className="text-micro text-muted-foreground mb-1.5">LEARNING VIBE</p>
-                        <div className="flex gap-1.5 flex-wrap">
-                          {[
-                            { id: "fun", label: "Fun & memes", emoji: "😂" },
-                            { id: "story", label: "Story-driven", emoji: "📖" },
-                            { id: "serious", label: "Serious", emoji: "🧠" },
-                            { id: "fast", label: "Fast & practical", emoji: "⚡" },
-                            { id: "visual", label: "Visual", emoji: "🎨" },
-                            { id: "socratic", label: "Socratic", emoji: "🤔" },
-                            { id: "gamified", label: "Gamified", emoji: "🎮" },
-                            { id: "handson", label: "Hands-on", emoji: "🔧" },
-                            { id: "eli5", label: "ELI5", emoji: "🍼" },
-                            { id: "academic", label: "Academic", emoji: "📚" },
-                            { id: "debate", label: "Debate", emoji: "🥊" },
-                            { id: "podcast", label: "Podcast", emoji: "🎙️" },
-                          ].map(v => (
-                            <button key={v.id} onClick={() => {
-                              const updated = savePersona({ vibe: v.id });
-                              setPersonaState(updated);
-                            }}
-                              className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${
-                                persona.vibe === v.id
-                                  ? "bg-agni-orange/10 border-agni-orange/30 text-agni-orange"
-                                  : "bg-muted/30 border-border/40 text-muted-foreground"
-                              }`}
-                            >
-                              {v.emoji} {v.label}
-                            </button>
-                          ))}
-                          {/* Custom vibe input */}
-                          <div className="w-full mt-1">
-                            <input
-                              type="text"
-                              placeholder="✨ Type your own..."
-                              className="w-full bg-muted/20 border border-dashed border-agni-orange/25 rounded-xl px-2.5 py-1.5 text-[10px] font-bold text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-agni-orange/50"
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter" && (e.target as HTMLInputElement).value.trim()) {
-                                  const val = (e.target as HTMLInputElement).value.trim();
-                                  const updated = savePersona({ vibe: val });
-                                  setPersonaState(updated);
-                                  (e.target as HTMLInputElement).value = "";
-                                }
-                              }}
-                            />
+                      {/* 3-Category Teaching Config */}
+                      {TEACHING_CATEGORIES.map((cat) => {
+                        const currentVal = getTeachingSelection(cat.id);
+                        const catColors: Record<string, { active: string; border: string }> = {
+                          mission: { active: "bg-agni-orange/10 border-agni-orange/30 text-agni-orange", border: "border-agni-orange/25" },
+                          vibe: { active: "bg-agni-blue/10 border-agni-blue/30 text-agni-blue", border: "border-agni-blue/25" },
+                          brain: { active: "bg-agni-purple/10 border-agni-purple/30 text-agni-purple", border: "border-agni-purple/25" },
+                        };
+                        const colors = catColors[cat.id] || catColors.vibe;
+                        return (
+                          <div key={cat.id}>
+                            <p className="text-micro text-muted-foreground mb-1.5">{cat.label.toUpperCase()}</p>
+                            <p className="text-[8px] text-muted-foreground/50 mb-1">{cat.desc}</p>
+                            <div className="flex gap-1.5 flex-wrap">
+                              {cat.options.map((opt: any) => (
+                                <button key={opt.id} onClick={() => {
+                                  setTeachingSelection(cat.id, opt.id);
+                                  // Also sync vibe to persona for backward compat
+                                  if (cat.id === "vibe") {
+                                    const updated = savePersona({ vibe: opt.id });
+                                    setPersonaState(updated);
+                                  }
+                                  if (cat.id === "brain") {
+                                    const depthMap: Record<string, string> = { chill: "basic", explorer: "normal", pro: "deep", hacker: "deep", scientist: "deep", professor: "deep" };
+                                    const updated = savePersona({ preferredDepth: (depthMap[opt.id] || "normal") as any });
+                                    setPersonaState(updated);
+                                  }
+                                }}
+                                  className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${
+                                    currentVal === opt.id ? colors.active : "bg-muted/30 border-border/40 text-muted-foreground"
+                                  }`}
+                                >
+                                  {opt.emoji} {opt.label}
+                                </button>
+                              ))}
+                              {/* Custom input for vibe */}
+                              {cat.id === "vibe" && (
+                                <div className="w-full mt-1">
+                                  <input
+                                    type="text"
+                                    placeholder="✨ Type your own..."
+                                    className={`w-full bg-muted/20 border border-dashed ${colors.border} rounded-xl px-2.5 py-1.5 text-[10px] font-bold text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-agni-blue/50`}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter" && (e.target as HTMLInputElement).value.trim()) {
+                                        const val = (e.target as HTMLInputElement).value.trim();
+                                        setTeachingSelection("vibe", val);
+                                        const updated = savePersona({ vibe: val });
+                                        setPersonaState(updated);
+                                        (e.target as HTMLInputElement).value = "";
+                                      }
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </div>
-
-                      {/* Depth preference */}
-                      <div>
-                        <p className="text-micro text-muted-foreground mb-1.5">PREFERRED DEPTH</p>
-                        <div className="flex gap-1.5">
-                          {(["basic", "normal", "deep"] as const).map(d => (
-                            <button key={d} onClick={() => {
-                              const updated = savePersona({ preferredDepth: d });
-                              setPersonaState(updated);
-                            }}
-                              className={`flex-1 px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all capitalize ${
-                                persona.preferredDepth === d
-                                  ? "bg-agni-purple/10 border-agni-purple/30 text-agni-purple"
-                                  : "bg-muted/30 border-border/40 text-muted-foreground"
-                              }`}
-                            >
-                              {d === "basic" ? "🌱" : d === "normal" ? "🌿" : "🌳"} {d}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                        );
+                      })}
 
                       {/* Interest categories */}
                       <div>

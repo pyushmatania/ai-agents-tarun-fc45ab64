@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { getPersona } from "@/lib/neuralOS";
 import { supabase } from "@/integrations/supabase/client";
 import { InterestPill } from "@/components/InterestPill";
+import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection } from "@/lib/teachingConfig";
 
 const DAILY_TIPS = [
   { tip: "AI agents use a Perceive→Reason→Act loop — just like humans!", emoji: "🧠" },
@@ -26,46 +27,8 @@ const DAILY_TIPS = [
   { tip: "1 person + 10 AI agents = a fully autonomous startup.", emoji: "🚀" },
 ];
 
-const TEACHING_MODE_CATEGORIES = [
-  {
-    category: "Style",
-    emoji: "🎨",
-    modes: [
-      { id: "simpler", label: "Simpler!", emoji: "🧸", desc: "Like I'm 10", color: "from-agni-green to-agni-green-light" },
-      { id: "fun", label: "Fun Example", emoji: "🎮", desc: "Gamified learning", color: "from-agni-blue to-blue-400" },
-      { id: "story", label: "Story Time", emoji: "📖", desc: "Narrative style", color: "from-agni-purple to-purple-400" },
-      { id: "silicon", label: "Silicon Valley", emoji: "🎬", desc: "Real-world cases", color: "from-violet-700 to-violet-500" },
-      { id: "visual", label: "Visual", emoji: "🎨", desc: "Diagrams & charts", color: "from-teal-500 to-teal-300" },
-      { id: "eli5", label: "ELI5", emoji: "🍼", desc: "Super simple", color: "from-sky-400 to-blue-300" },
-    ],
-  },
-  {
-    category: "Depth",
-    emoji: "🧠",
-    modes: [
-      { id: "class5", label: "Class 5", emoji: "🎒", desc: "Super simple", color: "from-agni-green to-emerald-400" },
-      { id: "engineer", label: "Engineer", emoji: "⚙️", desc: "Full depth", color: "from-agni-blue to-cyan-400" },
-      { id: "hacker", label: "Hacker", emoji: "💻", desc: "Ship fast", color: "from-agni-purple to-fuchsia-400" },
-      { id: "researcher", label: "Researcher", emoji: "🔬", desc: "Papers & math", color: "from-agni-pink to-pink-400" },
-      { id: "academic", label: "Academic", emoji: "📚", desc: "Citations & depth", color: "from-slate-500 to-gray-400" },
-    ],
-  },
-  {
-    category: "Persona",
-    emoji: "🚀",
-    modes: [
-      { id: "founder", label: "Founder", emoji: "🚀", desc: "Strategic view", color: "from-agni-gold to-yellow-400" },
-      { id: "crazy", label: "Crazy", emoji: "🤯", desc: "Sci-fi mode", color: "from-agni-pink to-rose-400" },
-      { id: "chip", label: "Chip Expert", emoji: "🏭", desc: "HCL context", color: "from-agni-orange to-orange-400" },
-      { id: "artist", label: "Creative", emoji: "🎭", desc: "Visual thinker", color: "from-teal-500 to-teal-300" },
-      { id: "debate", label: "Debate", emoji: "🥊", desc: "Challenge me", color: "from-red-500 to-pink-400" },
-      { id: "podcast", label: "Podcast", emoji: "🎙️", desc: "Conversational", color: "from-violet-500 to-fuchsia-400" },
-    ],
-  },
-];
-
-// Flat list for lookups
-const TEACHING_MODES = TEACHING_MODE_CATEGORIES.flatMap(c => c.modes);
+// Flat list for lookups (legacy compat)
+const ALL_TEACHING_OPTIONS = TEACHING_CATEGORIES.flatMap(c => c.options);
 
 const MOTIVATIONAL_QUOTES = [
   { quote: "The best way to predict the future is to build it.", author: "Alan Kay" },
@@ -135,7 +98,7 @@ const HomePage = () => {
   }, [persona]);
 
   const storedRole = localStorage.getItem("edu_user_role");
-  const roleLabel = storedRole ? TEACHING_MODES.find(m => m.id === storedRole)?.label || storedRole : null;
+  const roleLabel = storedRole ? ALL_TEACHING_OPTIONS.find(m => m.id === storedRole)?.label || storedRole : null;
 
   // Personalized features shown under the greeting
   const personalFeatures = [
@@ -339,57 +302,62 @@ const HomePage = () => {
             </div>
           </FadeIn>
 
-          {/* Teaching Modes — Collapsible Minimal Chips */}
+          {/* Teaching Mode — 3 Categories */}
           <FadeIn delay={0.35}>
             <Collapsible open={modesOpen} onOpenChange={setModesOpen} className="mb-4">
               <CollapsibleTrigger asChild>
                 <button className="w-full flex items-center justify-between mb-2.5 group">
-                  <h4 className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Learning Mode</h4>
+                  <h4 className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Learning Config</h4>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] font-bold text-muted-foreground/60">
-                      {TEACHING_MODES.find(m => m.id === activeMode)?.emoji} {TEACHING_MODES.find(m => m.id === activeMode)?.label}
-                    </span>
+                    {TEACHING_CATEGORIES.map(cat => {
+                      const val = getTeachingSelection(cat.id);
+                      const opt = cat.options.find((o: any) => o.id === val);
+                      return opt ? (
+                        <span key={cat.id} className="text-[8px] font-bold text-muted-foreground/60">{opt.emoji}</span>
+                      ) : null;
+                    })}
                     <ChevronDown className={`w-3 h-3 text-muted-foreground/50 transition-transform duration-200 ${modesOpen ? "rotate-180" : ""}`} />
                   </div>
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-                {TEACHING_MODE_CATEGORIES.map((cat) => (
-                  <div key={cat.category} className="mb-2">
-                    <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1 px-0.5">
-                      {cat.emoji} {cat.category}
-                    </p>
-                    <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1">
-                      {cat.modes.map((mode) => {
-                        const isSelected = activeMode === mode.id;
-                        return (
-                          <motion.button
-                            key={mode.id}
-                            whileTap={{ scale: 0.93 }}
-                            whileHover={{ scale: 1.05 }}
-                            animate={isSelected ? { scale: [1, 1.1, 1], transition: { duration: 0.3 } } : {}}
-                            layout
-                            onClick={() => {
-                              setActiveMode(mode.id);
-                              localStorage.setItem("teaching_mode", mode.id);
-                              window.dispatchEvent(new Event("storage"));
-                              SFX.tap();
-                              toast(`${mode.emoji} ${mode.label}`, { description: mode.desc, duration: 1500 });
-                            }}
-                            className={`shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold flex items-center gap-1 transition-colors duration-200 ${
-                              isSelected
-                                ? "bg-agni-green/15 text-agni-green border border-agni-green/30 shadow-[0_0_8px_hsl(var(--agni-green)/0.2)]"
-                                : "bg-muted/30 text-muted-foreground border border-transparent hover:bg-muted/50"
-                            }`}
-                          >
-                            <span className="text-xs">{mode.emoji}</span>
-                            <span>{mode.label}</span>
-                          </motion.button>
-                        );
-                      })}
+                {TEACHING_CATEGORIES.map((cat) => {
+                  const currentVal = getTeachingSelection(cat.id);
+                  return (
+                    <div key={cat.id} className="mb-3">
+                      <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1.5 px-0.5">
+                        {cat.label}
+                      </p>
+                      <p className="text-[7px] text-muted-foreground/40 mb-1 px-0.5">{cat.desc}</p>
+                      <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1 flex-wrap">
+                        {cat.options.map((opt: any) => {
+                          const isSelected = currentVal === opt.id;
+                          return (
+                            <motion.button
+                              key={opt.id}
+                              whileTap={{ scale: 0.93 }}
+                              onClick={() => {
+                                setTeachingSelection(cat.id, opt.id);
+                                setActiveMode(opt.id);
+                                localStorage.setItem("teaching_mode", opt.id);
+                                SFX.tap();
+                                toast(`${opt.emoji} ${opt.label}`, { description: opt.desc, duration: 1500 });
+                              }}
+                              className={`shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold flex items-center gap-1 transition-colors duration-200 ${
+                                isSelected
+                                  ? "bg-agni-green/15 text-agni-green border border-agni-green/30 shadow-[0_0_8px_hsl(var(--agni-green)/0.2)]"
+                                  : "bg-muted/30 text-muted-foreground border border-transparent hover:bg-muted/50"
+                              }`}
+                            >
+                              <span className="text-xs">{opt.emoji}</span>
+                              <span>{opt.label}</span>
+                            </motion.button>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 {/* Custom mode input */}
                 <div className="mt-1">
                   <div className="flex items-center gap-1.5">

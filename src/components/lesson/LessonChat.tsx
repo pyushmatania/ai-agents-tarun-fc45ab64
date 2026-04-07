@@ -8,6 +8,7 @@ import { getAIConfig } from "@/lib/aiConfig";
 import { getPersona } from "@/lib/neuralOS";
 import { InterestPill } from "@/components/InterestPill";
 import MascotProfileModal from "@/components/MascotProfileModal";
+import { TEACHING_CATEGORIES, getTeachingSelection, getTeachingContext } from "@/lib/teachingConfig";
 
 interface Message {
   role: "user" | "assistant";
@@ -26,20 +27,10 @@ interface LessonChatProps {
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-const MODES = [
-  { key: "class5", label: "Simple", emoji: "🚀" },
-  { key: "engineer", label: "Engineer", emoji: "🔧" },
-  { key: "founder", label: "Founder", emoji: "💼" },
-  { key: "hacker", label: "Hacker", emoji: "⚡" },
-  { key: "crazy", label: "Crazy", emoji: "🤯" },
-  { key: "semiconductor", label: "Semi", emoji: "🏭" },
-  { key: "fun", label: "Fun", emoji: "🎮" },
-  { key: "story", label: "Story", emoji: "📖" },
-  { key: "visual", label: "Visual", emoji: "🎨" },
-  { key: "eli5", label: "ELI5", emoji: "🍼" },
-  { key: "debate", label: "Debate", emoji: "🥊" },
-  { key: "researcher", label: "Research", emoji: "🔬" },
-];
+// Build MODES from all teaching categories
+const MODES = TEACHING_CATEGORIES.flatMap(cat =>
+  cat.options.map((opt: any) => ({ key: opt.id, label: opt.label, emoji: opt.emoji }))
+).slice(0, 15); // Keep it manageable
 
 interface PowerUp {
   id: string;

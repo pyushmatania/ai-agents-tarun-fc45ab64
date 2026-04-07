@@ -17,6 +17,7 @@ import type { AgniExpression } from "@/components/Agni";
 import { motion, AnimatePresence } from "framer-motion";
 import { savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona, getSubFilters, getSubFilterCount, POPULAR_PICKS } from "@/lib/neuralOS";
 import { TrendingUp, Crown } from "lucide-react";
+import { MISSION_MODES, BRAIN_LEVELS, setTeachingSelection } from "@/lib/teachingConfig";
 
 /* ── EXPANDED ROLES ── */
 const ROLES = [
@@ -79,7 +80,7 @@ const CATEGORY_GRADIENTS = [
   "from-[#FF86D8] to-[#CE82FF]",
 ];
 
-const TOTAL_STEPS = 5 + SUGGESTION_CATEGORIES.length + 1;
+const TOTAL_STEPS = 7 + SUGGESTION_CATEGORIES.length + 1; // splash, name, role, mission, vibe, brain, why-matters, categories..., confirm
 
 const slideVariants = {
   enter: (dir: number) => ({ x: dir > 0 ? 300 : -300, opacity: 0 }),
@@ -97,14 +98,17 @@ const OnboardingPage = () => {
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [customRole, setCustomRole] = useState("");
   const [selectedVibe, setSelectedVibe] = useState<string | null>(null);
+  const [selectedMission, setSelectedMission] = useState<string | null>(null);
+  const [selectedBrain, setSelectedBrain] = useState<string | null>(null);
   const [persona, setPersona] = useState<Partial<NeuralOSPersona>>({});
   const [search, setSearch] = useState("");
   const [activeSubFilter, setActiveSubFilter] = useState<string | null>(null);
 
-  const categoryIndex = step >= 5 ? step - 5 : -1;
+  // Steps: 0=splash, 1=name, 2=role, 3=mission, 4=vibe, 5=brain, 6=why-matters, 7+=categories, last=confirm
+  const categoryIndex = step >= 7 ? step - 7 : -1;
   const activeCategory = categoryIndex >= 0 && categoryIndex < SUGGESTION_CATEGORIES.length
     ? SUGGESTION_CATEGORIES[categoryIndex] : null;
-  const isConfirmStep = step === 5 + SUGGESTION_CATEGORIES.length;
+  const isConfirmStep = step === 7 + SUGGESTION_CATEGORIES.length;
 
   const currentItems = activeCategory
     ? ((persona[activeCategory.field] as string[]) || [])
@@ -166,15 +170,21 @@ const OnboardingPage = () => {
   const finish = () => {
     const role = ROLES.find(r => r.id === selectedRole);
     const roleLabel = selectedRole === "custom" ? customRole.trim() : role?.label;
+    const depthMap: Record<string, string> = { chill: "basic", explorer: "normal", pro: "deep", hacker: "deep", scientist: "deep", professor: "deep" };
     savePersona({
       ...persona,
       name: name.trim(),
       goal: role?.goal || "Master AI agents",
       experience: role?.exp || "some experience",
       vibe: selectedVibe || "fun",
+      preferredDepth: (depthMap[selectedBrain || "explorer"] || "normal") as any,
       currentRole: roleLabel,
       completedAt: new Date().toISOString(),
     });
+    // Save teaching selections
+    if (selectedMission) setTeachingSelection("mission", selectedMission);
+    if (selectedVibe) setTeachingSelection("vibe", selectedVibe);
+    if (selectedBrain) setTeachingSelection("brain", selectedBrain);
     localStorage.setItem("edu_user_name", name.trim());
     localStorage.setItem("edu_user_role", selectedRole || "curious");
     localStorage.setItem("edu_onboarded", "true");
@@ -372,8 +382,56 @@ const OnboardingPage = () => {
           </motion.div>
         )}
 
-        {/* ═══════ STEP 3: VIBE ═══════ */}
+        {/* ═══════ STEP 3: MISSION MODE ═══════ */}
         {step === 3 && (
+          <motion.div key="mission" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-agni-gold/15 to-transparent pointer-events-none" />
+
+            <div className="flex flex-col flex-1 min-h-0 relative z-10">
+              <div className="flex justify-center mb-3 shrink-0">
+                <Agni expression="thinking" size={80} speech="What's your mission? 🎯" animate />
+              </div>
+
+              <h2 className="text-2xl font-black text-foreground text-center mb-1 shrink-0">🎯 Mission Mode</h2>
+              <p className="text-xs text-muted-foreground text-center mb-4 shrink-0">Why are you learning this? Pick your goal!</p>
+
+              <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
+                <div className="space-y-2.5">
+                  {MISSION_MODES.map((m, i) => (
+                    <motion.button key={m.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + i * 0.04 }}
+                      whileTap={{ scale: 0.97 }} onClick={() => setSelectedMission(m.id)}
+                      className={`w-full p-3.5 rounded-2xl border-2 text-left flex items-center gap-3 transition-all ${
+                        selectedMission === m.id ? "border-agni-green bg-agni-green/10 shadow-glow-green" : "border-border bg-card"
+                      }`}
+                    >
+                      <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${m.color} flex items-center justify-center shadow-lg shrink-0`}>
+                        <span className="text-xl">{m.emoji}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-extrabold text-foreground block">{m.label}</span>
+                        <span className="text-[11px] text-muted-foreground">{m.desc}</span>
+                      </div>
+                      {selectedMission === m.id && (
+                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-6 h-6 rounded-full bg-agni-green flex items-center justify-center shrink-0">
+                          <Check size={14} className="text-white" strokeWidth={3} />
+                        </motion.div>
+                      )}
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <Button onClick={goNext} disabled={!selectedMission} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none shrink-0">
+              CONTINUE <ArrowRight size={18} className="ml-2" />
+            </Button>
+          </motion.div>
+        )}
+
+        {/* ═══════ STEP 4: VIBE ═══════ */}
+        {step === 4 && (
           <motion.div key="vibe" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
@@ -384,8 +442,8 @@ const OnboardingPage = () => {
                 <Agni expression="excited" size={80} speech="How should I teach you? 🎨" animate />
               </div>
 
-              <h2 className="text-2xl font-black text-foreground text-center mb-1 shrink-0">My learning style is...</h2>
-              <p className="text-xs text-muted-foreground text-center mb-4 shrink-0">Pick what feels right (scroll for more!)</p>
+              <h2 className="text-2xl font-black text-foreground text-center mb-1 shrink-0">🎨 Teaching Vibe</h2>
+              <p className="text-xs text-muted-foreground text-center mb-4 shrink-0">Pick your learning style!</p>
 
               <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
                 <div className="space-y-2.5">
@@ -449,7 +507,6 @@ const OnboardingPage = () => {
                 </div>
               </div>
 
-              {/* Neural OS hint */}
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
                 className="bg-agni-purple/5 border border-agni-purple/20 rounded-2xl px-4 py-2.5 mb-3 shrink-0"
               >
@@ -463,8 +520,62 @@ const OnboardingPage = () => {
           </motion.div>
         )}
 
-        {/* ═══════ STEP 4: WHY THIS MATTERS — ATTENTION HOOK ═══════ */}
-        {step === 4 && (
+        {/* ═══════ STEP 5: BRAIN LEVEL ═══════ */}
+        {step === 5 && (
+          <motion.div key="brain" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-agni-purple/15 to-transparent pointer-events-none" />
+
+            <div className="flex flex-col flex-1 min-h-0 relative z-10">
+              <div className="flex justify-center mb-3 shrink-0">
+                <Agni expression="teaching" size={80} speech="How deep should we go? 🧠" animate />
+              </div>
+
+              <h2 className="text-2xl font-black text-foreground text-center mb-1 shrink-0">🧠 Brain Level</h2>
+              <p className="text-xs text-muted-foreground text-center mb-4 shrink-0">How deep do you want to dive?</p>
+
+              <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
+                <div className="space-y-2.5">
+                  {BRAIN_LEVELS.map((b, i) => (
+                    <motion.button key={b.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + i * 0.04 }}
+                      whileTap={{ scale: 0.97 }} onClick={() => setSelectedBrain(b.id)}
+                      className={`w-full p-3.5 rounded-2xl border-2 text-left flex items-center gap-3 transition-all ${
+                        selectedBrain === b.id ? "border-agni-green bg-agni-green/10 shadow-glow-green" : "border-border bg-card"
+                      }`}
+                    >
+                      <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${b.color} flex items-center justify-center shadow-lg shrink-0`}>
+                        <span className="text-xl">{b.emoji}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-extrabold text-foreground block">{b.label}</span>
+                        <span className="text-[11px] text-muted-foreground">{b.desc}</span>
+                      </div>
+                      {selectedBrain === b.id && (
+                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-6 h-6 rounded-full bg-agni-green flex items-center justify-center shrink-0">
+                          <Check size={14} className="text-white" strokeWidth={3} />
+                        </motion.div>
+                      )}
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
+                className="bg-agni-green/5 border border-agni-green/20 rounded-2xl px-4 py-2.5 mb-3 shrink-0"
+              >
+                <p className="text-[10px] text-agni-green font-bold">💡 "Chill" = bite-sized & easy. "Hacker" = skip theory, just code. "Scientist" = papers & math. Pick your level!</p>
+              </motion.div>
+            </div>
+
+            <Button onClick={goNext} disabled={!selectedBrain} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none shrink-0">
+              CONTINUE <ArrowRight size={18} className="ml-2" />
+            </Button>
+          </motion.div>
+        )}
+
+        {/* ═══════ STEP 6: WHY THIS MATTERS — ATTENTION HOOK ═══════ */}
+        {step === 6 && (
           <motion.div key="whymatters" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
