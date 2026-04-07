@@ -548,22 +548,48 @@ const OnboardingPage = () => {
               </AnimatePresence>
 
               {/* Search bar — also acts as custom input */}
-              <div className="relative mb-2 shrink-0">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={handleSearchKeyDown}
-                  placeholder={`Search or type to add custom...`}
-                  className="w-full bg-card border-2 border-border rounded-2xl pl-10 pr-3 py-3 text-sm font-medium outline-none focus:border-agni-green transition-colors placeholder:text-muted-foreground/50"
-                />
+              <div className="relative mb-2 shrink-0 group">
+                <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-agni-green via-agni-blue to-agni-purple opacity-30 group-focus-within:opacity-80 transition-opacity duration-300 blur-[1px]" />
+                <div className="relative flex items-center bg-card rounded-2xl border-2 border-transparent overflow-hidden">
+                  <Search size={16} className="absolute left-3 text-muted-foreground group-focus-within:text-agni-green transition-colors" />
+                  <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={handleSearchKeyDown}
+                    placeholder="Search or type your own..."
+                    className="w-full bg-transparent pl-10 pr-20 py-3 text-sm font-medium outline-none placeholder:text-muted-foreground/50"
+                  />
+                  {!search.trim() && (
+                    <div className="absolute right-2 flex items-center gap-1 bg-agni-purple/10 border border-agni-purple/20 rounded-lg px-2 py-1 pointer-events-none">
+                      <Sparkles size={10} className="text-agni-purple" />
+                      <span className="text-[8px] font-bold text-agni-purple whitespace-nowrap">+ Custom</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Add custom hint when searching */}
+              {/* Add custom — prominent card when typing something new */}
               {showAddCustom && (
-                <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => { toggleItem(search.trim()); setSearch(""); }}
-                  className="mb-2 shrink-0 bg-agni-gold/10 border border-agni-gold/30 rounded-xl px-3 py-2 flex items-center gap-2 w-full text-left"
+                <motion.button
+                  initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                  onClick={() => { toggleItem(search.trim()); setSearch(""); }}
+                  className="mb-2 shrink-0 w-full text-left overflow-hidden rounded-2xl border-2 border-dashed border-agni-gold/40 bg-gradient-to-r from-agni-gold/10 via-agni-orange/5 to-agni-pink/10 hover:border-agni-gold/60 transition-all"
                 >
-                  <Sparkles size={14} className="text-agni-gold shrink-0" />
-                  <span className="text-xs font-bold text-foreground">Add "<span className="text-agni-gold">{search.trim()}</span>"</span>
-                  <span className="text-[9px] text-muted-foreground ml-auto">↵ Enter</span>
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-agni-gold to-agni-orange flex items-center justify-center shadow-lg shrink-0">
+                      <Sparkles size={16} className="text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-extrabold text-foreground">
+                        Add "<span className="text-agni-gold">{search.trim()}</span>" as custom
+                      </p>
+                      <p className="text-[9px] text-muted-foreground mt-0.5">
+                        Not in the list? No problem — tap to add it!
+                      </p>
+                    </div>
+                    <div className="shrink-0 bg-agni-gold/20 rounded-lg px-2 py-1 flex items-center gap-1">
+                      <span className="text-[9px] font-bold text-agni-gold">↵ Enter</span>
+                    </div>
+                  </div>
                 </motion.button>
               )}
 
