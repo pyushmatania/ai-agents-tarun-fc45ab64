@@ -30,10 +30,9 @@ interface SmartInputBarProps {
   onSuggestionClick?: (s: string) => void;
   placeholder?: string;
   accentColor?: string;
-  // Lesson-specific
   lessonTitle?: string;
   exchangeCount?: number;
-  onQuizReady?: () => void;
+  onQuizReady?: (difficulty?: string) => void;
   onModeChange?: (mode: string) => void;
   activeMode?: string;
 }
