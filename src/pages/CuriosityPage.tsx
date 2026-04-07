@@ -358,7 +358,7 @@ const CuriosityPage = () => {
   const storedName = localStorage.getItem("edu_user_name") || "Learner";
   const displayName = user?.user_metadata?.full_name?.split(" ")[0] || storedName;
 
-  const [activeTab, setActiveTab] = useState<"feed" | "explore">("feed");
+  const [activeTab, setActiveTab] = useState<"feed" | "saved" | "explore">("feed");
   const [activeId, setActiveId] = useState<string | null>(null);
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
