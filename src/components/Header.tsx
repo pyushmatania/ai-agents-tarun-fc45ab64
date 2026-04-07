@@ -1,4 +1,4 @@
-import { Bell, Settings, Flame, Sparkles, User } from "lucide-react";
+import { Bell, Settings, Flame, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useState, useCallback, useRef } from "react";
@@ -6,6 +6,8 @@ import Agni, { AgniExpression } from "./Agni";
 import MascotProfileModal from "./MascotProfileModal";
 import { hasPersona } from "@/lib/neuralOS";
 import { SFX } from "@/lib/sounds";
+import UserAvatar from "./UserAvatar";
+import { useAvatar } from "@/hooks/useAvatar";
 
 const EXPRESSIONS: AgniExpression[] = ["default", "happy", "excited", "thinking", "teaching", "celebrating"];
 
