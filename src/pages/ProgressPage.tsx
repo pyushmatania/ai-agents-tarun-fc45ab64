@@ -220,14 +220,20 @@ const ProgressPage = () => {
             <DailyQuests quests={dailyQuests} />
           </FadeIn>
 
-          {/* League */}
+          {/* League + Leaderboard link */}
           <FadeIn delay={0.3}>
             <div className="bg-card rounded-2xl p-3.5 border border-border/40 shadow-card my-4">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-7 h-7 rounded-xl bg-agni-purple flex items-center justify-center">
-                  <Crown size={14} className="text-white" />
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-xl bg-agni-purple flex items-center justify-center">
+                    <Crown size={14} className="text-white" />
+                  </div>
+                  <h4 className="text-xs font-extrabold text-foreground">League</h4>
                 </div>
-                <h4 className="text-xs font-extrabold text-foreground">League</h4>
+                <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate("/leaderboard")}
+                  className="text-[9px] font-black text-agni-gold bg-agni-gold/15 px-2.5 py-1 rounded-full flex items-center gap-0.5">
+                  Leaderboard <ChevronRight size={10} />
+                </motion.button>
               </div>
               <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-agni-purple/10 to-agni-blue/10 rounded-xl border border-agni-purple/20">
                 <motion.span
