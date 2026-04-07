@@ -400,7 +400,7 @@ const OnboardingPage = () => {
   const catHint = activeCategory ? AGNI_HINTS[activeCategory.id] : null;
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <div className="min-h-screen bg-background relative overflow-x-hidden">
       {/* Interlude overlay */}
       <AnimatePresence>
         {showInterlude && interludeData && (
