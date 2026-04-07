@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import PageTransition, { FadeIn } from "@/components/PageTransition";
-import { ExternalLink, Search, Zap, User, ChevronDown, X } from "lucide-react";
+import { ExternalLink, Search, Zap, User, Star, BookOpen, Wrench, Code2, Mic, Newspaper, GraduationCap, Users, FlaskConical, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { motion, AnimatePresence } from "framer-motion";
 import Agni from "@/components/Agni";
@@ -11,15 +11,15 @@ import { useGamification } from "@/hooks/useGamification";
 type Source = { title: string; desc: string; url: string; icon: string; type: string };
 
 const ZONES = [
-  { id: "youtube", label: "Watch", icon: "🎬", emoji2: "📺", color: "#FF4B4B", desc: "Video tutorials & deep dives", count: 7 },
-  { id: "tool", label: "Build", icon: "🔧", emoji2: "⚡", color: "#58CC02", desc: "Frameworks, SDKs & platforms", count: 8 },
-  { id: "newsletter", label: "Read", icon: "📨", emoji2: "✉️", color: "#FF9600", desc: "Newsletters & daily updates", count: 4 },
-  { id: "github", label: "Code", icon: "💻", emoji2: "🐙", color: "#CE82FF", desc: "Open-source repos & stars", count: 5 },
-  { id: "course", label: "Study", icon: "🎓", emoji2: "📚", color: "#1CB0F6", desc: "Courses & certifications", count: 3 },
-  { id: "paper", label: "Research", icon: "🔬", emoji2: "📄", color: "#FF4B91", desc: "Foundational papers", count: 4 },
-  { id: "community", label: "Connect", icon: "👥", emoji2: "💬", color: "#FFC800", desc: "Communities & forums", count: 3 },
-  { id: "podcast", label: "Listen", icon: "🎙️", emoji2: "🎧", color: "#CE82FF", desc: "AI engineering podcasts", count: 2 },
-  { id: "news", label: "Headlines", icon: "📰", emoji2: "🗞️", color: "#1CB0F6", desc: "Breaking AI news", count: 3 },
+  { id: "youtube", label: "Watch", icon: "🎬", lucide: BookOpen, color: "#FF4B4B", desc: "Video tutorials", count: 7 },
+  { id: "tool", label: "Build", icon: "🔧", lucide: Wrench, color: "#58CC02", desc: "Frameworks & SDKs", count: 8 },
+  { id: "newsletter", label: "Read", icon: "📨", lucide: Newspaper, color: "#FF9600", desc: "Newsletters", count: 4 },
+  { id: "github", label: "Code", icon: "💻", lucide: Code2, color: "#CE82FF", desc: "Open-source repos", count: 5 },
+  { id: "course", label: "Study", icon: "🎓", lucide: GraduationCap, color: "#1CB0F6", desc: "Courses", count: 3 },
+  { id: "paper", label: "Research", icon: "🔬", lucide: FlaskConical, color: "#FF4B91", desc: "Papers", count: 4 },
+  { id: "community", label: "Connect", icon: "👥", lucide: Users, color: "#FFC800", desc: "Communities", count: 3 },
+  { id: "podcast", label: "Listen", icon: "🎙️", lucide: Mic, color: "#CE82FF", desc: "Podcasts", count: 2 },
+  { id: "news", label: "Headlines", icon: "📰", lucide: Newspaper, color: "#1CB0F6", desc: "AI news", count: 3 },
 ];
 
 const SOURCES: Source[] = [
@@ -64,29 +64,10 @@ const SOURCES: Source[] = [
   { title: "VentureBeat AI", desc: "Enterprise agentic AI coverage", url: "https://venturebeat.com/ai", icon: "📰", type: "news" },
 ];
 
-/* Floating decoration */
-const FloatingShape = ({ delay, x, y, size, color, shape }: { delay: number; x: string; y: string; size: number; color: string; shape: string }) => (
-  <motion.div
-    className="absolute pointer-events-none"
-    style={{ left: x, top: y, width: size, height: size }}
-    animate={{
-      y: [0, -10, 0, 6, 0],
-      opacity: [0.08, 0.18, 0.08],
-      rotate: shape === "diamond" ? [45, 90, 45] : [0, 12, 0],
-    }}
-    transition={{ duration: 8 + delay, repeat: Infinity, delay, ease: "easeInOut" }}
-  >
-    {shape === "hex" ? (
-      <svg viewBox="0 0 100 100" className="w-full h-full"><polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill={color} /></svg>
-    ) : shape === "diamond" ? (
-      <svg viewBox="0 0 100 100" className="w-full h-full"><polygon points="50,5 95,50 50,95 5,50" fill={color} /></svg>
-    ) : shape === "tri" ? (
-      <svg viewBox="0 0 100 100" className="w-full h-full"><polygon points="50,10 90,85 10,85" fill={color} /></svg>
-    ) : (
-      <div className="w-full h-full rounded-full" style={{ background: color }} />
-    )}
-  </motion.div>
-);
+const getSCurveX = (index: number): number => {
+  const pattern = [20, 60, 100, 60, 20, 60];
+  return pattern[index % pattern.length];
+};
 
 const SourcesPage = () => {
   const { user } = useAuth();
@@ -95,13 +76,8 @@ const SourcesPage = () => {
   const [expandedZone, setExpandedZone] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const toggleZone = (id: string) => {
-    setExpandedZone(prev => prev === id ? null : id);
-  };
-
   const getZoneSources = (zoneId: string) =>
-    SOURCES.filter(s => s.type === zoneId)
-      .filter(s => !searchQuery || s.title.toLowerCase().includes(searchQuery.toLowerCase()));
+    SOURCES.filter(s => s.type === zoneId);
 
   const searchResults = searchQuery
     ? SOURCES.filter(s => s.title.toLowerCase().includes(searchQuery.toLowerCase()) || s.desc.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -110,65 +86,86 @@ const SourcesPage = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background pb-24 relative overflow-hidden">
-        {/* ===== BG ===== */}
+        {/* Background */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute inset-0 opacity-[0.03]" style={{
-            backgroundImage: "radial-gradient(circle, hsl(var(--foreground)) 0.8px, transparent 0.8px)",
-            backgroundSize: "36px 36px",
+          <div className="absolute inset-0 opacity-[0.05]" style={{
+            backgroundImage: "radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px)",
+            backgroundSize: "30px 30px",
           }} />
-          <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[500px] h-[300px] rounded-full opacity-[0.1]"
-            style={{ background: "radial-gradient(ellipse, hsl(var(--agni-blue)), transparent 60%)" }}
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-[500px] h-[250px] rounded-full opacity-[0.12]"
+            style={{ background: "radial-gradient(ellipse, #1CB0F6, transparent 70%)" }}
           />
-          <FloatingShape delay={0} x="6%" y="10%" size={55} color="hsla(199,92%,54%,0.15)" shape="hex" />
-          <FloatingShape delay={2} x="85%" y="20%" size={40} color="hsla(100,95%,40%,0.12)" shape="diamond" />
-          <FloatingShape delay={1} x="8%" y="50%" size={45} color="hsla(270,100%,75%,0.1)" shape="tri" />
-          <FloatingShape delay={3} x="82%" y="60%" size={50} color="hsla(46,100%,49%,0.1)" shape="circle" />
-          <FloatingShape delay={4} x="15%" y="80%" size={35} color="hsla(330,80%,60%,0.08)" shape="hex" />
+          {/* S-curve path */}
+          <svg className="absolute top-[200px] left-1/2 -translate-x-1/2 w-[280px] h-[1200px] opacity-[0.08]" viewBox="0 0 280 1200">
+            <path d="M140 0 Q20 100 140 200 Q260 300 140 400 Q20 500 140 600 Q260 700 140 800 Q20 900 140 1000 Q260 1100 140 1200" fill="none" stroke="currentColor" strokeWidth="40" className="text-foreground" />
+          </svg>
+          {/* Floating orbs */}
+          {[
+            { x: "8%", y: "15%", size: 70, color: "hsla(0,100%,65%,0.15)" },
+            { x: "85%", y: "25%", size: 55, color: "hsla(100,95%,40%,0.18)" },
+            { x: "5%", y: "45%", size: 60, color: "hsla(270,100%,75%,0.15)" },
+            { x: "88%", y: "55%", size: 50, color: "hsla(46,100%,49%,0.12)" },
+            { x: "15%", y: "75%", size: 65, color: "hsla(199,92%,54%,0.15)" },
+          ].map((orb, i) => (
+            <motion.div
+              key={i}
+              className="absolute rounded-full pointer-events-none"
+              style={{ left: orb.x, top: orb.y, width: orb.size, height: orb.size, background: orb.color }}
+              animate={{ y: [0, -12, 0, 8, 0], opacity: [0.15, 0.3, 0.15] }}
+              transition={{ duration: 8 + i * 2, repeat: Infinity, delay: i, ease: "easeInOut" }}
+            />
+          ))}
         </div>
 
-        <div className="max-w-md mx-auto px-4 pt-5 relative z-10">
-
+        <div className="max-w-md mx-auto relative z-10">
           {/* Top bar */}
           <FadeIn>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Agni expression="teaching" size={45} animate={true} />
-                <div>
-                  <h2 className="text-sm font-black text-foreground">Knowledge Hub</h2>
-                  <p className="text-[10px] text-muted-foreground font-semibold">{SOURCES.length} curated resources</p>
-                </div>
-              </div>
+            <div className="px-4 pt-4 pb-2 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate("/settings")} className="w-7 h-7 rounded-xl bg-card flex items-center justify-center border border-border/50 hover:border-primary/30 transition-colors" title="Profile">
-                  <User size={12} className="text-muted-foreground" />
-                </motion.button>
-                <div className="flex items-center gap-1 bg-agni-green/15 rounded-full px-2 py-0.5">
-                  <Zap size={10} className="text-agni-green" />
+                <div className="flex items-center gap-1 bg-agni-green/15 rounded-full px-2 py-1">
+                  <Zap size={12} className="text-agni-green" />
                   <span className="text-[10px] font-black text-agni-green">{stats.xp}</span>
                 </div>
+                <div className="flex items-center gap-1 bg-agni-gold/15 rounded-full px-2 py-1">
+                  <Star size={12} className="text-agni-gold fill-agni-gold" />
+                  <span className="text-[10px] font-black text-agni-gold">{SOURCES.length}</span>
+                </div>
+              </div>
+              <h1 className="text-sm font-black text-foreground">Hub</h1>
+              <div className="flex items-center gap-1.5">
+                <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate("/settings")} className="w-7 h-7 rounded-xl bg-card flex items-center justify-center border border-border/50 hover:border-primary/30 transition-colors">
+                  <User size={12} className="text-muted-foreground" />
+                </motion.button>
               </div>
             </div>
           </FadeIn>
 
           {/* Search */}
           <FadeIn delay={0.05}>
-            <div className="relative mb-4">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search all resources..."
-                value={searchQuery}
-                onChange={e => { setSearchQuery(e.target.value); if (e.target.value) setExpandedZone(null); }}
-                className="w-full h-10 pl-9 pr-4 bg-card border border-border/40 rounded-2xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-agni-green/50 transition-colors"
-              />
+            <div className="px-4 mb-3">
+              <div className="relative">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search resources..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="w-full h-10 pl-9 pr-4 bg-card border border-border/40 rounded-2xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-agni-green/50 transition-colors"
+                />
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <X size={14} className="text-muted-foreground" />
+                  </button>
+                )}
+              </div>
             </div>
           </FadeIn>
 
           {/* Search Results */}
           <AnimatePresence>
             {searchQuery && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-4">
-                <p className="text-[10px] text-muted-foreground font-bold mb-2">{searchResults.length} result{searchResults.length !== 1 ? "s" : ""}</p>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="px-4 mb-4">
+                <p className="text-[10px] text-muted-foreground font-bold mb-2">{searchResults.length} results</p>
                 <div className="space-y-1.5">
                   {searchResults.map((s, i) => {
                     const zone = ZONES.find(z => z.id === s.type);
@@ -197,116 +194,158 @@ const SourcesPage = () => {
             )}
           </AnimatePresence>
 
-          {/* Zone Grid — 2 column visual tiles */}
+          {/* Winding path of zone nodes */}
           {!searchQuery && (
-            <div className="grid grid-cols-2 gap-2.5">
-              {ZONES.map((zone, i) => {
-                const isExpanded = expandedZone === zone.id;
-                const sources = getZoneSources(zone.id);
+            <div className="px-4 relative">
+              {/* SVG connector lines */}
+              <svg className="absolute top-0 left-4 right-4 h-full pointer-events-none" style={{ width: "calc(100% - 32px)" }}>
+                {ZONES.map((_, i) => {
+                  if (i === 0) return null;
+                  const x1 = getSCurveX(i - 1) + 28;
+                  const y1 = (i - 1) * 130 + 45;
+                  const x2 = getSCurveX(i) + 28;
+                  const y2 = i * 130 + 45;
+                  const midY = (y1 + y2) / 2;
+                  return (
+                    <path
+                      key={i}
+                      d={`M${x1},${y1} C${x1},${midY} ${x2},${midY} ${x2},${y2}`}
+                      fill="none"
+                      stroke={ZONES[i].color}
+                      strokeWidth="3"
+                      strokeDasharray="6 6"
+                      opacity={0.25}
+                    />
+                  );
+                })}
+              </svg>
 
-                return (
-                  <motion.div
-                    key={zone.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.08 + i * 0.04, type: "spring", stiffness: 300 }}
-                    className={`${isExpanded ? "col-span-2" : ""}`}
-                  >
-                    <motion.button
-                      layout="position"
-                      whileTap={{ scale: 0.96 }}
-                      onClick={() => toggleZone(zone.id)}
-                      className="w-full rounded-2xl p-3.5 text-left relative overflow-hidden border-2 transition-all"
-                      style={{
-                        borderColor: isExpanded ? `${zone.color}50` : "hsl(var(--border) / 0.3)",
-                        background: isExpanded
-                          ? `linear-gradient(145deg, ${zone.color}18, transparent 70%)`
-                          : `linear-gradient(145deg, ${zone.color}08, transparent 50%)`,
-                      }}
+              {/* Zone nodes on path */}
+              <div className="relative" style={{ paddingBottom: 20 }}>
+                {ZONES.map((zone, i) => {
+                  const xOffset = getSCurveX(i);
+                  const isExpanded = expandedZone === zone.id;
+                  const sources = getZoneSources(zone.id);
+                  const LucideIcon = zone.lucide;
+
+                  return (
+                    <motion.div
+                      key={zone.id}
+                      initial={{ opacity: 0, scale: 0.5, y: 30 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ delay: 0.15 + i * 0.07, type: "spring", stiffness: 200 }}
+                      className="relative"
+                      style={{ height: isExpanded ? "auto" : 130, minHeight: 130, paddingLeft: xOffset }}
                     >
-                      {/* BG decoration */}
-                      <div className="absolute -right-3 -bottom-3 text-4xl opacity-[0.06] select-none pointer-events-none">
-                        {zone.emoji2}
-                      </div>
-                      <motion.div
-                        className="absolute top-2 right-2 w-6 h-6 rounded-full opacity-[0.08]"
-                        style={{ background: zone.color }}
-                        animate={{ scale: [1, 1.4, 1] }}
-                        transition={{ duration: 4, repeat: Infinity, delay: i * 0.5 }}
-                      />
-
-                      <div className="flex items-start justify-between relative z-10">
-                        <div>
-                          <motion.div
-                            className="w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-2 shadow-md"
-                            style={{
-                              background: `linear-gradient(135deg, ${zone.color}30, ${zone.color}15)`,
-                              border: `2px solid ${zone.color}25`,
-                            }}
-                            animate={isExpanded ? { rotate: [0, 5, -5, 0] } : {}}
-                            transition={{ duration: 2, repeat: Infinity }}
-                          >
-                            {zone.icon}
-                          </motion.div>
-                          <h4 className="text-xs font-black text-foreground">{zone.label}</h4>
-                          <p className="text-[9px] text-muted-foreground font-semibold mt-0.5 leading-tight">{zone.desc}</p>
-                        </div>
-                        <div className="flex flex-col items-end gap-1">
-                          <span className="text-[9px] font-black px-2 py-0.5 rounded-full" style={{ color: zone.color, background: `${zone.color}15` }}>
-                            {zone.count}
-                          </span>
-                          <motion.div
-                            animate={{ rotate: isExpanded ? 180 : 0 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            <ChevronDown size={12} className="text-muted-foreground" />
-                          </motion.div>
-                        </div>
-                      </div>
-                    </motion.button>
-
-                    {/* Expanded resources */}
-                    <AnimatePresence>
-                      {isExpanded && (
+                      {/* The node button */}
+                      <motion.button
+                        whileTap={{ scale: 0.9, y: 3 }}
+                        onClick={() => setExpandedZone(prev => prev === zone.id ? null : zone.id)}
+                        className="relative flex flex-col items-center"
+                        style={{ width: 90 }}
+                      >
+                        {/* Glow ring */}
                         <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.3, ease: "easeInOut" }}
-                          className="overflow-hidden"
+                          className="absolute -inset-2 rounded-full opacity-0"
+                          style={{ background: `radial-gradient(circle, ${zone.color}30, transparent 70%)` }}
+                          animate={isExpanded ? { opacity: [0.3, 0.6, 0.3] } : { opacity: 0 }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        />
+
+                        {/* Circle node */}
+                        <motion.div
+                          className="w-[56px] h-[56px] rounded-full flex items-center justify-center shadow-lg relative z-10 border-[3px]"
+                          style={{
+                            background: isExpanded
+                              ? zone.color
+                              : `linear-gradient(135deg, ${zone.color}25, ${zone.color}10)`,
+                            borderColor: isExpanded ? zone.color : `${zone.color}50`,
+                            boxShadow: isExpanded
+                              ? `0 6px 0 0 ${zone.color}80, 0 8px 20px ${zone.color}40`
+                              : `0 4px 0 0 ${zone.color}40`,
+                          }}
+                          animate={isExpanded ? { y: [0, -3, 0] } : {}}
+                          transition={{ duration: 1.5, repeat: Infinity }}
                         >
-                          <div className="pt-2 space-y-1.5">
-                            {sources.map((s, si) => (
-                              <motion.a
-                                key={si}
-                                href={s.url} target="_blank" rel="noopener noreferrer"
-                                initial={{ opacity: 0, x: -8 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: si * 0.05 }}
-                                className="flex items-center gap-2.5 bg-card rounded-xl p-2.5 border border-border/30 hover:border-border transition-all group"
-                              >
-                                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0"
-                                  style={{ background: `${zone.color}12` }}>
-                                  {s.icon}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-[11px] font-extrabold text-foreground truncate">{s.title}</p>
-                                  <p className="text-[8px] text-muted-foreground truncate font-semibold">{s.desc}</p>
-                                </div>
-                                <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform"
-                                  style={{ background: `${zone.color}15` }}>
-                                  <ExternalLink size={9} style={{ color: zone.color }} />
-                                </div>
-                              </motion.a>
-                            ))}
-                          </div>
+                          <span className="text-2xl">{zone.icon}</span>
                         </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                );
-              })}
+
+                        {/* Label */}
+                        <span className="text-[9px] font-black mt-1.5" style={{ color: isExpanded ? zone.color : "hsl(var(--foreground))" }}>
+                          {zone.label}
+                        </span>
+                        <span className="text-[7px] font-bold text-muted-foreground">{zone.count} resources</span>
+
+                        {/* Count badge */}
+                        <div
+                          className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-black text-white z-20"
+                          style={{ background: zone.color, boxShadow: `0 2px 0 0 ${zone.color}80` }}
+                        >
+                          {zone.count}
+                        </div>
+                      </motion.button>
+
+                      {/* Expanded resources panel */}
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="overflow-hidden w-full mt-2"
+                            style={{ paddingLeft: 0, marginLeft: -xOffset }}
+                          >
+                            {/* Category banner */}
+                            <div
+                              className="rounded-2xl p-3 mb-2 relative overflow-hidden"
+                              style={{ background: zone.color, boxShadow: `0 4px 0 0 ${zone.color}80` }}
+                            >
+                              <div className="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-white/10" />
+                              <div className="absolute -right-2 bottom-0 w-10 h-10 rounded-full bg-white/5" />
+                              <div className="flex items-center gap-2 relative z-10">
+                                <span className="text-2xl">{zone.icon}</span>
+                                <div>
+                                  <h4 className="text-white font-black text-sm">{zone.label}</h4>
+                                  <p className="text-white/60 text-[9px] font-bold">{zone.desc}</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Resources list */}
+                            <div className="space-y-1.5">
+                              {sources.map((s, si) => (
+                                <motion.a
+                                  key={si}
+                                  href={s.url} target="_blank" rel="noopener noreferrer"
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: si * 0.05 }}
+                                  className="flex items-center gap-2.5 bg-card rounded-2xl p-3 border-2 border-border/30 hover:border-border transition-all group"
+                                  style={{ borderLeftColor: `${zone.color}40`, borderLeftWidth: 3 }}
+                                >
+                                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-md"
+                                    style={{ background: `${zone.color}20`, border: `2px solid ${zone.color}25` }}>
+                                    <LucideIcon size={14} style={{ color: zone.color }} />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-[11px] font-extrabold text-foreground truncate">{s.title}</p>
+                                    <p className="text-[9px] text-muted-foreground truncate font-semibold">{s.desc}</p>
+                                  </div>
+                                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform"
+                                    style={{ background: `${zone.color}15` }}>
+                                    <ExternalLink size={10} style={{ color: zone.color }} />
+                                  </div>
+                                </motion.a>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
