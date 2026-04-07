@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +41,7 @@ const OnboardingPage = () => {
   const [categoryIndex, setCategoryIndex] = useState(0);
   const [search, setSearch] = useState("");
   const [customInput, setCustomInput] = useState("");
+  const progress = Math.round((step / TOTAL_STEPS) * 100);
 
   // Splash typewriter
   const tagline = "Master the future of intelligent automation";

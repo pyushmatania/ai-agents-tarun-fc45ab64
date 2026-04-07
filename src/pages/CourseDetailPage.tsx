@@ -1,15 +1,21 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import PageTransition from "@/components/PageTransition";
-import { ChevronLeft, CheckCircle2, Send, StickyNote, Timer, Brain as BrainIcon } from "lucide-react";
+import { ChevronLeft, CheckCircle2, Timer, Brain } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { getAIConfig, getActiveModelLabel } from "@/lib/aiConfig";
-import { Brain, Sparkles } from "lucide-react";
-import { buildPersonalizedPrompt, generateSmartOptions, buildOpeningPrompt, hasPersona, detectComprehension, updateComprehension, buildRemediationPrompt } from "@/lib/neuralOS";
-import MascotProfileModal from "@/components/MascotProfileModal";
-import PracticalQuizModal from "@/components/PracticalQuizModal";
-import BotIllustration from "@/components/illustrations/BotIllustration";
+import { getActiveModelLabel } from "@/lib/aiConfig";
+import { useGamification } from "@/hooks/useGamification";
+import LessonChat from "@/components/lesson/LessonChat";
+import type { ChatMessage } from "@/components/lesson/LessonChat";
+import QuizCard from "@/components/lesson/QuizCard";
+import type { QuizQuestion } from "@/components/lesson/QuizCard";
+import LessonComplete from "@/components/lesson/LessonComplete";
+import Agni from "@/components/Agni";
+import { SFX } from "@/lib/sounds";
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 const ALL_LESSONS: Record<string, { t: string; xp: number; topic: string }> = {
   f1: { t: "What is an AI Agent?", xp: 50, topic: "what AI agents are, Perceive-Reason-Act-Learn loop, ReAct pattern, core components" },
@@ -38,109 +44,32 @@ const ALL_LESSONS: Record<string, { t: string; xp: number; topic: string }> = {
 
 type Phase = "chat" | "generating" | "quiz" | "complete";
 
-const SYS_BASE = "You are AGNI, an elite AI Agents tutor. Be passionate, use Indian examples (HCL, Tata, Flipkart, cricket, Bollywood). Keep under 250 words. End with a question to check understanding.";
-
-type Msg = { role: "user" | "assistant"; text: string };
-
 const CourseDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { stats, loseHeart, completeLesson } = useGamification();
+  const { loseHeart, completeLesson } = useGamification();
   const [phase, setPhase] = useState<Phase>("chat");
   const [quizzes, setQuizzes] = useState<QuizQuestion[]>([]);
   const [quizIndex, setQuizIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [timer, setTimer] = useState(0);
-  const [showProfile, setShowProfile] = useState(false);
-  const [showQuiz, setShowQuiz] = useState(false);
-  const [smartOptions, setSmartOptions] = useState(generateSmartOptions(""));
-  const chatEnd = useRef<HTMLDivElement>(null);
+  const [showQuizConfirm, setShowQuizConfirm] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [quizError, setQuizError] = useState("");
   const timerRef = useRef<any>(null);
+  const chatMessagesRef = useRef<ChatMessage[]>([]);
 
   const teachingMode = localStorage.getItem("teaching_mode") || "engineer";
   const lesson = id ? ALL_LESSONS[id] : null;
   const done: string[] = JSON.parse(localStorage.getItem("adojo_done") || "[]");
   const isDone = id ? done.includes(id) : false;
-  const personaActive = hasPersona();
 
-  const callAI = async (apiMessages: { role: string; content: string }[]) => {
-    const config = getAIConfig();
-    // 🧠 NEURAL OS — inject personalized system prompt
-    const personalizedSys = buildPersonalizedPrompt(SYS_BASE);
-    const body: any = {
-      system: personalizedSys,
-      messages: apiMessages,
-    };
-    if (config.mode === "byok" && config.byokApiKey) {
-      body.customApiKey = config.byokApiKey;
-      body.provider = config.byokProvider;
-      body.model = config.byokModel;
-    } else {
-      body.model = config.builtinModel;
-    }
-    const { data, error } = await supabase.functions.invoke("ai-tutor", { body });
-    if (error) throw new Error(error.message);
-    return data?.text || "";
-  };
+  const progress = phase === "chat" ? 33 : phase === "generating" ? 50 : phase === "quiz" ? 66 + (quizIndex / Math.max(quizzes.length, 1)) * 34 : 100;
 
   useEffect(() => {
     timerRef.current = setInterval(() => setTimer(t => t + 1), 1000);
-
-    // 🌱 UTSARGA — refresh smart options based on persona + lesson
-    setSmartOptions(generateSmartOptions(lesson.topic));
-
-    setMsgs([{ role: "assistant", text: "⏳ Loading lesson..." }]);
-    setLoading(true);
-    const mObj = MODES.find(m => m.id === mode) || MODES[1];
-
-    // 🎬 VIDYA — personalized opening prompt
-    const openingPrompt = buildOpeningPrompt(lesson.topic, mObj.prompt);
-
-    callAI([{ role: "user", content: openingPrompt }])
-    .then(text => {
-      setMsgs([{ role: "assistant", text: text || `Welcome to **${lesson.t}**!\n\nThis covers: ${lesson.topic}\n\nSend me a message to start learning!` }]);
-      setLoading(false);
-    })
-    .catch(() => {
-      setMsgs([{ role: "assistant", text: `Welcome to **${lesson.t}**!\n\nThis covers: ${lesson.topic}\n\nThe AI tutor is connecting... Try sending a message below to start!\n\nWhat would you like to learn?` }]);
-      setLoading(false);
-    });
-
     return () => clearInterval(timerRef.current);
-  }, [id]);
-
-  useEffect(() => {
-    if (chatEnd.current) chatEnd.current.scrollIntoView({ behavior: "smooth" });
-  }, [msgs]);
-
-  const sendMsg = async (custom?: string) => {
-    const userMsg = custom || inp.trim();
-    if (!userMsg || loading) return;
-    setInp("");
-    const newMsgs: Msg[] = [...msgs, { role: "user", text: userMsg }];
-    setMsgs(newMsgs);
-    setLoading(true);
-
-    // 🧠 NEURAL OS — detect comprehension signal from the user's message
-    const signal = detectComprehension(userMsg);
-    if (signal !== "neutral") {
-      updateComprehension(signal);
-      // Refresh smart options so confused users see "even simpler" etc
-      if (lesson) setSmartOptions(generateSmartOptions(lesson.topic));
-    }
-
-    const mObj = MODES.find(m => m.id === mode) || MODES[1];
-    const apiMsgs = newMsgs.slice(-6).map(m => ({ role: m.role, content: m.text }));
-
-    // 🆕 If confused: inject remediation directive
-    if (signal === "confused") {
-      apiMsgs.push({
-        role: "user",
-        content: `[NEURAL OS ALERT: Student is confused. Take them BACK TO BASICS. Use the simplest possible analogy. Switch to a totally different angle. Use one of their interests if available. Be kind and patient. End with: "Did that land better? Want me to break it down even more?"]`
-      });
-    } else {
-      apiMsgs.push({ role: "user", content: `[Context: ${lesson!.topic}. Style: ${mObj.prompt}. Under 250 words. End with a comprehension check question like "does that click?" or "1-5 how clear is this?"]` });
-    }
+  }, []);
 
   const generateQuizzes = async (conversation: ChatMessage[]) => {
     setPhase("generating");
@@ -176,7 +105,6 @@ const CourseDetailPage = () => {
     } catch (error: any) {
       console.error("Quiz generation error:", error);
       setQuizError(error.message);
-      // Fallback: go to quiz with a simple generated question
       setQuizzes([{
         type: "mcq",
         question: `What is the main focus of "${lesson?.t}"?`,
@@ -192,6 +120,22 @@ const CourseDetailPage = () => {
     SFX.tap();
     chatMessagesRef.current = conversation;
     generateQuizzes(conversation.length > 0 ? conversation : [{ role: "user", content: `Teach me about ${lesson?.t}: ${lesson?.topic}` }]);
+  };
+
+  const startCountdown = () => {
+    setCountdown(3);
+    const interval = setInterval(() => {
+      setCountdown(prev => {
+        if (prev === null || prev <= 1) {
+          clearInterval(interval);
+          setShowQuizConfirm(false);
+          setCountdown(null);
+          handleQuizReady(chatMessagesRef.current);
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
   };
 
   const handleQuizAnswer = (correct: boolean) => {
@@ -219,174 +163,195 @@ const CourseDetailPage = () => {
     setPhase("complete");
   };
 
+  const markDone = () => {
+    if (phase === "chat") {
+      setShowQuizConfirm(true);
+    } else {
+      navigate("/courses");
+    }
+  };
+
   if (!lesson) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
         <Agni expression="sad" size={120} speech="Lesson not found 😢" />
-        <button onClick={() => navigate("/courses")} className="text-agni-green font-black text-sm">Back to courses</button>
+        <button onClick={() => navigate("/courses")} className="text-primary font-black text-sm">Back to courses</button>
       </div>
     );
   }
 
   return (
     <PageTransition>
-    <div className="flex flex-col h-screen bg-background">
-      {/* Header */}
-      <div className="bg-card px-4 py-3 border-b border-border shrink-0">
-        <div className="max-w-md mx-auto flex items-center justify-between">
-          <button onClick={() => { clearInterval(timerRef.current); navigate("/courses"); }} className="flex items-center gap-1 text-sm text-muted-foreground">
-            <ChevronLeft size={16} /> Back
-          </button>
-          <div className="text-center">
-            <div className="font-bold text-sm text-foreground truncate max-w-[180px]">{lesson.t}</div>
-            <div className="text-xs text-muted-foreground flex items-center gap-2 justify-center">
-              <span>{lesson.xp} XP</span>
-              <span className="flex items-center gap-0.5"><Timer size={10} /> {Math.floor(timer/60)}m {timer%60}s</span>
-              <span className="flex items-center gap-0.5 text-[8px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-bold">
-                <Brain size={8} /> {getActiveModelLabel()}
-              </span>
-            </div>
-          </div>
-          <div className="flex gap-2 items-center">
-            {/* 🧠 Tap mascot to open profile */}
-            <button
-              onClick={() => setShowProfile(true)}
-              className="relative w-9 h-9 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center hover:scale-105 transition-transform"
-              title="My Persona"
-            >
-              <BotIllustration size={28} />
-              {personaActive && (
-                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-card" />
-              )}
+      <div className="flex flex-col h-screen bg-background">
+        {/* Header */}
+        <div className="bg-card px-4 py-3 border-b border-border shrink-0">
+          <div className="max-w-md mx-auto flex items-center justify-between">
+            <button onClick={() => { clearInterval(timerRef.current); navigate("/courses"); }} className="flex items-center gap-1 text-sm text-muted-foreground">
+              <ChevronLeft size={16} /> Back
             </button>
-            {/* 🎯 Practical Quiz */}
-            <button
-              onClick={() => setShowQuiz(true)}
-              className="w-9 h-9 rounded-full bg-purple-500/10 border-2 border-purple-500/30 flex items-center justify-center hover:scale-105 transition-transform"
-              title="Practical Quiz"
-            >
-              <BrainIcon size={14} className="text-purple-500" />
-            </button>
-            <button onClick={() => setShowNote(!showNote)} className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-              <StickyNote size={14} className="text-foreground" />
-            </button>
-            {!isDone ? (
-              <button onClick={markDone} className="bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1">
-                <CheckCircle2 size={12} /> Done
-              </button>
-            ) : (
-              <span className="text-green-500 text-xs font-bold flex items-center gap-1"><CheckCircle2 size={14} /> Done</span>
-            )}
-          </div>
-        </div>
-      </div>
-
-            <div className="flex-1 text-center">
-              <p className="text-sm font-black text-foreground truncate">{lesson.t}</p>
-              <div className="flex items-center justify-center gap-2 mt-0.5">
-                <span className="text-[9px] font-black text-agni-green">{lesson.xp} XP</span>
-                <span className="text-[9px] text-muted-foreground">⏱ {Math.floor(timer / 60)}m {timer % 60}s</span>
-                <span className="text-[8px] font-bold text-agni-gold bg-agni-gold/10 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
-                  ⚡ Gemini Flash
+            <div className="text-center">
+              <div className="font-bold text-sm text-foreground truncate max-w-[180px]">{lesson.t}</div>
+              <div className="text-xs text-muted-foreground flex items-center gap-2 justify-center">
+                <span>{lesson.xp} XP</span>
+                <span className="flex items-center gap-0.5"><Timer size={10} /> {Math.floor(timer / 60)}m {timer % 60}s</span>
+                <span className="flex items-center gap-0.5 text-[8px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-bold">
+                  <Brain size={8} /> {getActiveModelLabel()}
                 </span>
               </div>
             </div>
-
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={() => { if (phase === "chat") setShowQuizConfirm(true); else navigate("/courses"); }}
-              className="text-[10px] font-black text-white bg-agni-green px-3 py-1.5 rounded-full flex items-center gap-1"
-            >
-              ✅ Done
-            </motion.button>
+            <div className="flex gap-2 items-center">
+              {!isDone ? (
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={markDone}
+                  className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1"
+                >
+                  <CheckCircle2 size={12} /> Done
+                </motion.button>
+              ) : (
+                <span className="text-primary text-xs font-bold flex items-center gap-1"><CheckCircle2 size={14} /> Done</span>
+              )}
+            </div>
           </div>
 
           {/* Progress bar */}
-          <div className="mt-2 h-2 bg-muted/30 rounded-full overflow-hidden">
+          <div className="mt-2 h-2 bg-muted/30 rounded-full overflow-hidden max-w-md mx-auto">
             <motion.div
               className={`h-full rounded-full ${
-                phase === "chat" || phase === "generating" ? "bg-agni-blue" : phase === "quiz" ? "bg-agni-gold" : "bg-agni-green"
+                phase === "chat" || phase === "generating" ? "bg-primary" : phase === "quiz" ? "bg-yellow-500" : "bg-green-500"
               }`}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.3 }}
             />
           </div>
         </div>
-      </div>
 
-      {/* 🌱 UTSARGA — Smart Options (dynamic, persona-aware) */}
-      <div className="px-4 py-2 bg-muted/30 border-t border-border shrink-0">
-        <div className="max-w-md mx-auto">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <Sparkles size={10} className="text-primary" />
-            <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">
-              {personaActive ? "Smart options for you" : "Quick actions"}
-            </span>
-            {!personaActive && (
-              <button
-                onClick={() => setShowProfile(true)}
-                className="ml-auto text-[9px] text-primary font-bold underline"
-              >
-                Personalize →
-              </button>
-            )}
-          </div>
-          <div className="flex gap-1.5 overflow-x-auto -mx-1 px-1">
-            {smartOptions.map((opt, i) => (
-              <button
-                key={i}
-                onClick={() => sendMsg(opt.prompt)}
-                className="shrink-0 px-3 py-1.5 rounded-full text-xs bg-card border border-border hover:border-primary hover:bg-primary/5 transition-all flex items-center gap-1"
-              >
-                <span>{opt.emoji}</span>
-                <span className="font-semibold text-foreground">{opt.label}</span>
-              </button>
-            ))}
-          </div>
+        {/* Main Content */}
+        <div className="flex-1 overflow-hidden">
+          {phase === "chat" && (
+            <LessonChat
+              lessonTitle={lesson.t}
+              lessonTopic={lesson.topic}
+              teachingMode={teachingMode}
+              onQuizReady={(msgs) => {
+                chatMessagesRef.current = msgs;
+                setShowQuizConfirm(true);
+              }}
+            />
+          )}
+
+          {phase === "generating" && (
+            <div className="h-full flex flex-col items-center justify-center gap-4 px-6">
+              <Agni expression="thinking" size={100} speech="Generating your quiz... 🧠" />
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full"
+              />
+              {quizError && <p className="text-destructive text-xs text-center">{quizError}</p>}
+            </div>
+          )}
+
+          {phase === "quiz" && quizzes.length > 0 && (
+            <div className="h-full overflow-y-auto px-4 py-6">
+              <div className="max-w-md mx-auto">
+                <div className="text-center mb-4">
+                  <span className="text-xs font-bold text-muted-foreground">
+                    Question {quizIndex + 1} / {quizzes.length}
+                  </span>
+                </div>
+                <QuizCard
+                  key={quizIndex}
+                  quiz={quizzes[quizIndex]}
+                  onAnswer={handleQuizAnswer}
+                />
+              </div>
+            </div>
+          )}
+
+          {phase === "complete" && (
+            <LessonComplete
+              lessonTitle={lesson.t}
+              xpEarned={lesson.xp}
+              correctCount={correctCount}
+              totalQuizzes={quizzes.length}
+              timeSpent={timer}
+              onContinue={() => navigate("/courses")}
+            />
+          )}
         </div>
+
+        {/* Quiz Confirmation Dialog */}
+        <AnimatePresence>
+          {showQuizConfirm && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-6"
+            >
+              <motion.div
+                initial={{ scale: 0.8, y: 30 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.8, y: 30 }}
+                className="bg-card rounded-3xl p-6 max-w-sm w-full border border-border shadow-2xl text-center"
+              >
+                {countdown !== null ? (
+                  <div className="flex flex-col items-center gap-4">
+                    <Agni expression="happy" size={80} speech="Here we go! 🔥" />
+                    <div className="relative w-24 h-24 flex items-center justify-center">
+                      <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="hsl(var(--muted))" strokeWidth="6" />
+                        <motion.circle
+                          cx="50" cy="50" r="45" fill="none"
+                          stroke="hsl(var(--primary))" strokeWidth="6"
+                          strokeLinecap="round"
+                          strokeDasharray={283}
+                          initial={{ strokeDashoffset: 0 }}
+                          animate={{ strokeDashoffset: 283 }}
+                          transition={{ duration: 2.4, ease: "linear" }}
+                        />
+                      </svg>
+                      <motion.span
+                        key={countdown}
+                        initial={{ scale: 2, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="text-4xl font-black text-primary"
+                      >
+                        {countdown}
+                      </motion.span>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <Agni expression="excited" size={80} speech="Ready for the quiz? 🧠" />
+                    <h3 className="text-lg font-black text-foreground mt-3">Time for the Quiz!</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Test what you've learned about <strong>{lesson.t}</strong>
+                    </p>
+                    <div className="flex gap-3 mt-5">
+                      <button
+                        onClick={() => setShowQuizConfirm(false)}
+                        className="flex-1 py-3 rounded-2xl font-bold text-sm text-muted-foreground bg-muted border border-border"
+                      >
+                        Keep Learning
+                      </button>
+                      <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        onClick={startCountdown}
+                        className="flex-1 py-3 rounded-2xl font-black text-sm text-primary-foreground bg-primary shadow-[0_3px_0_0_hsl(var(--primary)/0.7)]"
+                      >
+                        ⚡ Let's Go!
+                      </motion.button>
+                    </div>
+                  </>
+                )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-
-      {/* Input */}
-      <div className="px-4 py-3 bg-card border-t border-border shrink-0">
-        <div className="max-w-md mx-auto flex gap-2">
-          <input value={inp} onChange={e => setInp(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMsg(); }}}
-            placeholder={`Ask about ${lesson.t}...`}
-            className="flex-1 px-4 py-2.5 rounded-2xl border border-border text-sm outline-none bg-muted/50 text-foreground focus:ring-2 focus:ring-ring" />
-          <button onClick={() => sendMsg()} disabled={loading}
-            className={`w-10 h-10 rounded-full flex items-center justify-center text-primary-foreground shrink-0 transition-all ${loading ? "bg-muted" : "bg-primary hover:scale-105"}`}>
-            <Send size={16} />
-          </button>
-        </div>
-      </div>
-
-      {/* 🧠 Neural OS Profile Modal */}
-      <MascotProfileModal
-        open={showProfile}
-        onClose={() => {
-          setShowProfile(false);
-          // Refresh smart options when persona changes
-          if (lesson) setSmartOptions(generateSmartOptions(lesson.topic));
-        }}
-      />
-
-      {/* 🎯 Practical Quiz Modal */}
-      {lesson && (
-        <PracticalQuizModal
-          open={showQuiz}
-          onClose={() => setShowQuiz(false)}
-          lessonTopic={lesson.topic}
-          lessonInfo={lesson.topic}
-          lessonTitle={lesson.t}
-          onComplete={(score, total) => {
-            const earned = Math.round((lesson.xp || 50) * (score / total));
-            const xp = parseInt(localStorage.getItem("adojo_xp") || "0") + earned;
-            localStorage.setItem("adojo_xp", String(xp));
-            toast.success(`+${earned} XP — ${score}/${total} correct! 🎉`);
-          }}
-        />
-      )}
-    </div>
+    </PageTransition>
   );
 };
 

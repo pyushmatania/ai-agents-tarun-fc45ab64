@@ -135,9 +135,10 @@ Return ONLY the JSON array, no markdown, no explanation, no wrapping.`;
     return new Response(JSON.stringify({ quizzes: validated }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : "Unknown error";
     console.error("ai-quiz error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: msg }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
