@@ -24,14 +24,41 @@ const DAILY_TIPS = [
   { tip: "1 person + 10 AI agents = a fully autonomous startup.", emoji: "🚀" },
 ];
 
-const TEACHING_MODES = [
-  { id: "class5", label: "Class 5", emoji: "🎒", desc: "Like I'm 10", color: "bg-agni-blue" },
-  { id: "engineer", label: "Engineer", emoji: "⚙️", desc: "Full depth", color: "bg-agni-green" },
-  { id: "hacker", label: "Hacker", emoji: "💻", desc: "Ship fast", color: "bg-agni-purple" },
-  { id: "founder", label: "Founder", emoji: "🚀", desc: "Strategic", color: "bg-agni-gold" },
-  { id: "crazy", label: "Crazy", emoji: "🤯", desc: "Sci-fi mode", color: "bg-agni-pink" },
-  { id: "semiconductor", label: "Chip", emoji: "🏭", desc: "HCL context", color: "bg-agni-orange" },
+const TEACHING_MODE_CATEGORIES = [
+  {
+    category: "Style",
+    emoji: "🎨",
+    modes: [
+      { id: "simpler", label: "Simpler!", emoji: "🧸", desc: "Like I'm 10", color: "from-agni-green to-agni-green-light" },
+      { id: "fun", label: "Fun Example", emoji: "🎮", desc: "Gamified learning", color: "from-agni-blue to-blue-400" },
+      { id: "story", label: "Story Time", emoji: "📖", desc: "Narrative style", color: "from-agni-purple to-purple-400" },
+      { id: "silicon", label: "Silicon Valley", emoji: "🎬", desc: "Real-world cases", color: "from-violet-700 to-violet-500" },
+    ],
+  },
+  {
+    category: "Depth",
+    emoji: "🧠",
+    modes: [
+      { id: "class5", label: "Class 5", emoji: "🎒", desc: "Super simple", color: "from-agni-green to-emerald-400" },
+      { id: "engineer", label: "Engineer", emoji: "⚙️", desc: "Full depth", color: "from-agni-blue to-cyan-400" },
+      { id: "hacker", label: "Hacker", emoji: "💻", desc: "Ship fast", color: "from-agni-purple to-fuchsia-400" },
+      { id: "researcher", label: "Researcher", emoji: "🔬", desc: "Papers & math", color: "from-agni-pink to-pink-400" },
+    ],
+  },
+  {
+    category: "Persona",
+    emoji: "🚀",
+    modes: [
+      { id: "founder", label: "Founder", emoji: "🚀", desc: "Strategic view", color: "from-agni-gold to-yellow-400" },
+      { id: "crazy", label: "Crazy", emoji: "🤯", desc: "Sci-fi mode", color: "from-agni-pink to-rose-400" },
+      { id: "chip", label: "Chip Expert", emoji: "🏭", desc: "HCL context", color: "from-agni-orange to-orange-400" },
+      { id: "artist", label: "Creative", emoji: "🎭", desc: "Visual thinker", color: "from-teal-500 to-teal-300" },
+    ],
+  },
 ];
+
+// Flat list for lookups
+const TEACHING_MODES = TEACHING_MODE_CATEGORIES.flatMap(c => c.modes);
 
 const MOTIVATIONAL_QUOTES = [
   { quote: "The best way to predict the future is to build it.", author: "Alan Kay" },
@@ -304,32 +331,54 @@ const HomePage = () => {
             </div>
           </FadeIn>
 
-          {/* Teaching Modes */}
+          {/* Teaching Modes - Swipeable Categories */}
           <FadeIn delay={0.35}>
             <div className="mb-4">
-              <div className="flex items-center gap-2 mb-2.5">
+              <div className="flex items-center gap-2 mb-3">
                 <div className="w-7 h-7 rounded-xl bg-agni-purple flex items-center justify-center">
                   <Brain size={14} className="text-white" />
                 </div>
                 <h4 className="text-xs font-extrabold text-foreground">Learning Mode</h4>
+                <span className="ml-auto text-[9px] font-bold text-muted-foreground bg-muted/30 px-2 py-0.5 rounded-full">
+                  {TEACHING_MODES.find(m => m.id === activeMode)?.emoji} {TEACHING_MODES.find(m => m.id === activeMode)?.label}
+                </span>
               </div>
-              <div className="grid grid-cols-3 gap-2">
-                {TEACHING_MODES.map((mode) => (
-                  <motion.button
-                    key={mode.id}
-                    whileTap={{ scale: 0.92, y: 2 }}
-                    onClick={() => { setActiveMode(mode.id); localStorage.setItem("teaching_mode", mode.id); SFX.tap(); toast(`${mode.emoji} ${mode.label} mode activated`, { description: mode.desc, duration: 2000 }); }}
-                    className={`rounded-2xl p-2.5 text-center transition-all border-2 relative ${activeMode === mode.id ? "border-agni-green/50 bg-agni-green/10 shadow-md" : "border-border/30 bg-card hover:border-border"}`}
-                  >
-                    {activeMode === mode.id && (
-                      <span className="absolute top-1 right-1 text-[7px] font-black text-agni-green bg-agni-green/15 px-1.5 py-0.5 rounded-full">✓</span>
-                    )}
-                    <span className="text-xl block">{mode.emoji}</span>
-                    <span className="text-[10px] font-extrabold block text-foreground mt-0.5">{mode.label}</span>
-                    <span className="text-[7px] block text-muted-foreground font-semibold">{mode.desc}</span>
-                  </motion.button>
-                ))}
-              </div>
+              {TEACHING_MODE_CATEGORIES.map((cat) => (
+                <div key={cat.category} className="mb-3">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-wider mb-1.5 px-0.5">
+                    {cat.emoji} {cat.category}
+                  </p>
+                  <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-none -mx-1 px-1" style={{ scrollSnapType: "x mandatory" }}>
+                    {cat.modes.map((mode) => (
+                      <motion.button
+                        key={mode.id}
+                        whileTap={{ scale: 0.93, y: 2 }}
+                        onClick={() => {
+                          setActiveMode(mode.id);
+                          localStorage.setItem("teaching_mode", mode.id);
+                          SFX.tap();
+                          toast(`${mode.emoji} ${mode.label} mode activated`, { description: mode.desc, duration: 2000 });
+                        }}
+                        className={`relative shrink-0 rounded-2xl px-5 py-3 flex items-center gap-2.5 transition-all border-2 shadow-btn-3d active:shadow-btn-3d-pressed active:translate-y-0.5 ${
+                          activeMode === mode.id
+                            ? "border-white/30 ring-2 ring-agni-green/40"
+                            : "border-transparent opacity-80 hover:opacity-100"
+                        } bg-gradient-to-r ${mode.color}`}
+                        style={{ scrollSnapAlign: "start", minWidth: "140px" }}
+                      >
+                        <span className="text-2xl">{mode.emoji}</span>
+                        <span className="text-sm font-black text-white whitespace-nowrap">{mode.label}</span>
+                        {activeMode === mode.id && (
+                          <motion.span
+                            initial={{ scale: 0 }} animate={{ scale: 1 }}
+                            className="absolute -top-1 -right-1 w-5 h-5 bg-agni-green rounded-full flex items-center justify-center text-[10px] text-white font-black shadow-lg border-2 border-background"
+                          >✓</motion.span>
+                        )}
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </FadeIn>
 
