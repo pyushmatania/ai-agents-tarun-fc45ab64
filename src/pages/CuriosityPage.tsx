@@ -510,6 +510,20 @@ const CuriosityPage = () => {
     setFeedLoadingMore(false);
   }, [followed, feedItems]);
 
+  // Auto-refresh explore data every 15 minutes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (activeId) {
+        const cat = CURIOSITY.find(c => c.id === activeId);
+        if (cat) fetchCuriosity(cat);
+      }
+      if (followed.length > 0 && feedItems.length > 0) {
+        fetchFeed(false);
+      }
+    }, 15 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [activeId, followed, feedItems.length]);
+
   // Infinite scroll
   useEffect(() => {
     if (!feedEndRef.current) return;
