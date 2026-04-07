@@ -1,25 +1,26 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import PageTransition, { FadeIn, StaggerContainer, StaggerItem } from "@/components/PageTransition";
-import { ExternalLink, Youtube, Newspaper, Wrench, BookOpen, Podcast, Users, Globe, Sparkles, GitBranch, GraduationCap, FlaskConical, Search, Zap, Diamond } from "lucide-react";
+import { ExternalLink, Search, Zap, User, ChevronRight } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Agni from "@/components/Agni";
 import { useGamification } from "@/hooks/useGamification";
 
-type Source = { title: string; desc: string; url: string; icon: string; type: string; };
+type Source = { title: string; desc: string; url: string; icon: string; type: string };
 
 const CATEGORIES = [
-  { id: "all", label: "All", icon: "✨" },
-  { id: "youtube", label: "YouTube", icon: "🎬" },
-  { id: "github", label: "GitHub", icon: "💻" },
-  { id: "course", label: "Courses", icon: "🎓" },
-  { id: "paper", label: "Papers", icon: "🔬" },
-  { id: "newsletter", label: "News", icon: "📨" },
-  { id: "tool", label: "Tools", icon: "🔧" },
-  { id: "community", label: "Community", icon: "👥" },
-  { id: "podcast", label: "Podcasts", icon: "🎙️" },
-  { id: "news", label: "Headlines", icon: "📰" },
+  { id: "all", label: "All", icon: "✨", color: "#58CC02", shape: "circle" },
+  { id: "youtube", label: "YouTube", icon: "🎬", color: "#FF4B4B", shape: "hexagon" },
+  { id: "github", label: "GitHub", icon: "💻", color: "#CE82FF", shape: "diamond" },
+  { id: "course", label: "Courses", icon: "🎓", color: "#1CB0F6", shape: "triangle" },
+  { id: "paper", label: "Papers", icon: "🔬", color: "#CE82FF", shape: "pentagon" },
+  { id: "newsletter", label: "News", icon: "📨", color: "#FF9600", shape: "star" },
+  { id: "tool", label: "Tools", icon: "🔧", color: "#58CC02", shape: "square" },
+  { id: "community", label: "Community", icon: "👥", color: "#FF4B91", shape: "circle" },
+  { id: "podcast", label: "Podcasts", icon: "🎙️", color: "#FFC800", shape: "hexagon" },
+  { id: "news", label: "Headlines", icon: "📰", color: "#1CB0F6", shape: "diamond" },
 ];
 
 const SOURCES: Source[] = [
@@ -69,11 +70,51 @@ const typeColorMap: Record<string, string> = {
   newsletter: "bg-agni-orange", tool: "bg-agni-green", community: "bg-agni-pink", podcast: "bg-agni-gold", news: "bg-agni-blue",
 };
 
+const typeHexMap: Record<string, string> = {
+  youtube: "#FF4B4B", github: "#CE82FF", course: "#1CB0F6", paper: "#CE82FF",
+  newsletter: "#FF9600", tool: "#58CC02", community: "#FF4B91", podcast: "#FFC800", news: "#1CB0F6",
+};
+
+/* Floating decoration */
+const FloatingShape = ({ delay, x, y, size, color, shape }: { delay: number; x: string; y: string; size: number; color: string; shape: string }) => (
+  <motion.div
+    className="absolute pointer-events-none"
+    style={{ left: x, top: y, width: size, height: size }}
+    animate={{
+      y: [0, -12, 0, 8, 0],
+      x: [0, 6, -4, 2, 0],
+      opacity: [0.12, 0.25, 0.12],
+      rotate: [0, shape === "diamond" ? 45 : 15, 0],
+      scale: [1, 1.1, 0.95, 1],
+    }}
+    transition={{ duration: 7 + delay, repeat: Infinity, delay, ease: "easeInOut" }}
+  >
+    {shape === "hexagon" ? (
+      <svg viewBox="0 0 100 100" className="w-full h-full">
+        <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill={color} />
+      </svg>
+    ) : shape === "diamond" ? (
+      <svg viewBox="0 0 100 100" className="w-full h-full">
+        <polygon points="50,5 95,50 50,95 5,50" fill={color} />
+      </svg>
+    ) : shape === "triangle" ? (
+      <svg viewBox="0 0 100 100" className="w-full h-full">
+        <polygon points="50,10 90,85 10,85" fill={color} />
+      </svg>
+    ) : shape === "star" ? (
+      <svg viewBox="0 0 100 100" className="w-full h-full">
+        <polygon points="50,5 61,35 95,35 68,57 79,90 50,70 21,90 32,57 5,35 39,35" fill={color} />
+      </svg>
+    ) : (
+      <div className="w-full h-full rounded-full" style={{ background: color }} />
+    )}
+  </motion.div>
+);
+
 const SourcesPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { stats } = useGamification();
-  const storedName = localStorage.getItem("edu_user_name") || "Learner";
-  const displayName = user?.user_metadata?.full_name?.split(" ")[0] || storedName;
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -81,22 +122,69 @@ const SourcesPage = () => {
     .filter(s => activeCategory === "all" || s.type === activeCategory)
     .filter(s => !searchQuery || s.title.toLowerCase().includes(searchQuery.toLowerCase()) || s.desc.toLowerCase().includes(searchQuery.toLowerCase()));
 
+  const activeCat = CATEGORIES.find(c => c.id === activeCategory) || CATEGORIES[0];
+  const activeColor = activeCat.color;
+
   return (
     <PageTransition>
-      <div className="min-h-screen bg-background pb-24">
-        <div className="max-w-md mx-auto px-4 pt-5">
+      <div className="min-h-screen bg-background pb-24 relative overflow-hidden">
+        {/* ===== Background Decorations ===== */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Constellation grid */}
+          <div className="absolute inset-0 opacity-[0.04]" style={{
+            backgroundImage: "radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px)",
+            backgroundSize: "32px 32px",
+          }} />
+
+          {/* Central web-like path */}
+          <svg className="absolute top-[100px] left-1/2 -translate-x-1/2 w-[320px] h-[800px] opacity-[0.08]" viewBox="0 0 320 800">
+            <path d="M160 0 Q60 100 160 200 Q260 300 160 400 Q60 500 160 600 Q260 700 160 800" fill="none" stroke="currentColor" strokeWidth="2" className="text-foreground" strokeDasharray="8 6" />
+            <path d="M80 50 Q160 150 240 50" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-foreground" opacity="0.5" />
+            <path d="M240 250 Q160 350 80 250" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-foreground" opacity="0.5" />
+            <path d="M80 450 Q160 550 240 450" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-foreground" opacity="0.5" />
+          </svg>
+
+          {/* Gradient glow — category colored */}
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-[500px] h-[250px] rounded-full opacity-[0.12]"
+            style={{ background: `radial-gradient(ellipse, ${activeColor}, transparent 70%)` }}
+          />
+          <div className="absolute bottom-32 right-0 w-[300px] h-[200px] rounded-full opacity-[0.08]"
+            style={{ background: `radial-gradient(ellipse, ${activeColor}, transparent 70%)` }}
+          />
+
+          {/* Floating shapes */}
+          <FloatingShape delay={0} x="5%" y="8%" size={60} color={`${activeColor}30`} shape="hexagon" />
+          <FloatingShape delay={1.5} x="85%" y="15%" size={45} color="hsla(100,95%,40%,0.2)" shape="diamond" />
+          <FloatingShape delay={3} x="8%" y="40%" size={50} color="hsla(199,92%,54%,0.15)" shape="triangle" />
+          <FloatingShape delay={2} x="88%" y="50%" size={40} color="hsla(270,100%,75%,0.18)" shape="star" />
+          <FloatingShape delay={4} x="15%" y="70%" size={55} color="hsla(46,100%,49%,0.15)" shape="hexagon" />
+          <FloatingShape delay={1} x="80%" y="75%" size={35} color={`${activeColor}25`} shape="circle" />
+
+          {/* Connector lines */}
+          <svg className="absolute top-[60px] right-0 w-[120px] h-[120px] opacity-[0.06]" viewBox="0 0 120 120">
+            <path d="M120,0 L120,40 L80,40 L80,80 L40,80 L40,120" fill="none" stroke={activeColor} strokeWidth="1.5" strokeDasharray="4 4" />
+          </svg>
+          <svg className="absolute bottom-[140px] left-0 w-[100px] h-[100px] opacity-[0.06]" viewBox="0 0 100 100">
+            <path d="M0,0 L0,35 L35,35 L35,70 L70,70 L70,100" fill="none" stroke={activeColor} strokeWidth="1.5" strokeDasharray="4 4" />
+          </svg>
+        </div>
+
+        <div className="max-w-md mx-auto px-4 pt-5 relative z-10">
 
           {/* Top bar */}
           <FadeIn>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Agni expression="teaching" size={40} animate={false} />
+                <Agni expression="teaching" size={45} animate={true} />
                 <div>
                   <h2 className="text-sm font-black text-foreground">Knowledge Hub</h2>
                   <p className="text-[10px] text-muted-foreground font-semibold">{SOURCES.length} curated resources</p>
                 </div>
               </div>
               <div className="flex items-center gap-1.5">
+                <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate("/settings")} className="w-7 h-7 rounded-xl bg-card flex items-center justify-center border border-border/50 hover:border-primary/30 transition-colors" title="Profile">
+                  <User size={12} className="text-muted-foreground" />
+                </motion.button>
                 <div className="flex items-center gap-1 bg-agni-green/15 rounded-full px-2 py-0.5">
                   <Zap size={10} className="text-agni-green" />
                   <span className="text-[10px] font-black text-agni-green">{stats.xp}</span>
@@ -105,17 +193,55 @@ const SourcesPage = () => {
             </div>
           </FadeIn>
 
-          {/* Hero Banner */}
+          {/* Hero — Node Map Style */}
           <FadeIn delay={0.05}>
-            <div className="rounded-2xl p-4 mb-4 relative overflow-hidden border border-agni-blue/20"
-              style={{ background: "linear-gradient(135deg, hsl(var(--agni-blue) / 0.15), hsl(var(--agni-purple) / 0.1))" }}>
-              <div className="absolute top-3 right-3 opacity-10 text-4xl">📡</div>
-              <div className="absolute -bottom-4 -left-4 w-16 h-16 rounded-full bg-agni-blue/10" />
-              <p className="text-micro text-agni-blue mb-1">CURATED COLLECTION</p>
-              <h3 className="text-base font-black text-foreground leading-tight mb-1">Top AI Agent Resources 🌐</h3>
+            <div className="rounded-3xl p-4 mb-4 relative overflow-hidden border-2 border-border/30"
+              style={{ background: `linear-gradient(135deg, ${activeColor}15, transparent 60%)` }}>
+              {/* Decorative nodes */}
+              <div className="absolute top-3 right-4 flex gap-2 opacity-20">
+                {["⬡", "◆", "▲", "★"].map((s, i) => (
+                  <motion.span key={i} className="text-lg" animate={{ y: [0, -3, 0] }} transition={{ duration: 2, delay: i * 0.3, repeat: Infinity }}>
+                    {s}
+                  </motion.span>
+                ))}
+              </div>
+              <div className="absolute -bottom-6 -left-6 w-20 h-20 rounded-full" style={{ background: `${activeColor}10` }} />
+              <div className="absolute -bottom-3 -right-3 w-14 h-14 rounded-2xl rotate-45" style={{ background: `${activeColor}08` }} />
+
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <motion.div
+                  className="w-2 h-2 rounded-full"
+                  style={{ background: activeColor }}
+                  animate={{ scale: [1, 1.5, 1], opacity: [0.6, 1, 0.6] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+                <p className="text-micro" style={{ color: activeColor }}>KNOWLEDGE CONSTELLATION</p>
+              </div>
+              <h3 className="text-lg font-black text-foreground leading-tight mb-1">Explore the Network 🌐</h3>
               <p className="text-[10px] text-muted-foreground leading-relaxed font-semibold">
-                Channels, tools, newsletters & communities handpicked for you
+                Channels, tools, papers & communities — your AI agent knowledge map
               </p>
+
+              {/* Mini node visualization */}
+              <div className="flex items-center gap-3 mt-3">
+                {CATEGORIES.slice(1, 6).map((cat, i) => (
+                  <motion.div
+                    key={cat.id}
+                    className="flex flex-col items-center"
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 + i * 0.08, type: "spring" }}
+                  >
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm border border-border/30"
+                      style={{ background: `${cat.color}20` }}>
+                      {cat.icon}
+                    </div>
+                    {i < 4 && (
+                      <div className="w-px h-2 opacity-20" style={{ background: cat.color }} />
+                    )}
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </FadeIn>
 
@@ -133,54 +259,96 @@ const SourcesPage = () => {
             </div>
           </FadeIn>
 
-          {/* Category Chips */}
+          {/* Category Path — Scrollable nodes connected by lines */}
           <FadeIn delay={0.12}>
-            <div className="flex gap-1.5 overflow-x-auto pb-3 mb-3 scrollbar-none">
-              {CATEGORIES.map(cat => (
-                <motion.button
-                  key={cat.id}
-                  whileTap={{ scale: 0.92 }}
-                  onClick={() => setActiveCategory(cat.id)}
-                  className={`shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold transition-all ${
-                    activeCategory === cat.id
-                      ? "bg-agni-green text-white shadow-glow-green"
-                      : "bg-card border border-border/40 text-muted-foreground hover:border-border"
-                  }`}
-                >
-                  <span>{cat.icon}</span>
-                  {cat.label}
-                </motion.button>
-              ))}
+            <div className="relative mb-4">
+              <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-none">
+                {CATEGORIES.map((cat, i) => {
+                  const isActive = activeCategory === cat.id;
+                  return (
+                    <motion.button
+                      key={cat.id}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setActiveCategory(cat.id)}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.15 + i * 0.04 }}
+                      className="shrink-0 flex flex-col items-center gap-1 relative"
+                    >
+                      <motion.div
+                        className={`w-11 h-11 rounded-2xl flex items-center justify-center text-base border-2 transition-all shadow-md ${
+                          isActive
+                            ? "border-transparent shadow-lg"
+                            : "border-border/30 bg-card"
+                        }`}
+                        style={isActive ? {
+                          background: `linear-gradient(135deg, ${cat.color}, ${cat.color}CC)`,
+                          boxShadow: `0 4px 15px ${cat.color}40`,
+                        } : {}}
+                        animate={isActive ? { scale: [1, 1.05, 1] } : {}}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      >
+                        {cat.icon}
+                      </motion.div>
+                      <span className={`text-[8px] font-extrabold ${isActive ? "text-foreground" : "text-muted-foreground"}`}>
+                        {cat.label}
+                      </span>
+                      {isActive && (
+                        <motion.div
+                          layoutId="hub-cat-indicator"
+                          className="absolute -bottom-0.5 w-5 h-1 rounded-full"
+                          style={{ background: cat.color }}
+                          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        />
+                      )}
+                    </motion.button>
+                  );
+                })}
+              </div>
             </div>
           </FadeIn>
 
           {/* Count */}
-          <p className="text-[10px] text-muted-foreground mb-2 font-bold">
-            {filtered.length} resource{filtered.length !== 1 ? "s" : ""}
-          </p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] text-muted-foreground font-bold">
+              {filtered.length} resource{filtered.length !== 1 ? "s" : ""}
+            </p>
+            <div className="flex items-center gap-1" style={{ color: activeColor }}>
+              <div className="w-1.5 h-1.5 rounded-full" style={{ background: activeColor }} />
+              <span className="text-[9px] font-extrabold">{activeCat.label}</span>
+            </div>
+          </div>
 
-          {/* Sources List */}
-          <StaggerContainer className="space-y-1.5">
-            {filtered.map((source, i) => (
-              <StaggerItem key={`${source.type}-${i}`}>
-                <motion.a
-                  href={source.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center gap-2.5 bg-card rounded-xl p-2.5 border border-border/40 hover:border-agni-green/20 transition-all shadow-card group block"
-                >
-                  <div className={`w-9 h-9 rounded-xl ${typeColorMap[source.type] || "bg-muted"} flex items-center justify-center text-base shrink-0 shadow-md`}>
-                    {source.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-[11px] font-extrabold text-foreground truncate">{source.title}</h4>
-                    <p className="text-[9px] text-muted-foreground mt-0.5 truncate font-semibold">{source.desc}</p>
-                  </div>
-                  <ExternalLink size={12} className="text-muted-foreground shrink-0 group-hover:text-agni-green transition-colors" />
-                </motion.a>
-              </StaggerItem>
-            ))}
+          {/* Sources — Card Grid with connecting elements */}
+          <StaggerContainer className="space-y-2">
+            {filtered.map((source, i) => {
+              const color = typeHexMap[source.type] || "#58CC02";
+              return (
+                <StaggerItem key={`${source.type}-${i}`}>
+                  <motion.a
+                    href={source.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileTap={{ scale: 0.97 }}
+                    className="flex items-center gap-3 bg-card rounded-2xl p-3 border border-border/40 hover:border-agni-green/30 transition-all shadow-card group block relative overflow-hidden"
+                  >
+                    {/* Left accent line */}
+                    <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full" style={{ background: `${color}40` }} />
+                    
+                    <div className={`w-10 h-10 rounded-xl ${typeColorMap[source.type] || "bg-muted"} flex items-center justify-center text-lg shrink-0 shadow-md`}>
+                      {source.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-[11px] font-extrabold text-foreground truncate">{source.title}</h4>
+                      <p className="text-[9px] text-muted-foreground mt-0.5 truncate font-semibold">{source.desc}</p>
+                    </div>
+                    <div className="w-7 h-7 rounded-lg bg-muted/30 flex items-center justify-center shrink-0 group-hover:bg-agni-green/10 transition-colors">
+                      <ExternalLink size={11} className="text-muted-foreground group-hover:text-agni-green transition-colors" />
+                    </div>
+                  </motion.a>
+                </StaggerItem>
+              );
+            })}
           </StaggerContainer>
 
           {filtered.length === 0 && (
