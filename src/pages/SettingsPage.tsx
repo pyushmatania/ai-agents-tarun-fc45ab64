@@ -30,7 +30,7 @@ const SettingsPage = () => {
   const navigate = useNavigate();
   const { stats, league } = useGamification();
   const { ctx, updateContext, loaded: ctxLoaded } = useUserContext();
-  const { avatarUrl, uploading, uploadAvatar } = useAvatar();
+  const { avatarUrl, uploading, generating, uploadAvatar, generateAIAvatar, removeAvatar } = useAvatar();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fullName, setFullName] = useState(localStorage.getItem("edu_user_name") || "");
   const [role, setRole] = useState(localStorage.getItem("edu_user_role") || "");
