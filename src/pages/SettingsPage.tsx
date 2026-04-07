@@ -9,11 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { LogOut, Moon, Sun, ChevronRight, Shield, Bell, Loader2, LogIn, Brain, Key, Check, Eye, EyeOff, Zap, Diamond, Heart, Flame, Trash2, Sparkles, X, Plus, Search, TrendingUp, User, MapPin, Briefcase, GraduationCap, Target, Camera } from "lucide-react";
+import { LogOut, Moon, Sun, ChevronRight, Shield, Bell, Loader2, LogIn, Brain, Key, Check, Eye, EyeOff, Zap, Diamond, Heart, Flame, Trash2, Sparkles, X, Plus, Search, TrendingUp, User, MapPin, Briefcase, GraduationCap, Target, Camera, Lightbulb } from "lucide-react";
 import { InterestPill } from "@/components/InterestPill";
 import { motion, AnimatePresence } from "framer-motion";
 import { BUILT_IN_MODELS, BYOK_PROVIDERS, getAIConfig, saveAIConfig, type AIConfig } from "@/lib/aiConfig";
-import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection, getAllOptions, saveCustomOption, getCustomOptions, IDENTITIES, MISSION_MODES } from "@/lib/teachingConfig";
+import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection, getAllOptions, saveCustomOption, getCustomOptions, IDENTITIES, MISSION_MODES, getAllExplainStyles, getActiveExplainStyleIds, setActiveExplainStyleIds, saveCustomExplainStyle, removeCustomExplainStyle, type ExplainStyle } from "@/lib/teachingConfig";
 import CustomOptionInput from "@/components/CustomOptionInput";
 import { getPersona, savePersona, SUGGESTION_CATEGORIES, getSubFilters, getSubFilterCount, POPULAR_PICKS, type NeuralOSPersona } from "@/lib/neuralOS";
 import Agni from "@/components/Agni";
@@ -54,6 +54,12 @@ const SettingsPage = () => {
   const [neuralCustom, setNeuralCustom] = useState("");
   const [settingsSubFilter, setSettingsSubFilter] = useState<string | null>(null);
 
+  // Explain Styles state
+  const [explainExpanded, setExplainExpanded] = useState(false);
+  const [activeExplainIds, setActiveExplainIds] = useState<string[]>(getActiveExplainStyleIds());
+  const [customExplainLabel, setCustomExplainLabel] = useState("");
+  const [customExplainPrompt, setCustomExplainPrompt] = useState("");
+  const [showAddExplain, setShowAddExplain] = useState(false);
   // Re-sync persona when page gains focus (e.g. after editing in modal elsewhere)
   useEffect(() => {
     const sync = () => setPersonaState(getPersona());
@@ -891,6 +897,113 @@ const SettingsPage = () => {
                       >
                         🔄 Re-do full onboarding
                       </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </FadeIn>
+
+          {/* Explain Styles Card */}
+          <FadeIn delay={0.19}>
+            <div className="bg-card rounded-2xl border border-border/40 mb-3 shadow-card overflow-hidden">
+              <motion.button
+                whileTap={{ scale: 0.99 }}
+                onClick={() => setExplainExpanded(!explainExpanded)}
+                className="flex items-center justify-between w-full p-3.5"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-agni-blue flex items-center justify-center shadow-md">
+                    <Lightbulb size={16} className="text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-extrabold text-foreground text-xs">Explain Styles</p>
+                    <p className="text-[10px] text-muted-foreground font-semibold">{activeExplainIds.length} active styles in chat</p>
+                  </div>
+                </div>
+                <motion.div animate={{ rotate: explainExpanded ? 90 : 0 }}>
+                  <ChevronRight size={14} className="text-muted-foreground" />
+                </motion.div>
+              </motion.button>
+              <AnimatePresence>
+                {explainExpanded && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                    <div className="px-3.5 pb-3.5 space-y-3">
+                      <p className="text-[9px] text-muted-foreground/60">Tap to toggle — active styles show as quick actions in the chat input bar.</p>
+                      <div className="flex flex-wrap gap-1.5 max-h-64 overflow-y-auto scrollbar-none">
+                        {getAllExplainStyles().map(style => {
+                          const isActive = activeExplainIds.includes(style.id);
+                          return (
+                            <button key={style.id} onClick={() => {
+                              const updated = isActive
+                                ? activeExplainIds.filter(id => id !== style.id)
+                                : [...activeExplainIds, style.id];
+                              setActiveExplainIds(updated);
+                              setActiveExplainStyleIds(updated);
+                              SFX.select();
+                            }}
+                              className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all flex items-center gap-1 ${
+                                isActive
+                                  ? "bg-agni-blue/10 border-agni-blue/30 text-agni-blue"
+                                  : "bg-muted/30 border-border/40 text-muted-foreground"
+                              }`}
+                            >
+                              {isActive && <Check size={8} />}
+                              {style.emoji} {style.label}
+                              {style.isCustom && (
+                                <span onClick={(e) => {
+                                  e.stopPropagation();
+                                  removeCustomExplainStyle(style.id);
+                                  setActiveExplainIds(prev => prev.filter(id => id !== style.id));
+                                  setActiveExplainStyleIds(activeExplainIds.filter(id => id !== style.id));
+                                }} className="ml-0.5 opacity-50 hover:opacity-100">
+                                  <X size={8} />
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Add custom */}
+                      {!showAddExplain ? (
+                        <button onClick={() => setShowAddExplain(true)}
+                          className="w-full text-[10px] font-bold text-agni-green flex items-center justify-center gap-1 py-1.5 border border-dashed border-agni-green/30 rounded-xl"
+                        >
+                          <Plus size={10} /> Add Custom Explain Style
+                        </button>
+                      ) : (
+                        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-muted/20 rounded-xl p-2.5 space-y-2">
+                          <Input value={customExplainLabel} onChange={e => setCustomExplainLabel(e.target.value)}
+                            placeholder="Style name (e.g. Bollywood Style)"
+                            className="h-8 rounded-lg bg-card border-border/30 text-[10px]" />
+                          <Input value={customExplainPrompt} onChange={e => setCustomExplainPrompt(e.target.value)}
+                            placeholder="Prompt (e.g. Explain using Bollywood movie scenes...)"
+                            className="h-8 rounded-lg bg-card border-border/30 text-[10px]" />
+                          <div className="flex gap-1.5">
+                            <Button size="sm" onClick={() => {
+                              if (!customExplainLabel.trim() || !customExplainPrompt.trim()) return;
+                              const saved = saveCustomExplainStyle({
+                                label: customExplainLabel.trim(),
+                                desc: customExplainPrompt.trim().slice(0, 40) + "...",
+                                prompt: customExplainPrompt.trim(),
+                              });
+                              setActiveExplainIds(prev => { const n = [...prev, saved.id]; setActiveExplainStyleIds(n); return n; });
+                              setCustomExplainLabel(""); setCustomExplainPrompt(""); setShowAddExplain(false);
+                              toast.success("Custom explain style added!");
+                            }}
+                              className="h-7 text-[10px] font-black bg-agni-green text-white rounded-lg flex-1"
+                            >
+                              <Check size={10} className="mr-1" /> Save
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => { setShowAddExplain(false); setCustomExplainLabel(""); setCustomExplainPrompt(""); }}
+                              className="h-7 text-[10px] rounded-lg"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </motion.div>
+                      )}
                     </div>
                   </motion.div>
                 )}
