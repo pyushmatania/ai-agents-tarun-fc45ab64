@@ -54,9 +54,9 @@ serve(async (req) => {
     
     if (context) {
       const ctxParts: string[] = [];
-      if (context.identity) ctxParts.push(`User identity: ${context.identity}\n→ Use analogies and examples from their professional world.`);
+      if (context.identity) ctxParts.push(`User identity (CURRENT): ${context.identity}\n→ Use analogies and examples from their professional world. If earlier messages used a different identity, IGNORE that and use this one.`);
       
-      if (context.mission) ctxParts.push(`User's mission: ${context.mission}\n→ Frame answers around this goal.`);
+      if (context.mission) ctxParts.push(`User's mission (CURRENT): ${context.mission}\n→ Frame answers around this goal. If earlier messages referenced a different mission, IGNORE that.`);
       
       // Vibe — explicit behavioral instructions
       if (context.vibe) {
