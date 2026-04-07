@@ -22,7 +22,7 @@ interface PowerUp {
 interface SmartInputBarProps {
   value: string;
   onChange: (v: string) => void;
-  onSend: (text?: string) => void;
+  onSend: (text?: string, hiddenPrompt?: string) => void;
   onStop?: () => void;
   isLoading: boolean;
   isLearnTab: boolean;
@@ -106,7 +106,8 @@ export default function SmartInputBar({
     const resolved = resolveInterestPrompt(pu.prompt);
     SFX.powerup("green");
     setActivePanel("none");
-    onSend(resolved);
+    // Show clean label, hide actual prompt
+    onSend(`${pu.emoji} ${pu.label}`, resolved);
   };
 
   const handleInterestSend = (catId: string, item: string) => {
@@ -120,7 +121,9 @@ export default function SmartInputBar({
     };
     SFX.powerup("pink");
     setActivePanel("none");
-    onSend(promptMap[catId] || `Explain using "${item}" as an analogy.`);
+    // Show clean label like "🌍 Naruto", hide actual prompt
+    const catEmoji = interestCategories.find(c => c.id === catId)?.emoji || "🌍";
+    onSend(`${catEmoji} Teach me using ${item}`, promptMap[catId] || `Explain using "${item}" as an analogy.`);
   };
 
   // Get labels for active selections
