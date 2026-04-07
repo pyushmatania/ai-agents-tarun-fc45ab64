@@ -86,6 +86,82 @@
     --shadow-glow-purple: 0 0 20px hsl(270 100% 75% / 0.25);
     --shadow-glow-blue: 0 0 20px hsl(199 92% 54% / 0.25);
   }
+
+  /* ── Light Mode ── */
+  .light {
+    --background: 180 10% 96%;           /* #F2F5F5 */
+    --foreground: 200 20% 15%;           /* Dark text */
+
+    --card: 0 0% 100%;                   /* White */
+    --card-foreground: 200 20% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 200 20% 15%;
+
+    --primary: 100 95% 35%;              /* Slightly deeper green for contrast */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 270 80% 65%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 200 10% 90%;
+    --muted-foreground: 200 10% 45%;
+
+    --accent: 199 80% 48%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 85% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 200 10% 85%;
+    --input: 200 10% 85%;
+    --ring: 100 95% 35%;
+
+    --sidebar-background: 180 10% 97%;
+    --sidebar-foreground: 200 20% 20%;
+    --sidebar-primary: 100 95% 35%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 200 10% 92%;
+    --sidebar-accent-foreground: 200 20% 20%;
+    --sidebar-border: 200 10% 85%;
+    --sidebar-ring: 100 95% 35%;
+
+    /* Semantic tokens stay the same */
+    --agni-green: 100 95% 35%;
+    --agni-green-dark: 100 100% 28%;
+    --agni-green-light: 90 78% 42%;
+    --agni-gold: 46 100% 45%;
+    --agni-gold-dark: 44 100% 40%;
+    --agni-red: 0 85% 55%;
+    --agni-blue: 199 80% 48%;
+    --agni-blue-dark: 199 75% 42%;
+    --agni-purple: 270 80% 60%;
+    --agni-orange: 33 90% 48%;
+    --agni-pink: 323 80% 60%;
+
+    --card-elevated: 200 8% 95%;
+
+    --gradient-green: linear-gradient(135deg, hsl(100 95% 35% / 0.08) 0%, hsl(180 10% 96%) 70%);
+    --gradient-hero: linear-gradient(160deg, hsl(100 95% 35% / 0.06) 0%, hsl(199 80% 48% / 0.04) 50%, hsl(270 80% 60% / 0.03) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(200 8% 97%) 100%);
+    --gradient-card-accent: linear-gradient(145deg, hsl(100 95% 35% / 0.05), hsl(0 0% 100%) 60%);
+
+    --lesson-locked: 200 10% 88%;
+    --lesson-current: 100 95% 35%;
+    --lesson-completed: 100 95% 35%;
+    --lesson-perfect: 46 100% 45%;
+    --lesson-treasure: 270 80% 60%;
+
+    --shadow-btn-3d: 0 4px 0 0 hsl(100 100% 28%);
+    --shadow-btn-3d-pressed: 0 2px 0 0 hsl(100 100% 28%);
+    --shadow-card: 0 2px 12px -2px hsl(200 20% 50% / 0.1);
+    --shadow-card-hover: 0 6px 24px -4px hsl(200 20% 50% / 0.15);
+    --shadow-elevated: 0 8px 32px -6px hsl(200 20% 50% / 0.12);
+    --shadow-glow-green: 0 0 20px hsl(100 95% 35% / 0.15);
+    --shadow-glow-gold: 0 0 20px hsl(46 100% 45% / 0.15);
+    --shadow-glow-purple: 0 0 20px hsl(270 80% 60% / 0.12);
+    --shadow-glow-blue: 0 0 20px hsl(199 80% 48% / 0.12);
+  }
 }
 
 @layer base {
@@ -95,11 +171,18 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Nunito', system-ui, sans-serif;
+    background-attachment: fixed;
+  }
+  :root body {
     background-image:
       radial-gradient(ellipse 80% 60% at 20% 100%, hsl(100 95% 40% / 0.06) 0%, transparent 60%),
       radial-gradient(ellipse 60% 50% at 90% 10%, hsl(199 92% 54% / 0.05) 0%, transparent 50%),
       radial-gradient(ellipse 70% 40% at 50% 50%, hsl(270 100% 75% / 0.03) 0%, transparent 50%);
-    background-attachment: fixed;
+  }
+  .light body {
+    background-image:
+      radial-gradient(ellipse 80% 60% at 20% 100%, hsl(100 95% 35% / 0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 90% 10%, hsl(199 80% 48% / 0.03) 0%, transparent 50%);
   }
   h1, h2, h3, h4 {
     font-family: 'Nunito', system-ui, sans-serif;

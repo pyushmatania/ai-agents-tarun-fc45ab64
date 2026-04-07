@@ -2,11 +2,9 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
-// Default to light theme
+// Default to dark theme
 const savedTheme = localStorage.getItem("theme");
-if (savedTheme === "dark") {
-  // Only go dark if explicitly set
-} else {
+if (savedTheme === "light") {
   document.documentElement.classList.add("light");
 }
 
