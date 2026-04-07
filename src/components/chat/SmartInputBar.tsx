@@ -123,26 +123,33 @@ export default function SmartInputBar({
     setSelectedInterest(item);
   };
 
-  // Get labels for active selections
-  const motiveInfo = MISSION_MODES.find(m => m.id === currentMotive);
-  const vibeInfo = TEACHING_VIBES.find(v => v.id === currentVibe);
+  // Get labels for active selections — check against defaults to know if truly active
+  const DEFAULT_MOTIVE = "explore";
+  const DEFAULT_VIBE = "fun";
+  const DEFAULT_BRAIN = "explorer";
+  
+  const motiveInfo = currentMotive && currentMotive !== DEFAULT_MOTIVE ? MISSION_MODES.find(m => m.id === currentMotive) : null;
+  const vibeInfo = currentVibe && currentVibe !== DEFAULT_VIBE ? TEACHING_VIBES.find(v => v.id === currentVibe) : null;
   const brainLevels = getBrainTrack() === "academic" ? BRAIN_LEVELS_ACADEMIC : BRAIN_LEVELS_SKILL;
-  const brainInfo = brainLevels.find(b => b.id === currentBrain);
+  const brainInfo = currentBrain && currentBrain !== DEFAULT_BRAIN ? brainLevels.find(b => b.id === currentBrain) : null;
 
-  // Check if any selection is active (not default)
-  const hasActiveSelections = motiveInfo || vibeInfo || brainInfo;
+  const hasActiveSelections = motiveInfo || vibeInfo || brainInfo || selectedInterest;
 
-  const clearSelection = (type: "motive" | "vibe" | "brain") => {
+  const clearSelection = (type: "motive" | "vibe" | "brain" | "interest") => {
     SFX.tap();
     if (type === "motive") {
-      setTeachingSelection("mission", "explore");
-      setCurrentMotive("explore");
+      setTeachingSelection("mission", DEFAULT_MOTIVE);
+      setCurrentMotive(DEFAULT_MOTIVE);
     } else if (type === "vibe") {
-      setTeachingSelection("vibe", "fun");
-      setCurrentVibe("fun");
+      setTeachingSelection("vibe", DEFAULT_VIBE);
+      setCurrentVibe(DEFAULT_VIBE);
     } else if (type === "brain") {
-      setTeachingSelection("brain", "explorer");
-      setCurrentBrain("explorer");
+      setTeachingSelection("brain", DEFAULT_BRAIN);
+      setCurrentBrain(DEFAULT_BRAIN);
+    } else if (type === "interest") {
+      localStorage.removeItem("teaching_universe_vibe");
+      window.dispatchEvent(new Event("storage"));
+      setSelectedInterest("");
     }
   };
 
