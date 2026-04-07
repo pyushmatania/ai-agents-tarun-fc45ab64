@@ -26,6 +26,7 @@ const SettingsPage = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { stats, league } = useGamification();
+  const { ctx, updateContext, loaded: ctxLoaded } = useUserContext();
   const [fullName, setFullName] = useState(localStorage.getItem("edu_user_name") || "");
   const [role, setRole] = useState(localStorage.getItem("edu_user_role") || "");
   const [saving, setSaving] = useState(false);
@@ -35,6 +36,10 @@ const SettingsPage = () => {
   const [aiConfig, setAiConfig] = useState<AIConfig>(getAIConfig());
   const [showApiKey, setShowApiKey] = useState(false);
   const [aiExpanded, setAiExpanded] = useState(false);
+
+  // Personal details state
+  const [detailsExpanded, setDetailsExpanded] = useState(false);
+  const [identityExpanded, setIdentityExpanded] = useState(false);
 
   // Neural OS state
   const [persona, setPersonaState] = useState<NeuralOSPersona>(getPersona());
