@@ -47,12 +47,16 @@ const HomePage = () => {
   const greeting = new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening";
   const dailyProgress = (Math.min(stats.dailyXp, stats.dailyGoal) / stats.dailyGoal) * 100;
 
-  useEffect(() => {
-    const timer = setTimeout(() => setAgniExpression("happy"), 2000);
-    return () => clearTimeout(timer);
-  }, []);
+  const storedRole = localStorage.getItem("edu_user_role");
+  const roleLabel = storedRole ? TEACHING_MODES.find(m => m.id === storedRole)?.label || storedRole : null;
 
-  const agniSpeech = stats.done.length === 0 ? "Let's learn AI! 🤖" : stats.done.length < 5 ? "Great start! 🔥" : stats.done.length < 15 ? "You're crushing it!" : "Almost a master! 🏆";
+  // Personalized features shown under the greeting
+  const personalFeatures = [
+    { label: `${stats.streak}d streak`, color: "bg-agni-green/15 text-agni-green", icon: Flame },
+    { label: league.name, color: "bg-agni-purple/15 text-agni-purple", icon: null, emoji: league.emoji },
+    ...(roleLabel ? [{ label: roleLabel, color: "bg-agni-blue/15 text-agni-blue", icon: User, emoji: undefined }] : []),
+    { label: `L${stats.level}`, color: "bg-agni-gold/15 text-agni-gold", icon: Zap, emoji: undefined },
+  ];
 
   return (
     <PageTransition>
