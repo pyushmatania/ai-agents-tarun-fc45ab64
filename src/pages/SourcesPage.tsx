@@ -141,11 +141,13 @@ const SourcesPage = () => {
   const [newsLoading, setNewsLoading] = useState(() => {
     try { return !localStorage.getItem("hub_news_cache"); } catch { return true; }
   });
+  const [newsRefreshing, setNewsRefreshing] = useState(false);
   const [activeNewsIdx, setActiveNewsIdx] = useState(0);
 
   useEffect(() => {
     const fetchNews = async () => {
       if (newsItems.length === 0) setNewsLoading(true);
+      else setNewsRefreshing(true);
       try {
         const { data, error } = await supabase.functions.invoke("ai-news", { body: {} });
         if (error) throw new Error(error.message);
@@ -157,6 +159,7 @@ const SourcesPage = () => {
         }
       } catch (e) { console.error("Failed to fetch news:", e); }
       setNewsLoading(false);
+      setNewsRefreshing(false);
     };
     fetchNews();
   }, []);
