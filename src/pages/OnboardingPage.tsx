@@ -107,10 +107,10 @@ const OnboardingPage = () => {
   const [missionFollowup, setMissionFollowup] = useState<Record<string, string>>({});
 
   // Steps: 0=splash, 1=name, 2=aboutYou, 3=role, 4=lifeContext, 5=mission, 6=missionFollowup, 7=vibe, 8=brain, 9=why-matters, 10+=categories, last=confirm
-  const categoryIndex = step >= 7 ? step - 7 : -1;
+  const categoryIndex = step >= 10 ? step - 10 : -1;
   const activeCategory = categoryIndex >= 0 && categoryIndex < SUGGESTION_CATEGORIES.length
     ? SUGGESTION_CATEGORIES[categoryIndex] : null;
-  const isConfirmStep = step === 7 + SUGGESTION_CATEGORIES.length;
+  const isConfirmStep = step === 10 + SUGGESTION_CATEGORIES.length;
 
   const currentItems = activeCategory
     ? ((persona[activeCategory.field] as string[]) || [])
