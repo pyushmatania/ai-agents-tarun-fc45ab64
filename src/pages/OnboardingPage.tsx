@@ -75,7 +75,7 @@ const CATEGORY_GRADIENTS = [
   "from-[#FF86D8] to-[#CE82FF]",
 ];
 
-const TOTAL_STEPS = 4 + SUGGESTION_CATEGORIES.length + 1;
+const TOTAL_STEPS = 5 + SUGGESTION_CATEGORIES.length + 1;
 
 const slideVariants = {
   enter: (dir: number) => ({ x: dir > 0 ? 300 : -300, opacity: 0 }),
