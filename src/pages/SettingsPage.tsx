@@ -459,11 +459,19 @@ const SettingsPage = () => {
                                 </button>
                               </div>
 
-                              {/* Search */}
+                              {/* Search — also adds custom on Enter */}
                               <div className="relative">
                                 <Search size={10} className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
                                 <input value={neuralSearch} onChange={e => setNeuralSearch(e.target.value)}
-                                  placeholder={`Search ${cat.label.toLowerCase()}...`}
+                                  onKeyDown={e => {
+                                    if (e.key === "Enter" && neuralSearch.trim() && !selected.includes(neuralSearch.trim())) {
+                                      const updated = [...selected, neuralSearch.trim()];
+                                      const newPersona = savePersona({ [field]: updated });
+                                      setPersona(newPersona);
+                                      setNeuralSearch("");
+                                    }
+                                  }}
+                                  placeholder={`Search or add custom ${cat.label.toLowerCase()}...`}
                                   className="w-full h-7 pl-6 pr-2 bg-card border border-border/30 rounded-lg text-[10px] text-foreground placeholder:text-muted-foreground focus:outline-none"
                                 />
                               </div>
@@ -481,6 +489,22 @@ const SettingsPage = () => {
                                 </div>
                               )}
 
+                              {/* Show "add as custom" hint */}
+                              {neuralSearch.trim().length > 1 && !cat.suggestions.some(s => s.name.toLowerCase() === neuralSearch.toLowerCase().trim()) && (
+                                <button onClick={() => {
+                                  if (!selected.includes(neuralSearch.trim())) {
+                                    const updated = [...selected, neuralSearch.trim()];
+                                    const newPersona = savePersona({ [field]: updated });
+                                    setPersona(newPersona);
+                                  }
+                                  setNeuralSearch("");
+                                }}
+                                  className="text-[9px] font-bold text-agni-gold bg-agni-gold/10 border border-agni-gold/20 rounded-lg px-2 py-1 w-full text-left"
+                                >
+                                  ✨ Add "{neuralSearch.trim()}" — press Enter
+                                </button>
+                              )}
+
                               {/* Suggestions grid */}
                               <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
                                 {filtered.map(s => (
@@ -494,20 +518,6 @@ const SettingsPage = () => {
                                     {s.emoji || ""} {s.name}
                                   </button>
                                 ))}
-                              </div>
-
-                              {/* Add custom */}
-                              <div className="flex gap-1.5">
-                                <input value={neuralCustom} onChange={e => setNeuralCustom(e.target.value)}
-                                  onKeyDown={e => e.key === "Enter" && addCustomItem()}
-                                  placeholder="Add custom..."
-                                  className="flex-1 h-7 px-2 bg-card border border-border/30 rounded-lg text-[10px] text-foreground placeholder:text-muted-foreground focus:outline-none"
-                                />
-                                <button onClick={addCustomItem}
-                                  className="h-7 w-7 rounded-lg bg-agni-green/15 flex items-center justify-center"
-                                >
-                                  <Plus size={12} className="text-agni-green" />
-                                </button>
                               </div>
                             </motion.div>
                           );
