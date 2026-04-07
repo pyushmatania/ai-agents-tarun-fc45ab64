@@ -98,7 +98,7 @@ const HomePage = () => {
   }, [persona]);
 
   const storedRole = localStorage.getItem("edu_user_role");
-  const roleLabel = storedRole ? TEACHING_MODES.find(m => m.id === storedRole)?.label || storedRole : null;
+  const roleLabel = storedRole ? ALL_TEACHING_OPTIONS.find(m => m.id === storedRole)?.label || storedRole : null;
 
   // Personalized features shown under the greeting
   const personalFeatures = [
