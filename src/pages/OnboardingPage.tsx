@@ -170,15 +170,21 @@ const OnboardingPage = () => {
   const finish = () => {
     const role = ROLES.find(r => r.id === selectedRole);
     const roleLabel = selectedRole === "custom" ? customRole.trim() : role?.label;
+    const depthMap: Record<string, string> = { chill: "basic", explorer: "normal", pro: "deep", hacker: "deep", scientist: "deep", professor: "deep" };
     savePersona({
       ...persona,
       name: name.trim(),
       goal: role?.goal || "Master AI agents",
       experience: role?.exp || "some experience",
       vibe: selectedVibe || "fun",
+      preferredDepth: (depthMap[selectedBrain || "explorer"] || "normal") as any,
       currentRole: roleLabel,
       completedAt: new Date().toISOString(),
     });
+    // Save teaching selections
+    if (selectedMission) setTeachingSelection("mission", selectedMission);
+    if (selectedVibe) setTeachingSelection("vibe", selectedVibe);
+    if (selectedBrain) setTeachingSelection("brain", selectedBrain);
     localStorage.setItem("edu_user_name", name.trim());
     localStorage.setItem("edu_user_role", selectedRole || "curious");
     localStorage.setItem("edu_onboarded", "true");
