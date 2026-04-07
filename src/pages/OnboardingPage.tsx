@@ -875,17 +875,22 @@ const OnboardingPage = () => {
           <motion.div key="missionfollowup" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
-            <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.missionFollowup.bg} pointer-events-none`} />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#FFF8E1] via-[#F0F4C3] to-[#E8F5E9] pointer-events-none" />
 
             <div className="flex flex-col flex-1 min-h-0 relative z-10">
+              <div className="flex justify-center mb-2">
+                <div className="bg-white/70 backdrop-blur-sm rounded-full px-4 py-1.5 shadow-sm border border-white/50">
+                  <span className="text-xs font-bold text-gray-600">Let me understand you better! 🎯</span>
+                </div>
+              </div>
               <div className="flex justify-center mb-3 shrink-0">
-                <Agni expression="excited" size={80} speech="Let me understand you better! 🎯" animate />
+                <Agni expression="excited" size={80} animate />
               </div>
 
-              <h2 className="text-xl font-black text-foreground text-center mb-1 shrink-0">
+              <h2 className="text-xl font-black text-gray-800 text-center mb-1 shrink-0">
                 {MISSION_MODES.find(m => m.id === selectedMission)?.emoji} Deep Dive
               </h2>
-              <p className="text-xs text-muted-foreground text-center mb-4 shrink-0">
+              <p className="text-xs text-gray-500 text-center mb-4 shrink-0">
                 Quick Q's to personalize your {MISSION_MODES.find(m => m.id === selectedMission)?.label} journey
               </p>
 
@@ -893,13 +898,13 @@ const OnboardingPage = () => {
                 <div className="space-y-4">
                   {MISSION_FOLLOWUPS[selectedMission].map((q, i) => (
                     <motion.div key={q.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.08 }}>
-                      <label className="text-[11px] font-extrabold text-foreground block mb-2">{q.label}</label>
+                      <label className="text-[11px] font-extrabold text-gray-700 block mb-2">{q.label}</label>
                       {q.type === "text" ? (
                         <Input
                           type="text" placeholder={q.placeholder}
                           value={missionFollowup[q.id] || ""}
                           onChange={(e) => setMissionFollowup(prev => ({ ...prev, [q.id]: e.target.value }))}
-                          className="h-12 rounded-xl bg-card border-2 border-border text-sm font-bold focus:border-agni-green"
+                          className="h-12 rounded-xl bg-white/80 border-2 border-white/50 text-sm font-bold text-gray-800 focus:border-agni-green shadow-sm"
                         />
                       ) : (
                         <div className="flex flex-wrap gap-2">
@@ -919,11 +924,13 @@ const OnboardingPage = () => {
               </div>
             </div>
 
-            <div className="flex gap-3 shrink-0">
-              <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-2xl border-2 border-border text-sm font-bold">Skip</Button>
-              <Button onClick={goNext} className="flex-1 h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d">
-                CONTINUE <ArrowRight size={18} className="ml-2" />
-              </Button>
+            <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#E8F5E9] via-[#E8F5E9]/95 to-transparent">
+              <div className="flex gap-3">
+                <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-full bg-white/80 border-2 border-white/50 text-gray-700 text-sm font-bold shadow-sm">Skip</Button>
+                <Button onClick={goNext} className="flex-1 h-14 rounded-full bg-[#58CC02] hover:bg-[#4CAD02] text-white font-extrabold text-base shadow-lg">
+                  CONTINUE <ArrowRight size={18} className="ml-2" />
+                </Button>
+              </div>
             </div>
           </motion.div>
         )}
