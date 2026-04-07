@@ -58,6 +58,13 @@ const HomePage = () => {
     { label: `L${stats.level}`, color: "bg-agni-gold/15 text-agni-gold", icon: Zap, emoji: undefined },
   ];
 
+  useEffect(() => {
+    const timer = setTimeout(() => setAgniExpression("happy"), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const agniSpeech = stats.done.length === 0 ? "Let's learn AI! 🤖" : stats.done.length < 5 ? "Great start! 🔥" : stats.done.length < 15 ? "You're crushing it!" : "Almost a master! 🏆";
+
   return (
     <PageTransition>
       <div className="min-h-screen bg-background pb-24 relative">
