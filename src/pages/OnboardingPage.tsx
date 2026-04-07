@@ -1,64 +1,107 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, ArrowLeft, Sparkles, Search, Check, Plus, Shield, Wifi, Cpu } from "lucide-react";
-import BotIllustration from "@/components/illustrations/BotIllustration";
-import heroSplash from "@/assets/hero-splash.png";
-import FloatingShapes from "@/components/illustrations/FloatingShapes";
+import {
+  ArrowRight, ArrowLeft, Sparkles, Search, Check, Plus, X,
+  Shield, Wifi, Cpu, Zap, Heart, Star, Rocket, Brain,
+  BookOpen, Gamepad2, Music, Film, Trophy, Newspaper, Lightbulb
+} from "lucide-react";
+import Agni from "@/components/Agni";
+import type { AgniExpression } from "@/components/Agni";
 import { motion, AnimatePresence } from "framer-motion";
 import { savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona } from "@/lib/neuralOS";
 
+/* ── STEP CONFIG ── */
+
 const ROLES = [
-  { id: "student", label: "Student", emoji: "🎓", desc: "Learning AI", goal: "Learn AI from zero", exp: "beginner" },
-  { id: "developer", label: "Developer", emoji: "💻", desc: "Building agents", goal: "Build production AI agents", exp: "engineer" },
-  { id: "founder", label: "Founder", emoji: "🚀", desc: "Scaling ideas", goal: "Build a startup with AI", exp: "some experience" },
-  { id: "manager", label: "PM/Manager", emoji: "📊", desc: "Leading teams", goal: "Lead AI product teams", exp: "some experience" },
-  { id: "researcher", label: "Researcher", emoji: "🔬", desc: "Exploring AI", goal: "Research AI deeply", exp: "engineer" },
-  { id: "curious", label: "Curious", emoji: "✨", desc: "Just exploring", goal: "Explore for fun", exp: "beginner" },
+  { id: "student", label: "Student", emoji: "🎓", desc: "Learning AI from scratch", goal: "Learn AI from zero", exp: "beginner", color: "from-blue-500 to-cyan-400" },
+  { id: "developer", label: "Developer", emoji: "💻", desc: "Building real agents", goal: "Build production AI agents", exp: "engineer", color: "from-green-500 to-emerald-400" },
+  { id: "founder", label: "Founder", emoji: "🚀", desc: "Scaling with AI", goal: "Build a startup with AI", exp: "some experience", color: "from-orange-500 to-amber-400" },
+  { id: "manager", label: "PM / Manager", emoji: "📊", desc: "Leading AI teams", goal: "Lead AI product teams", exp: "some experience", color: "from-purple-500 to-violet-400" },
+  { id: "researcher", label: "Researcher", emoji: "🔬", desc: "Deep exploration", goal: "Research AI deeply", exp: "engineer", color: "from-pink-500 to-rose-400" },
+  { id: "curious", label: "Just Curious", emoji: "✨", desc: "Here for fun!", goal: "Explore for fun", exp: "beginner", color: "from-yellow-500 to-amber-300" },
 ];
 
 const VIBES = [
-  { id: "fun", label: "Fun & memes", emoji: "😂", desc: "Make me laugh while learning" },
-  { id: "story", label: "Story-driven", emoji: "📖", desc: "Tell me tales and analogies" },
-  { id: "serious", label: "Serious & deep", emoji: "🧠", desc: "No fluff, give me the depth" },
-  { id: "fast", label: "Fast & practical", emoji: "⚡", desc: "Just the essentials, ship it" },
+  { id: "fun", label: "Fun & Memes", emoji: "😂", desc: "Make me LOL while learning", icon: Heart, color: "bg-pink-500/20 border-pink-400" },
+  { id: "story", label: "Story-driven", emoji: "📖", desc: "Tales & analogies", icon: BookOpen, color: "bg-purple-500/20 border-purple-400" },
+  { id: "serious", label: "Deep & Serious", emoji: "🧠", desc: "No fluff, pure knowledge", icon: Brain, color: "bg-blue-500/20 border-blue-400" },
+  { id: "fast", label: "Fast & Practical", emoji: "⚡", desc: "Ship it now!", icon: Zap, color: "bg-amber-500/20 border-amber-400" },
 ];
 
-const TOTAL_STEPS = 3 + SUGGESTION_CATEGORIES.length;
+const SCREEN_COLORS = [
+  { bg: "from-[#58CC02] to-[#45A800]", text: "text-white" },       // green
+  { bg: "from-[#1CB0F6] to-[#0899D6]", text: "text-white" },       // blue
+  { bg: "from-[#CE82FF] to-[#A855F7]", text: "text-white" },       // purple
+  { bg: "from-[#FF9600] to-[#E08500]", text: "text-white" },       // orange
+  { bg: "from-[#FF4B4B] to-[#E03E3E]", text: "text-white" },       // red
+  { bg: "from-[#FFC800] to-[#E0AC00]", text: "text-gray-900" },    // gold
+  { bg: "from-[#FF86D8] to-[#E870C0]", text: "text-white" },       // pink
+  { bg: "from-[#1CB0F6] to-[#58CC02]", text: "text-white" },       // blue-green
+];
+
+const MASCOT_SPEECHES: Record<number, { text: string; expr: AgniExpression }> = {
+  0: { text: "", expr: "excited" },
+  1: { text: "Let's make this personal! 🎯", expr: "teaching" },
+  2: { text: "What brings you here?", expr: "thinking" },
+  3: { text: "How should I talk to you? 🎨", expr: "happy" },
+};
+
+const CATEGORY_ICONS: Record<string, any> = {
+  shows: Film,
+  sports: Trophy,
+  music: Music,
+  gaming: Gamepad2,
+  news: Newspaper,
+  books: BookOpen,
+  hobbies: Star,
+  curious: Lightbulb,
+};
+
+// Steps: 0=splash, 1=name, 2=role, 3=vibe, 4..4+N-1=categories, 4+N=confirm
+const TOTAL_STEPS = 4 + SUGGESTION_CATEGORIES.length + 1;
+
+const slideVariants = {
+  enter: (dir: number) => ({ x: dir > 0 ? 300 : -300, opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (dir: number) => ({ x: dir > 0 ? -300 : 300, opacity: 0 }),
+};
 
 const OnboardingPage = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(0); // 0 = splash, 1 = welcome+name+role+vibe, 2 = persona categories
+  const [step, setStep] = useState(0);
+  const [dir, setDir] = useState(1);
   const [name, setName] = useState("");
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [selectedVibe, setSelectedVibe] = useState<string | null>(null);
-  const [companyName, setCompanyName] = useState("");
-  const [dailyWork, setDailyWork] = useState("");
   const [persona, setPersona] = useState<Partial<NeuralOSPersona>>({});
-
-  // For category sub-step
-  const [categoryIndex, setCategoryIndex] = useState(0);
   const [search, setSearch] = useState("");
   const [customInput, setCustomInput] = useState("");
-  const progress = Math.round((step / TOTAL_STEPS) * 100);
+  const [showSelected, setShowSelected] = useState(false);
 
-  // Splash typewriter
-  const tagline = "Master the future of intelligent automation";
-  const [displayedText, setDisplayedText] = useState("");
-  useEffect(() => {
-    if (step !== 0) return;
-    let i = 0;
-    const interval = setInterval(() => {
-      setDisplayedText(tagline.slice(0, i + 1));
-      i++;
-      if (i >= tagline.length) clearInterval(interval);
-    }, 40);
-    return () => clearInterval(interval);
-  }, [step]);
+  const categoryIndex = step >= 4 ? step - 4 : -1;
+  const activeCategory = categoryIndex >= 0 && categoryIndex < SUGGESTION_CATEGORIES.length
+    ? SUGGESTION_CATEGORIES[categoryIndex] : null;
+  const isConfirmStep = step === 4 + SUGGESTION_CATEGORIES.length;
 
-  const activeCategory = SUGGESTION_CATEGORIES[categoryIndex];
-  const currentItems = activeCategory ? ((persona[activeCategory.field] as string[]) || []) : [];
+  const currentItems = activeCategory
+    ? ((persona[activeCategory.field] as string[]) || [])
+    : [];
+
+  const totalSelected = useMemo(() => {
+    let count = 0;
+    SUGGESTION_CATEGORIES.forEach(cat => {
+      const items = (persona[cat.field] as string[]) || [];
+      count += items.length;
+    });
+    return count;
+  }, [persona]);
+
+  const progress = Math.round((step / (TOTAL_STEPS - 1)) * 100);
+
+  const goNext = () => { setDir(1); setStep(s => s + 1); setSearch(""); setCustomInput(""); };
+  const goBack = () => { setDir(-1); setStep(s => Math.max(0, s - 1)); setSearch(""); setCustomInput(""); };
 
   const toggleItem = (item: string) => {
     if (!activeCategory) return;
@@ -68,12 +111,18 @@ const OnboardingPage = () => {
     setPersona({ ...persona, [field]: updated });
   };
 
+  const removeItem = (catField: string, item: string) => {
+    const current = (persona[catField as keyof NeuralOSPersona] as string[]) || [];
+    setPersona({ ...persona, [catField]: current.filter(x => x !== item) });
+  };
+
   const addCustom = () => {
     if (!customInput.trim() || !activeCategory) return;
     const field = activeCategory.field as keyof NeuralOSPersona;
     const current = (persona[field] as string[]) || [];
-    if (current.includes(customInput.trim())) return;
-    setPersona({ ...persona, [field]: [...current, customInput.trim()] });
+    if (!current.includes(customInput.trim())) {
+      setPersona({ ...persona, [field]: [...current, customInput.trim()] });
+    }
     setCustomInput("");
   };
 
@@ -84,37 +133,6 @@ const OnboardingPage = () => {
       )
     : [];
 
-  const goToStep1 = () => setStep(1);
-
-  const goToCategories = () => {
-    if (!name.trim() || !selectedRole || !selectedVibe) return;
-    localStorage.setItem("edu_user_name", name.trim());
-    localStorage.setItem("edu_user_role", selectedRole);
-    localStorage.setItem("theme", "light");
-    document.documentElement.classList.add("light");
-    setStep(2);
-  };
-
-  const nextCategory = () => {
-    setSearch("");
-    setCustomInput("");
-    if (categoryIndex < SUGGESTION_CATEGORIES.length - 1) {
-      setCategoryIndex(categoryIndex + 1);
-    } else {
-      finish();
-    }
-  };
-
-  const prevCategory = () => {
-    setSearch("");
-    setCustomInput("");
-    if (categoryIndex > 0) {
-      setCategoryIndex(categoryIndex - 1);
-    } else {
-      setStep(1);
-    }
-  };
-
   const finish = () => {
     const role = ROLES.find(r => r.id === selectedRole);
     savePersona({
@@ -123,438 +141,584 @@ const OnboardingPage = () => {
       goal: role?.goal || "Master AI agents",
       experience: role?.exp || "some experience",
       vibe: selectedVibe || "fun",
-      currentCompany: companyName.trim() || undefined,
       currentRole: role?.label,
-      dailyWork: dailyWork.trim() || undefined,
       completedAt: new Date().toISOString(),
     });
+    localStorage.setItem("edu_user_name", name.trim());
+    localStorage.setItem("edu_user_role", selectedRole || "curious");
     localStorage.setItem("edu_onboarded", "true");
     navigate("/");
   };
 
-  const totalProgress = step === 0 ? 0 : step === 1 ? 1 / TOTAL_STEPS : (2 + categoryIndex) / TOTAL_STEPS;
+  const screenColor = SCREEN_COLORS[step % SCREEN_COLORS.length];
+
+  // Mascot speech bubble component
+  const MascotBubble = ({ text, expr, size = 100 }: { text: string; expr: AgniExpression; size?: number }) => (
+    <div className="flex flex-col items-center gap-3">
+      <Agni expression={expr} size={size} speech={text} animate />
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Background glow */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full bg-agni-green/5 blur-[100px]" />
-      </div>
-
       {/* Progress bar */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-muted/30 z-20">
-        <motion.div
-          className="h-full bg-agni-green rounded-r-full"
-          animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.3 }}
-        />
-      </div>
+      {step > 0 && (
+        <div className="absolute top-0 left-0 right-0 z-30 px-4 pt-3 flex items-center gap-3">
+          <button
+            onClick={goBack}
+            className="w-9 h-9 rounded-full bg-card/80 backdrop-blur border border-border flex items-center justify-center shrink-0"
+          >
+            <ArrowLeft size={16} className="text-foreground" />
+          </button>
+          <div className="flex-1 h-3 bg-muted/40 rounded-full overflow-hidden">
+            <motion.div
+              className="h-full rounded-full bg-gradient-to-r from-agni-green to-agni-blue"
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            />
+          </div>
+          <span className="text-xs font-extrabold text-muted-foreground w-8 text-right">{step}/{TOTAL_STEPS - 1}</span>
+        </div>
+      )}
 
-      <AnimatePresence mode="wait">
-        {/* ============ STEP 0: SPLASH ============ */}
+      <AnimatePresence mode="wait" custom={dir}>
+        {/* ═══════ STEP 0: SPLASH ═══════ */}
         {step === 0 && (
           <motion.div
-            key={`slide-${step}`}
-            initial={{ opacity: 0, x: 60 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -60 }}
-            transition={{ duration: 0.3 }}
-            className="relative z-10 max-w-md mx-auto px-5 flex flex-col min-h-screen items-center justify-center"
+            key="splash"
+            custom={dir}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.35, ease: "easeInOut" }}
+            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen items-center justify-center"
           >
+            {/* Big colorful gradient background */}
+            <div className="absolute inset-0 bg-gradient-to-b from-agni-green/20 via-transparent to-agni-blue/10 pointer-events-none" />
+
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, type: "spring" }}
-              className="mb-6"
+              initial={{ scale: 0, rotate: -30 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: "spring", stiffness: 200, damping: 12, delay: 0.2 }}
+              className="relative z-10 mb-4"
             >
-              <div className="w-40 h-40 rounded-3xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                <BotIllustration size={140} />
-              </div>
+              <Agni expression="celebrating" size={180} animate />
             </motion.div>
 
             <motion.h1
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="text-4xl font-display font-extrabold text-foreground text-center mb-2"
+              transition={{ delay: 0.5 }}
+              className="text-5xl font-black text-foreground text-center mb-2 relative z-10"
             >
-              AgentDojo
+              Agent<span className="text-agni-green">Dojo</span>
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="text-sm text-muted-foreground text-center min-h-[20px] mb-8"
+              transition={{ delay: 0.8 }}
+              className="text-base text-muted-foreground text-center font-semibold mb-8 relative z-10"
             >
-              {displayedText}
-              <span className="inline-block w-0.5 h-3 bg-primary ml-0.5 animate-pulse" />
+              Master AI Agents. Level Up. 🚀
             </motion.p>
 
+            {/* Feature pills */}
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.5 }}
-              className="w-full mb-6"
+              transition={{ delay: 1 }}
+              className="flex gap-3 mb-10 relative z-10"
             >
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { icon: Shield, label: "Free" },
-                  { icon: Wifi, label: "Offline" },
-                  { icon: Cpu, label: "AI-Powered" },
-                ].map((f, i) => (
-                  <div key={i} className="bg-card border border-border rounded-2xl p-3 flex flex-col items-center gap-1">
-                    <f.icon size={16} className="text-primary" />
-                    <span className="text-[10px] font-bold text-foreground">{f.label}</span>
-                  </div>
-                ))}
-              </div>
+              {[
+                { icon: Shield, label: "Free", color: "bg-agni-green/15 text-agni-green" },
+                { icon: Zap, label: "AI-Powered", color: "bg-agni-blue/15 text-agni-blue" },
+                { icon: Rocket, label: "Gamified", color: "bg-agni-purple/15 text-agni-purple" },
+              ].map((f, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 1.1 + i * 0.1 }}
+                  className={`${f.color} rounded-full px-4 py-2 flex items-center gap-1.5`}
+                >
+                  <f.icon size={14} />
+                  <span className="text-xs font-extrabold">{f.label}</span>
+                </motion.div>
+              ))}
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.8 }}
-              className="w-full"
+              transition={{ delay: 1.4 }}
+              className="w-full relative z-10"
             >
               <Button
-                onClick={goToStep1}
-                className="w-full h-14 rounded-2xl bg-primary text-primary-foreground font-bold text-base shadow-glow-primary"
+                onClick={goNext}
+                className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-lg shadow-btn-3d btn-3d hover:bg-agni-green-dark"
               >
-                Get Started
-                <ArrowRight size={18} className="ml-2" />
+                GET STARTED
+                <ArrowRight size={20} className="ml-2" />
               </Button>
             </motion.div>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.6 }}
+              className="text-xs text-muted-foreground mt-4 relative z-10"
+            >
+              Already learning? <button onClick={() => navigate("/")} className="text-agni-green font-bold underline">Sign in</button>
+            </motion.p>
           </motion.div>
         )}
 
-        {/* ============ STEP 1: NAME + ROLE + VIBE ============ */}
+        {/* ═══════ STEP 1: NAME ═══════ */}
         {step === 1 && (
           <motion.div
-            key="step1"
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -40 }}
+            key="name"
+            custom={dir}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
             transition={{ duration: 0.35 }}
-            className="relative z-10 max-w-md mx-auto px-5 pt-4 pb-6 flex flex-col min-h-screen"
+            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
-            {/* Top progress */}
-            <div className="flex items-center gap-2 mb-4">
-              <button onClick={() => setStep(0)} className="w-9 h-9 rounded-xl bg-card border border-border flex items-center justify-center">
-                <ArrowLeft size={14} />
-              </button>
-              <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${(1 / TOTAL_STEPS) * 100}%` }}
-                  className="h-full bg-primary rounded-full"
+            <div className="absolute inset-0 bg-gradient-to-b from-agni-blue/15 to-transparent pointer-events-none" />
+
+            <div className="flex-1 flex flex-col items-center justify-center relative z-10">
+              <MascotBubble text="Hey! What's your name? 👋" expr="happy" size={120} />
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="w-full mt-8"
+              >
+                <h2 className="text-2xl font-black text-foreground text-center mb-6">
+                  What should I call you?
+                </h2>
+                <Input
+                  type="text"
+                  placeholder="Enter your name..."
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="h-14 rounded-2xl bg-card border-2 border-border text-lg font-bold text-center focus:border-agni-green"
+                  autoFocus
                 />
-              </div>
-              <span className="text-xs font-bold text-muted-foreground">1/{TOTAL_STEPS}</span>
+              </motion.div>
             </div>
 
-            {/* Mascot greeting */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="flex items-center gap-3 mb-5"
+            <Button
+              onClick={goNext}
+              disabled={!name.trim()}
+              className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none"
             >
-              <div className="w-16 h-16 shrink-0">
-                <BotIllustration size={64} />
-              </div>
-              <div className="bg-card border border-border rounded-2xl rounded-bl-sm p-3 shadow-sm">
-                <p className="text-sm font-bold text-foreground">Hey! I'm AGNI 👋</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Tell me about yourself so I can teach you better.</p>
-              </div>
-            </motion.div>
+              CONTINUE
+              <ArrowRight size={18} className="ml-2" />
+            </Button>
+          </motion.div>
+        )}
 
-            {/* Name input */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              className="mb-5"
-            >
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2 block">
-                What should I call you?
-              </label>
-              <Input
-                type="text"
-                placeholder="Your name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="h-12 rounded-xl bg-card border-border text-sm font-medium"
-                autoFocus
-              />
-            </motion.div>
+        {/* ═══════ STEP 2: ROLE ═══════ */}
+        {step === 2 && (
+          <motion.div
+            key="role"
+            custom={dir}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.35 }}
+            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-agni-purple/15 to-transparent pointer-events-none" />
 
-            {/* Role selection */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="mb-6"
-            >
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2 block">
-                You are a...
-              </label>
-              <div className="grid grid-cols-3 gap-2">
+            <div className="flex-1 relative z-10">
+              <div className="flex justify-center mb-4">
+                <Agni expression="thinking" size={90} speech="What brings you here? 🤔" animate />
+              </div>
+
+              <h2 className="text-2xl font-black text-foreground text-center mb-6">
+                I am a...
+              </h2>
+
+              <div className="grid grid-cols-2 gap-3">
                 {ROLES.map((role, i) => (
                   <motion.button
                     key={role.id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.35 + i * 0.04 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 + i * 0.06 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setSelectedRole(role.id)}
-                    className={`flex flex-col items-center gap-0.5 p-3 rounded-2xl border-2 transition-all ${
+                    className={`relative p-4 rounded-2xl border-2 text-left transition-all overflow-hidden ${
                       selectedRole === role.id
-                        ? "bg-primary/10 border-primary"
-                        : "bg-card border-border"
+                        ? "border-agni-green bg-agni-green/10 shadow-glow-green"
+                        : "border-border bg-card hover:border-muted-foreground/30"
                     }`}
                   >
-                    <span className="text-2xl">{role.emoji}</span>
-                    <span className="text-[10px] font-bold">{role.label}</span>
+                    {selectedRole === role.id && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="absolute top-2 right-2 w-6 h-6 rounded-full bg-agni-green flex items-center justify-center"
+                      >
+                        <Check size={14} className="text-white" strokeWidth={3} />
+                      </motion.div>
+                    )}
+                    <span className="text-3xl block mb-1">{role.emoji}</span>
+                    <span className="text-sm font-extrabold text-foreground block">{role.label}</span>
+                    <span className="text-[10px] text-muted-foreground">{role.desc}</span>
                   </motion.button>
                 ))}
               </div>
-            </motion.div>
-
-            {/* Vibe */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="mb-5"
-            >
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2 block">
-                How should I teach?
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {VIBES.map((vibe, i) => (
-                  <motion.button
-                    key={vibe.id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.55 + i * 0.06 }}
-                    whileTap={{ scale: 0.96 }}
-                    onClick={() => setSelectedVibe(vibe.id)}
-                    className={`p-3 rounded-2xl border-2 text-left transition-all ${
-                      selectedVibe === vibe.id
-                        ? "bg-primary/10 border-primary"
-                        : "bg-card border-border"
-                    }`}
-                  >
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      <span className="text-lg">{vibe.emoji}</span>
-                      <span className="text-xs font-bold">{vibe.label}</span>
-                    </div>
-                    <p className="text-[9px] text-muted-foreground">{vibe.desc}</p>
-                  </motion.button>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* 🆕 WORK CONTEXT */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.65 }}
-              className="mb-5"
-            >
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2 block">
-                Where do you work? <span className="text-muted-foreground/60 normal-case">(optional)</span>
-              </label>
-              <Input
-                type="text"
-                placeholder="e.g. HCL, freelance, building my own startup..."
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                className="h-11 rounded-xl bg-card border-border text-sm mb-3"
-              />
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2 block">
-                What does your day-to-day look like? <span className="text-muted-foreground/60 normal-case">(optional)</span>
-              </label>
-              <textarea
-                placeholder="e.g. lots of meetings, writing PRDs, reviewing dashboards, running standups..."
-                value={dailyWork}
-                onChange={(e) => setDailyWork(e.target.value)}
-                rows={2}
-                className="w-full rounded-xl bg-card border border-border text-sm px-3 py-2 outline-none focus:border-primary resize-none"
-              />
-              <p className="text-[10px] text-muted-foreground mt-1.5">
-                💡 I'll use this to show how every concept applies to YOUR work
-              </p>
-            </motion.div>
-
-            <div className="mt-auto">
-              <Button
-                onClick={goToCategories}
-                disabled={!name.trim() || !selectedRole || !selectedVibe}
-                className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-bold text-sm disabled:opacity-30"
-              >
-                Continue
-                <ArrowRight size={15} className="ml-1.5" />
-              </Button>
             </div>
+
+            <Button
+              onClick={goNext}
+              disabled={!selectedRole}
+              className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none"
+            >
+              CONTINUE
+              <ArrowRight size={18} className="ml-2" />
+            </Button>
           </motion.div>
         )}
 
-        {/* ============ STEP 2: PERSONA CATEGORIES (Twitter-style) ============ */}
-        {step === 2 && activeCategory && (
+        {/* ═══════ STEP 3: VIBE ═══════ */}
+        {step === 3 && (
           <motion.div
-            key={`cat-${categoryIndex}`}
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -40 }}
-            transition={{ duration: 0.3 }}
-            className="relative z-10 max-w-md mx-auto px-5 pt-4 pb-4 flex flex-col min-h-screen h-screen"
+            key="vibe"
+            custom={dir}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.35 }}
+            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
-            {/* Top progress */}
-            <div className="flex items-center gap-2 mb-3 shrink-0">
-              <button onClick={prevCategory} className="w-9 h-9 rounded-xl bg-card border border-border flex items-center justify-center">
-                <ArrowLeft size={14} />
-              </button>
-              <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${((2 + categoryIndex) / TOTAL_STEPS) * 100}%` }}
-                  transition={{ duration: 0.4 }}
-                  className="h-full bg-primary rounded-full"
-                />
-              </div>
-              <span className="text-xs font-bold text-muted-foreground">{2 + categoryIndex}/{TOTAL_STEPS}</span>
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-b from-agni-orange/15 to-transparent pointer-events-none" />
 
-            {/* Mascot + question */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-start gap-3 mb-4 shrink-0"
-            >
-              <div className="w-12 h-12 shrink-0">
-                <BotIllustration size={48} />
+            <div className="flex-1 relative z-10">
+              <div className="flex justify-center mb-4">
+                <Agni expression="excited" size={90} speech="How should I teach you? 🎨" animate />
               </div>
-              <div className="flex-1 bg-card border border-border rounded-2xl rounded-bl-sm p-3 shadow-sm">
-                <p className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                  <span className="text-lg">{activeCategory.emoji}</span>
-                  {activeCategory.label}
-                </p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">{activeCategory.description}</p>
-                {currentItems.length > 0 && (
-                  <p className="text-[10px] text-primary font-bold mt-1.5">
-                    ✓ {currentItems.length} picked
-                  </p>
-                )}
-              </div>
-            </motion.div>
 
-            {/* Search */}
-            <div className="relative mb-3 shrink-0">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={`Search ${activeCategory.label.toLowerCase()}...`}
-                className="w-full bg-card border border-border rounded-xl pl-9 pr-3 py-2.5 text-sm outline-none focus:border-primary"
-              />
-            </div>
+              <h2 className="text-2xl font-black text-foreground text-center mb-2">
+                My learning style is...
+              </h2>
+              <p className="text-sm text-muted-foreground text-center mb-6">Pick what feels right</p>
 
-            {/* Suggestions grid — scrollable */}
-            <div className="flex-1 overflow-y-auto -mx-1 px-1 mb-3">
-              <div className="grid grid-cols-2 gap-2">
-                {filtered.map((s, i) => {
-                  const selected = currentItems.includes(s.name);
+              <div className="space-y-3">
+                {VIBES.map((vibe, i) => {
+                  const Icon = vibe.icon;
                   return (
                     <motion.button
-                      key={s.name}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: Math.min(i * 0.015, 0.3) }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => toggleItem(s.name)}
-                      className={`p-3 rounded-2xl border-2 text-left transition-all relative ${
-                        selected
-                          ? "bg-primary/10 border-primary"
-                          : "bg-card border-border"
+                      key={vibe.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.15 + i * 0.08 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => setSelectedVibe(vibe.id)}
+                      className={`w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4 transition-all ${
+                        selectedVibe === vibe.id
+                          ? "border-agni-green bg-agni-green/10 shadow-glow-green"
+                          : "border-border bg-card"
                       }`}
                     >
-                      {selected && (
-                        <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                          <Check size={11} className="text-primary-foreground" strokeWidth={3} />
-                        </div>
-                      )}
-                      <div className="text-xl mb-1">{s.emoji || "✨"}</div>
-                      <div className="text-xs font-bold text-foreground leading-tight pr-5">{s.name}</div>
-                      {s.tag && (
-                        <div className="text-[9px] text-muted-foreground mt-0.5">{s.tag}</div>
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${vibe.color}`}>
+                        <span className="text-2xl">{vibe.emoji}</span>
+                      </div>
+                      <div className="flex-1">
+                        <span className="text-sm font-extrabold text-foreground block">{vibe.label}</span>
+                        <span className="text-xs text-muted-foreground">{vibe.desc}</span>
+                      </div>
+                      {selectedVibe === vibe.id && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="w-7 h-7 rounded-full bg-agni-green flex items-center justify-center"
+                        >
+                          <Check size={16} className="text-white" strokeWidth={3} />
+                        </motion.div>
                       )}
                     </motion.button>
                   );
                 })}
               </div>
+            </div>
 
-              {/* Custom adds */}
-              {currentItems.filter(i => !activeCategory.suggestions.find(s => s.name === i)).length > 0 && (
-                <div className="mt-3">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Your custom adds</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {currentItems
-                      .filter(i => !activeCategory.suggestions.find(s => s.name === i))
-                      .map((item) => (
-                        <button
-                          key={item}
-                          onClick={() => toggleItem(item)}
-                          className="bg-primary/10 border border-primary text-primary text-xs font-semibold px-3 py-1.5 rounded-full"
-                        >
-                          {item} ×
-                        </button>
-                      ))}
+            <Button
+              onClick={goNext}
+              disabled={!selectedVibe}
+              className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none"
+            >
+              CONTINUE
+              <ArrowRight size={18} className="ml-2" />
+            </Button>
+          </motion.div>
+        )}
+
+        {/* ═══════ STEP 4+: CATEGORY SELECTION ═══════ */}
+        {activeCategory && !isConfirmStep && (
+          <motion.div
+            key={`cat-${categoryIndex}`}
+            custom={dir}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.3 }}
+            className="relative z-10 max-w-md mx-auto px-5 pt-16 pb-4 flex flex-col min-h-screen h-screen"
+          >
+            {/* Colored accent */}
+            <div className={`absolute inset-0 bg-gradient-to-b ${SCREEN_COLORS[(categoryIndex + 2) % SCREEN_COLORS.length].bg} opacity-10 pointer-events-none`} />
+
+            <div className="relative z-10 flex flex-col flex-1 min-h-0">
+              {/* Category header with mascot */}
+              <div className="flex items-center gap-3 mb-3 shrink-0">
+                <Agni
+                  expression={categoryIndex % 2 === 0 ? "teaching" : "happy"}
+                  size={56}
+                  animate
+                />
+                <div className="flex-1">
+                  <h2 className="text-lg font-black text-foreground flex items-center gap-2">
+                    <span className="text-2xl">{activeCategory.emoji}</span>
+                    {activeCategory.label}
+                  </h2>
+                  <p className="text-xs text-muted-foreground">{activeCategory.description}</p>
+                </div>
+                {currentItems.length > 0 && (
+                  <button
+                    onClick={() => setShowSelected(!showSelected)}
+                    className="bg-agni-green/15 text-agni-green text-xs font-extrabold px-3 py-1.5 rounded-full flex items-center gap-1"
+                  >
+                    {currentItems.length} picked
+                    <motion.div animate={{ rotate: showSelected ? 180 : 0 }}>▼</motion.div>
+                  </button>
+                )}
+              </div>
+
+              {/* Selected items panel */}
+              <AnimatePresence>
+                {showSelected && currentItems.length > 0 && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden mb-3 shrink-0"
+                  >
+                    <div className="bg-agni-green/5 border border-agni-green/20 rounded-2xl p-3">
+                      <p className="text-[10px] font-extrabold text-agni-green uppercase tracking-wider mb-2">Your picks</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {currentItems.map((item) => (
+                          <motion.button
+                            key={item}
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => toggleItem(item)}
+                            className="bg-agni-green/20 text-agni-green text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 hover:bg-agni-red/20 hover:text-agni-red transition-colors"
+                          >
+                            {item}
+                            <X size={12} />
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Search */}
+              <div className="relative mb-3 shrink-0">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={`Search ${activeCategory.label.toLowerCase()}...`}
+                  className="w-full bg-card border-2 border-border rounded-2xl pl-10 pr-3 py-3 text-sm font-medium outline-none focus:border-agni-green transition-colors"
+                />
+              </div>
+
+              {/* Suggestions grid */}
+              <div className="flex-1 overflow-y-auto -mx-1 px-1 mb-3 scrollbar-none">
+                <div className="grid grid-cols-2 gap-2">
+                  {filtered.map((s, i) => {
+                    const selected = currentItems.includes(s.name);
+                    return (
+                      <motion.button
+                        key={s.name}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: Math.min(i * 0.02, 0.4) }}
+                        whileTap={{ scale: 0.93 }}
+                        onClick={() => toggleItem(s.name)}
+                        className={`p-3 rounded-2xl border-2 text-left transition-all relative ${
+                          selected
+                            ? "bg-agni-green/15 border-agni-green shadow-glow-green"
+                            : "bg-card border-border hover:border-muted-foreground/30"
+                        }`}
+                      >
+                        {selected && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="absolute top-2 right-2 w-5 h-5 rounded-full bg-agni-green flex items-center justify-center"
+                          >
+                            <Check size={11} className="text-white" strokeWidth={3} />
+                          </motion.div>
+                        )}
+                        <div className="text-xl mb-0.5">{s.emoji || "✨"}</div>
+                        <div className="text-xs font-extrabold text-foreground leading-tight pr-5">{s.name}</div>
+                        {s.tag && (
+                          <div className="text-[9px] text-muted-foreground mt-0.5 font-semibold">{s.tag}</div>
+                        )}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Custom input */}
+              <div className="flex gap-2 mb-3 shrink-0">
+                <input
+                  type="text"
+                  value={customInput}
+                  onChange={(e) => setCustomInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") addCustom(); }}
+                  placeholder="Add your own..."
+                  className="flex-1 bg-card border-2 border-border rounded-2xl px-4 py-2.5 text-sm font-medium outline-none focus:border-agni-green transition-colors"
+                />
+                <button
+                  onClick={addCustom}
+                  disabled={!customInput.trim()}
+                  className="bg-agni-green text-white rounded-2xl px-4 disabled:opacity-30 font-bold"
+                >
+                  <Plus size={18} />
+                </button>
+              </div>
+
+              {/* Bottom actions */}
+              <div className="flex gap-3 shrink-0">
+                <Button
+                  onClick={goNext}
+                  variant="outline"
+                  className="flex-1 h-12 rounded-2xl border-2 border-border text-sm font-bold"
+                >
+                  Skip
+                </Button>
+                <Button
+                  onClick={goNext}
+                  className="flex-1 h-12 rounded-2xl bg-agni-green text-white font-extrabold text-sm shadow-btn-3d btn-3d"
+                >
+                  {categoryIndex < SUGGESTION_CATEGORIES.length - 1 ? (
+                    <>Next <ArrowRight size={16} className="ml-1" /></>
+                  ) : (
+                    <>Review <Sparkles size={16} className="ml-1" /></>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ═══════ CONFIRM STEP ═══════ */}
+        {isConfirmStep && (
+          <motion.div
+            key="confirm"
+            custom={dir}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.35 }}
+            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-agni-green/20 via-agni-blue/10 to-transparent pointer-events-none" />
+
+            <div className="flex-1 relative z-10 overflow-y-auto scrollbar-none">
+              <div className="flex justify-center mb-4">
+                <Agni expression="celebrating" size={100} speech={`Looking great, ${name}! 🎉`} animate />
+              </div>
+
+              <h2 className="text-2xl font-black text-foreground text-center mb-1">
+                You're all set! 🚀
+              </h2>
+              <p className="text-sm text-muted-foreground text-center mb-6">
+                Here's your learning profile • {totalSelected} interests picked
+              </p>
+
+              {/* Profile summary */}
+              <div className="space-y-3 mb-6">
+                {/* Name & Role */}
+                <div className="bg-card border border-border rounded-2xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider">Profile</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-agni-green/20 flex items-center justify-center text-lg">
+                      {ROLES.find(r => r.id === selectedRole)?.emoji || "✨"}
+                    </div>
+                    <div>
+                      <p className="text-sm font-extrabold text-foreground">{name}</p>
+                      <p className="text-xs text-muted-foreground">{ROLES.find(r => r.id === selectedRole)?.label} • {VIBES.find(v => v.id === selectedVibe)?.label}</p>
+                    </div>
                   </div>
                 </div>
-              )}
+
+                {/* Interest categories */}
+                {SUGGESTION_CATEGORIES.map((cat) => {
+                  const items = (persona[cat.field] as string[]) || [];
+                  if (items.length === 0) return null;
+                  const CatIcon = CATEGORY_ICONS[cat.id] || Star;
+                  return (
+                    <div key={cat.id} className="bg-card border border-border rounded-2xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg">{cat.emoji}</span>
+                        <span className="text-xs font-extrabold text-foreground">{cat.label}</span>
+                        <span className="text-[10px] text-muted-foreground ml-auto">{items.length} picked</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {items.map((item) => (
+                          <motion.span
+                            key={item}
+                            className="bg-agni-green/10 text-agni-green text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1"
+                          >
+                            {item}
+                            <button
+                              onClick={() => removeItem(cat.field as string, item)}
+                              className="hover:text-agni-red transition-colors"
+                            >
+                              <X size={10} />
+                            </button>
+                          </motion.span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
-            {/* Custom input */}
-            <div className="flex gap-2 mb-3 shrink-0">
-              <input
-                type="text"
-                value={customInput}
-                onChange={(e) => setCustomInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") addCustom(); }}
-                placeholder="Or add your own..."
-                className="flex-1 bg-card border border-border rounded-xl px-3 py-2 text-sm outline-none focus:border-primary"
-              />
-              <button
-                onClick={addCustom}
-                disabled={!customInput.trim()}
-                className="bg-primary text-primary-foreground rounded-xl px-4 disabled:opacity-30"
-              >
-                <Plus size={16} />
-              </button>
-            </div>
-
-            {/* Bottom actions */}
-            <div className="flex gap-2 shrink-0">
+            <div className="shrink-0 space-y-3 relative z-10">
               <Button
-                onClick={nextCategory}
-                variant="outline"
-                className="flex-1 h-12 rounded-xl border-border text-sm font-semibold"
+                onClick={finish}
+                className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-lg shadow-btn-3d btn-3d"
               >
-                Skip
+                <Sparkles size={20} className="mr-2" />
+                ACTIVATE AGNI
               </Button>
-              <Button
-                onClick={nextCategory}
-                className="flex-1 h-12 rounded-xl bg-primary text-primary-foreground font-bold text-sm"
-              >
-                {categoryIndex < SUGGESTION_CATEGORIES.length - 1 ? (
-                  <>Next <ArrowRight size={15} className="ml-1" /></>
-                ) : (
-                  <><Sparkles size={15} className="mr-1" /> Activate AGNI</>
-                )}
-              </Button>
+              <p className="text-[11px] text-muted-foreground text-center">
+                You can change these anytime in Settings
+              </p>
             </div>
           </motion.div>
         )}
