@@ -248,11 +248,21 @@ const CuriosityPage = () => {
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={feedCardIndex}
-                        initial={{ opacity: 0, x: 40 }}
+                        initial={{ opacity: 0, x: 80 }}
                         animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -40 }}
+                        exit={{ opacity: 0, x: -80 }}
                         transition={{ duration: 0.25 }}
-                        className="bg-card rounded-2xl border-2 border-border/20 overflow-hidden"
+                        drag="x"
+                        dragConstraints={{ left: 0, right: 0 }}
+                        dragElastic={0.3}
+                        onDragEnd={(_e, info) => {
+                          if (info.offset.x < -60 && feedCardIndex < feedItems.length - 1) {
+                            nextFeedCard();
+                          } else if (info.offset.x > 60 && feedCardIndex > 0) {
+                            prevFeedCard();
+                          }
+                        }}
+                        className="bg-card rounded-2xl border-2 border-border/20 overflow-hidden cursor-grab active:cursor-grabbing touch-pan-y"
                       >
                         {/* Card header with source */}
                         <div className="flex items-center gap-2 px-3 pt-3 pb-2">
