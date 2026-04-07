@@ -386,7 +386,7 @@ export const TEACHING_CATEGORIES = [
 export function getTeachingSelection(categoryId: string): string {
   const cat = TEACHING_CATEGORIES.find(c => c.id === categoryId);
   if (!cat) return "";
-  return localStorage.getItem(cat.storageKey) || cat.defaultId;
+  return localStorage.getItem(cat.storageKey) || "";
 }
 
 export function setTeachingSelection(categoryId: string, value: string) {
@@ -402,6 +402,7 @@ export function getTeachingLabel(categoryId: string): { label: string; emoji: st
   const val = getTeachingSelection(categoryId);
   const opt = cat.options.find((o: any) => o.id === val);
   if (opt) return { label: opt.label, emoji: opt.emoji, desc: opt.desc };
+  if (!val) return null;
   const customs = getCustomOptions(categoryId);
   const custom = customs.find(c => c.id === val);
   if (custom) return { label: custom.label, emoji: custom.emoji, desc: custom.desc };

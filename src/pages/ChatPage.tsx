@@ -58,7 +58,7 @@ export default function ChatPage() {
     const saved = localStorage.getItem("teaching_mode");
     if (saved) return saved;
     const identity = localStorage.getItem("teaching_identity");
-    return identity || "engineer";
+    return identity || "";
   });
 
   const chat = useChat(activeTab);
