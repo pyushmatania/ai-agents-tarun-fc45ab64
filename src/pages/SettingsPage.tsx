@@ -300,6 +300,10 @@ const SettingsPage = () => {
                     <div className="px-3.5 pb-3.5">
                       <p className="text-micro text-muted-foreground mb-2">WHO ARE YOU? — Drives metaphors & examples</p>
                       <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto scrollbar-none">
+                        <button onClick={() => { updateContext({ teaching_identity: "" }); setTeachingSelection("identity", ""); localStorage.removeItem("edu_user_role"); setRole(""); }}
+                          className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${!ctx.teaching_identity ? "bg-destructive/10 border-destructive/30 text-destructive" : "bg-muted/30 border-border/40 text-muted-foreground"}`}>
+                          🚫 None
+                        </button>
                         {IDENTITIES.map(id => (
                           <button key={id.id} onClick={() => {
                             updateContext({ teaching_identity: id.id });
@@ -643,6 +647,10 @@ const SettingsPage = () => {
                         <div className="px-3.5 pb-3.5">
                           <p className="text-micro text-muted-foreground mb-2">WHY ARE YOU LEARNING? — Drives priorities</p>
                           <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto scrollbar-none">
+                            <button onClick={() => { setTeachingSelection("mission", ""); updateContext({ teaching_mission: "" }); }}
+                              className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${!currentMotive ? "bg-destructive/10 border-destructive/30 text-destructive" : "bg-muted/30 border-border/40 text-muted-foreground"}`}>
+                              🚫 None
+                            </button>
                             {getAllOptions("mission").map((opt: any) => (
                               <button key={opt.id} onClick={() => {
                                 setTeachingSelection("mission", opt.id);
@@ -703,6 +711,10 @@ const SettingsPage = () => {
                         <div className="px-3.5 pb-3.5">
                           <p className="text-micro text-muted-foreground mb-2">HOW SHOULD AGNI TEACH? — Drives voice & style</p>
                           <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto scrollbar-none">
+                            <button onClick={() => { setTeachingSelection("vibe", ""); updateContext({ teaching_vibe: "" }); const updated = savePersona({ vibe: "" }); setPersonaState(updated); }}
+                              className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${!currentVibe ? "bg-destructive/10 border-destructive/30 text-destructive" : "bg-muted/30 border-border/40 text-muted-foreground"}`}>
+                              🚫 None
+                            </button>
                             {getAllOptions("vibe").map((opt: any) => (
                               <button key={opt.id} onClick={() => {
                                 setTeachingSelection("vibe", opt.id);
@@ -764,6 +776,10 @@ const SettingsPage = () => {
                         <div className="px-3.5 pb-3.5">
                           <p className="text-micro text-muted-foreground mb-2">HOW DEEP? — Drives complexity & depth</p>
                           <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto scrollbar-none">
+                            <button onClick={() => { setTeachingSelection("brain", ""); updateContext({ teaching_brain: "" }); const updated = savePersona({ preferredDepth: "normal" as any }); setPersonaState(updated); }}
+                              className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${!currentBrain ? "bg-destructive/10 border-destructive/30 text-destructive" : "bg-muted/30 border-border/40 text-muted-foreground"}`}>
+                              🚫 None
+                            </button>
                             {getAllOptions("brain").map((opt: any) => (
                               <button key={opt.id} onClick={() => {
                                 setTeachingSelection("brain", opt.id);
