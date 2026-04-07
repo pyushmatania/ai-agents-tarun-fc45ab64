@@ -775,23 +775,91 @@ const CuriosityPage = () => {
                       <div className="flex items-center gap-1.5">
                         <Globe size={12} className="text-agni-blue" />
                         <span className="text-[10px] font-black text-muted-foreground tracking-wider">YOUR FEED</span>
+                        {lastFetchTime && (
+                          <span className="text-[8px] font-bold text-muted-foreground/40 ml-1">
+                            • {(() => {
+                              const diff = Date.now() - new Date(lastFetchTime).getTime();
+                              const mins = Math.floor(diff / 60000);
+                              if (mins < 1) return "just now";
+                              if (mins < 60) return `${mins}m ago`;
+                              const hrs = Math.floor(mins / 60);
+                              if (hrs < 24) return `${hrs}h ago`;
+                              return `${Math.floor(hrs / 24)}d ago`;
+                            })()}
+                          </span>
+                        )}
                       </div>
-                      <motion.button
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => fetchFeed(false)}
-                        disabled={feedLoading}
-                        className="flex items-center gap-1 text-[9px] font-bold text-agni-blue bg-agni-blue/10 px-2.5 py-1.5 rounded-full"
-                      >
-                        {feedLoading ? <Loader2 size={10} className="animate-spin" /> : <RefreshCw size={10} />}
-                        {feedLoading ? "Loading..." : "Refresh"}
-                      </motion.button>
+                      <div className="flex items-center gap-1.5">
+                        <motion.button
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => setShowFilters(!showFilters)}
+                          className={`flex items-center gap-1 text-[9px] font-bold px-2 py-1.5 rounded-full transition-all ${
+                            showFilters ? "bg-agni-gold/15 text-agni-gold" : "bg-muted/20 text-muted-foreground"
+                          }`}
+                        >
+                          <Filter size={9} />
+                          Filters
+                        </motion.button>
+                        <motion.button
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => fetchFeed(false)}
+                          disabled={feedLoading}
+                          className="flex items-center gap-1 text-[9px] font-bold text-agni-blue bg-agni-blue/10 px-2.5 py-1.5 rounded-full"
+                        >
+                          {feedLoading ? <Loader2 size={10} className="animate-spin" /> : <RefreshCw size={10} />}
+                          {feedLoading ? "Loading..." : "Refresh"}
+                        </motion.button>
+                      </div>
                     </div>
+
+                    {/* Advanced filters */}
+                    <AnimatePresence>
+                      {showFilters && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden mb-2"
+                        >
+                          <div className="bg-card/50 border border-border/20 rounded-2xl p-3 space-y-2.5">
+                            {/* Sort */}
+                            <div>
+                              <span className="text-[8px] font-black text-muted-foreground uppercase tracking-wider">Sort by</span>
+                              <div className="flex gap-1.5 mt-1">
+                                {SORT_OPTIONS.map(s => (
+                                  <button key={s.id} onClick={() => setSortBy(s.id)}
+                                    className={`text-[9px] font-bold px-2.5 py-1 rounded-full transition-all ${
+                                      sortBy === s.id ? "bg-agni-blue/15 text-agni-blue border border-agni-blue/30" : "bg-muted/20 text-muted-foreground border border-transparent"
+                                    }`}
+                                  >{s.label}</button>
+                                ))}
+                              </div>
+                            </div>
+                            {/* Date */}
+                            <div>
+                              <span className="text-[8px] font-black text-muted-foreground uppercase tracking-wider">Time period</span>
+                              <div className="flex gap-1.5 mt-1">
+                                {DATE_FILTERS.map(d => (
+                                  <button key={d.id} onClick={() => setDateFilter(d.id)}
+                                    className={`text-[9px] font-bold px-2.5 py-1 rounded-full transition-all ${
+                                      dateFilter === d.id ? "bg-agni-orange/15 text-agni-orange border border-agni-orange/30" : "bg-muted/20 text-muted-foreground border border-transparent"
+                                    }`}
+                                  >{d.label}</button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
                     {/* Content type filters */}
                     <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
                       {FEED_FILTERS.map((f) => {
                         const Icon = f.icon;
                         const isActive = feedFilter === f.id;
-                        const count = f.id === "all" ? feedItems.length : feedItems.filter(item => {
+                        const baseItems = activeSource ? feedItems.filter(item => item.sourceName === activeSource) : feedItems;
+                        const count = f.id === "all" ? baseItems.length : baseItems.filter(item => {
                           const meta = getContentMeta(item.url);
                           if (f.id === "youtube") return meta.type === "youtube" || meta.type === "instagram";
                           if (f.id === "article") return meta.type === "article";
