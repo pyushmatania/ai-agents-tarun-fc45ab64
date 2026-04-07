@@ -936,7 +936,10 @@ const CuriosityPage = () => {
                                 className={`p-1.5 rounded-full ${isSaved ? "text-agni-gold" : "text-muted-foreground/40"}`}>
                                 <Bookmark size={11} className={isSaved ? "fill-agni-gold" : ""} />
                               </motion.button>
-                            </div>
+                              <motion.button whileTap={{ scale: 0.8 }} onClick={() => shareItem(item)}
+                                className="p-1.5 rounded-full text-muted-foreground/40">
+                                <Share2 size={11} />
+                              </motion.button>
                             {/* 🧠 AI Learn Button */}
                             <motion.button
                               whileTap={{ scale: 0.9 }}
