@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import PageTransition, { FadeIn } from "@/components/PageTransition";
-import { ArrowRight, RefreshCw, Loader2, Sparkles, Zap, Copy, Check, Diamond, User, Heart, Flame, ExternalLink, Star } from "lucide-react";
+import { ArrowRight, RefreshCw, Loader2, Sparkles, Zap, Copy, Check, User, Heart, Flame, ExternalLink, Star } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,10 +10,10 @@ import Agni from "@/components/Agni";
 import { useGamification } from "@/hooks/useGamification";
 
 const CURIOSITY = [
-  { id: "industry", label: "Your Industry", emoji: "🏭", desc: "AI agents in semiconductor & manufacturing", query: "AI agents semiconductor manufacturing India 2026 latest", color: "#FF9600", bgGrad: "linear-gradient(135deg, #FF9600, #FF6B00)" },
-  { id: "general", label: "General", emoji: "🌍", desc: "What people are building with AI agents", query: "amazing AI agent projects people built 2026 showcase", color: "#CE82FF", bgGrad: "linear-gradient(135deg, #CE82FF, #A855F7)" },
-  { id: "crazy", label: "Crazy Future", emoji: "🤯", desc: "Mind-bending futuristic agent apps", query: "most crazy futuristic AI agent applications autonomous 2026", color: "#FF4B91", bgGrad: "linear-gradient(135deg, #FF4B91, #FF1A6D)" },
-  { id: "daily", label: "Daily Work", emoji: "💼", desc: "Agents for daily productivity", query: "AI agents automate daily office work productivity examples 2026", color: "#58CC02", bgGrad: "linear-gradient(135deg, #58CC02, #45A800)" },
+  { id: "industry", label: "Your Industry", emoji: "🏭", desc: "AI agents in semiconductor & manufacturing", query: "AI agents semiconductor manufacturing India 2026 latest", gradient: "linear-gradient(135deg, #FF9600 0%, #FFB340 50%, #E08500 100%)", color: "#FF9600", shadow: "#CC7A00" },
+  { id: "general", label: "General", emoji: "🌍", desc: "What people are building with AI agents", query: "amazing AI agent projects people built 2026 showcase", gradient: "linear-gradient(135deg, #CE82FF 0%, #DDA0FF 50%, #A855F7 100%)", color: "#CE82FF", shadow: "#9333EA" },
+  { id: "crazy", label: "Crazy Future", emoji: "🤯", desc: "Mind-bending futuristic agent apps", query: "most crazy futuristic AI agent applications autonomous 2026", gradient: "linear-gradient(135deg, #FF4B91 0%, #FF70AB 50%, #E0357A 100%)", color: "#FF4B91", shadow: "#CC2D6A" },
+  { id: "daily", label: "Daily Work", emoji: "💼", desc: "Agents for daily productivity", query: "AI agents automate daily office work productivity examples 2026", gradient: "linear-gradient(135deg, #58CC02 0%, #6EE718 50%, #45A800 100%)", color: "#58CC02", shadow: "#3D9400" },
 ];
 
 const SPARK_FACTS = [
@@ -69,22 +69,6 @@ const CuriosityPage = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background pb-24 relative overflow-hidden">
-        {/* Colorful background blobs */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-20 -right-20 w-[350px] h-[350px] rounded-full opacity-[0.08]"
-            style={{ background: "radial-gradient(circle, #CE82FF, transparent 70%)" }}
-          />
-          <div className="absolute top-[30%] -left-20 w-[300px] h-[300px] rounded-full opacity-[0.06]"
-            style={{ background: "radial-gradient(circle, #FF9600, transparent 70%)" }}
-          />
-          <div className="absolute bottom-[20%] -right-10 w-[250px] h-[250px] rounded-full opacity-[0.05]"
-            style={{ background: "radial-gradient(circle, #FF4B91, transparent 70%)" }}
-          />
-          <div className="absolute bottom-[5%] left-[10%] w-[200px] h-[200px] rounded-full opacity-[0.06]"
-            style={{ background: "radial-gradient(circle, #58CC02, transparent 70%)" }}
-          />
-        </div>
-
         <div className="max-w-md mx-auto relative z-10">
           {/* Top bar */}
           <FadeIn>
@@ -95,7 +79,7 @@ const CuriosityPage = () => {
                   <span className="text-[10px] font-black text-agni-orange">{stats.streak}</span>
                 </div>
                 <div className="flex items-center gap-1 bg-agni-gold/15 rounded-full px-2 py-1">
-                  <Diamond size={12} className="text-agni-gold" />
+                  <Zap size={12} className="text-agni-gold" />
                   <span className="text-[10px] font-black text-agni-gold">{stats.gems}</span>
                 </div>
               </div>
@@ -112,150 +96,109 @@ const CuriosityPage = () => {
             </div>
           </FadeIn>
 
-          {/* Hero banner — gradient */}
+          {/* Spark Fact — bold colored card */}
           <FadeIn delay={0.05}>
-            <div className="mx-4 rounded-3xl p-4 mb-4 relative overflow-hidden"
-              style={{ background: "linear-gradient(135deg, #CE82FF, #FF4B91)", boxShadow: "0 4px 0 0 #A855F780" }}
+            <div className="mx-4 rounded-3xl overflow-hidden mb-4"
+              style={{ boxShadow: "0 5px 0 0 #CC9F00" }}
             >
-              <div className="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-white/10" />
-              <div className="absolute left-[30%] -bottom-8 w-20 h-20 rounded-full bg-white/5" />
-              <div className="absolute right-[15%] top-[40%] w-8 h-8 rounded-full bg-white/5" />
-              <div className="flex items-center gap-3 relative z-10">
-                <Agni expression={loading ? "thinking" : results.length > 0 ? "excited" : "happy"} size={50} animate={true} />
-                <div className="flex-1">
-                  <p className="text-white/50 text-[7px] font-black tracking-[0.2em]">AI-POWERED</p>
-                  <h3 className="text-white font-black text-lg leading-tight">Curiosity Spark ✨</h3>
-                  <p className="text-white/60 text-[9px] font-bold mt-0.5">Hey {displayName} — discover something amazing!</p>
+              <div className="p-3 relative" style={{ background: "linear-gradient(135deg, #FFC800, #FF9600)" }}>
+                <div className="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-white/15" />
+                <div className="flex items-center gap-2 relative z-10">
+                  <motion.span className="text-xl"
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  >⚡</motion.span>
+                  <div>
+                    <p className="text-[10px] font-black text-white tracking-wider">SPARK FACT</p>
+                    <p className="text-[8px] font-bold text-white/60">Tap refresh for more</p>
+                  </div>
+                  <div className="ml-auto flex gap-1">
+                    <motion.button whileTap={{ scale: 0.85 }} onClick={handleCopyFact}
+                      className="w-7 h-7 rounded-xl bg-white/20 flex items-center justify-center"
+                    >
+                      {copied ? <Check size={11} className="text-white" /> : <Copy size={11} className="text-white/80" />}
+                    </motion.button>
+                    <motion.button whileTap={{ scale: 0.85, rotate: 180 }} onClick={() => setSparkIdx((sparkIdx + 1) % SPARK_FACTS.length)}
+                      className="w-7 h-7 rounded-xl bg-white/20 flex items-center justify-center"
+                    >
+                      <RefreshCw size={11} className="text-white/80" />
+                    </motion.button>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-card p-4 border-x-2 border-b-2 rounded-b-3xl" style={{ borderColor: "#FFC80030" }}>
+                <AnimatePresence mode="wait">
+                  <motion.p key={sparkIdx}
+                    initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                    className="text-[12px] text-foreground/85 leading-relaxed font-bold"
+                  >
+                    {SPARK_FACTS[sparkIdx]}
+                  </motion.p>
+                </AnimatePresence>
+                <div className="flex items-center gap-1 mt-2.5">
+                  {SPARK_FACTS.map((_, i) => (
+                    <div key={i} className="rounded-full transition-all duration-200" style={{
+                      width: i === sparkIdx ? 14 : 4, height: 4,
+                      background: i === sparkIdx ? "#FFC800" : "hsl(var(--muted-foreground) / 0.15)",
+                    }} />
+                  ))}
                 </div>
               </div>
             </div>
           </FadeIn>
 
-          {/* Spark Fact card — vibrant */}
-          <FadeIn delay={0.1}>
-            <div className="mx-4 bg-card rounded-3xl p-4 border-2 border-agni-gold/25 mb-4 relative overflow-hidden"
-              style={{ boxShadow: "0 3px 0 0 hsl(var(--agni-gold) / 0.2)" }}
-            >
-              <motion.div
-                className="absolute inset-0 opacity-[0.04]"
-                style={{ background: "linear-gradient(110deg, transparent 30%, #FFC800 50%, transparent 70%)" }}
-                animate={{ x: ["-100%", "200%"] }}
-                transition={{ duration: 3, repeat: Infinity, repeatDelay: 5 }}
-              />
-              <div className="flex items-center gap-2 mb-2.5 relative z-10">
-                <motion.div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: "linear-gradient(135deg, #FFC800, #FF9600)", boxShadow: "0 3px 0 0 #E0AC00" }}
-                  animate={{ rotate: [0, 5, -5, 0] }}
-                  transition={{ duration: 4, repeat: Infinity }}
-                >
-                  <Zap size={16} className="text-white" />
-                </motion.div>
-                <div>
-                  <h4 className="text-[9px] font-black text-agni-gold tracking-wider">⚡ SPARK FACT</h4>
-                  <p className="text-[7px] text-muted-foreground font-bold">Tap refresh for more</p>
-                </div>
-                <div className="ml-auto flex gap-1">
-                  <motion.button whileTap={{ scale: 0.85 }} onClick={handleCopyFact}
-                    className="w-7 h-7 rounded-xl bg-muted/40 flex items-center justify-center border border-border/20"
-                  >
-                    {copied ? <Check size={10} className="text-agni-green" /> : <Copy size={10} className="text-muted-foreground" />}
-                  </motion.button>
-                  <motion.button whileTap={{ scale: 0.85, rotate: 180 }} onClick={() => setSparkIdx((sparkIdx + 1) % SPARK_FACTS.length)}
-                    className="w-7 h-7 rounded-xl bg-muted/40 flex items-center justify-center border border-border/20"
-                  >
-                    <RefreshCw size={10} className="text-muted-foreground" />
-                  </motion.button>
-                </div>
-              </div>
-              <AnimatePresence mode="wait">
-                <motion.p
-                  key={sparkIdx}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  className="text-[11px] text-foreground/80 leading-relaxed font-semibold relative z-10"
-                >
-                  {SPARK_FACTS[sparkIdx]}
-                </motion.p>
-              </AnimatePresence>
-              {/* Dots */}
-              <div className="flex items-center gap-1 mt-2.5 relative z-10">
-                {SPARK_FACTS.map((_, i) => (
-                  <div key={i} className="rounded-full transition-all duration-200" style={{
-                    width: i === sparkIdx ? 14 : 4,
-                    height: 4,
-                    background: i === sparkIdx ? "#FFC800" : "hsl(var(--muted-foreground) / 0.15)",
-                  }} />
-                ))}
-              </div>
-            </div>
-          </FadeIn>
-
-          {/* Discovery Categories — colorful full-width cards */}
+          {/* Discovery Dimensions — vivid gradient cards */}
           <div className="px-4 space-y-3">
             <div className="flex items-center gap-1.5 mb-1">
-              <Sparkles size={12} className="text-agni-purple" />
+              <Sparkles size={13} className="text-agni-purple" />
               <p className="text-[10px] font-black text-muted-foreground tracking-wider">EXPLORE DIMENSIONS</p>
             </div>
 
             {CURIOSITY.map((cat, i) => {
               const isActive = activeId === cat.id;
               return (
-                <motion.div
-                  key={cat.id}
+                <motion.div key={cat.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.15 + i * 0.07, type: "spring", stiffness: 200 }}
+                  transition={{ delay: 0.12 + i * 0.07, type: "spring", stiffness: 200 }}
                 >
-                  {/* Category card — colorful with gradient when active */}
                   <motion.button
-                    whileTap={{ scale: 0.97, y: 3 }}
+                    whileTap={{ scale: 0.96, y: 4 }}
                     onClick={() => fetchCuriosity(cat)}
-                    className="w-full rounded-3xl p-4 text-left relative overflow-hidden transition-all"
+                    className="w-full rounded-3xl p-5 text-left relative overflow-hidden"
                     style={{
-                      background: isActive ? cat.bgGrad : "hsl(var(--card))",
-                      border: isActive ? "none" : "2px solid hsl(var(--border) / 0.3)",
+                      background: cat.gradient,
                       boxShadow: isActive
-                        ? `0 5px 0 0 ${cat.color}80`
-                        : "0 3px 0 0 hsl(var(--border) / 0.15)",
+                        ? `0 6px 0 0 ${cat.shadow}, 0 0 25px ${cat.color}35`
+                        : `0 5px 0 0 ${cat.shadow}`,
                     }}
                   >
-                    {/* Decorative circles */}
-                    <div className="absolute -right-6 -top-6 w-20 h-20 rounded-full" style={{ background: isActive ? "rgba(255,255,255,0.12)" : `${cat.color}08` }} />
-                    <div className="absolute right-8 bottom-0 w-12 h-12 rounded-full" style={{ background: isActive ? "rgba(255,255,255,0.06)" : `${cat.color}05` }} />
+                    {/* Decorative shapes */}
+                    <div className="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-white/10" />
+                    <div className="absolute right-10 bottom-0 w-14 h-14 rounded-full bg-black/5" />
+                    <div className="absolute left-[30%] -bottom-4 w-10 h-10 rounded-full bg-white/5" />
 
-                    <div className="flex items-center gap-3 relative z-10">
+                    <div className="flex items-center gap-3.5 relative z-10">
                       <motion.div
-                        className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0"
-                        style={{
-                          background: isActive ? "rgba(255,255,255,0.2)" : `${cat.color}18`,
-                          boxShadow: isActive ? "0 3px 0 0 rgba(0,0,0,0.15)" : `0 2px 0 0 ${cat.color}15`,
-                        }}
+                        className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-3xl shrink-0"
+                        style={{ boxShadow: "0 3px 0 0 rgba(0,0,0,0.1)" }}
                         animate={isActive && loading ? { rotate: [0, 10, -10, 0] } : {}}
                         transition={{ duration: 0.6, repeat: Infinity }}
                       >
                         {isActive && loading ? (
-                          <Loader2 size={22} className="animate-spin text-white" />
-                        ) : (
-                          cat.emoji
-                        )}
+                          <Loader2 size={24} className="animate-spin text-white" />
+                        ) : cat.emoji}
                       </motion.div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-black" style={{ color: isActive ? "#fff" : "hsl(var(--foreground))" }}>
-                          {cat.label}
-                        </p>
-                        <p className="text-[9px] font-semibold" style={{ color: isActive ? "rgba(255,255,255,0.7)" : "hsl(var(--muted-foreground))" }}>
-                          {cat.desc}
-                        </p>
+                        <p className="text-[15px] font-black text-white">{cat.label}</p>
+                        <p className="text-[10px] font-bold text-white/70">{cat.desc}</p>
                       </div>
                       <motion.div
-                        className="w-8 h-8 rounded-xl flex items-center justify-center"
-                        style={{ background: isActive ? "rgba(255,255,255,0.2)" : `${cat.color}12` }}
+                        className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center"
                         animate={isActive && !loading ? { x: [0, 3, 0] } : {}}
                         transition={{ duration: 1.5, repeat: Infinity }}
                       >
-                        <ArrowRight size={14} style={{ color: isActive ? "#fff" : cat.color }} />
+                        <ArrowRight size={16} className="text-white" />
                       </motion.div>
                     </div>
                   </motion.button>
@@ -289,9 +232,8 @@ const CuriosityPage = () => {
 
                           {!loading && results.length > 0 && (
                             <>
-                              {/* Category result header */}
                               <div className="rounded-2xl p-3 relative overflow-hidden"
-                                style={{ background: cat.bgGrad, boxShadow: `0 3px 0 0 ${cat.color}80` }}
+                                style={{ background: cat.gradient, boxShadow: `0 3px 0 0 ${cat.shadow}` }}
                               >
                                 <div className="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-white/10" />
                                 <div className="flex items-center gap-2 relative z-10">
@@ -304,31 +246,21 @@ const CuriosityPage = () => {
                                 </div>
                               </div>
 
-                              {/* Result items */}
                               {results.map((item: any, j: number) => (
-                                <motion.a
-                                  key={j}
-                                  href={item.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  initial={{ opacity: 0, x: -15 }}
-                                  animate={{ opacity: 1, x: 0 }}
+                                <motion.a key={j} href={item.url} target="_blank" rel="noopener noreferrer"
+                                  initial={{ opacity: 0, x: -15 }} animate={{ opacity: 1, x: 0 }}
                                   transition={{ delay: j * 0.06, type: "spring", stiffness: 200 }}
-                                  className="flex items-center gap-2.5 bg-card rounded-2xl p-3 border-2 border-border/30 active:scale-[0.98] transition-all"
-                                  style={{ boxShadow: `0 2px 0 0 ${cat.color}12` }}
+                                  className="flex items-center gap-2.5 bg-card rounded-2xl p-3 border-2 active:scale-[0.98] transition-all"
+                                  style={{ borderColor: `${cat.color}25`, boxShadow: `0 2px 0 0 ${cat.color}12` }}
                                 >
                                   <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm shrink-0"
-                                    style={{ background: `${cat.color}15` }}
-                                  >
-                                    {typeIcons[item.type] || "🔗"}
-                                  </div>
+                                    style={{ background: `${cat.color}20` }}
+                                  >{typeIcons[item.type] || "🔗"}</div>
                                   <div className="flex-1 min-w-0">
                                     <p className="text-[11px] font-extrabold text-foreground truncate">{item.title}</p>
                                     <p className="text-[8px] text-muted-foreground truncate">{item.desc}</p>
                                   </div>
-                                  <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: `${cat.color}10` }}>
-                                    <ExternalLink size={10} style={{ color: cat.color }} />
-                                  </div>
+                                  <ExternalLink size={10} style={{ color: cat.color }} />
                                 </motion.a>
                               ))}
                             </>
@@ -342,7 +274,6 @@ const CuriosityPage = () => {
             })}
           </div>
         </div>
-
         <BottomNav />
       </div>
     </PageTransition>
