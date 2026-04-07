@@ -1,265 +1,535 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
-import PageTransition, { FadeIn, StaggerContainer, StaggerItem } from "@/components/PageTransition";
-import { ArrowRight, ChevronLeft, Bookmark, BookmarkCheck, CheckCircle2, Users, Clock, Award, Filter } from "lucide-react";
-import FloatingShapes from "@/components/illustrations/FloatingShapes";
+import PageTransition, { FadeIn } from "@/components/PageTransition";
+import { CheckCircle2, Lock, Star, Crown, Diamond, Heart, Flame, ChevronRight, Trophy, Target, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import heroCourses from "@/assets/hero-courses.png";
+import Agni from "@/components/Agni";
+import type { AgniExpression } from "@/components/Agni";
 
 const MODULES = [
-  { id:"found", title:"Foundations", sub:"START HERE", icon:"🧬", color: "from-violet-600 to-purple-800", lessons:[
-    {id:"f1",t:"What is an AI Agent?",xp:50,topic:"Perceive-Reason-Act-Learn loop, ReAct pattern"},
-    {id:"f2",t:"LLMs as the Brain",xp:50,topic:"GPT-4o, Claude, Gemini as reasoning engines"},
-    {id:"f3",t:"Tools & Functions",xp:60,topic:"Function calling, how LLM decides when/what to call"},
-    {id:"f4",t:"Memory & RAG",xp:60,topic:"Short-term, long-term (vector DBs), RAG"},
-    {id:"f5",t:"Planning & Reasoning",xp:70,topic:"Chain-of-Thought, Tree-of-Thought, ReAct"},
-    {id:"f6",t:"Build: Research Agent",xp:100,topic:"Python agent: search, summarize, write briefing"},
+  { id:"found", title:"Foundations", sub:"START HERE", icon:"🧬", color: "bg-agni-green", hex: "#58CC02", lessons:[
+    {id:"f1",t:"What is an AI Agent?",xp:50},
+    {id:"f2",t:"LLMs as the Brain",xp:50},
+    {id:"f3",t:"Tools & Functions",xp:60},
+    {id:"f4",t:"Memory & RAG",xp:60},
+    {id:"f5",t:"Planning & Reasoning",xp:70},
+    {id:"f6",t:"Build: Research Agent",xp:100,checkpoint:true},
   ]},
-  { id:"frame", title:"Frameworks", sub:"PICK YOUR WEAPON", icon:"⚔️", color: "from-orange-500 to-amber-700", lessons:[
-    {id:"w1",t:"LangGraph",xp:70,topic:"Directed graphs, checkpointing, LangSmith"},
-    {id:"w2",t:"CrewAI",xp:60,topic:"Role+Backstory+Goal, Crews & Flows"},
-    {id:"w3",t:"AutoGen & SDKs",xp:70,topic:"AutoGen debate, OpenAI SDK, Google ADK"},
-    {id:"w4",t:"MCP Protocol",xp:80,topic:"USB-C of AI, 12K+ servers"},
-    {id:"w5",t:"MetaGPT & More",xp:60,topic:"MetaGPT SOPs, OpenAgents MCP+A2A"},
-    {id:"w6",t:"Build: FW Battle",xp:120,topic:"Same agent in 3 frameworks"},
+  { id:"frame", title:"Frameworks", sub:"PICK YOUR WEAPON", icon:"⚔️", color: "bg-agni-orange", hex: "#FF9600", lessons:[
+    {id:"w1",t:"LangGraph",xp:70},
+    {id:"w2",t:"CrewAI",xp:60},
+    {id:"w3",t:"AutoGen & SDKs",xp:70},
+    {id:"w4",t:"MCP Protocol",xp:80},
+    {id:"w5",t:"MetaGPT & More",xp:60},
+    {id:"w6",t:"Build: FW Battle",xp:120,checkpoint:true},
   ]},
-  { id:"multi", title:"Multi-Agent", sub:"BUILD YOUR AI ORG", icon:"🏢", color: "from-slate-600 to-slate-800", lessons:[
-    {id:"m1",t:"Communication",xp:70,topic:"Shared State, Message Passing, Pub/Sub"},
-    {id:"m2",t:"AI Organization",xp:80,topic:"CEO, CMO, CTO, CFO as agents"},
-    {id:"m3",t:"Orchestration",xp:80,topic:"Sequential, Parallel, Consensus"},
-    {id:"m4",t:"Cost & Safety",xp:70,topic:"Tiered models, circuit breakers, guardrails"},
-    {id:"m5",t:"Build: AI Startup",xp:150,topic:"6-agent startup team"},
+  { id:"multi", title:"Multi-Agent", sub:"BUILD YOUR AI ORG", icon:"🏢", color: "bg-agni-blue", hex: "#1CB0F6", lessons:[
+    {id:"m1",t:"Communication",xp:70},
+    {id:"m2",t:"AI Organization",xp:80},
+    {id:"m3",t:"Orchestration",xp:80},
+    {id:"m4",t:"Cost & Safety",xp:70},
+    {id:"m5",t:"Build: AI Startup",xp:150,checkpoint:true},
   ]},
-  { id:"real", title:"Real World", sub:"SHIP IT", icon:"🚀", color: "from-purple-700 to-indigo-900", lessons:[
-    {id:"r1",t:"Enterprise 2026",xp:70,topic:"Agentforce, Copilot, Gartner 40%"},
-    {id:"r2",t:"Semiconductor AI",xp:90,topic:"HCL-Foxconn OSAT yield agents"},
-    {id:"r3",t:"Solo Stack",xp:80,topic:"1 person + 10 agents = company"},
-    {id:"r4",t:"Crazy Mode",xp:100,topic:"Swarms, self-improving, digital twins"},
-    {id:"r5",t:"Final Boss",xp:200,topic:"10+ agent autonomous company"},
+  { id:"real", title:"Real World", sub:"SHIP IT", icon:"🚀", color: "bg-agni-purple", hex: "#CE82FF", lessons:[
+    {id:"r1",t:"Enterprise 2026",xp:70},
+    {id:"r2",t:"Semiconductor AI",xp:90},
+    {id:"r3",t:"Solo Stack",xp:80},
+    {id:"r4",t:"Crazy Mode",xp:100},
+    {id:"r5",t:"Final Boss",xp:200,checkpoint:true},
   ]}
 ];
 
+const MILESTONES = [
+  { at: 3, label: "🔓 Tools Unlocked", color: "text-agni-blue" },
+  { at: 6, label: "🏆 Foundation Master", color: "text-agni-gold" },
+  { at: 12, label: "⚔️ Framework Warrior", color: "text-agni-orange" },
+  { at: 17, label: "🏢 Architect", color: "text-agni-blue" },
+  { at: 22, label: "🚀 Agent Master", color: "text-agni-purple" },
+];
+
+const getSCurveX = (index: number): number => {
+  const pattern = [0, 40, 80, 120, 80, 40];
+  return pattern[index % pattern.length];
+};
+
+/* Floating particle for bg decoration */
+const FloatingOrb = ({ delay, x, y, size, color }: { delay: number; x: string; y: string; size: number; color: string }) => (
+  <motion.div
+    className="absolute rounded-full pointer-events-none"
+    style={{ left: x, top: y, width: size, height: size, background: color }}
+    animate={{
+      y: [0, -15, 0, 10, 0],
+      x: [0, 8, -5, 3, 0],
+      opacity: [0.15, 0.3, 0.15],
+      scale: [1, 1.1, 0.95, 1],
+    }}
+    transition={{ duration: 8 + delay, repeat: Infinity, delay, ease: "easeInOut" }}
+  />
+);
+
 const CoursesPage = () => {
   const navigate = useNavigate();
-  const [selectedModule, setSelectedModule] = useState<string | null>(null);
-  const [expandedModule, setExpandedModule] = useState<string | null>(null);
-  const [showBookmarked, setShowBookmarked] = useState(false);
   const done: string[] = JSON.parse(localStorage.getItem("adojo_done") || "[]");
-  const bookmarks: string[] = JSON.parse(localStorage.getItem("adojo_bookmarks") || "[]");
+  const xp = parseInt(localStorage.getItem("adojo_xp") || "0");
+  const [activeModule, setActiveModule] = useState(0);
 
-  const toggleBookmark = (lid: string) => {
-    const bm = bookmarks.includes(lid) ? bookmarks.filter(x => x !== lid) : [...bookmarks, lid];
-    localStorage.setItem("adojo_bookmarks", JSON.stringify(bm));
-    window.location.reload();
-  };
-
-  const subjects = MODULES.map(m => m.title);
-  let filtered = selectedModule ? MODULES.filter(m => m.title === selectedModule) : MODULES;
   const totalLessons = MODULES.reduce((a, m) => a + m.lessons.length, 0);
-  const totalXP = MODULES.reduce((a, m) => a + m.lessons.reduce((b, l) => b + l.xp, 0), 0);
+  const totalDone = done.length;
+  const overallPct = Math.round((totalDone / totalLessons) * 100);
+  const mod = MODULES[activeModule];
+  const modDone = mod.lessons.filter(l => done.includes(l.id)).length;
+  const modPct = Math.round((modDone / mod.lessons.length) * 100);
 
-  // Get all bookmarked lessons
-  const bookmarkedLessons = MODULES.flatMap(m => m.lessons.filter(l => bookmarks.includes(l.id)).map(l => ({ ...l, moduleTitle: m.title, moduleIcon: m.icon })));
+  const nextMilestone = useMemo(() => MILESTONES.find(m => totalDone < m.at), [totalDone]);
+  const lastMilestone = useMemo(() => [...MILESTONES].reverse().find(m => totalDone >= m.at), [totalDone]);
+
+  const agniExpr: AgniExpression = modDone === mod.lessons.length ? "celebrating" : modDone > 0 ? "happy" : "default";
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-background pb-24 relative">
-        <FloatingShapes />
-        <div className="max-w-md mx-auto px-4 pt-5 relative z-10">
-          {/* Top bar */}
+      <div className="min-h-screen bg-background pb-24 relative overflow-hidden">
+        {/* ===== Background decorations ===== */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* S-curve path — more visible */}
+          <svg className="absolute top-[220px] left-1/2 -translate-x-1/2 w-[300px] h-[900px] opacity-[0.12]" viewBox="0 0 300 900">
+            <path d="M150 0 Q30 120 150 240 Q270 360 150 480 Q30 600 150 720 Q270 840 150 900" fill="none" stroke="currentColor" strokeWidth="50" className="text-foreground" />
+          </svg>
+
+          {/* Grid dots */}
+          <div className="absolute inset-0 opacity-[0.07]" style={{
+            backgroundImage: "radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+          }} />
+
+          {/* Gradient glow top — module-colored */}
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-[500px] h-[250px] rounded-full opacity-[0.15]"
+            style={{ background: `radial-gradient(ellipse, ${mod.hex}, transparent 70%)` }}
+          />
+
+          {/* Gradient glow bottom */}
+          <div className="absolute bottom-20 left-1/4 w-[350px] h-[200px] rounded-full opacity-[0.08]"
+            style={{ background: `radial-gradient(ellipse, ${mod.hex}, transparent 70%)` }}
+          />
+
+          {/* Floating orbs — much more visible */}
+          <FloatingOrb delay={0} x="8%" y="12%" size={80} color={`${mod.hex}40`} />
+          <FloatingOrb delay={2} x="82%" y="22%" size={55} color="hsla(100,95%,40%,0.2)" />
+          <FloatingOrb delay={4} x="3%" y="50%" size={70} color="hsla(199,92%,54%,0.15)" />
+          <FloatingOrb delay={1} x="88%" y="60%" size={50} color="hsla(270,100%,75%,0.18)" />
+          <FloatingOrb delay={3} x="45%" y="78%" size={60} color="hsla(46,100%,49%,0.15)" />
+          <FloatingOrb delay={5} x="20%" y="38%" size={45} color={`${mod.hex}30`} />
+
+          {/* Diagonal accent lines */}
+          <div className="absolute top-[280px] -left-10 w-[250px] h-[2px] rotate-[35deg] opacity-[0.15]"
+            style={{ background: `linear-gradient(90deg, transparent, ${mod.hex}, transparent)` }}
+          />
+          <div className="absolute top-[480px] -right-10 w-[220px] h-[2px] -rotate-[25deg] opacity-[0.15]"
+            style={{ background: `linear-gradient(90deg, transparent, ${mod.hex}, transparent)` }}
+          />
+          <div className="absolute top-[700px] -left-5 w-[180px] h-[2px] rotate-[20deg] opacity-[0.12]"
+            style={{ background: `linear-gradient(90deg, transparent, ${mod.hex}, transparent)` }}
+          />
+
+          {/* Hexagon decorations */}
+          <svg className="absolute top-[150px] right-[10%] w-16 h-16 opacity-[0.08]" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="none" stroke={mod.hex} strokeWidth="2" />
+          </svg>
+          <svg className="absolute top-[450px] left-[5%] w-12 h-12 opacity-[0.06]" viewBox="0 0 100 100">
+            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="none" stroke={mod.hex} strokeWidth="2" />
+          </svg>
+
+          {/* Circuit-style corner lines */}
+          <svg className="absolute top-[60px] right-0 w-[120px] h-[120px] opacity-[0.08]" viewBox="0 0 120 120">
+            <path d="M120,0 L120,40 L80,40 L80,80 L40,80 L40,120" fill="none" stroke={mod.hex} strokeWidth="1.5" strokeDasharray="4 4" />
+          </svg>
+          <svg className="absolute bottom-[120px] left-0 w-[100px] h-[100px] opacity-[0.08]" viewBox="0 0 100 100">
+            <path d="M0,0 L0,35 L35,35 L35,70 L70,70 L70,100" fill="none" stroke={mod.hex} strokeWidth="1.5" strokeDasharray="4 4" />
+          </svg>
+        </div>
+
+        <div className="max-w-md mx-auto relative z-10">
+          
+          {/* Top stats bar */}
           <FadeIn>
-            <div className="flex items-center gap-3 mb-4">
-              <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate("/")} className="w-9 h-9 rounded-xl glass flex items-center justify-center border border-border/50">
-                <ChevronLeft size={16} className="text-foreground" />
-              </motion.button>
-              <div className="flex-1">
-                <h2 className="text-base font-display font-bold text-foreground">Courses</h2>
-                <p className="text-[9px] text-muted-foreground">{done.length}/{totalLessons} completed</p>
-              </div>
+            <div className="px-4 pt-4 pb-2 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => setShowBookmarked(!showBookmarked)}
-                  className={`flex items-center gap-1 rounded-lg px-2 py-1 border transition-all ${showBookmarked ? "bg-secondary/15 border-secondary/30" : "bg-card border-border/50"}`}
+                <div className="flex items-center gap-1 bg-agni-orange/15 rounded-full px-2 py-1">
+                  <Flame size={12} className="text-agni-orange" />
+                  <span className="text-[10px] font-black text-agni-orange">{Math.min(done.length, 7)}</span>
+                </div>
+                <div className="flex items-center gap-1 bg-agni-gold/15 rounded-full px-2 py-1">
+                  <Diamond size={12} className="text-agni-gold" />
+                  <span className="text-[10px] font-black text-agni-gold">{xp * 2}</span>
+                </div>
+              </div>
+              <h1 className="text-sm font-black text-foreground">Learn</h1>
+              <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1 bg-agni-pink/15 rounded-full px-2 py-1">
+                  <Heart size={12} className="text-agni-pink fill-agni-pink" />
+                  <span className="text-[10px] font-black text-agni-pink">5</span>
+                </div>
+              </div>
+            </div>
+          </FadeIn>
+
+          {/* Overall progress bar */}
+          <FadeIn>
+            <div className="px-4 mb-2">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[8px] font-black text-muted-foreground tracking-wider">OVERALL PROGRESS</span>
+                <span className="text-[9px] font-black text-agni-green">{totalDone}/{totalLessons} lessons</span>
+              </div>
+              <div className="h-1.5 bg-muted/20 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full rounded-full bg-gradient-to-r from-agni-green to-agni-blue"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${overallPct}%` }}
+                  transition={{ duration: 1 }}
+                />
+              </div>
+              {/* Milestone tracker */}
+              <div className="flex items-center justify-between mt-1.5">
+                {lastMilestone ? (
+                  <span className={`text-[8px] font-black ${lastMilestone.color}`}>{lastMilestone.label}</span>
+                ) : (
+                  <span className="text-[8px] font-bold text-muted-foreground/40">Start your journey!</span>
+                )}
+                {nextMilestone && (
+                  <span className="text-[8px] font-bold text-muted-foreground/50 flex items-center gap-0.5">
+                    <Target size={8} /> Next: {nextMilestone.at - totalDone} lessons to {nextMilestone.label.split(" ").slice(1).join(" ")}
+                  </span>
+                )}
+              </div>
+            </div>
+          </FadeIn>
+
+          {/* Module selector tabs */}
+          <FadeIn>
+            <div className="px-4 mb-3">
+              <div className="flex gap-1.5 bg-card rounded-2xl p-1.5 border border-border/30">
+                {MODULES.map((m, i) => {
+                  const mDone = m.lessons.filter(l => done.includes(l.id)).length;
+                  const isActive = i === activeModule;
+                  return (
+                    <motion.button
+                      key={m.id}
+                      whileTap={{ scale: 0.92 }}
+                      onClick={() => setActiveModule(i)}
+                      className={`flex-1 rounded-xl py-2 text-center transition-all relative ${
+                        isActive ? `${m.color} shadow-lg` : "hover:bg-muted/30"
+                      }`}
+                    >
+                      <span className="text-base block">{m.icon}</span>
+                      <span className={`text-[7px] font-black block mt-0.5 ${isActive ? "text-white" : "text-muted-foreground"}`}>
+                        {mDone}/{m.lessons.length}
+                      </span>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </div>
+          </FadeIn>
+
+          {/* Module banner */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={mod.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className={`mx-4 ${mod.color} rounded-3xl p-4 shadow-lg mb-4 relative overflow-hidden`}
+            >
+              {/* Decorative circles */}
+              <div className="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-white/5" />
+              <div className="absolute -right-2 bottom-0 w-14 h-14 rounded-full bg-white/5" />
+              <div className="absolute left-[30%] -bottom-6 w-24 h-24 rounded-full bg-white/[0.03]" />
+
+              <div className="flex items-center gap-3 relative z-10">
+                <motion.span
+                  className="text-4xl"
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
                 >
-                  <Bookmark size={10} className={showBookmarked ? "text-secondary" : "text-muted-foreground"} />
-                  <span className={`text-[10px] font-bold ${showBookmarked ? "text-secondary" : "text-muted-foreground"}`}>{bookmarks.length}</span>
-                </motion.button>
-                <div className="flex items-center gap-1 bg-primary/10 rounded-lg px-2 py-1">
-                  <Award size={10} className="text-primary" />
-                  <span className="text-[10px] font-bold text-primary">{totalXP} XP</span>
+                  {mod.icon}
+                </motion.span>
+                <div className="flex-1">
+                  <p className="text-white/50 text-[8px] font-black tracking-[0.2em]">{mod.sub}</p>
+                  <h3 className="text-white font-black text-lg leading-tight">{mod.title}</h3>
+                </div>
+                <div className="text-right">
+                  <p className="text-white font-black text-xl">{modPct}%</p>
+                  <p className="text-white/50 text-[8px] font-bold">{modDone}/{mod.lessons.length}</p>
                 </div>
               </div>
-            </div>
-          </FadeIn>
 
-          {/* Hero Illustration */}
-          <FadeIn delay={0.1}>
-            <div className="rounded-2xl mb-4 relative overflow-hidden">
-              <img
-                src={heroCourses}
-                alt="AI learning journey - climbing knowledge staircase"
-                className="w-full h-44 object-cover rounded-2xl"
-                width={800}
-                height={512}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent rounded-2xl" />
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                <p className="text-[10px] font-bold text-primary tracking-widest mb-0.5">AI AGENTS</p>
-                <h3 className="text-lg font-display font-bold text-foreground leading-tight">Mastery Path</h3>
-                <p className="text-[10px] text-muted-foreground mt-1">From zero to autonomous AI builder</p>
-                <div className="mt-2 flex items-center gap-2">
-                  <div className="flex-1 h-1.5 bg-muted/50 rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full bg-primary rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.round(done.length / totalLessons * 100)}%` }}
-                      transition={{ duration: 0.8, delay: 0.3 }}
-                    />
-                  </div>
-                  <span className="text-[10px] text-muted-foreground font-semibold">{Math.round(done.length / totalLessons * 100)}%</span>
-                </div>
+              {/* Progress bar */}
+              <div className="mt-3 h-2.5 bg-white/15 rounded-full overflow-hidden relative z-10">
+                <motion.div
+                  className="h-full bg-white/70 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${modPct}%` }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                />
               </div>
-            </div>
-          </FadeIn>
-
-          {/* Bookmarked Section */}
-          <AnimatePresence>
-            {showBookmarked && bookmarkedLessons.length > 0 && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden mb-4"
-              >
-                <div className="bg-card rounded-xl p-3 border border-secondary/20 shadow-card">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Bookmark size={12} className="text-secondary" />
-                    <h4 className="text-xs font-bold text-foreground">Bookmarked</h4>
-                  </div>
-                  <div className="space-y-1.5">
-                    {bookmarkedLessons.map((l) => (
-                      <button key={l.id} onClick={() => navigate(`/course/${l.id}`)}
-                        className="w-full flex items-center gap-2 bg-background/50 rounded-lg p-2 border border-border/30 text-left hover:border-secondary/30 transition-all">
-                        <span className="text-base">{l.moduleIcon}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[11px] font-semibold text-foreground truncate">{l.t}</p>
-                          <p className="text-[8px] text-muted-foreground">{l.moduleTitle}</p>
-                        </div>
-                        <span className="text-[8px] text-primary font-bold">{l.xp}XP</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            )}
+            </motion.div>
           </AnimatePresence>
 
-          {/* Filter chips */}
-          <FadeIn delay={0.15}>
-            <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 scrollbar-none">
-              <motion.button whileTap={{ scale: 0.95 }} onClick={() => setSelectedModule(null)}
-                className={`rounded-lg px-3 py-1.5 text-[11px] font-semibold whitespace-nowrap border transition-all ${!selectedModule ? "bg-primary/15 border-primary/30 text-primary" : "bg-card border-border/50 text-muted-foreground"}`}>
-                All
-              </motion.button>
-              {subjects.map(s => (
-                <motion.button key={s} whileTap={{ scale: 0.95 }} onClick={() => setSelectedModule(s === selectedModule ? null : s)}
-                  className={`rounded-lg px-3 py-1.5 text-[11px] font-semibold whitespace-nowrap border transition-all ${s === selectedModule ? "bg-primary/15 border-primary/30 text-primary" : "bg-card border-border/50 text-muted-foreground"}`}>
-                  {s}
-                </motion.button>
-              ))}
-            </div>
-          </FadeIn>
+          {/* Winding S-curve path */}
+          <div className="px-4 relative">
+            {/* SVG connector path */}
+            <svg className="absolute top-0 left-4 right-4 h-full pointer-events-none" style={{ width: "calc(100% - 32px)" }}>
+              {mod.lessons.map((_, i) => {
+                if (i === 0) return null;
+                const x1 = getSCurveX(i - 1) + 32;
+                const y1 = (i - 1) * 120 + 40;
+                const x2 = getSCurveX(i) + 32;
+                const y2 = i * 120 + 40;
+                const midY = (y1 + y2) / 2;
+                const isDone = done.includes(mod.lessons[i].id) || done.includes(mod.lessons[i - 1].id);
+                return (
+                  <path
+                    key={i}
+                    d={`M${x1},${y1} C${x1},${midY} ${x2},${midY} ${x2},${y2}`}
+                    fill="none"
+                    stroke={isDone ? mod.hex : "hsl(var(--muted))"}
+                    strokeWidth="3"
+                    strokeDasharray={isDone ? "none" : "6 6"}
+                    opacity={isDone ? 0.5 : 0.15}
+                  />
+                );
+              })}
+            </svg>
 
-          {/* Module cards */}
-          <StaggerContainer className="space-y-3">
-            {filtered.map((mod) => {
-              const mDone = mod.lessons.filter(l => done.includes(l.id)).length;
-              const mPct = Math.round(mDone / mod.lessons.length * 100);
-              const isExpanded = expandedModule === mod.id;
+            <div className="relative" style={{ paddingBottom: 20 }}>
+              {mod.lessons.map((lesson, i) => {
+                const isDone = done.includes(lesson.id);
+                const prevDone = i === 0 || done.includes(mod.lessons[i - 1].id);
+                const isNext = !isDone && prevDone;
+                const isLocked = !isDone && !isNext;
+                const isCheckpoint = (lesson as any).checkpoint;
+                const xOffset = getSCurveX(i);
+                const showTreasure = i === 2 && (isDone || isNext);
+                const showAgniPeek = i === Math.floor(mod.lessons.length / 2);
 
-              return (
-                <StaggerItem key={mod.id}>
-                  <div className="rounded-2xl overflow-hidden border border-white/5 shadow-card">
-                    <motion.button
-                      whileTap={{ scale: 0.99 }}
-                      onClick={() => setExpandedModule(isExpanded ? null : mod.id)}
-                      className={`w-full p-3.5 relative overflow-hidden text-left bg-gradient-to-r ${mod.color}`}
-                    >
-                      {mPct === 100 && (
-                        <div className="absolute top-3 right-3 flex items-center gap-1 bg-green-500/20 text-green-400 text-[10px] font-bold px-2 py-0.5 rounded-md">
-                          <CheckCircle2 size={10} /> Done
-                        </div>
-                      )}
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-xl">{mod.icon}</span>
-                        <div>
-                          <p className="text-[9px] font-bold text-white/40 tracking-widest">{mod.sub}</p>
-                          <h3 className="text-sm font-display font-bold text-white">{mod.title}</h3>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-[10px] text-white/50 font-medium">{mDone}/{mod.lessons.length} lessons</span>
-                        <span className="text-[10px] text-white/50 font-medium">{mod.lessons.reduce((a,l) => a + l.xp, 0)} XP</span>
-                        <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
-                          <div className="h-full bg-white/40 rounded-full transition-all" style={{ width: `${mPct}%` }} />
-                        </div>
-                        <motion.div animate={{ rotate: isExpanded ? 90 : 0 }} transition={{ duration: 0.2 }}>
-                          <ArrowRight size={12} className="text-white/50" />
-                        </motion.div>
-                      </div>
-                    </motion.button>
+                const globalIndex = MODULES.slice(0, activeModule).reduce((a, m) => a + m.lessons.length, 0) + i;
+                const milestone = MILESTONES.find(m => m.at === globalIndex + 1);
 
-                    <AnimatePresence>
-                      {isExpanded && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.25 }}
-                          className="overflow-hidden"
+                // Inline path decorations at specific positions
+                const INLINE_DECOR: Record<number, { emoji: string; label: string; bg: string; text: string; side: "left" | "right" }> = {
+                  1: { emoji: "💎", label: "+50 Gems", bg: "bg-agni-blue/15 border-agni-blue/30", text: "text-agni-blue", side: "right" },
+                  3: { emoji: "🔥", label: "Streak x3", bg: "bg-agni-orange/15 border-agni-orange/30", text: "text-agni-orange", side: "left" },
+                  4: { emoji: "⚡", label: "2x XP Boost", bg: "bg-agni-gold/15 border-agni-gold/30", text: "text-agni-gold", side: "right" },
+                };
+                const decor = INLINE_DECOR[i];
+
+                return (
+                  <motion.div
+                    key={lesson.id}
+                    initial={{ opacity: 0, scale: 0.5, y: 30 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ delay: 0.2 + i * 0.08, type: "spring", stiffness: 180 }}
+                    className="relative"
+                    style={{ height: 120, paddingLeft: xOffset }}
+                  >
+                    {/* Milestone badge — colorful */}
+                    {milestone && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.5, type: "spring" }}
+                        className={`absolute -top-3 right-0 z-20`}
+                      >
+                        <div className={`text-[8px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 border shadow-lg ${
+                          milestone.color === "text-agni-blue" ? "bg-agni-blue/20 border-agni-blue/40 text-agni-blue" :
+                          milestone.color === "text-agni-gold" ? "bg-agni-gold/20 border-agni-gold/40 text-agni-gold" :
+                          milestone.color === "text-agni-orange" ? "bg-agni-orange/20 border-agni-orange/40 text-agni-orange" :
+                          milestone.color === "text-agni-purple" ? "bg-agni-purple/20 border-agni-purple/40 text-agni-purple" :
+                          "bg-card border-border/30"
+                        }`}
+                          style={{ boxShadow: `0 0 12px ${mod.hex}25` }}
                         >
-                          <div className="bg-card p-2 space-y-1.5">
-                            {mod.lessons.map((l, li) => {
-                              const isDone = done.includes(l.id);
-                              const isBM = bookmarks.includes(l.id);
-                              return (
-                                <motion.div
-                                  key={l.id}
-                                  initial={{ opacity: 0, x: -10 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  transition={{ delay: li * 0.05 }}
-                                  className="flex items-center gap-2 bg-background/50 rounded-xl p-2.5 border border-border/30"
-                                >
-                                  <div className={`w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold shrink-0 ${isDone ? "bg-primary text-white" : "bg-muted text-muted-foreground"}`}>
-                                    {isDone ? "✓" : (li + 1)}
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <p className={`text-[11px] font-semibold truncate ${isDone ? "text-muted-foreground line-through" : "text-foreground"}`}>{l.t}</p>
-                                    <p className="text-[9px] text-muted-foreground truncate">{l.topic}</p>
-                                  </div>
-                                  <div className="flex items-center gap-1 shrink-0">
-                                    <span className="text-[8px] text-primary font-bold">{l.xp}XP</span>
-                                    <motion.button whileTap={{ scale: 0.8 }} onClick={(e) => { e.stopPropagation(); toggleBookmark(l.id); }} className="p-0.5">
-                                      {isBM ? <BookmarkCheck size={12} className="text-primary" /> : <Bookmark size={12} className="text-muted-foreground/40" />}
-                                    </motion.button>
-                                    <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate(`/course/${l.id}`)} className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors">
-                                      <ArrowRight size={10} className="text-primary" />
-                                    </motion.button>
-                                  </div>
-                                </motion.div>
-                              );
-                            })}
-                          </div>
+                          <Trophy size={9} /> {milestone.label}
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Inline path decoration */}
+                    {decor && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.6 + i * 0.1, type: "spring" }}
+                        className={`absolute top-1 ${decor.side === "right" ? "right-0" : "left-0"} z-10`}
+                      >
+                        <motion.div
+                          animate={{ y: [0, -3, 0] }}
+                          transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.3 }}
+                          className={`text-[7px] font-black px-2 py-0.5 rounded-full border flex items-center gap-1 ${decor.bg} ${decor.text}`}
+                        >
+                          <span className="text-[10px]">{decor.emoji}</span> {decor.label}
                         </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </StaggerItem>
-              );
-            })}
-          </StaggerContainer>
+                      </motion.div>
+                    )}
+
+                    <div className="flex items-start gap-3">
+                      {/* Node */}
+                      <motion.button
+                        whileHover={!isLocked ? { scale: 1.12 } : {}}
+                        whileTap={!isLocked ? { scale: 0.88, y: 4 } : {}}
+                        onClick={() => !isLocked && navigate(`/course/${lesson.id}`)}
+                        disabled={isLocked}
+                        className="relative flex-shrink-0"
+                      >
+                        {/* Glow ring behind active/done nodes */}
+                        {(isDone || isNext) && (
+                          <div className="absolute inset-[-8px] rounded-full opacity-20 blur-md"
+                            style={{ background: isCheckpoint ? "#FFC800" : mod.hex }}
+                          />
+                        )}
+
+                        {/* Outer ring */}
+                        <div className={`w-[64px] h-[64px] rounded-full flex items-center justify-center transition-all relative ${
+                          isCheckpoint
+                            ? isDone ? "bg-agni-gold" : isNext ? "bg-agni-gold/80" : "bg-muted/30"
+                            : isDone ? mod.color : isNext ? mod.color : "bg-muted/30"
+                        }`}
+                          style={{
+                            boxShadow: (isDone || isNext)
+                              ? `0 6px 0 0 rgba(0,0,0,0.25), 0 0 20px ${mod.hex}30`
+                              : '0 3px 0 0 rgba(0,0,0,0.15)'
+                          }}
+                        >
+                          <div className={`w-[52px] h-[52px] rounded-full flex items-center justify-center ${
+                            isDone || isNext ? "bg-white/15" : "bg-muted/20"
+                          }`}>
+                            {isDone ? (
+                              <CheckCircle2 size={26} className="text-white" />
+                            ) : isCheckpoint ? (
+                              <Crown size={26} className={isLocked ? "text-muted-foreground/30" : "text-white"} />
+                            ) : isNext ? (
+                              <motion.div
+                                animate={{ scale: [1, 1.2, 1] }}
+                                transition={{ duration: 1.5, repeat: Infinity }}
+                              >
+                                <Star size={26} className="text-white" />
+                              </motion.div>
+                            ) : (
+                              <Lock size={22} className="text-muted-foreground/30" />
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Pulse ring for active */}
+                        {isNext && (
+                          <motion.div
+                            className="absolute inset-[-4px] rounded-full border-2"
+                            style={{ borderColor: mod.hex }}
+                            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                          />
+                        )}
+
+                        {/* Completion stars */}
+                        {isDone && (
+                          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
+                            {[0,1,2].map(s => (
+                              <motion.div key={s} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.5 + s * 0.1, type: "spring" }}>
+                                <Star size={8} className="text-agni-gold fill-agni-gold" />
+                              </motion.div>
+                            ))}
+                          </div>
+                        )}
+                      </motion.button>
+
+                      {/* Label card */}
+                      <div className="pt-2 flex-1 min-w-0">
+                        <p className={`text-[11px] font-black leading-tight ${
+                          isLocked ? "text-muted-foreground/30" : "text-foreground"
+                        }`}>
+                          {lesson.t}
+                        </p>
+                        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                          <span className={`text-[9px] font-black ${isDone ? "text-agni-green" : "text-muted-foreground/40"}`}>
+                            +{lesson.xp} XP
+                          </span>
+                          {isCheckpoint && (
+                            <span className="text-[8px] font-black text-agni-gold bg-agni-gold/15 px-1.5 py-0.5 rounded-full">
+                              🏆 BOSS
+                            </span>
+                          )}
+                          {isDone && (
+                            <span className="text-[8px] font-black text-agni-green bg-agni-green/15 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                              <CheckCircle2 size={8} /> DONE
+                            </span>
+                          )}
+                          {isNext && (
+                            <motion.button
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => navigate(`/course/${lesson.id}`)}
+                              className={`text-[8px] font-black text-white ${mod.color} px-2 py-0.5 rounded-full flex items-center gap-0.5`}
+                            >
+                              START <ChevronRight size={8} />
+                            </motion.button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Treasure chest between nodes */}
+                    {showTreasure && (
+                      <motion.div
+                        className="absolute -right-2 top-1/2 -translate-y-1/2"
+                        animate={{ y: [0, -4, 0], rotate: [0, 5, -5, 0] }}
+                        transition={{ duration: 3, repeat: Infinity }}
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-b from-agni-gold to-amber-600 flex items-center justify-center shadow-lg"
+                          style={{ boxShadow: "0 0 15px rgba(255,200,0,0.3)" }}
+                        >
+                          <span className="text-lg">🎁</span>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* AGNI peeking mid-path */}
+                    {showAgniPeek && (
+                      <motion.div
+                        className="absolute -right-3 -bottom-2"
+                        initial={{ x: 30, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 1 }}
+                      >
+                        <Agni expression="thinking" size={55} speech="Keep going! 💪" />
+                      </motion.div>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Module complete celebration */}
+            {modDone === mod.lessons.length && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.7 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: "spring" }}
+                className="text-center py-6"
+              >
+                <Agni expression="celebrating" size={120} speech="You're amazing! 🎉" />
+                <p className="text-foreground font-black text-sm mt-3">Module Complete! 🏆</p>
+                <p className="text-muted-foreground text-[10px] font-semibold">You've mastered {mod.title}</p>
+                {activeModule < MODULES.length - 1 && (
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setActiveModule(activeModule + 1)}
+                    className="mt-3 bg-agni-green text-white font-black text-xs px-6 py-2.5 rounded-full shadow-btn-3d"
+                  >
+                    Next Module →
+                  </motion.button>
+                )}
+              </motion.div>
+            )}
+          </div>
         </div>
         <BottomNav />
       </div>

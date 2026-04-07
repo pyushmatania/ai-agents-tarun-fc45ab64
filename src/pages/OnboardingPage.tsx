@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -135,17 +135,29 @@ const OnboardingPage = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      <FloatingShapes />
+      {/* Background glow */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full bg-agni-green/5 blur-[100px]" />
+      </div>
+
+      {/* Progress bar */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-muted/30 z-20">
+        <motion.div
+          className="h-full bg-agni-green rounded-r-full"
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: 0.3 }}
+        />
+      </div>
 
       <AnimatePresence mode="wait">
         {/* ============ STEP 0: SPLASH ============ */}
         {step === 0 && (
           <motion.div
-            key="splash"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, x: -40 }}
-            transition={{ duration: 0.35 }}
+            key={`slide-${step}`}
+            initial={{ opacity: 0, x: 60 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -60 }}
+            transition={{ duration: 0.3 }}
             className="relative z-10 max-w-md mx-auto px-5 flex flex-col min-h-screen items-center justify-center"
           >
             <motion.div
@@ -211,9 +223,6 @@ const OnboardingPage = () => {
                 Get Started
                 <ArrowRight size={18} className="ml-2" />
               </Button>
-              <p className="text-center text-[10px] text-muted-foreground mt-3">
-                Free forever • No credit card required
-              </p>
             </motion.div>
           </motion.div>
         )}
@@ -259,11 +268,11 @@ const OnboardingPage = () => {
               </div>
             </motion.div>
 
-            {/* Name */}
+            {/* Name input */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.15 }}
               className="mb-5"
             >
               <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2 block">
@@ -279,12 +288,12 @@ const OnboardingPage = () => {
               />
             </motion.div>
 
-            {/* Role */}
+            {/* Role selection */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="mb-5"
+              transition={{ delay: 0.2 }}
+              className="mb-6"
             >
               <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2 block">
                 You are a...

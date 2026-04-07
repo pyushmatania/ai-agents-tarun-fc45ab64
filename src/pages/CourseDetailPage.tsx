@@ -12,39 +12,31 @@ import PracticalQuizModal from "@/components/PracticalQuizModal";
 import BotIllustration from "@/components/illustrations/BotIllustration";
 
 const ALL_LESSONS: Record<string, { t: string; xp: number; topic: string }> = {
-  f1:{t:"What is an AI Agent?",xp:50,topic:"what AI agents are — Perceive-Reason-Act-Learn loop, how they differ from chatbots, ReAct pattern, core components: LLM + Tools + Memory + Planning + Autonomy Loop"},
-  f2:{t:"LLMs as the Brain",xp:50,topic:"how LLMs (GPT-4o, Claude, Gemini, Llama, Mistral) serve as agent reasoning engines, context windows as working memory, how to choose the right model"},
-  f3:{t:"Tools & Functions",xp:60,topic:"how tools give agents the ability to ACT in the real world, function calling mechanics, how the LLM decides when to call a tool and what arguments to pass"},
-  f4:{t:"Memory & RAG",xp:60,topic:"agent memory systems: short-term (conversation), long-term (vector databases like Pinecone, ChromaDB), episodic memory, and RAG (Retrieval Augmented Generation)"},
-  f5:{t:"Planning & Reasoning",xp:70,topic:"how agents plan: Chain-of-Thought, Tree-of-Thought, ReAct pattern, task decomposition, and why planning separates smart agents from dumb ones"},
-  f6:{t:"Build: Research Agent",xp:100,topic:"step-by-step building a Python research agent that searches the web, summarizes articles, and writes briefings using an LLM API + search tool + file writer"},
-  w1:{t:"LangGraph",xp:70,topic:"LangGraph directed graph workflows, checkpointing, time-travel debugging, LangSmith observability, 47M+ PyPI downloads"},
-  w2:{t:"CrewAI",xp:60,topic:"CrewAI role-based agent teams: Role+Backstory+Goal pattern, Crews and Flows architecture, prototyping in 20 lines of code"},
-  w3:{t:"AutoGen & SDKs",xp:70,topic:"Microsoft AutoGen conversational debate, OpenAI Agents SDK with handoffs, Google ADK with A2A protocol for cross-framework agent interoperability"},
-  w4:{t:"MCP Protocol",xp:80,topic:"Model Context Protocol by Anthropic — the USB-C of AI, how MCP servers connect LLMs to tools, 12000+ servers, building and using MCP servers"},
-  w5:{t:"MetaGPT & More",xp:60,topic:"MetaGPT multi-agent software company with SOPs, OpenAgents with native MCP + A2A, n8n no-code agents"},
-  w6:{t:"Build: FW Battle",xp:120,topic:"building the same research agent in CrewAI, LangGraph, and AutoGen, then comparing lines of code, speed, quality, cost, developer experience"},
-  m1:{t:"Communication",xp:70,topic:"how agents communicate: Shared State, Message Passing, Event-Driven pub/sub, Hierarchical delegation patterns"},
-  m2:{t:"AI Organization",xp:80,topic:"designing a multi-agent org: CEO for strategy, CMO for marketing, CTO for engineering, CFO for finance, Sales, HR, Legal, Ops agents"},
-  m3:{t:"Orchestration",xp:80,topic:"Sequential, Parallel, Hierarchical, Consensus (voting), Competitive orchestration patterns and when to use each"},
-  m4:{t:"Cost & Safety",xp:70,topic:"managing LLM costs in multi-agent systems (4 agents x 5 rounds = 20+ calls), tiered models, circuit breakers, guardrails, budget caps"},
-  m5:{t:"Build: AI Startup",xp:150,topic:"building a 6-agent startup team using CrewAI that takes a market question and produces a complete business package"},
-  r1:{t:"Enterprise 2026",xp:70,topic:"production AI agents: Salesforce Agentforce (18.5K deals), Microsoft Copilot (15M seats), Gartner prediction 40% enterprise apps embed agents by 2026"},
-  r2:{t:"Semiconductor AI",xp:90,topic:"AI agents for HCL-Foxconn OSAT plant: yield optimization, supply chain risk, equipment maintenance prediction, quality documentation, patent monitoring"},
-  r3:{t:"Solo Stack",xp:80,topic:"building a one-person company with 10 AI agents: content pipeline, sales outreach, competitor intelligence, bookkeeping, social media"},
-  r4:{t:"Crazy Mode",xp:100,topic:"agent swarms, self-improving agents, digital twins, Manus ($2B Meta acquisition), agent-to-agent economies, agentic SOC, intent-based computing"},
-  r5:{t:"Final Boss",xp:200,topic:"capstone: 10+ agent autonomous company producing market research, business plan, landing page, social posts, financial model, investor emails in parallel"},
+  f1: { t: "What is an AI Agent?", xp: 50, topic: "what AI agents are, Perceive-Reason-Act-Learn loop, ReAct pattern, core components" },
+  f2: { t: "LLMs as the Brain", xp: 50, topic: "how LLMs serve as agent reasoning engines, context windows, choosing the right model" },
+  f3: { t: "Tools & Functions", xp: 60, topic: "how tools give agents the ability to ACT, function calling mechanics" },
+  f4: { t: "Memory & RAG", xp: 60, topic: "agent memory systems: short-term, long-term, episodic, RAG" },
+  f5: { t: "Planning & Reasoning", xp: 70, topic: "Chain-of-Thought, Tree-of-Thought, ReAct, task decomposition" },
+  f6: { t: "Build: Research Agent", xp: 100, topic: "building a Python research agent with search + summarize + write" },
+  w1: { t: "LangGraph", xp: 70, topic: "LangGraph directed graphs, checkpointing, time-travel debugging" },
+  w2: { t: "CrewAI", xp: 60, topic: "CrewAI role-based teams, Role+Backstory+Goal pattern" },
+  w3: { t: "AutoGen & SDKs", xp: 70, topic: "Microsoft AutoGen, OpenAI Agents SDK, Google ADK" },
+  w4: { t: "MCP Protocol", xp: 80, topic: "Model Context Protocol, the USB-C of AI, 12000+ servers" },
+  w5: { t: "MetaGPT & More", xp: 60, topic: "MetaGPT multi-agent software company, OpenAgents, n8n" },
+  w6: { t: "Build: FW Battle", xp: 120, topic: "comparing CrewAI vs LangGraph vs AutoGen" },
+  m1: { t: "Communication", xp: 70, topic: "Shared State, Message Passing, Event-Driven, Hierarchical patterns" },
+  m2: { t: "AI Organization", xp: 80, topic: "designing multi-agent orgs: CEO, CMO, CTO agents" },
+  m3: { t: "Orchestration", xp: 80, topic: "Sequential, Parallel, Hierarchical, Consensus patterns" },
+  m4: { t: "Cost & Safety", xp: 70, topic: "managing LLM costs, circuit breakers, guardrails" },
+  m5: { t: "Build: AI Startup", xp: 150, topic: "building a 6-agent startup team" },
+  r1: { t: "Enterprise 2026", xp: 70, topic: "production AI agents, Salesforce Agentforce, Microsoft Copilot" },
+  r2: { t: "Semiconductor AI", xp: 90, topic: "AI agents for semiconductor manufacturing" },
+  r3: { t: "Solo Stack", xp: 80, topic: "one-person company with 10 AI agents" },
+  r4: { t: "Crazy Mode", xp: 100, topic: "agent swarms, self-improving agents, digital twins" },
+  r5: { t: "Final Boss", xp: 200, topic: "capstone: 10+ agent autonomous company" },
 };
 
-const MODES = [
-  {id:"class5",label:"🏏 Simple",prompt:"Explain like I'm 10. Cricket analogies, everyday Indian examples. No jargon."},
-  {id:"engineer",label:"🔧 Engineer",prompt:"Full technical depth with Python code and architecture."},
-  {id:"founder",label:"💼 Founder",prompt:"Business lens. ROI, moats. Connect to HCL semiconductor."},
-  {id:"hacker",label:"⚡ Hacker",prompt:"Speed-run. Copy-paste code. Ship in 2 hours."},
-  {id:"crazy",label:"🤯 Crazy",prompt:"Wildest bleeding-edge stuff. Science fiction."},
-  {id:"first",label:"🧠 Socratic",prompt:"Ask ME questions. First principles. Don't give answers directly."},
-  {id:"semi",label:"🏭 Semi",prompt:"Through semiconductor manufacturing / HCL-Foxconn OSAT lens."},
-];
+type Phase = "chat" | "generating" | "quiz" | "complete";
 
 const SYS_BASE = "You are AGNI, an elite AI Agents tutor. Be passionate, use Indian examples (HCL, Tata, Flipkart, cricket, Bollywood). Keep under 250 words. End with a question to check understanding.";
 
@@ -53,12 +45,11 @@ type Msg = { role: "user" | "assistant"; text: string };
 const CourseDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [msgs, setMsgs] = useState<Msg[]>([]);
-  const [inp, setInp] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState("engineer");
-  const [note, setNote] = useState("");
-  const [showNote, setShowNote] = useState(false);
+  const { stats, loseHeart, completeLesson } = useGamification();
+  const [phase, setPhase] = useState<Phase>("chat");
+  const [quizzes, setQuizzes] = useState<QuizQuestion[]>([]);
+  const [quizIndex, setQuizIndex] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
   const [timer, setTimer] = useState(0);
   const [showProfile, setShowProfile] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
@@ -66,6 +57,7 @@ const CourseDetailPage = () => {
   const chatEnd = useRef<HTMLDivElement>(null);
   const timerRef = useRef<any>(null);
 
+  const teachingMode = localStorage.getItem("teaching_mode") || "engineer";
   const lesson = id ? ALL_LESSONS[id] : null;
   const done: string[] = JSON.parse(localStorage.getItem("adojo_done") || "[]");
   const isDone = id ? done.includes(id) : false;
@@ -92,8 +84,6 @@ const CourseDetailPage = () => {
   };
 
   useEffect(() => {
-    if (!lesson) return;
-    setNote(JSON.parse(localStorage.getItem("adojo_notes") || "{}")[id!] || "");
     timerRef.current = setInterval(() => setTimer(t => t + 1), 1000);
 
     // 🌱 UTSARGA — refresh smart options based on persona + lesson
@@ -152,39 +142,91 @@ const CourseDetailPage = () => {
       apiMsgs.push({ role: "user", content: `[Context: ${lesson!.topic}. Style: ${mObj.prompt}. Under 250 words. End with a comprehension check question like "does that click?" or "1-5 how clear is this?"]` });
     }
 
+  const generateQuizzes = async (conversation: ChatMessage[]) => {
+    setPhase("generating");
+    setQuizError("");
     try {
-      const text = await callAI(apiMsgs);
-      setMsgs([...newMsgs, { role: "assistant", text: text || "Could you try asking again?" }]);
-    } catch (err: any) {
-      setMsgs([...newMsgs, { role: "assistant", text: `Connection issue: ${err.message}\n\nPlease try again.` }]);
+      const resp = await fetch(`${SUPABASE_URL}/functions/v1/ai-quiz`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${SUPABASE_KEY}`,
+        },
+        body: JSON.stringify({
+          conversation,
+          lessonTitle: lesson?.t,
+          lessonTopic: lesson?.topic,
+          teachingMode,
+        }),
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(err.error || `Error ${resp.status}`);
+      }
+
+      const data = await resp.json();
+      if (data.quizzes && data.quizzes.length > 0) {
+        setQuizzes(data.quizzes);
+        SFX.tap();
+        setPhase("quiz");
+      } else {
+        throw new Error("No quiz questions generated");
+      }
+    } catch (error: any) {
+      console.error("Quiz generation error:", error);
+      setQuizError(error.message);
+      // Fallback: go to quiz with a simple generated question
+      setQuizzes([{
+        type: "mcq",
+        question: `What is the main focus of "${lesson?.t}"?`,
+        options: ["Basic programming", lesson?.topic.split(",")[0]?.trim() || "AI concepts", "Web development", "Data entry"],
+        correctIndex: 1,
+        explanation: `This lesson focuses on ${lesson?.topic.split(",")[0]?.trim() || "AI concepts"}.`,
+      }]);
+      setPhase("quiz");
     }
-    setLoading(false);
   };
 
-  const markDone = () => {
-    if (!id || isDone) return;
-    const newDone = [...done, id];
-    localStorage.setItem("adojo_done", JSON.stringify(newDone));
-    const xp = parseInt(localStorage.getItem("adojo_xp") || "0") + (lesson?.xp || 0);
-    localStorage.setItem("adojo_xp", String(xp));
+  const handleQuizReady = (conversation: ChatMessage[]) => {
+    SFX.tap();
+    chatMessagesRef.current = conversation;
+    generateQuizzes(conversation.length > 0 ? conversation : [{ role: "user", content: `Teach me about ${lesson?.t}: ${lesson?.topic}` }]);
+  };
+
+  const handleQuizAnswer = (correct: boolean) => {
+    if (correct) {
+      setCorrectCount(c => c + 1);
+    } else {
+      loseHeart();
+    }
+    setTimeout(() => {
+      if (quizIndex < quizzes.length - 1) {
+        setQuizIndex(quizIndex + 1);
+      } else {
+        handleLessonComplete();
+      }
+    }, 300);
+  };
+
+  const handleLessonComplete = () => {
     clearInterval(timerRef.current);
-    toast.success(`+${lesson?.xp} XP earned! 🎉`);
-    navigate("/courses");
+    SFX.xp();
+    if (id && lesson) {
+      const isPerfect = quizzes.length > 0 && correctCount === quizzes.length;
+      completeLesson(id, lesson.xp, isPerfect);
+    }
+    setPhase("complete");
   };
 
-  const saveNote = () => {
-    const notes = JSON.parse(localStorage.getItem("adojo_notes") || "{}");
-    notes[id!] = note;
-    localStorage.setItem("adojo_notes", JSON.stringify(notes));
-    toast.success("Note saved!");
-  };
-
-  if (!lesson) return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
-      <p className="text-foreground font-bold">Lesson not found</p>
-      <button onClick={() => navigate("/courses")} className="text-primary font-semibold">Back to courses</button>
-    </div>
-  );
+  if (!lesson) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
+        <Agni expression="sad" size={120} speech="Lesson not found 😢" />
+        <button onClick={() => navigate("/courses")} className="text-agni-green font-black text-sm">Back to courses</button>
+      </div>
+    );
+  }
 
   return (
     <PageTransition>
@@ -239,49 +281,36 @@ const CourseDetailPage = () => {
         </div>
       </div>
 
-      {/* Notes */}
-      {showNote && (
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 px-4 py-2 border-b border-border shrink-0">
-          <div className="max-w-md mx-auto">
-            <textarea value={note} onChange={e => setNote(e.target.value)} onBlur={saveNote} placeholder="Your notes for this lesson..." rows={3}
-              className="w-full border border-yellow-200 dark:border-yellow-800 rounded-xl p-2.5 text-sm outline-none resize-none bg-transparent text-foreground" />
-          </div>
-        </div>
-      )}
-
-      {/* Mode selector */}
-      <div className="bg-muted/50 px-4 py-2 border-b border-border shrink-0 overflow-x-auto">
-        <div className="max-w-md mx-auto flex gap-1.5 items-center">
-          <span className="text-xs text-muted-foreground shrink-0">Mode:</span>
-          {MODES.map(m => (
-            <button key={m.id} onClick={() => setMode(m.id)}
-              className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${
-                mode === m.id ? "bg-primary/10 border-primary text-primary" : "bg-card border-border text-muted-foreground"
-              }`}>{m.label}</button>
-          ))}
-        </div>
-      </div>
-
-      {/* Chat */}
-      <div className="flex-1 overflow-y-auto px-4 py-3">
-        <div className="max-w-md mx-auto space-y-3">
-          {msgs.map((msg, i) => (
-            <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[85%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
-                msg.role === "user"
-                  ? "bg-primary text-primary-foreground rounded-2xl rounded-br-sm"
-                  : "bg-card text-foreground rounded-2xl rounded-bl-sm border border-border shadow-sm"
-              }`}>{msg.text}</div>
-            </div>
-          ))}
-          {loading && (
-            <div className="flex justify-start">
-              <div className="bg-card border border-border rounded-2xl rounded-bl-sm px-5 py-3 flex gap-1.5 items-center shadow-sm">
-                {[0, 1, 2].map(i => (<span key={i} className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-pulse" style={{ animationDelay: `${i * 200}ms` }} />))}
+            <div className="flex-1 text-center">
+              <p className="text-sm font-black text-foreground truncate">{lesson.t}</p>
+              <div className="flex items-center justify-center gap-2 mt-0.5">
+                <span className="text-[9px] font-black text-agni-green">{lesson.xp} XP</span>
+                <span className="text-[9px] text-muted-foreground">⏱ {Math.floor(timer / 60)}m {timer % 60}s</span>
+                <span className="text-[8px] font-bold text-agni-gold bg-agni-gold/10 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                  ⚡ Gemini Flash
+                </span>
               </div>
             </div>
-          )}
-          <div ref={chatEnd} />
+
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => { if (phase === "chat") setShowQuizConfirm(true); else navigate("/courses"); }}
+              className="text-[10px] font-black text-white bg-agni-green px-3 py-1.5 rounded-full flex items-center gap-1"
+            >
+              ✅ Done
+            </motion.button>
+          </div>
+
+          {/* Progress bar */}
+          <div className="mt-2 h-2 bg-muted/30 rounded-full overflow-hidden">
+            <motion.div
+              className={`h-full rounded-full ${
+                phase === "chat" || phase === "generating" ? "bg-agni-blue" : phase === "quiz" ? "bg-agni-gold" : "bg-agni-green"
+              }`}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.3 }}
+            />
+          </div>
         </div>
       </div>
 
@@ -358,7 +387,6 @@ const CourseDetailPage = () => {
         />
       )}
     </div>
-    </PageTransition>
   );
 };
 
