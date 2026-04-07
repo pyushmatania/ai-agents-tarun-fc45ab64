@@ -16,6 +16,8 @@ const MascotProfileModal = ({ open, onClose }: MascotProfileModalProps) => {
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSubFilter, setActiveSubFilter] = useState<string | null>(null);
+  const [smartSearchOpen, setSmartSearchOpen] = useState(false);
+  const [smartSearchQuery, setSmartSearchQuery] = useState("");
 
   useEffect(() => {
     if (open) setPersona(getPersona());
