@@ -289,7 +289,7 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
                       >
                         <div className="flex items-start gap-3">
                           <Avatar className="h-12 w-12 shrink-0 rounded-xl border-2" style={{ borderColor: `${rCatMeta.color}30` }}>
-                            <AvatarImage src={getSuggestionImage(r.name, r.category)} alt={r.name} className="rounded-xl object-cover" />
+                            <AvatarImage src={getSuggestionImage(r.name, r.category) || `https://unavatar.io/${encodeURIComponent(r.imageSearchQuery || r.name)}`} alt={r.name} className="rounded-xl object-cover" />
                             <AvatarFallback className="rounded-xl text-2xl" style={{ background: `${rCatMeta.color}15` }}>
                               {rCatMeta.emoji}
                             </AvatarFallback>
