@@ -246,7 +246,7 @@ const CuriosityPage = () => {
                             </div>
                           )}
 
-                          {!loading && results.length > 0 && (
+                          {results.length > 0 && (
                             <>
                               <div className="rounded-2xl p-3 relative overflow-hidden"
                                 style={{ background: cat.gradient, boxShadow: `0 3px 0 0 ${cat.shadow}` }}
@@ -258,7 +258,13 @@ const CuriosityPage = () => {
                                     <h4 className="text-white font-black text-[11px]">{cat.label} Discoveries</h4>
                                     <p className="text-white/60 text-[8px] font-bold">{results.length} items found by AI</p>
                                   </div>
-                                  <Star size={14} className="ml-auto text-white/30" />
+                                  {refreshing ? (
+                                    <span className="ml-auto text-[8px] font-bold text-white/80 bg-white/20 px-1.5 py-0.5 rounded-full animate-pulse flex items-center gap-1">
+                                      <Loader2 size={8} className="animate-spin" /> Updating
+                                    </span>
+                                  ) : (
+                                    <Star size={14} className="ml-auto text-white/30" />
+                                  )}
                                 </div>
                               </div>
 
