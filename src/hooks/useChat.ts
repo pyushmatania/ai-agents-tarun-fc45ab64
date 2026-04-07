@@ -99,13 +99,17 @@ export function useChat(tab: ChatTab) {
     }
   }, [user]);
 
-  const sendMessage = useCallback(async (content: string, extraContext?: Record<string, any>) => {
+  const sendMessage = useCallback(async (content: string, extraContext?: Record<string, any>, options?: { hiddenPrompt?: string }) => {
     if (!content.trim() || isLoading) return;
+
+    // Display text is what the user sees; hidden prompt is what goes to AI
+    const displayText = content.trim();
+    const actualPrompt = options?.hiddenPrompt || displayText;
 
     const userMsg: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
-      content: content.trim(),
+      content: displayText,
       tab,
       created_at: new Date().toISOString(),
     };
