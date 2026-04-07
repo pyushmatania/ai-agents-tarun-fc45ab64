@@ -10,6 +10,8 @@ import {
   MessageCircle
 } from "lucide-react";
 import Agni from "@/components/Agni";
+import { getSuggestionImage, getPillColor } from "@/lib/suggestionImages";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import type { AgniExpression } from "@/components/Agni";
 import { motion, AnimatePresence } from "framer-motion";
 import { savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona } from "@/lib/neuralOS";
@@ -565,26 +567,67 @@ const OnboardingPage = () => {
                 </motion.button>
               )}
 
-              {/* Suggestions grid */}
+              {/* Suggestions — Colorful Pills */}
               <div className="flex-1 overflow-y-auto -mx-1 px-1 mb-2 scrollbar-none">
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-wrap gap-2">
                   {filtered.map((s, i) => {
                     const selected = currentItems.includes(s.name);
+                    const pillColor = getPillColor(activeCategory.id, i);
+                    const imageUrl = getSuggestionImage(s.name, activeCategory.id);
+
                     return (
-                      <motion.button key={s.name} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: Math.min(i * 0.02, 0.3) }}
-                        whileTap={{ scale: 0.93 }} onClick={() => toggleItem(s.name)}
-                        className={`p-3 rounded-2xl border-2 text-left transition-all relative ${
-                          selected ? "bg-agni-green/15 border-agni-green shadow-glow-green" : "bg-card border-border hover:border-muted-foreground/30"
-                        }`}
+                      <motion.button
+                        key={s.name}
+                        initial={{ opacity: 0, scale: 0.85 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: Math.min(i * 0.015, 0.25), type: "spring", stiffness: 300, damping: 20 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => toggleItem(s.name)}
+                        className="relative flex items-center gap-1.5 rounded-full transition-all duration-200"
+                        style={{
+                          background: selected ? pillColor : `${pillColor}18`,
+                          border: `2px solid ${selected ? pillColor : `${pillColor}35`}`,
+                          paddingLeft: 4,
+                          paddingRight: selected ? 10 : 12,
+                          paddingTop: 4,
+                          paddingBottom: 4,
+                          boxShadow: selected ? `0 4px 12px ${pillColor}40` : 'none',
+                        }}
                       >
+                        {/* Small round image */}
+                        <Avatar className="w-7 h-7 shrink-0 border-2" style={{ borderColor: selected ? 'rgba(255,255,255,0.3)' : `${pillColor}30` }}>
+                          <AvatarImage src={imageUrl} alt={s.name} loading="lazy" />
+                          <AvatarFallback
+                            className="text-xs"
+                            style={{
+                              background: selected ? 'rgba(255,255,255,0.2)' : `${pillColor}25`,
+                              color: selected ? '#fff' : pillColor,
+                              fontSize: '14px',
+                            }}
+                          >
+                            {s.emoji || "✨"}
+                          </AvatarFallback>
+                        </Avatar>
+
+                        {/* Name */}
+                        <span
+                          className="text-[11px] font-extrabold whitespace-nowrap pr-1"
+                          style={{ color: selected ? '#fff' : 'hsl(var(--foreground))' }}
+                        >
+                          {s.name}
+                        </span>
+
+                        {/* Check mark when selected */}
                         {selected && (
-                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-2 right-2 w-5 h-5 rounded-full bg-agni-green flex items-center justify-center">
-                            <Check size={11} className="text-white" strokeWidth={3} />
+                          <motion.div
+                            initial={{ scale: 0, rotate: -90 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            className="absolute -top-1 -right-1 w-4.5 h-4.5 rounded-full bg-white flex items-center justify-center shadow-md"
+                            style={{ width: 18, height: 18 }}
+                          >
+                            <Check size={10} style={{ color: pillColor }} strokeWidth={3} />
                           </motion.div>
                         )}
-                        <div className="text-xl mb-0.5">{s.emoji || "✨"}</div>
-                        <div className="text-xs font-extrabold text-foreground leading-tight pr-5">{s.name}</div>
-                        {s.tag && <div className="text-[9px] text-muted-foreground mt-0.5 font-semibold">{s.tag}</div>}
                       </motion.button>
                     );
                   })}
