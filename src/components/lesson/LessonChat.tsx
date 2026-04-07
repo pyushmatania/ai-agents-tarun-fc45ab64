@@ -681,6 +681,21 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
           </AnimatePresence>
         </div>
 
+        {/* Interest Deck — one item per category with dropdown */}
+        {interestDeck.length > 0 && (
+          <div className="flex gap-1.5 overflow-x-auto scrollbar-none px-0.5 pt-1.5 pb-0.5">
+            {interestDeck.map((cat) => (
+              <InterestDropdown
+                key={cat.id}
+                category={cat}
+                selectedItem={selectedInterests[cat.id] || cat.items[0]}
+                onSelect={(item) => handleInterestSelect(cat.id, item)}
+                disabled={isLoading}
+              />
+            ))}
+          </div>
+        )}
+
       </div>
 
       {/* Input */}
