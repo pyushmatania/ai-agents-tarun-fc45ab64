@@ -175,6 +175,89 @@ export const BRAIN_LEVELS_SKILL: BrainLevel[] = [
 // Combined for backward compat
 export const BRAIN_LEVELS: BrainLevel[] = [...BRAIN_LEVELS_SKILL];
 
+// ═══════════════════════════════════════════════
+// 💡 EXPLAIN STYLES — How to explain things
+// ═══════════════════════════════════════════════
+export interface ExplainStyle {
+  id: string;
+  label: string;
+  emoji: string;
+  desc: string;
+  prompt: string;
+  color: string;
+  isCustom?: boolean;
+}
+
+export const EXPLAIN_STYLES: ExplainStyle[] = [
+  { id: "simple", label: "Simple", emoji: "🧸", desc: "ELI5 — no jargon", prompt: "Explain this in the simplest possible terms, like I'm 5 years old. No jargon.", color: "from-green-400 to-emerald-300" },
+  { id: "fun", label: "Fun & Quirky", emoji: "🎉", desc: "Jokes, memes, pop refs", prompt: "Explain this in a fun, quirky way with jokes, memes, or pop culture references.", color: "from-pink-500 to-rose-400" },
+  { id: "examples", label: "With Examples", emoji: "📦", desc: "Concrete examples first", prompt: "Explain using 3 concrete, real-world examples. Examples first, theory after.", color: "from-blue-500 to-cyan-400" },
+  { id: "realworld", label: "Real World", emoji: "🌍", desc: "Industry use cases", prompt: "Explain with real-world industry use cases — how companies actually use this today.", color: "from-emerald-500 to-green-400" },
+  { id: "analogy", label: "Analogy", emoji: "🪞", desc: "Compare to everyday things", prompt: "Explain using vivid analogies from everyday life — cooking, sports, driving, etc.", color: "from-amber-500 to-yellow-400" },
+  { id: "visual", label: "Visual / Diagram", emoji: "🎨", desc: "ASCII art & diagrams", prompt: "Explain visually with ASCII diagrams, flowcharts, or 'picture this' descriptions.", color: "from-teal-500 to-emerald-400" },
+  { id: "story", label: "Story Mode", emoji: "📖", desc: "Narrative with characters", prompt: "Explain as a short story with characters, conflict, and resolution.", color: "from-purple-500 to-violet-400" },
+  { id: "compare", label: "Compare", emoji: "⚖️", desc: "A vs B breakdown", prompt: "Compare this to similar concepts — show pros/cons, similarities, differences in a table.", color: "from-indigo-500 to-blue-400" },
+  { id: "code", label: "Show Code", emoji: "💻", desc: "Working code snippet", prompt: "Show me a working code example with comments explaining each part.", color: "from-sky-500 to-cyan-400" },
+  { id: "step", label: "Step by Step", emoji: "🪜", desc: "Numbered walkthrough", prompt: "Break this down step by step — numbered, clear, one concept per step.", color: "from-orange-500 to-amber-400" },
+  { id: "debate", label: "Pros & Cons", emoji: "🤔", desc: "Argue both sides", prompt: "Present the pros and cons of this — argue both sides fairly.", color: "from-rose-500 to-pink-400" },
+  { id: "quiz", label: "Quiz Me", emoji: "❓", desc: "Test my understanding", prompt: "Don't explain — quiz me on this topic with 3 questions to test my understanding.", color: "from-violet-500 to-purple-400" },
+  { id: "tldr", label: "TL;DR", emoji: "⚡", desc: "3-line summary", prompt: "Give me a 3-line TL;DR — the absolute essence, nothing extra.", color: "from-red-500 to-orange-400" },
+  { id: "metaphor", label: "Metaphor", emoji: "🎭", desc: "Deep metaphor", prompt: "Explain using one powerful, extended metaphor that makes the concept click.", color: "from-fuchsia-500 to-pink-400" },
+  { id: "timeline", label: "Timeline", emoji: "📅", desc: "Historical evolution", prompt: "Explain the history and evolution of this concept — when it emerged, key milestones.", color: "from-slate-500 to-gray-400" },
+  { id: "wrong", label: "Common Mistakes", emoji: "🚫", desc: "What NOT to do", prompt: "What are the most common mistakes and misconceptions about this? Tell me what NOT to do.", color: "from-red-600 to-rose-500" },
+];
+
+const EXPLAIN_STYLES_STORAGE_KEY = "explain_styles_custom";
+const EXPLAIN_STYLES_ACTIVE_KEY = "explain_styles_active";
+
+export function getCustomExplainStyles(): ExplainStyle[] {
+  try {
+    const raw = localStorage.getItem(EXPLAIN_STYLES_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+export function saveCustomExplainStyle(style: { label: string; desc: string; prompt: string; emoji?: string }): ExplainStyle {
+  const id = `explain_custom_${Date.now()}`;
+  const custom: ExplainStyle = {
+    id, label: style.label, emoji: style.emoji || "✨",
+    desc: style.desc, prompt: style.prompt,
+    color: "from-agni-purple to-agni-pink", isCustom: true,
+  };
+  const existing = getCustomExplainStyles();
+  existing.push(custom);
+  localStorage.setItem(EXPLAIN_STYLES_STORAGE_KEY, JSON.stringify(existing));
+  return custom;
+}
+
+export function removeCustomExplainStyle(id: string) {
+  const existing = getCustomExplainStyles().filter(s => s.id !== id);
+  localStorage.setItem(EXPLAIN_STYLES_STORAGE_KEY, JSON.stringify(existing));
+}
+
+export function getAllExplainStyles(): ExplainStyle[] {
+  return [...EXPLAIN_STYLES, ...getCustomExplainStyles()];
+}
+
+export function getActiveExplainStyleIds(): string[] {
+  try {
+    const raw = localStorage.getItem(EXPLAIN_STYLES_ACTIVE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  // Default: first 6
+  return EXPLAIN_STYLES.slice(0, 6).map(s => s.id);
+}
+
+export function setActiveExplainStyleIds(ids: string[]) {
+  localStorage.setItem(EXPLAIN_STYLES_ACTIVE_KEY, JSON.stringify(ids));
+}
+
+export function getActiveExplainStyles(): ExplainStyle[] {
+  const ids = getActiveExplainStyleIds();
+  const all = getAllExplainStyles();
+  return ids.map(id => all.find(s => s.id === id)).filter(Boolean) as ExplainStyle[];
+}
+
 // ─── CUSTOM OPTIONS STORAGE ───
 const CUSTOM_STORAGE_KEY = "teaching_custom_options";
 

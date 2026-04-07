@@ -51,7 +51,13 @@ export default function ChatPage() {
 
   const initialTab = (location.state as any)?.tab || "general";
   const [activeTab, setActiveTab] = useState<ChatTab>(initialTab);
-  const [activeMode, setActiveMode] = useState(localStorage.getItem("teaching_mode") || "engineer");
+  const [activeMode, setActiveMode] = useState(() => {
+    const saved = localStorage.getItem("teaching_mode");
+    if (saved) return saved;
+    // Fall back to saved identity from onboarding/settings
+    const identity = localStorage.getItem("teaching_identity");
+    return identity || "engineer";
+  });
 
   const chat = useChat(activeTab);
   const scrollRef = useRef<HTMLDivElement>(null);
