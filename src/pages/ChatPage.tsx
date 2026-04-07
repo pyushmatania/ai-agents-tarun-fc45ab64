@@ -51,18 +51,18 @@ export default function ChatPage() {
   const persona = getPersona();
 
   const initialTab = (location.state as any)?.tab || "general";
+  const prefill = (location.state as any)?.prefill || "";
   const [activeTab, setActiveTab] = useState<ChatTab>(initialTab);
   const [activeMode, setActiveMode] = useState(() => {
     const saved = localStorage.getItem("teaching_mode");
     if (saved) return saved;
-    // Fall back to saved identity from onboarding/settings
     const identity = localStorage.getItem("teaching_identity");
     return identity || "engineer";
   });
 
   const chat = useChat(activeTab);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(prefill);
 
   // Build teaching context LIVE on each send (not memoized — selections change without re-render)
   const buildTeachingContext = () => {
