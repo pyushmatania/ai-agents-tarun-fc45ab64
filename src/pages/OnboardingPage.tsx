@@ -102,6 +102,10 @@ const OnboardingPage = () => {
   const [selectedVibe, setSelectedVibe] = useState<string | null>(null);
   const [selectedMission, setSelectedMission] = useState<string | null>(null);
   const [selectedBrain, setSelectedBrain] = useState<string | null>(null);
+  const [customMissions, setCustomMissions] = useState(getCustomOptions("mission"));
+  const [customVibes, setCustomVibes] = useState(getCustomOptions("vibe"));
+  const [customBrains, setCustomBrains] = useState(getCustomOptions("brain"));
+  const [selectedBrain, setSelectedBrain] = useState<string | null>(null);
   const [persona, setPersona] = useState<Partial<NeuralOSPersona>>({});
   const [search, setSearch] = useState("");
   const [activeSubFilter, setActiveSubFilter] = useState<string | null>(null);
