@@ -1,6 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import TheoryCard from "./TheoryCard";
 import CodeCard from "./CodeCard";
+import MermaidChart from "./MermaidChart";
 import ExampleCard from "./ExampleCard";
 import KeyPointsCard from "./KeyPointsCard";
 import DefinitionCard from "./DefinitionCard";
@@ -16,7 +17,7 @@ interface ContentRendererProps {
 
 // Parse content into structured blocks
 interface ContentBlock {
-  type: "theory" | "code" | "example" | "keypoints" | "definition" | "timeline" | "comparison" | "text";
+  type: "theory" | "code" | "mermaid" | "example" | "keypoints" | "definition" | "timeline" | "comparison" | "text";
   content: string;
   meta?: Record<string, string>;
 }
@@ -42,11 +43,12 @@ function parseContentBlocks(raw: string): ContentBlock[] {
           current = { type: "text", content: "" };
         }
         inCodeBlock = true;
-        codeLang = line.trim().slice(3).trim();
+        codeLang = line.trim().slice(3).trim().toLowerCase();
         codeContent = "";
       } else {
         inCodeBlock = false;
-        blocks.push({ type: "code", content: codeContent.trim(), meta: { language: codeLang } });
+        const blockType = codeLang === "mermaid" ? "mermaid" : "code";
+        blocks.push({ type: blockType, content: codeContent.trim(), meta: { language: codeLang } });
       }
       continue;
     }
@@ -178,6 +180,8 @@ export default function ContentRenderer({ content, isUser, showActions = true }:
         switch (block.type) {
           case "code":
             return <CodeCard key={i} code={block.content} language={block.meta?.language} />;
+          case "mermaid":
+            return <MermaidChart key={i} code={block.content} />;
           case "keypoints":
             return <KeyPointsCard key={i} points={block.content.split("|||")} title={block.meta?.title} />;
           case "definition":
