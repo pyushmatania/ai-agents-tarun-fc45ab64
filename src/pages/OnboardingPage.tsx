@@ -617,6 +617,40 @@ const OnboardingPage = () => {
                 </motion.button>
               )}
 
+              {/* Sub-filter chips */}
+              {subFilters.length > 0 && !search && (
+                <div className="flex gap-1.5 overflow-x-auto scrollbar-none mb-2 shrink-0 -mx-1 px-1">
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setActiveSubFilter(null)}
+                    className={`shrink-0 text-[9px] font-extrabold px-3 py-1.5 rounded-full transition-all ${
+                      !activeSubFilter
+                        ? "bg-agni-green text-white shadow-md"
+                        : "bg-card border border-border/40 text-muted-foreground"
+                    }`}
+                  >
+                    All
+                  </motion.button>
+                  {subFilters.map((tag, i) => (
+                    <motion.button
+                      key={tag}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: i * 0.03 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setActiveSubFilter(activeSubFilter === tag ? null : tag)}
+                      className={`shrink-0 text-[9px] font-extrabold px-3 py-1.5 rounded-full transition-all ${
+                        activeSubFilter === tag
+                          ? "bg-agni-blue text-white shadow-md"
+                          : "bg-card border border-border/40 text-muted-foreground"
+                      }`}
+                    >
+                      {tag}
+                    </motion.button>
+                  ))}
+                </div>
+              )}
+
               {/* Suggestions — Colorful Pills */}
               <div className="flex-1 overflow-y-auto -mx-1 px-1 mb-2 scrollbar-none">
                 <div className="flex flex-wrap gap-2">
