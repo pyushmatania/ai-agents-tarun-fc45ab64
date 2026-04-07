@@ -734,21 +734,26 @@ const OnboardingPage = () => {
           <motion.div key="lifecontext" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
-            <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.background.bg} pointer-events-none`} />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#E8F5E9] via-[#E0F2FE] to-[#E8EAF6] pointer-events-none" />
 
             <div className="flex flex-col flex-1 min-h-0 relative z-10">
+              <div className="flex justify-center mb-2">
+                <div className="bg-white/70 backdrop-blur-sm rounded-full px-4 py-1.5 shadow-sm border border-white/50">
+                  <span className="text-xs font-bold text-gray-600">Tell me more about you! 📋</span>
+                </div>
+              </div>
               <div className="flex justify-center mb-3 shrink-0">
-                <Agni expression="thinking" size={80} speech="Tell me more about you! 📋" animate />
+                <Agni expression="thinking" size={80} animate />
               </div>
 
-              <h2 className="text-2xl font-black text-foreground text-center mb-1 shrink-0">📋 Your Background</h2>
-              <p className="text-xs text-muted-foreground text-center mb-4 shrink-0">Helps AGNI tailor examples to your world</p>
+              <h2 className="text-2xl font-black text-gray-800 text-center mb-0.5 shrink-0">📋 Your Background</h2>
+              <p className="text-xs text-gray-500 text-center mb-4 shrink-0">Helps AGNI tailor examples to your world</p>
 
               <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
                 <div className="space-y-4">
                   {/* Education */}
                   <div>
-                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2">🎓 Education</label>
+                    <label className="text-[10px] font-extrabold text-gray-600 uppercase tracking-wider block mb-2">🎓 Education</label>
                     <div className="flex flex-wrap gap-2">
                       {EDUCATION_LEVELS.map((edu, i) => (
                         <motion.button key={edu} whileTap={{ scale: 0.92 }}
@@ -764,14 +769,14 @@ const OnboardingPage = () => {
 
                   {/* Location */}
                   <div>
-                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2"><MapPin size={10} className="inline" /> Location</label>
+                    <label className="text-[10px] font-extrabold text-gray-600 uppercase tracking-wider block mb-2"><MapPin size={10} className="inline" /> Location</label>
                     <Input type="text" placeholder="e.g. Mumbai, New York, London..." value={location} onChange={(e) => setLocation(e.target.value)}
-                      className="h-12 rounded-xl bg-card border-2 border-border text-sm font-bold focus:border-agni-green" />
+                      className="h-12 rounded-xl bg-white/80 border-2 border-white/50 text-sm font-bold text-gray-800 focus:border-agni-green shadow-sm" />
                   </div>
 
                   {/* Experience */}
                   <div>
-                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2">💼 Experience Level</label>
+                    <label className="text-[10px] font-extrabold text-gray-600 uppercase tracking-wider block mb-2">💼 Experience Level</label>
                     <div className="flex flex-wrap gap-2">
                       {EXPERIENCE_LEVELS.map((exp, i) => (
                         <motion.button key={exp} whileTap={{ scale: 0.92 }}
@@ -787,19 +792,21 @@ const OnboardingPage = () => {
 
                   {/* Job Title */}
                   <div>
-                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2">🏷️ Current Role / Title</label>
+                    <label className="text-[10px] font-extrabold text-gray-600 uppercase tracking-wider block mb-2">🏷️ Current Role / Title</label>
                     <Input type="text" placeholder="e.g. Software Engineer, Student, Freelancer..." value={jobTitle} onChange={(e) => setJobTitle(e.target.value)}
-                      className="h-12 rounded-xl bg-card border-2 border-border text-sm font-bold focus:border-agni-green" />
+                      className="h-12 rounded-xl bg-white/80 border-2 border-white/50 text-sm font-bold text-gray-800 focus:border-agni-green shadow-sm" />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-3 shrink-0">
-              <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-2xl border-2 border-border text-sm font-bold">Skip</Button>
-              <Button onClick={goNext} className="flex-1 h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d">
-                CONTINUE <ArrowRight size={18} className="ml-2" />
-              </Button>
+            <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#E8EAF6] via-[#E8EAF6]/95 to-transparent">
+              <div className="flex gap-3">
+                <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-full bg-white/80 border-2 border-white/50 text-gray-700 text-sm font-bold shadow-sm">Skip</Button>
+                <Button onClick={goNext} className="flex-1 h-14 rounded-full bg-[#58CC02] hover:bg-[#4CAD02] text-white font-extrabold text-base shadow-lg">
+                  CONTINUE <ArrowRight size={18} className="ml-2" />
+                </Button>
+              </div>
             </div>
           </motion.div>
         )}
