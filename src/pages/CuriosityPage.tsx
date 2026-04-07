@@ -437,17 +437,37 @@ const CuriosityPage = () => {
     [followed, isFollowed]
   );
 
-  // Filter feed items by type
+  // Filter feed items by type, source, date
   const filteredFeedItems = useMemo(() => {
-    if (feedFilter === "all") return feedItems;
-    return feedItems.filter(item => {
-      const meta = getContentMeta(item.url);
-      if (feedFilter === "youtube") return meta.type === "youtube" || meta.type === "instagram";
-      if (feedFilter === "article") return meta.type === "article";
-      if (feedFilter === "news") return item.type === "news";
-      return true;
-    });
-  }, [feedItems, feedFilter]);
+    let items = feedItems;
+    
+    // Source filter
+    if (activeSource) {
+      items = items.filter(item => item.sourceName === activeSource);
+    }
+    
+    // Type filter
+    if (feedFilter !== "all") {
+      items = items.filter(item => {
+        const meta = getContentMeta(item.url);
+        if (feedFilter === "youtube") return meta.type === "youtube" || meta.type === "instagram";
+        if (feedFilter === "article") return meta.type === "article";
+        if (feedFilter === "news") return item.type === "news";
+        return true;
+      });
+    }
+    
+    // Sort
+    if (sortBy === "popular") {
+      items = [...items].sort((a, b) => {
+        const aViews = parseInt(a.engagement) || 0;
+        const bViews = parseInt(b.engagement) || 0;
+        return bViews - aViews;
+      });
+    }
+    
+    return items;
+  }, [feedItems, feedFilter, activeSource, dateFilter, sortBy]);
 
   const toggleSave = (idx: number) => {
     setSavedItems(prev => {
