@@ -54,6 +54,12 @@ const SettingsPage = () => {
   const [neuralCustom, setNeuralCustom] = useState("");
   const [settingsSubFilter, setSettingsSubFilter] = useState<string | null>(null);
 
+  // Explain Styles state
+  const [explainExpanded, setExplainExpanded] = useState(false);
+  const [activeExplainIds, setActiveExplainIds] = useState<string[]>(getActiveExplainStyleIds());
+  const [customExplainLabel, setCustomExplainLabel] = useState("");
+  const [customExplainPrompt, setCustomExplainPrompt] = useState("");
+  const [showAddExplain, setShowAddExplain] = useState(false);
   // Re-sync persona when page gains focus (e.g. after editing in modal elsewhere)
   useEffect(() => {
     const sync = () => setPersonaState(getPersona());
