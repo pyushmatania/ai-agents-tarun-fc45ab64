@@ -160,11 +160,14 @@ const OnboardingPage = () => {
     }
   };
 
+  const subFilters = activeCategory ? getSubFilters(activeCategory) : [];
+
   const filtered = activeCategory
-    ? activeCategory.suggestions.filter(s =>
-        s.name.toLowerCase().includes(search.toLowerCase()) ||
-        (s.tag && s.tag.toLowerCase().includes(search.toLowerCase()))
-      )
+    ? activeCategory.suggestions.filter(s => {
+        const matchSearch = !search || s.name.toLowerCase().includes(search.toLowerCase()) || (s.tag && s.tag.toLowerCase().includes(search.toLowerCase()));
+        const matchSub = !activeSubFilter || (s.tag && s.tag.toLowerCase().startsWith(activeSubFilter.toLowerCase()));
+        return matchSearch && matchSub;
+      })
     : [];
 
   // Show "add as custom" option when search doesn't match any suggestion
