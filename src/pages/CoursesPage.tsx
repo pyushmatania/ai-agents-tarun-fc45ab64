@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import PageTransition, { FadeIn } from "@/components/PageTransition";
-import { CheckCircle2, Lock, Star, Crown, Diamond, Heart, Flame, ChevronRight, Trophy, Target, Zap } from "lucide-react";
+import { CheckCircle2, Lock, Star, Crown, Diamond, Heart, Flame, ChevronRight, Trophy, Target, Zap, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Agni from "@/components/Agni";
 import type { AgniExpression } from "@/components/Agni";
@@ -165,6 +165,9 @@ const CoursesPage = () => {
               </div>
               <h1 className="text-sm font-black text-foreground">Learn</h1>
               <div className="flex items-center gap-1.5">
+                <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate("/settings")} className="w-7 h-7 rounded-xl bg-card flex items-center justify-center border border-border/50 hover:border-primary/30 transition-colors" title="Profile">
+                  <User size={12} className="text-muted-foreground" />
+                </motion.button>
                 <div className="flex items-center gap-1 bg-agni-pink/15 rounded-full px-2 py-1">
                   <Heart size={12} className="text-agni-pink fill-agni-pink" />
                   <span className="text-[10px] font-black text-agni-pink">5</span>

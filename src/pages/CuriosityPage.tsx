@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import PageTransition, { FadeIn, StaggerContainer, StaggerItem } from "@/components/PageTransition";
-import { ArrowRight, RefreshCw, Loader2, Sparkles, Zap, Copy, Check, Diamond } from "lucide-react";
+import { ArrowRight, RefreshCw, Loader2, Sparkles, Zap, Copy, Check, Diamond, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
@@ -26,6 +27,7 @@ const typeIcons: Record<string, string> = { tool: "🔧", repo: "📦", article:
 
 const CuriosityPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { stats } = useGamification();
   const storedName = localStorage.getItem("edu_user_name") || "Learner";
   const displayName = user?.user_metadata?.full_name?.split(" ")[0] || storedName;
@@ -78,6 +80,9 @@ const CuriosityPage = () => {
                 </div>
               </div>
               <div className="flex items-center gap-1.5">
+                <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate("/settings")} className="w-7 h-7 rounded-xl bg-card flex items-center justify-center border border-border/50 hover:border-primary/30 transition-colors" title="Profile">
+                  <User size={12} className="text-muted-foreground" />
+                </motion.button>
                 <div className="flex items-center gap-1 bg-agni-green/15 rounded-full px-2 py-0.5">
                   <Zap size={10} className="text-agni-green" />
                   <span className="text-[10px] font-black text-agni-green">{stats.xp}</span>

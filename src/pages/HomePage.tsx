@@ -1,6 +1,6 @@
 import BottomNav from "@/components/BottomNav";
 import PageTransition, { StaggerContainer, StaggerItem, FadeIn } from "@/components/PageTransition";
-import { ArrowRight, Zap, Clock, BookOpen, Flame, Lightbulb, Rocket, Brain, Heart, Diamond } from "lucide-react";
+import { ArrowRight, Zap, Clock, BookOpen, Flame, Lightbulb, Rocket, Brain, Heart, Diamond, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -70,6 +70,9 @@ const HomePage = () => {
                 </motion.div>
               </div>
               <div className="flex items-center gap-2">
+                <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate("/settings")} className="w-8 h-8 rounded-xl bg-card flex items-center justify-center border border-border/50 hover:border-primary/30 transition-colors" title="Profile">
+                  <User size={14} className="text-muted-foreground" />
+                </motion.button>
                 <motion.div whileTap={{ scale: 0.9 }} className="flex items-center gap-1 bg-agni-pink/15 rounded-full px-2.5 py-1">
                   <Heart size={14} className="text-agni-pink fill-agni-pink" />
                   <span className="text-xs font-black text-agni-pink">{stats.hearts}</span>
