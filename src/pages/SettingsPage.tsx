@@ -447,9 +447,12 @@ const SettingsPage = () => {
                           if (!cat) return null;
                           const field = cat.field as keyof NeuralOSPersona;
                           const selected = (persona[field] as string[]) || [];
+                          const subFilters = getSubFilters(cat);
                           const filtered = neuralSearch
-                            ? cat.suggestions.filter(s => s.name.toLowerCase().includes(neuralSearch.toLowerCase()))
-                            : cat.suggestions;
+                            ? cat.suggestions.filter(s => s.name.toLowerCase().includes(neuralSearch.toLowerCase()) || (s.tag && s.tag.toLowerCase().includes(neuralSearch.toLowerCase())))
+                            : settingsSubFilter
+                              ? cat.suggestions.filter(s => s.tag && s.tag.toLowerCase().startsWith(settingsSubFilter.toLowerCase()))
+                              : cat.suggestions;
 
                           const toggleItem = (name: string) => {
                             const updated = selected.includes(name) ? selected.filter(x => x !== name) : [...selected, name];
@@ -472,7 +475,7 @@ const SettingsPage = () => {
                             >
                               <div className="flex items-center justify-between">
                                 <p className="text-[11px] font-black text-foreground">{cat.emoji} {cat.label}</p>
-                                <button onClick={() => setActiveCatId(null)}>
+                                <button onClick={() => { setActiveCatId(null); setSettingsSubFilter(null); }}>
                                   <X size={12} className="text-muted-foreground" />
                                 </button>
                               </div>
@@ -493,6 +496,75 @@ const SettingsPage = () => {
                                   className="w-full h-7 pl-6 pr-2 bg-card border border-border/30 rounded-lg text-[10px] text-foreground placeholder:text-muted-foreground focus:outline-none"
                                 />
                               </div>
+
+                              {/* Sub-filter chips with count badges */}
+                              {subFilters.length > 0 && !neuralSearch && (
+                                <div>
+                                  <div className="flex gap-1 overflow-x-auto scrollbar-none mb-1">
+                                    <button
+                                      onClick={() => setSettingsSubFilter(null)}
+                                      className={`shrink-0 text-[8px] font-extrabold px-2 py-1 rounded-full transition-all flex items-center gap-0.5 ${
+                                        !settingsSubFilter
+                                          ? "bg-agni-green text-white"
+                                          : "bg-card border border-border/30 text-muted-foreground"
+                                      }`}
+                                    >
+                                      All
+                                      <span className={`text-[7px] font-black rounded-full px-1 min-w-[14px] text-center ${
+                                        !settingsSubFilter ? "bg-white/25 text-white" : "bg-muted/50"
+                                      }`}>{cat.suggestions.length}</span>
+                                    </button>
+                                    {subFilters.map(tag => {
+                                      const count = getSubFilterCount(cat, tag);
+                                      return (
+                                        <button
+                                          key={tag}
+                                          onClick={() => setSettingsSubFilter(settingsSubFilter === tag ? null : tag)}
+                                          className={`shrink-0 text-[8px] font-extrabold px-2 py-1 rounded-full transition-all flex items-center gap-0.5 ${
+                                            settingsSubFilter === tag
+                                              ? "bg-agni-blue text-white"
+                                              : "bg-card border border-border/30 text-muted-foreground"
+                                          }`}
+                                        >
+                                          {tag}
+                                          <span className={`text-[7px] font-black rounded-full px-1 min-w-[14px] text-center ${
+                                            settingsSubFilter === tag ? "bg-white/25 text-white" : "bg-muted/50"
+                                          }`}>{count}</span>
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                  {/* Select All for active sub-filter */}
+                                  {settingsSubFilter && (
+                                    <button
+                                      onClick={() => {
+                                        const subItems = cat.suggestions
+                                          .filter(s => s.tag && s.tag.toLowerCase().startsWith(settingsSubFilter.toLowerCase()))
+                                          .map(s => s.name);
+                                        const allSelected = subItems.every(item => selected.includes(item));
+                                        const updated = allSelected
+                                          ? selected.filter(x => !subItems.includes(x))
+                                          : [...new Set([...selected, ...subItems])];
+                                        const newPersona = savePersona({ [field]: updated });
+                                        setPersonaState(newPersona);
+                                      }}
+                                      className="text-[8px] font-extrabold text-agni-blue flex items-center gap-0.5"
+                                    >
+                                      {(() => {
+                                        const subItems = cat.suggestions
+                                          .filter(s => s.tag && s.tag.toLowerCase().startsWith(settingsSubFilter.toLowerCase()))
+                                          .map(s => s.name);
+                                        const allSelected = subItems.every(item => selected.includes(item));
+                                        return allSelected ? (
+                                          <><X size={8} /> Deselect all {settingsSubFilter}</>
+                                        ) : (
+                                          <><Check size={8} /> Select all {settingsSubFilter}</>
+                                        );
+                                      })()}
+                                    </button>
+                                  )}
+                                </div>
+                              )}
 
                               {/* Selected chips */}
                               {selected.length > 0 && (
