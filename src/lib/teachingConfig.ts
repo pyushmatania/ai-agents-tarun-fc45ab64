@@ -4,7 +4,19 @@
  * 1. 🎯 MISSION MODE — WHY you're learning (your mood/goal)
  * 2. 🎨 TEACHING VIBE — HOW AGNI teaches (style)
  * 3. 🧠 BRAIN LEVEL — Difficulty/depth
+ * 
+ * Each supports custom user-created options with name + description.
  */
+
+// ─── Custom option type ───
+export interface CustomTeachingOption {
+  id: string;
+  label: string;
+  emoji: string;
+  desc: string;
+  color: string;
+  isCustom: true;
+}
 
 // ─── MISSION MODE ───
 export interface MissionOption {
@@ -13,6 +25,7 @@ export interface MissionOption {
   emoji: string;
   desc: string;
   color: string;
+  isCustom?: boolean;
 }
 
 export const MISSION_MODES: MissionOption[] = [
@@ -35,6 +48,7 @@ export interface VibeOption {
   emoji: string;
   desc: string;
   color: string;
+  isCustom?: boolean;
 }
 
 export const TEACHING_VIBES: VibeOption[] = [
@@ -59,6 +73,7 @@ export interface BrainLevel {
   emoji: string;
   desc: string;
   color: string;
+  isCustom?: boolean;
 }
 
 export const BRAIN_LEVELS: BrainLevel[] = [
@@ -69,6 +84,61 @@ export const BRAIN_LEVELS: BrainLevel[] = [
   { id: "scientist", label: "Scientist", emoji: "🔬", desc: "Papers, math & proofs", color: "from-pink-500 to-rose-400" },
   { id: "professor", label: "Professor", emoji: "🎓", desc: "Teach me to teach others", color: "from-amber-500 to-yellow-400" },
 ];
+
+// ─── CUSTOM OPTIONS STORAGE ───
+const CUSTOM_STORAGE_KEY = "teaching_custom_options";
+
+export function getCustomOptions(categoryId: string): CustomTeachingOption[] {
+  try {
+    const raw = localStorage.getItem(CUSTOM_STORAGE_KEY);
+    if (!raw) return [];
+    const all = JSON.parse(raw) as Record<string, CustomTeachingOption[]>;
+    return all[categoryId] || [];
+  } catch { return []; }
+}
+
+export function saveCustomOption(categoryId: string, option: { label: string; desc: string; emoji?: string }): CustomTeachingOption {
+  const id = `custom_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+  const customOpt: CustomTeachingOption = {
+    id,
+    label: option.label,
+    emoji: option.emoji || "✨",
+    desc: option.desc,
+    color: "from-agni-purple to-agni-pink",
+    isCustom: true,
+  };
+
+  try {
+    const raw = localStorage.getItem(CUSTOM_STORAGE_KEY);
+    const all = raw ? JSON.parse(raw) as Record<string, CustomTeachingOption[]> : {};
+    if (!all[categoryId]) all[categoryId] = [];
+    all[categoryId].push(customOpt);
+    localStorage.setItem(CUSTOM_STORAGE_KEY, JSON.stringify(all));
+    window.dispatchEvent(new Event("storage"));
+  } catch { /* ignore */ }
+
+  return customOpt;
+}
+
+export function removeCustomOption(categoryId: string, optionId: string) {
+  try {
+    const raw = localStorage.getItem(CUSTOM_STORAGE_KEY);
+    if (!raw) return;
+    const all = JSON.parse(raw) as Record<string, CustomTeachingOption[]>;
+    if (!all[categoryId]) return;
+    all[categoryId] = all[categoryId].filter(o => o.id !== optionId);
+    localStorage.setItem(CUSTOM_STORAGE_KEY, JSON.stringify(all));
+    window.dispatchEvent(new Event("storage"));
+  } catch { /* ignore */ }
+}
+
+/** Get all options (built-in + custom) for a category */
+export function getAllOptions(categoryId: string): (MissionOption | VibeOption | BrainLevel)[] {
+  const cat = TEACHING_CATEGORIES.find(c => c.id === categoryId);
+  if (!cat) return [];
+  const customs = getCustomOptions(categoryId);
+  return [...cat.options, ...customs];
+}
 
 // ─── CATEGORY METADATA (fun names) ───
 export const TEACHING_CATEGORIES = [
@@ -115,28 +185,29 @@ export function setTeachingSelection(categoryId: string, value: string) {
   window.dispatchEvent(new Event("storage"));
 }
 
-export function getTeachingLabel(categoryId: string): { label: string; emoji: string } | null {
+export function getTeachingLabel(categoryId: string): { label: string; emoji: string; desc?: string } | null {
   const cat = TEACHING_CATEGORIES.find(c => c.id === categoryId);
   if (!cat) return null;
   const val = getTeachingSelection(categoryId);
+  // Check built-in options first
   const opt = cat.options.find((o: any) => o.id === val);
-  return opt ? { label: opt.label, emoji: opt.emoji } : { label: val, emoji: "✨" };
+  if (opt) return { label: opt.label, emoji: opt.emoji, desc: opt.desc };
+  // Check custom options
+  const customs = getCustomOptions(categoryId);
+  const custom = customs.find(c => c.id === val);
+  if (custom) return { label: custom.label, emoji: custom.emoji, desc: custom.desc };
+  // Fallback: the value itself is a custom text
+  return { label: val, emoji: "✨", desc: "" };
 }
 
 /** Build a context string for AI prompts based on all 3 selections */
 export function getTeachingContext(): string {
-  const mission = getTeachingSelection("mission");
-  const vibe = getTeachingSelection("vibe");
-  const brain = getTeachingSelection("brain");
-  
-  const missionOpt = MISSION_MODES.find(m => m.id === mission);
-  const vibeOpt = TEACHING_VIBES.find(v => v.id === vibe);
-  const brainOpt = BRAIN_LEVELS.find(b => b.id === brain);
-
   const parts: string[] = [];
-  if (missionOpt) parts.push(`Mission: ${missionOpt.label} (${missionOpt.desc})`);
-  if (vibeOpt) parts.push(`Teaching style: ${vibeOpt.label} (${vibeOpt.desc})`);
-  if (brainOpt) parts.push(`Depth: ${brainOpt.label} (${brainOpt.desc})`);
-  
+  for (const cat of TEACHING_CATEGORIES) {
+    const label = getTeachingLabel(cat.id);
+    if (label) {
+      parts.push(`${cat.funName}: ${label.label}${label.desc ? ` (${label.desc})` : ""}`);
+    }
+  }
   return parts.join(". ");
 }
