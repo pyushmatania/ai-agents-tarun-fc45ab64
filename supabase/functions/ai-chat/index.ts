@@ -54,14 +54,59 @@ serve(async (req) => {
     
     if (context) {
       const ctxParts: string[] = [];
-      if (context.identity) ctxParts.push(`User identity: ${context.identity}`);
-      if (context.mission) ctxParts.push(`User's mission: ${context.mission}`);
-      if (context.vibe) ctxParts.push(`Preferred teaching style: ${context.vibe}`);
-      if (context.level) ctxParts.push(`Brain level: ${context.level}`);
-      if (context.universeVibe) ctxParts.push(`Universe vibe (HIGHEST PRIORITY): The user selected "${context.universeVibe}" as their world. ALL examples, analogies, metaphors, and references MUST come from "${context.universeVibe}" — NEVER use other franchises, shows, or games.`);
+      if (context.identity) ctxParts.push(`User identity: ${context.identity}\n→ Use analogies and examples from their professional world.`);
+      
+      if (context.mission) ctxParts.push(`User's mission: ${context.mission}\n→ Frame answers around this goal.`);
+      
+      // Vibe — explicit behavioral instructions
+      if (context.vibe) {
+        const vibeId = context.vibe.split(" — ")[0]?.trim().toLowerCase();
+        let vibeRule = "";
+        if (vibeId.includes("meme") || vibeId.includes("fun")) vibeRule = "Use Gen-Z humor, memes, pop culture refs, light roasting. Shitpost energy but accurate.";
+        else if (vibeId.includes("story")) vibeRule = "Frame everything as a narrative with characters and conflict.";
+        else if (vibeId.includes("visual")) vibeRule = "Use ASCII art, diagrams, flowcharts. Make concepts visual.";
+        else if (vibeId.includes("sensei")) vibeRule = "Wise, disciplined. Short profound statements. Karate Kid energy.";
+        else if (vibeId.includes("fact")) vibeRule = "Pure technical, no fluff, no jokes. Bullet points. Dry and fast.";
+        else if (vibeId.includes("hype")) vibeRule = "HIGH ENERGY! Exclamation marks! Motivational speaker vibes!";
+        else if (vibeId.includes("board")) vibeRule = "Executive summary. ROI-focused. Strategic framing.";
+        else if (vibeId.includes("game")) vibeRule = "XP, levels, boss battles, side quests. Game UI energy.";
+        else if (vibeId.includes("podcast")) vibeRule = "Conversational deep-dive. Interview style. Thoughtful.";
+        else if (vibeId.includes("lab")) vibeRule = "Hypothesis → experiment → result. Scientific method.";
+        else if (vibeId.includes("wizard")) vibeRule = "Mysterious, magical framing. Concepts as spells.";
+        else if (vibeId.includes("news")) vibeRule = "Breaking news framing. Reporter energy.";
+        ctxParts.push(`Teaching style: ${context.vibe}\nSTYLE RULE: ${vibeRule}`);
+      }
+      
+      // Brain level — explicit depth rules
+      if (context.level) {
+        const levelId = context.level.split(" — ")[0]?.trim().toLowerCase();
+        let depthRule = "Adapt depth to match.";
+        if (levelId.includes("sprout") || levelId.includes("class 5")) {
+          depthRule = "MANDATORY: Explain like talking to a 10-year-old. ZERO jargon. Only everyday analogies (cooking, playing, school). Short sentences. Simple words. Skip complexity — give intuition only.";
+        } else if (levelId.includes("chill") || levelId.includes("class 8")) {
+          depthRule = "Simple language, real-world examples. Introduce terms with 'which basically means...' Keep casual.";
+        } else if (levelId.includes("explorer") || levelId.includes("class 10")) {
+          depthRule = "Some technical terms OK but always explain. Clear definitions. Medium depth.";
+        } else if (levelId.includes("builder") || levelId.includes("class 12")) {
+          depthRule = "Technical language OK. Show code. Practical, hands-on.";
+        } else if (levelId.includes("pro") || levelId.includes("college")) {
+          depthRule = "Professional-grade. Best practices, edge cases, production considerations.";
+        } else if (levelId.includes("hacker") || levelId.includes("scientist") || levelId.includes("researcher")) {
+          depthRule = "Deep technical. Papers, math, internals, undocumented tricks.";
+        } else if (levelId.includes("demon") || levelId.includes("professor") || levelId.includes("architect")) {
+          depthRule = "Maximum depth. Trade-offs, system design, frontier research. No hand-holding.";
+        }
+        ctxParts.push(`Brain level: ${context.level}\nDEPTH RULE: ${depthRule}`);
+      }
+      
+      // Universe vibe — HIGHEST PRIORITY, overrides interests
+      if (context.universeVibe) {
+        ctxParts.push(`Universe vibe (HIGHEST PRIORITY): "${context.universeVibe}"\nMANDATORY: ALL examples, analogies, metaphors, and references MUST come from "${context.universeVibe}" — NEVER use other franchises, shows, or games. This is non-negotiable.`);
+      }
       if (context.interests) ctxParts.push(`General interests (use ONLY if no universe vibe is set): ${context.interests}`);
+      
       if (ctxParts.length > 0) {
-        systemPrompt += `\n\nUSER PROFILE:\n${ctxParts.join("\n")}\n\nCRITICAL: If a "Universe vibe" is set, it overrides everything — every single example and analogy MUST use that universe. Never mix in other franchises.`;
+        systemPrompt += `\n\nUSER PROFILE (BINDING — these are rules, not suggestions):\n${ctxParts.join("\n\n")}\n\nCRITICAL RULES:\n1. Brain level controls HOW SIMPLY you explain — a Sprout/Class 5 answer should be understandable by a child\n2. If Universe Vibe is set, EVERY example uses that world — never mix franchises\n3. Vibe controls your tone and style — commit fully to it\n4. These are NOT decorative tags — they define your entire response style`;
       }
     }
 
