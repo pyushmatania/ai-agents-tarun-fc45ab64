@@ -574,8 +574,8 @@ const OnboardingPage = () => {
           </motion.div>
         )}
 
-        {/* ═══════ STEP 4: WHY THIS MATTERS — ATTENTION HOOK ═══════ */}
-        {step === 4 && (
+        {/* ═══════ STEP 6: WHY THIS MATTERS — ATTENTION HOOK ═══════ */}
+        {step === 6 && (
           <motion.div key="whymatters" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
