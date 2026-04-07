@@ -83,6 +83,7 @@ async function shareItem(item: { title: string; desc?: string; url?: string }) {
 
 
 function AILearnModal({ item, onClose }: { item: any; onClose: () => void }) {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
@@ -124,7 +125,7 @@ function AILearnModal({ item, onClose }: { item: any; onClose: () => void }) {
         exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-md bg-background rounded-t-3xl border-t border-border/30 max-h-[85vh] flex flex-col"
+        className="relative w-full max-w-md bg-background rounded-t-3xl border-t border-border/30 h-[95vh] flex flex-col"
       >
         {/* Handle */}
         <div className="flex justify-center pt-2 pb-1">
@@ -266,6 +267,19 @@ function AILearnModal({ item, onClose }: { item: any; onClose: () => void }) {
                   ))}
                 </div>
               )}
+
+              {/* Take to Chat CTA */}
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  onClose();
+                  navigate("/chat", { state: { tab: "curriculum", prefill: `Explain this in detail: "${item.title}"` } });
+                }}
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-agni-green to-agni-blue text-white text-[12px] font-black flex items-center justify-center gap-2 mt-2 shadow-lg"
+              >
+                <MessageCircleMore size={16} />
+                Let's take this to Chat 🚀
+              </motion.button>
             </div>
           )}
 
