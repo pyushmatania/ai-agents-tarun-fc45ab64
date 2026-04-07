@@ -115,7 +115,7 @@ function AILearnModal({ item, onClose }: { item: any; onClose: () => void }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-end justify-center"
+      className="fixed inset-0 z-[60] flex items-end justify-center"
       onClick={onClose}
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
@@ -125,7 +125,7 @@ function AILearnModal({ item, onClose }: { item: any; onClose: () => void }) {
         exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-md bg-background rounded-t-3xl border-t border-border/30 h-[95vh] flex flex-col"
+        className="relative w-full max-w-md bg-background rounded-t-3xl border-t border-border/30 h-[95vh] flex flex-col z-[60]"
       >
         {/* Handle */}
         <div className="flex justify-center pt-2 pb-1">
@@ -171,7 +171,7 @@ function AILearnModal({ item, onClose }: { item: any; onClose: () => void }) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-none">
+        <div className="flex-1 overflow-y-auto px-4 pb-24 scrollbar-none">
           {loading && (
             <div className="flex flex-col items-center justify-center py-12 gap-3">
               <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}>
