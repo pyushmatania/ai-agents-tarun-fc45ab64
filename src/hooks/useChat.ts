@@ -134,9 +134,10 @@ export function useChat(tab: ChatTab) {
     }]);
 
     try {
-      const allMessages = [...messages, userMsg].map(m => ({
+      const allMessages = [...messages, userMsg].map((m, i, arr) => ({
         role: m.role,
-        content: m.content,
+        // For the last user message, use the actual prompt (which may differ from display)
+        content: i === arr.length - 1 && m.role === "user" ? actualPrompt : m.content,
       }));
 
       const edgeFunction = tab === "curriculum" ? "ai-tutor" : "ai-chat";
