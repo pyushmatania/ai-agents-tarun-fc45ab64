@@ -129,7 +129,22 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
   }, [messages, isLoading]);
 
   useEffect(() => {
-    sendToAI([{ role: "user", content: `Start teaching me about "${lessonTitle}". Topic: ${lessonTopic}. Begin with an engaging introduction.` }], true);
+    const p = persona;
+    const personaBits: string[] = [];
+    if (p.name) personaBits.push(`My name is ${p.name}.`);
+    if (p.currentRole) personaBits.push(`I work as a ${p.currentRole}.`);
+    if (p.currentCompany) personaBits.push(`I work at ${p.currentCompany}.`);
+    if (p.shows?.length) personaBits.push(`I love watching ${p.shows.slice(0, 3).join(", ")}.`);
+    if (p.sports?.length) personaBits.push(`I follow ${p.sports.slice(0, 2).join(", ")}.`);
+    if (p.curious?.length) personaBits.push(`I'm curious about ${p.curious.slice(0, 2).join(", ")}.`);
+    if (p.hobbies?.length) personaBits.push(`My hobbies include ${p.hobbies.slice(0, 2).join(", ")}.`);
+    if (p.music?.length) personaBits.push(`I listen to ${p.music.slice(0, 2).join(", ")}.`);
+
+    const personaContext = personaBits.length > 0
+      ? `\n\nAbout me: ${personaBits.join(" ")} Use my interests and role to make analogies and examples relatable to me.`
+      : "";
+
+    sendToAI([{ role: "user", content: `Start teaching me about "${lessonTitle}". Topic: ${lessonTopic}. Begin with an engaging introduction.${personaContext}` }], true);
   }, []);
 
   const sendToAI = useCallback(async (chatMessages: Message[], isInitial = false) => {
