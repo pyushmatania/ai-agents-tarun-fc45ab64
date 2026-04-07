@@ -351,8 +351,9 @@ const KNOWN_IMAGES: Record<string, string> = {
 
 /**
  * Get image URL for a suggestion item
+ * @param imageHint - optional better search query (e.g. from AI imageSearchQuery)
  */
-export function getSuggestionImage(name: string, categoryId: string): string {
+export function getSuggestionImage(name: string, categoryId: string, imageHint?: string): string {
   // Check known images first
   if (KNOWN_IMAGES[name]) return KNOWN_IMAGES[name];
 
@@ -361,6 +362,9 @@ export function getSuggestionImage(name: string, categoryId: string): string {
 
   // For news/creator items with known domains
   if (categoryId === "news") return searchAvatar(name);
+
+  // Use AI-provided image hint if available (better matching)
+  if (imageHint) return searchAvatar(imageHint);
 
   // Generic fallback — try unavatar search
   return searchAvatar(name);
