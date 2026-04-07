@@ -537,16 +537,16 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
 
       {/* Persona summary chip row */}
       {(() => {
-        const groups: { emoji: string; items: string[] }[] = [];
-        if (persona.currentRole) groups.push({ emoji: "💼", items: [persona.currentRole] });
-        if (persona.shows?.length) groups.push({ emoji: "🎬", items: persona.shows });
-        if (persona.sports?.length) groups.push({ emoji: "⚽", items: persona.sports });
-        if (persona.curious?.length) groups.push({ emoji: "🔍", items: persona.curious });
-        if (persona.hobbies?.length) groups.push({ emoji: "🎯", items: persona.hobbies });
-        if (persona.music?.length) groups.push({ emoji: "🎵", items: persona.music });
-        if (persona.gaming?.length) groups.push({ emoji: "🎮", items: persona.gaming });
-        if (persona.news?.length) groups.push({ emoji: "📰", items: persona.news });
-        if (persona.books?.length) groups.push({ emoji: "📚", items: persona.books });
+        const groups: { emoji: string; catId: string; items: string[] }[] = [];
+        if (persona.currentRole) groups.push({ emoji: "💼", catId: "hobbies", items: [persona.currentRole] });
+        if (persona.shows?.length) groups.push({ emoji: "🎬", catId: "shows", items: persona.shows });
+        if (persona.sports?.length) groups.push({ emoji: "⚽", catId: "sports", items: persona.sports });
+        if (persona.curious?.length) groups.push({ emoji: "🔍", catId: "curious", items: persona.curious });
+        if (persona.hobbies?.length) groups.push({ emoji: "🎯", catId: "hobbies", items: persona.hobbies });
+        if (persona.music?.length) groups.push({ emoji: "🎵", catId: "music", items: persona.music });
+        if (persona.gaming?.length) groups.push({ emoji: "🎮", catId: "gaming", items: persona.gaming });
+        if (persona.news?.length) groups.push({ emoji: "📰", catId: "news", items: persona.news });
+        if (persona.books?.length) groups.push({ emoji: "📚", catId: "books", items: persona.books });
 
         return groups.length > 0 ? (
           <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-1.5 mb-1.5 overflow-x-auto scrollbar-none">
