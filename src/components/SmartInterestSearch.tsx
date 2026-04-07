@@ -4,6 +4,7 @@ import { Search, Sparkles, Loader2, X, Check, Brain, ArrowRight, AlertCircle } f
 import { supabase } from "@/integrations/supabase/client";
 import { InterestPill } from "./InterestPill";
 import { getSuggestionImage } from "@/lib/suggestionImages";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface AIResult {
   name: string;
@@ -193,9 +194,12 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
                           className="w-full text-left bg-muted/30 hover:bg-muted/60 border-2 border-border/50 hover:border-agni-green/40 rounded-2xl p-3.5 transition-all"
                         >
                           <div className="flex items-start gap-3">
-                            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0" style={{ background: `${catMeta.color}15` }}>
-                              {catMeta.emoji}
-                            </div>
+                            <Avatar className="w-12 h-12 rounded-xl shrink-0 border-2" style={{ borderColor: `${catMeta.color}30` }}>
+                              <AvatarImage src={getSuggestionImage(r.name, r.category)} alt={r.name} className="object-cover rounded-xl" />
+                              <AvatarFallback className="rounded-xl text-2xl" style={{ background: `${catMeta.color}15` }}>
+                                {catMeta.emoji}
+                              </AvatarFallback>
+                            </Avatar>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-0.5">
                                 <span className="text-sm font-black text-foreground">{r.name}</span>
