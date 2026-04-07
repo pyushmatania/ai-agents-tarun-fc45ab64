@@ -306,9 +306,12 @@ const HomePage = () => {
                   <motion.button
                     key={mode.id}
                     whileTap={{ scale: 0.92, y: 2 }}
-                    onClick={() => { setActiveMode(mode.id); localStorage.setItem("teaching_mode", mode.id); }}
-                    className={`rounded-2xl p-2.5 text-center transition-all border-2 ${activeMode === mode.id ? "border-agni-green/50 bg-agni-green/10 shadow-md" : "border-border/30 bg-card hover:border-border"}`}
+                    onClick={() => { setActiveMode(mode.id); localStorage.setItem("teaching_mode", mode.id); SFX.tap(); }}
+                    className={`rounded-2xl p-2.5 text-center transition-all border-2 relative ${activeMode === mode.id ? "border-agni-green/50 bg-agni-green/10 shadow-md" : "border-border/30 bg-card hover:border-border"}`}
                   >
+                    {activeMode === mode.id && (
+                      <span className="absolute top-1 right-1 text-[7px] font-black text-agni-green bg-agni-green/15 px-1.5 py-0.5 rounded-full">✓</span>
+                    )}
                     <span className="text-xl block">{mode.emoji}</span>
                     <span className="text-[10px] font-extrabold block text-foreground mt-0.5">{mode.label}</span>
                     <span className="text-[7px] block text-muted-foreground font-semibold">{mode.desc}</span>
