@@ -593,6 +593,11 @@ const OnboardingPage = () => {
               <Button onClick={goNext} disabled={!name.trim()} className="w-full h-14 rounded-full bg-[#1CB0F6] hover:bg-[#1A9FE0] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
                 CONTINUE <ArrowRight size={18} className="ml-2" />
               </Button>
+              <div className="flex justify-center gap-4 mt-2">
+                <button onClick={goNext} className="text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip this step</button>
+                <span className="text-gray-300">•</span>
+                <button onClick={skipAll} className="text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip all → Settings</button>
+              </div>
             </div>
           </motion.div>
         )}
