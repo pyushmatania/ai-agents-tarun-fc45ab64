@@ -3,16 +3,17 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, Send, Loader2, Brain, Sparkles, Trash2,
-  Image, Paperclip, Mic, BookmarkPlus, StopCircle,
-  MessageSquare, GraduationCap, ChevronDown
+  StopCircle, GraduationCap
 } from "lucide-react";
 import { useChat, type ChatTab, type ChatMessage } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
 import { getPersona } from "@/lib/neuralOS";
 import BottomNav from "@/components/BottomNav";
-import ReactMarkdown from "react-markdown";
+import ContentRenderer from "@/components/chat/ContentRenderer";
+import SuggestionBar from "@/components/chat/SuggestionBar";
+import ChatToolbar from "@/components/chat/ChatToolbar";
+import { toast } from "sonner";
 
-// Extract suggestions from AGNI's response
 function parseSuggestions(content: string): { text: string; suggestions: string[] } {
   const match = content.match(/\[SUGGESTIONS\](.*?)\[\/SUGGESTIONS\]/s);
   if (!match) return { text: content, suggestions: [] };
@@ -28,6 +29,9 @@ const TAB_CONFIG = {
     color: "#58CC02",
     gradient: "from-agni-green/20 to-agni-green/5",
     placeholder: "Ask about AI agents, lessons...",
+    emptyTitle: "Learn with AGNI 🔥",
+    emptyDesc: "Your AI tutor for AI Agents — ask about concepts, get interactive lessons, and test yourself with quizzes.",
+    starters: ["What are AI agents?", "Explain RAG simply", "How do LLMs work?", "Teach me about tool use"],
   },
   general: {
     label: "AGNI Chat",
@@ -35,42 +39,11 @@ const TAB_CONFIG = {
     color: "#CE82FF",
     gradient: "from-agni-purple/20 to-agni-pink/5",
     placeholder: "Ask me anything...",
+    emptyTitle: "Chat with AGNI ✨",
+    emptyDesc: "Your AI companion for everything — code, creative writing, brainstorming, daily life, and more.",
+    starters: ["Help me brainstorm", "Explain quantum computing", "Write a poem about code", "Debug my logic"],
   },
 };
-
-function ChatBubble({ message, isLast }: { message: ChatMessage; isLast: boolean }) {
-  const isUser = message.role === "user";
-  const { text, suggestions } = parseSuggestions(message.content);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={`flex ${isUser ? "justify-end" : "justify-start"} mb-3`}
-    >
-      <div
-        className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 ${
-          isUser
-            ? "bg-agni-green text-white rounded-br-md"
-            : "bg-card border border-border/30 text-foreground rounded-bl-md"
-        }`}
-      >
-        {isUser ? (
-          <p className="text-[13px] font-medium leading-relaxed">{text}</p>
-        ) : text ? (
-          <div className="prose prose-sm prose-invert max-w-none text-[13px] leading-relaxed [&_p]:mb-1.5 [&_ul]:mb-1.5 [&_ol]:mb-1.5 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-xs [&_code]:text-[11px] [&_code]:bg-muted/30 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_pre]:bg-muted/20 [&_pre]:rounded-lg [&_pre]:p-2">
-            <ReactMarkdown>{text}</ReactMarkdown>
-          </div>
-        ) : (
-          <div className="flex items-center gap-1.5">
-            <Loader2 size={12} className="animate-spin text-agni-purple" />
-            <span className="text-[11px] text-muted-foreground">Thinking...</span>
-          </div>
-        )}
-      </div>
-    </motion.div>
-  );
-}
 
 export default function ChatPage() {
   const navigate = useNavigate();
@@ -78,16 +51,14 @@ export default function ChatPage() {
   const { user } = useAuth();
   const persona = getPersona();
 
-  // Check if a specific tab was requested
   const initialTab = (location.state as any)?.tab || "general";
   const [activeTab, setActiveTab] = useState<ChatTab>(initialTab);
 
   const chat = useChat(activeTab);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
 
-  // Build teaching context
   const teachingContext = useMemo(() => ({
     identity: persona.currentRole || undefined,
     mission: persona.goal || undefined,
@@ -100,10 +71,19 @@ export default function ChatPage() {
     ].slice(0, 5).join(", ") || undefined,
   }), [persona]);
 
-  // Auto-scroll on new messages
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    }
   }, [chat.messages]);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto";
+      inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 120) + "px";
+    }
+  }, [input]);
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -125,167 +105,167 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/20">
+      {/* Header - clean and minimal */}
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/10">
         <div className="flex items-center justify-between px-4 py-3">
-          <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-muted/30 flex items-center justify-center">
-            <ArrowLeft size={16} className="text-foreground" />
+          <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-2xl bg-muted/20 flex items-center justify-center hover:bg-muted/30 transition-colors">
+            <ArrowLeft size={18} className="text-foreground" />
           </button>
-          <div className="flex items-center gap-2">
-            <Brain size={18} className="text-agni-green" />
-            <span className="text-sm font-black text-foreground">AGNI Chat</span>
-          </div>
-          <button
-            onClick={chat.clearHistory}
-            className="w-9 h-9 rounded-full bg-muted/30 flex items-center justify-center"
-          >
-            <Trash2 size={14} className="text-muted-foreground" />
-          </button>
-        </div>
 
-        {/* Tab switcher */}
-        <div className="flex gap-1 px-4 pb-2">
-          {(Object.entries(TAB_CONFIG) as [ChatTab, typeof TAB_CONFIG.curriculum][]).map(([key, cfg]) => {
-            const isActive = activeTab === key;
-            const Icon = cfg.icon;
-            return (
-              <button
-                key={key}
-                onClick={() => setActiveTab(key)}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-black transition-all"
-                style={{
-                  background: isActive ? `${cfg.color}20` : "transparent",
-                  color: isActive ? cfg.color : "hsl(var(--muted-foreground))",
-                  border: `1.5px solid ${isActive ? `${cfg.color}40` : "transparent"}`,
-                }}
-              >
-                <Icon size={13} />
-                {cfg.label}
-              </button>
-            );
-          })}
+          {/* Tab switcher — pill style */}
+          <div className="flex bg-muted/15 rounded-2xl p-1">
+            {(Object.entries(TAB_CONFIG) as [ChatTab, typeof TAB_CONFIG.curriculum][]).map(([key, cfg]) => {
+              const isActive = activeTab === key;
+              const Icon = cfg.icon;
+              return (
+                <button
+                  key={key}
+                  onClick={() => setActiveTab(key)}
+                  className="relative flex items-center gap-1.5 px-4 py-2 rounded-xl text-[11px] font-black transition-all"
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="chatTabIndicator"
+                      className="absolute inset-0 rounded-xl"
+                      style={{ background: `${cfg.color}20`, border: `1.5px solid ${cfg.color}30` }}
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-1.5" style={{ color: isActive ? cfg.color : "hsl(var(--muted-foreground))" }}>
+                    <Icon size={13} />
+                    {cfg.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={() => {
+              chat.clearHistory();
+              toast.success("Chat cleared");
+            }}
+            className="w-10 h-10 rounded-2xl bg-muted/20 flex items-center justify-center hover:bg-muted/30 transition-colors"
+          >
+            <Trash2 size={15} className="text-muted-foreground" />
+          </button>
         </div>
       </div>
 
-      {/* Messages area */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3">
+      {/* Messages area — spacious */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
         {chat.isLoadingHistory ? (
-          <div className="flex flex-col items-center justify-center py-12 gap-2">
-            <Loader2 size={20} className="animate-spin text-agni-purple" />
-            <p className="text-[10px] font-bold text-muted-foreground">Loading chat history...</p>
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
+            <Loader2 size={24} className="animate-spin" style={{ color: tabConfig.color }} />
+            <p className="text-[11px] font-bold text-muted-foreground">Loading history...</p>
           </div>
         ) : chat.messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-4">
-            <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center"
-              style={{ background: `${tabConfig.color}15` }}
+          // Empty state — welcoming and spacious
+          <div className="flex flex-col items-center justify-center py-12 gap-6">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="w-20 h-20 rounded-3xl flex items-center justify-center"
+              style={{ background: `${tabConfig.color}10`, border: `2px solid ${tabConfig.color}20` }}
             >
-              <Brain size={28} style={{ color: tabConfig.color }} />
+              <Brain size={36} style={{ color: tabConfig.color }} />
+            </motion.div>
+
+            <div className="text-center max-w-[280px]">
+              <h2 className="text-lg font-black text-foreground mb-2">{tabConfig.emptyTitle}</h2>
+              <p className="text-[12px] text-muted-foreground leading-relaxed">{tabConfig.emptyDesc}</p>
             </div>
-            <div className="text-center">
-              <h3 className="text-sm font-black text-foreground mb-1">
-                {activeTab === "curriculum" ? "Learn with AGNI" : "Chat with AGNI"}
-              </h3>
-              <p className="text-[11px] text-muted-foreground max-w-[240px]">
-                {activeTab === "curriculum"
-                  ? "Ask about AI agents, get explanations tailored to your level"
-                  : "Ask me anything — AI, code, life, creativity. I'm here for it all."}
-              </p>
-            </div>
-            {/* Quick starters */}
-            <div className="flex flex-wrap gap-1.5 justify-center max-w-[300px]">
-              {(activeTab === "curriculum"
-                ? ["What are AI agents?", "Explain RAG simply", "How do LLMs work?"]
-                : ["Help me brainstorm", "Explain quantum computing", "Write a poem about code"]
-              ).map(s => (
-                <button
+
+            <div className="flex flex-wrap gap-2 justify-center max-w-[320px]">
+              {tabConfig.starters.map(s => (
+                <motion.button
                   key={s}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => handleSuggestionClick(s)}
-                  className="text-[10px] font-bold px-3 py-1.5 rounded-full border border-border/30 bg-card/50 text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-[11px] font-bold px-4 py-2.5 rounded-2xl border bg-card/50 text-foreground/70 hover:text-foreground transition-all"
+                  style={{ borderColor: `${tabConfig.color}20` }}
                 >
                   {s}
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
         ) : (
-          <>
-            {chat.messages.map((msg, i) => (
-              <ChatBubble key={msg.id} message={msg} isLast={i === chat.messages.length - 1} />
-            ))}
-          </>
+          <div className="space-y-1">
+            {chat.messages.map((msg) => {
+              const { text } = parseSuggestions(msg.content);
+              return (
+                <ContentRenderer
+                  key={msg.id}
+                  content={text}
+                  isUser={msg.role === "user"}
+                  showActions={msg.role === "assistant" && !!text}
+                />
+              );
+            })}
+          </div>
         )}
       </div>
 
-      {/* Suggestions chips */}
-      {lastSuggestions.length > 0 && !chat.isLoading && (
-        <div className="px-4 pb-2">
-          <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
-            {lastSuggestions.map((s, i) => (
-              <motion.button
-                key={i}
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                onClick={() => handleSuggestionClick(s)}
-                className="shrink-0 text-[10px] font-bold px-3 py-1.5 rounded-full border bg-card/50 text-muted-foreground hover:text-foreground transition-colors"
-                style={{ borderColor: `${tabConfig.color}30` }}
-              >
-                {s}
-              </motion.button>
-            ))}
-          </div>
-        </div>
+      {/* AI Suggestions — collapsible */}
+      {!chat.isLoading && lastSuggestions.length > 0 && (
+        <SuggestionBar
+          suggestions={lastSuggestions}
+          onSelect={handleSuggestionClick}
+          color={tabConfig.color}
+          disabled={chat.isLoading}
+        />
       )}
 
-      {/* Input area */}
-      <div className="sticky bottom-0 bg-background border-t border-border/20 px-3 py-2 pb-20">
-        <div className="flex items-center gap-2">
-          {/* Extras for general tab */}
+      {/* Input area — spacious and clean */}
+      <div className="sticky bottom-0 bg-background/95 backdrop-blur-md border-t border-border/10 px-4 py-3 pb-20">
+        <div className="flex items-end gap-2">
+          {/* Toolbar for general tab */}
           {activeTab === "general" && (
-            <div className="flex gap-1">
-              <button className="w-8 h-8 rounded-full bg-agni-purple/10 flex items-center justify-center">
-                <Image size={14} className="text-agni-purple" />
-              </button>
-              <button className="w-8 h-8 rounded-full bg-agni-purple/10 flex items-center justify-center">
-                <Paperclip size={14} className="text-agni-purple" />
-              </button>
-            </div>
+            <ChatToolbar
+              onImageClick={() => toast.info("Image generation coming soon!")}
+              onFileClick={() => toast.info("File upload coming soon!")}
+              onVoiceClick={() => toast.info("Voice input coming soon!")}
+              onSearchClick={() => toast.info("Web search coming soon!")}
+            />
           )}
 
           <div className="flex-1 relative">
-            <input
+            <textarea
               ref={inputRef}
               value={input}
               onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && !e.shiftKey && handleSend()}
+              onKeyDown={e => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
               placeholder={tabConfig.placeholder}
-              className="w-full bg-card border border-border/30 rounded-2xl pl-4 pr-10 py-2.5 text-[12px] font-medium text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-agni-green/40"
+              rows={1}
+              className="w-full bg-card border border-border/20 rounded-2xl pl-4 pr-12 py-3 text-[13px] font-medium text-foreground placeholder:text-muted-foreground/30 focus:outline-none resize-none overflow-hidden transition-all"
+              style={{ 
+                borderColor: input.trim() ? `${tabConfig.color}30` : undefined,
+              }}
             />
             {chat.isLoading ? (
               <button
                 onClick={chat.stopStreaming}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-destructive/20 flex items-center justify-center"
+                className="absolute right-2 bottom-2 w-8 h-8 rounded-xl bg-destructive/20 flex items-center justify-center hover:bg-destructive/30 transition-colors"
               >
-                <StopCircle size={14} className="text-destructive" />
+                <StopCircle size={16} className="text-destructive" />
               </button>
             ) : (
               <button
                 onClick={handleSend}
                 disabled={!input.trim()}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center transition-colors disabled:opacity-30"
+                className="absolute right-2 bottom-2 w-8 h-8 rounded-xl flex items-center justify-center transition-all disabled:opacity-20"
                 style={{ background: input.trim() ? tabConfig.color : "hsl(var(--muted))" }}
               >
-                <Send size={12} className="text-white" />
+                <Send size={14} className="text-white" />
               </button>
             )}
           </div>
-
-          {activeTab === "general" && (
-            <button className="w-8 h-8 rounded-full bg-agni-purple/10 flex items-center justify-center">
-              <Mic size={14} className="text-agni-purple" />
-            </button>
-          )}
         </div>
       </div>
 
