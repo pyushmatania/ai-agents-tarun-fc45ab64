@@ -368,7 +368,7 @@ export default function SmartInputBar({
                             <motion.button
                               key={item}
                               whileTap={{ scale: 0.93 }}
-                              onClick={() => handleInterestSend(cat.id, item)}
+                              onClick={() => handleInterestSelect(cat.id, item)}
                               disabled={isLoading}
                               className="shrink-0"
                             >
