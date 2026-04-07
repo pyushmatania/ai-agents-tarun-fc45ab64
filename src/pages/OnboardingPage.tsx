@@ -295,7 +295,7 @@ const OnboardingPage = () => {
         {/* ═══════ STEP 2: ROLE (expanded) ═══════ */}
         {step === 2 && (
           <motion.div key="role" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
-            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
+            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-agni-purple/15 via-agni-pink/5 to-transparent pointer-events-none" />
 
