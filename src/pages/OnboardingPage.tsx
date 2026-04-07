@@ -1,65 +1,63 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  ArrowRight, ArrowLeft, Sparkles, Search, Check, Plus, X,
-  Shield, Wifi, Cpu, Zap, Heart, Star, Rocket, Brain,
-  BookOpen, Gamepad2, Music, Film, Trophy, Newspaper, Lightbulb
+  ArrowRight, ArrowLeft, Sparkles, Search, Check, X,
+  Shield, Zap, Heart, Star, Rocket, Brain,
+  BookOpen, Gamepad2, Music, Film, Trophy, Newspaper, Lightbulb,
+  GraduationCap, Code, Briefcase, Palette, Wrench, Globe, Target,
+  MessageCircle
 } from "lucide-react";
 import Agni from "@/components/Agni";
 import type { AgniExpression } from "@/components/Agni";
 import { motion, AnimatePresence } from "framer-motion";
 import { savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona } from "@/lib/neuralOS";
 
-/* ── STEP CONFIG ── */
-
+/* ── EXPANDED ROLES ── */
 const ROLES = [
-  { id: "student", label: "Student", emoji: "🎓", desc: "Learning AI from scratch", goal: "Learn AI from zero", exp: "beginner", color: "from-blue-500 to-cyan-400" },
-  { id: "developer", label: "Developer", emoji: "💻", desc: "Building real agents", goal: "Build production AI agents", exp: "engineer", color: "from-green-500 to-emerald-400" },
-  { id: "founder", label: "Founder", emoji: "🚀", desc: "Scaling with AI", goal: "Build a startup with AI", exp: "some experience", color: "from-orange-500 to-amber-400" },
-  { id: "manager", label: "PM / Manager", emoji: "📊", desc: "Leading AI teams", goal: "Lead AI product teams", exp: "some experience", color: "from-purple-500 to-violet-400" },
-  { id: "researcher", label: "Researcher", emoji: "🔬", desc: "Deep exploration", goal: "Research AI deeply", exp: "engineer", color: "from-pink-500 to-rose-400" },
-  { id: "curious", label: "Just Curious", emoji: "✨", desc: "Here for fun!", goal: "Explore for fun", exp: "beginner", color: "from-yellow-500 to-amber-300" },
+  { id: "student", label: "Student", emoji: "🎓", desc: "Learning AI from scratch", goal: "Learn AI from zero", exp: "beginner", icon: GraduationCap },
+  { id: "developer", label: "Developer", emoji: "💻", desc: "Building real agents", goal: "Build production AI agents", exp: "engineer", icon: Code },
+  { id: "founder", label: "Founder / CEO", emoji: "🚀", desc: "Scaling with AI", goal: "Build a startup with AI", exp: "some experience", icon: Rocket },
+  { id: "manager", label: "PM / Manager", emoji: "📊", desc: "Leading AI teams", goal: "Lead AI product teams", exp: "some experience", icon: Briefcase },
+  { id: "researcher", label: "Researcher", emoji: "🔬", desc: "Deep exploration", goal: "Research AI deeply", exp: "engineer", icon: Brain },
+  { id: "designer", label: "Designer", emoji: "🎨", desc: "AI meets creativity", goal: "Use AI in design workflows", exp: "some experience", icon: Palette },
+  { id: "marketer", label: "Marketer", emoji: "📢", desc: "Growth with AI", goal: "Use AI for marketing", exp: "beginner", icon: Target },
+  { id: "freelancer", label: "Freelancer", emoji: "🌍", desc: "AI superpowers", goal: "Freelance with AI tools", exp: "some experience", icon: Globe },
+  { id: "data", label: "Data / ML", emoji: "📈", desc: "Models & pipelines", goal: "Build ML pipelines", exp: "engineer", icon: Wrench },
+  { id: "curious", label: "Just Curious", emoji: "✨", desc: "Here for fun!", goal: "Explore for fun", exp: "beginner", icon: Star },
 ];
 
 const VIBES = [
-  { id: "fun", label: "Fun & Memes", emoji: "😂", desc: "Make me LOL while learning", icon: Heart, color: "bg-pink-500/20 border-pink-400" },
-  { id: "story", label: "Story-driven", emoji: "📖", desc: "Tales & analogies", icon: BookOpen, color: "bg-purple-500/20 border-purple-400" },
-  { id: "serious", label: "Deep & Serious", emoji: "🧠", desc: "No fluff, pure knowledge", icon: Brain, color: "bg-blue-500/20 border-blue-400" },
-  { id: "fast", label: "Fast & Practical", emoji: "⚡", desc: "Ship it now!", icon: Zap, color: "bg-amber-500/20 border-amber-400" },
+  { id: "fun", label: "Fun & Memes", emoji: "😂", desc: "Make me LOL while learning", icon: Heart, gradient: "from-pink-500 to-rose-400" },
+  { id: "story", label: "Story-driven", emoji: "📖", desc: "Tales & analogies", icon: BookOpen, gradient: "from-purple-500 to-violet-400" },
+  { id: "serious", label: "Deep & Serious", emoji: "🧠", desc: "No fluff, pure knowledge", icon: Brain, gradient: "from-blue-500 to-cyan-400" },
+  { id: "fast", label: "Fast & Practical", emoji: "⚡", desc: "Ship it now!", icon: Zap, gradient: "from-amber-500 to-yellow-400" },
 ];
 
-const SCREEN_COLORS = [
-  { bg: "from-[#58CC02] to-[#45A800]", text: "text-white" },       // green
-  { bg: "from-[#1CB0F6] to-[#0899D6]", text: "text-white" },       // blue
-  { bg: "from-[#CE82FF] to-[#A855F7]", text: "text-white" },       // purple
-  { bg: "from-[#FF9600] to-[#E08500]", text: "text-white" },       // orange
-  { bg: "from-[#FF4B4B] to-[#E03E3E]", text: "text-white" },       // red
-  { bg: "from-[#FFC800] to-[#E0AC00]", text: "text-gray-900" },    // gold
-  { bg: "from-[#FF86D8] to-[#E870C0]", text: "text-white" },       // pink
-  { bg: "from-[#1CB0F6] to-[#58CC02]", text: "text-white" },       // blue-green
+/* ── AGNI HINTS — shown on each category screen ── */
+const AGNI_HINTS: Record<string, { speech: string; expr: AgniExpression; hint: string }> = {
+  shows: { speech: "I'll use your fave scenes as analogies! 🎬", expr: "excited", hint: "💡 Neural OS × AGNI: \"Think of an AI agent like Byomkesh — gathering clues from multiple sources!\"" },
+  sports: { speech: "Sports = perfect AI analogies! ⚽", expr: "happy", hint: "💡 AGNI will say: \"Think of RAG like Dhoni reading the pitch — pulling the right info at the right time!\"" },
+  music: { speech: "Your playlist shapes my vibe! 🎵", expr: "celebrating", hint: "💡 Neural OS: \"An LLM is like A.R. Rahman composing — mixing patterns into something new!\"" },
+  gaming: { speech: "Game mechanics = AI concepts! 🎮", expr: "excited", hint: "💡 AGNI: \"Multi-agent systems are like your Valorant team — each agent has a role!\"" },
+  news: { speech: "I'll reference your sources! 📰", expr: "teaching", hint: "💡 Neural OS: \"I'll cite @karpathy's takes when teaching you about transformers!\"" },
+  books: { speech: "Books + AI = 🔥 combos!", expr: "thinking", hint: "💡 AGNI: \"Like Zero to One says — AI agents are the next 0→1 shift!\"" },
+  hobbies: { speech: "Everything connects to AI! ✨", expr: "happy", hint: "💡 Neural OS: \"Your love for cooking? AI agents follow recipes too — we call them workflows!\"" },
+  curious: { speech: "Let's explore together! 🔮", expr: "celebrating", hint: "💡 AGNI: \"I'll build personalized rabbit holes into every lesson for you!\"" },
+};
+
+const CATEGORY_GRADIENTS = [
+  "from-[#FF4B4B] to-[#FF86D8]",
+  "from-[#1CB0F6] to-[#CE82FF]",
+  "from-[#58CC02] to-[#1CB0F6]",
+  "from-[#FFC800] to-[#FF9600]",
+  "from-[#CE82FF] to-[#FF4B4B]",
+  "from-[#FF9600] to-[#FFC800]",
+  "from-[#1CB0F6] to-[#58CC02]",
+  "from-[#FF86D8] to-[#CE82FF]",
 ];
 
-const MASCOT_SPEECHES: Record<number, { text: string; expr: AgniExpression }> = {
-  0: { text: "", expr: "excited" },
-  1: { text: "Let's make this personal! 🎯", expr: "teaching" },
-  2: { text: "What brings you here?", expr: "thinking" },
-  3: { text: "How should I talk to you? 🎨", expr: "happy" },
-};
-
-const CATEGORY_ICONS: Record<string, any> = {
-  shows: Film,
-  sports: Trophy,
-  music: Music,
-  gaming: Gamepad2,
-  news: Newspaper,
-  books: BookOpen,
-  hobbies: Star,
-  curious: Lightbulb,
-};
-
-// Steps: 0=splash, 1=name, 2=role, 3=vibe, 4..4+N-1=categories, 4+N=confirm
 const TOTAL_STEPS = 4 + SUGGESTION_CATEGORIES.length + 1;
 
 const slideVariants = {
@@ -77,8 +75,6 @@ const OnboardingPage = () => {
   const [selectedVibe, setSelectedVibe] = useState<string | null>(null);
   const [persona, setPersona] = useState<Partial<NeuralOSPersona>>({});
   const [search, setSearch] = useState("");
-  const [customInput, setCustomInput] = useState("");
-  const [showSelected, setShowSelected] = useState(false);
 
   const categoryIndex = step >= 4 ? step - 4 : -1;
   const activeCategory = categoryIndex >= 0 && categoryIndex < SUGGESTION_CATEGORIES.length
@@ -100,8 +96,8 @@ const OnboardingPage = () => {
 
   const progress = Math.round((step / (TOTAL_STEPS - 1)) * 100);
 
-  const goNext = () => { setDir(1); setStep(s => s + 1); setSearch(""); setCustomInput(""); };
-  const goBack = () => { setDir(-1); setStep(s => Math.max(0, s - 1)); setSearch(""); setCustomInput(""); };
+  const goNext = () => { setDir(1); setStep(s => s + 1); setSearch(""); };
+  const goBack = () => { setDir(-1); setStep(s => Math.max(0, s - 1)); setSearch(""); };
 
   const toggleItem = (item: string) => {
     if (!activeCategory) return;
@@ -116,14 +112,16 @@ const OnboardingPage = () => {
     setPersona({ ...persona, [catField]: current.filter(x => x !== item) });
   };
 
-  const addCustom = () => {
-    if (!customInput.trim() || !activeCategory) return;
-    const field = activeCategory.field as keyof NeuralOSPersona;
-    const current = (persona[field] as string[]) || [];
-    if (!current.includes(customInput.trim())) {
-      setPersona({ ...persona, [field]: [...current, customInput.trim()] });
+  // Search filters suggestions AND allows adding custom via Enter
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && search.trim() && activeCategory) {
+      const field = activeCategory.field as keyof NeuralOSPersona;
+      const current = (persona[field] as string[]) || [];
+      if (!current.includes(search.trim())) {
+        setPersona({ ...persona, [field]: [...current, search.trim()] });
+      }
+      setSearch("");
     }
-    setCustomInput("");
   };
 
   const filtered = activeCategory
@@ -132,6 +130,10 @@ const OnboardingPage = () => {
         (s.tag && s.tag.toLowerCase().includes(search.toLowerCase()))
       )
     : [];
+
+  // Show "add as custom" option when search doesn't match any suggestion
+  const showAddCustom = search.trim().length > 1 && activeCategory &&
+    !activeCategory.suggestions.some(s => s.name.toLowerCase() === search.toLowerCase().trim());
 
   const finish = () => {
     const role = ROLES.find(r => r.id === selectedRole);
@@ -150,24 +152,14 @@ const OnboardingPage = () => {
     navigate("/");
   };
 
-  const screenColor = SCREEN_COLORS[step % SCREEN_COLORS.length];
-
-  // Mascot speech bubble component
-  const MascotBubble = ({ text, expr, size = 100 }: { text: string; expr: AgniExpression; size?: number }) => (
-    <div className="flex flex-col items-center gap-3">
-      <Agni expression={expr} size={size} speech={text} animate />
-    </div>
-  );
+  const catHint = activeCategory ? AGNI_HINTS[activeCategory.id] : null;
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Progress bar */}
       {step > 0 && (
         <div className="absolute top-0 left-0 right-0 z-30 px-4 pt-3 flex items-center gap-3">
-          <button
-            onClick={goBack}
-            className="w-9 h-9 rounded-full bg-card/80 backdrop-blur border border-border flex items-center justify-center shrink-0"
-          >
+          <button onClick={goBack} className="w-9 h-9 rounded-full bg-card/80 backdrop-blur border border-border flex items-center justify-center shrink-0">
             <ArrowLeft size={16} className="text-foreground" />
           </button>
           <div className="flex-1 h-3 bg-muted/40 rounded-full overflow-hidden">
@@ -184,92 +176,61 @@ const OnboardingPage = () => {
       <AnimatePresence mode="wait" custom={dir}>
         {/* ═══════ STEP 0: SPLASH ═══════ */}
         {step === 0 && (
-          <motion.div
-            key="splash"
-            custom={dir}
-            variants={slideVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: 0.35, ease: "easeInOut" }}
+          <motion.div key="splash" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen items-center justify-center"
           >
-            {/* Big colorful gradient background */}
-            <div className="absolute inset-0 bg-gradient-to-b from-agni-green/20 via-transparent to-agni-blue/10 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-agni-green/20 via-transparent to-agni-purple/10 pointer-events-none" />
+            {/* Floating decorative orbs */}
+            <motion.div className="absolute top-20 left-8 w-20 h-20 rounded-full bg-agni-blue/10 blur-2xl" animate={{ y: [0, -15, 0], scale: [1, 1.2, 1] }} transition={{ duration: 4, repeat: Infinity }} />
+            <motion.div className="absolute bottom-32 right-6 w-16 h-16 rounded-full bg-agni-purple/15 blur-xl" animate={{ y: [0, 10, 0] }} transition={{ duration: 3, repeat: Infinity }} />
+            <motion.div className="absolute top-40 right-12 w-12 h-12 rounded-full bg-agni-gold/10 blur-xl" animate={{ x: [0, 8, 0] }} transition={{ duration: 5, repeat: Infinity }} />
 
-            <motion.div
-              initial={{ scale: 0, rotate: -30 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", stiffness: 200, damping: 12, delay: 0.2 }}
-              className="relative z-10 mb-4"
-            >
+            <motion.div initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 200, damping: 12, delay: 0.2 }} className="relative z-10 mb-4">
               <Agni expression="celebrating" size={180} animate />
             </motion.div>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="text-5xl font-black text-foreground text-center mb-2 relative z-10"
-            >
+            <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="text-5xl font-black text-foreground text-center mb-2 relative z-10">
               Agent<span className="text-agni-green">Dojo</span>
             </motion.h1>
 
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
-              className="text-base text-muted-foreground text-center font-semibold mb-8 relative z-10"
-            >
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="text-base text-muted-foreground text-center font-semibold mb-3 relative z-10">
               Master AI Agents. Level Up. 🚀
             </motion.p>
 
-            {/* Feature pills */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1 }}
-              className="flex gap-3 mb-10 relative z-10"
+            {/* Neural OS teaser */}
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.9 }}
+              className="bg-card/60 backdrop-blur border border-agni-purple/20 rounded-2xl px-4 py-3 mb-6 relative z-10 max-w-[280px]"
             >
+              <div className="flex items-center gap-2 mb-1">
+                <Brain size={14} className="text-agni-purple" />
+                <span className="text-[10px] font-black text-agni-purple uppercase tracking-wider">Neural OS × AGNI</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                I'll learn YOUR interests and teach AI using analogies from <span className="text-agni-gold font-bold">your favorite shows, sports & music</span> 🎯
+              </p>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }} className="flex gap-3 mb-8 relative z-10">
               {[
                 { icon: Shield, label: "Free", color: "bg-agni-green/15 text-agni-green" },
                 { icon: Zap, label: "AI-Powered", color: "bg-agni-blue/15 text-agni-blue" },
                 { icon: Rocket, label: "Gamified", color: "bg-agni-purple/15 text-agni-purple" },
               ].map((f, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 1.1 + i * 0.1 }}
-                  className={`${f.color} rounded-full px-4 py-2 flex items-center gap-1.5`}
-                >
+                <motion.div key={i} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1.1 + i * 0.1 }}
+                  className={`${f.color} rounded-full px-4 py-2 flex items-center gap-1.5`}>
                   <f.icon size={14} />
                   <span className="text-xs font-extrabold">{f.label}</span>
                 </motion.div>
               ))}
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.4 }}
-              className="w-full relative z-10"
-            >
-              <Button
-                onClick={goNext}
-                className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-lg shadow-btn-3d btn-3d hover:bg-agni-green-dark"
-              >
-                GET STARTED
-                <ArrowRight size={20} className="ml-2" />
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.3 }} className="w-full relative z-10">
+              <Button onClick={goNext} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-lg shadow-btn-3d btn-3d hover:bg-agni-green-dark">
+                GET STARTED <ArrowRight size={20} className="ml-2" />
               </Button>
             </motion.div>
 
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.6 }}
-              className="text-xs text-muted-foreground mt-4 relative z-10"
-            >
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }} className="text-xs text-muted-foreground mt-4 relative z-10">
               Already learning? <button onClick={() => navigate("/")} className="text-agni-green font-bold underline">Sign in</button>
             </motion.p>
           </motion.div>
@@ -277,160 +238,117 @@ const OnboardingPage = () => {
 
         {/* ═══════ STEP 1: NAME ═══════ */}
         {step === 1 && (
-          <motion.div
-            key="name"
-            custom={dir}
-            variants={slideVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: 0.35 }}
+          <motion.div key="name" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-agni-blue/15 to-transparent pointer-events-none" />
+            <motion.div className="absolute top-24 right-4 w-14 h-14 rounded-full bg-agni-pink/10 blur-xl" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 3, repeat: Infinity }} />
 
             <div className="flex-1 flex flex-col items-center justify-center relative z-10">
-              <MascotBubble text="Hey! What's your name? 👋" expr="happy" size={120} />
+              <Agni expression="happy" size={120} speech="Hey! What's your name? 👋" animate />
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="w-full mt-8"
-              >
-                <h2 className="text-2xl font-black text-foreground text-center mb-6">
-                  What should I call you?
-                </h2>
-                <Input
-                  type="text"
-                  placeholder="Enter your name..."
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="h-14 rounded-2xl bg-card border-2 border-border text-lg font-bold text-center focus:border-agni-green"
-                  autoFocus
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="w-full mt-8">
+                <h2 className="text-2xl font-black text-foreground text-center mb-2">What should I call you?</h2>
+                <p className="text-sm text-muted-foreground text-center mb-6">I'm <span className="text-agni-green font-bold">AGNI</span>, your AI teaching buddy!</p>
+                <Input type="text" placeholder="Enter your name..." value={name} onChange={(e) => setName(e.target.value)}
+                  className="h-14 rounded-2xl bg-card border-2 border-border text-lg font-bold text-center focus:border-agni-green" autoFocus
                 />
+              </motion.div>
+
+              {/* Chat preview bubble */}
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
+                className="mt-6 bg-card/50 border border-border/50 rounded-2xl p-3 w-full max-w-[280px]"
+              >
+                <div className="flex items-center gap-2 mb-1.5">
+                  <MessageCircle size={12} className="text-agni-green" />
+                  <span className="text-[9px] font-black text-agni-green uppercase tracking-wider">Preview</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground italic">
+                  "Hey <span className="text-agni-gold font-bold">{name || "..."}</span>! Think of an AI agent like {name ? "your personal Iron Man's JARVIS" : "..."} — it observes, thinks, then acts! 🤖"
+                </p>
               </motion.div>
             </div>
 
-            <Button
-              onClick={goNext}
-              disabled={!name.trim()}
-              className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none"
-            >
-              CONTINUE
-              <ArrowRight size={18} className="ml-2" />
+            <Button onClick={goNext} disabled={!name.trim()} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none">
+              CONTINUE <ArrowRight size={18} className="ml-2" />
             </Button>
           </motion.div>
         )}
 
-        {/* ═══════ STEP 2: ROLE ═══════ */}
+        {/* ═══════ STEP 2: ROLE (expanded) ═══════ */}
         {step === 2 && (
-          <motion.div
-            key="role"
-            custom={dir}
-            variants={slideVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: 0.35 }}
+          <motion.div key="role" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-agni-purple/15 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-agni-purple/15 via-agni-pink/5 to-transparent pointer-events-none" />
 
-            <div className="flex-1 relative z-10">
-              <div className="flex justify-center mb-4">
-                <Agni expression="thinking" size={90} speech="What brings you here? 🤔" animate />
+            <div className="flex-1 relative z-10 overflow-y-auto scrollbar-none">
+              <div className="flex justify-center mb-3">
+                <Agni expression="thinking" size={80} speech="What brings you here? 🤔" animate />
               </div>
 
-              <h2 className="text-2xl font-black text-foreground text-center mb-6">
-                I am a...
-              </h2>
+              <h2 className="text-2xl font-black text-foreground text-center mb-1">I am a...</h2>
+              <p className="text-xs text-muted-foreground text-center mb-5">Pick what fits best</p>
 
-              <div className="grid grid-cols-2 gap-3">
-                {ROLES.map((role, i) => (
-                  <motion.button
-                    key={role.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 + i * 0.06 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setSelectedRole(role.id)}
-                    className={`relative p-4 rounded-2xl border-2 text-left transition-all overflow-hidden ${
-                      selectedRole === role.id
-                        ? "border-agni-green bg-agni-green/10 shadow-glow-green"
-                        : "border-border bg-card hover:border-muted-foreground/30"
-                    }`}
-                  >
-                    {selectedRole === role.id && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="absolute top-2 right-2 w-6 h-6 rounded-full bg-agni-green flex items-center justify-center"
-                      >
-                        <Check size={14} className="text-white" strokeWidth={3} />
-                      </motion.div>
-                    )}
-                    <span className="text-3xl block mb-1">{role.emoji}</span>
-                    <span className="text-sm font-extrabold text-foreground block">{role.label}</span>
-                    <span className="text-[10px] text-muted-foreground">{role.desc}</span>
-                  </motion.button>
-                ))}
+              <div className="grid grid-cols-2 gap-2.5">
+                {ROLES.map((role, i) => {
+                  const Icon = role.icon;
+                  return (
+                    <motion.button key={role.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 + i * 0.04 }}
+                      whileTap={{ scale: 0.95 }} onClick={() => setSelectedRole(role.id)}
+                      className={`relative p-3 rounded-2xl border-2 text-left transition-all overflow-hidden ${
+                        selectedRole === role.id ? "border-agni-green bg-agni-green/10 shadow-glow-green" : "border-border bg-card hover:border-muted-foreground/30"
+                      }`}
+                    >
+                      {selectedRole === role.id && (
+                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-2 right-2 w-5 h-5 rounded-full bg-agni-green flex items-center justify-center">
+                          <Check size={12} className="text-white" strokeWidth={3} />
+                        </motion.div>
+                      )}
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-2xl">{role.emoji}</span>
+                        <Icon size={14} className="text-muted-foreground" />
+                      </div>
+                      <span className="text-xs font-extrabold text-foreground block">{role.label}</span>
+                      <span className="text-[9px] text-muted-foreground">{role.desc}</span>
+                    </motion.button>
+                  );
+                })}
               </div>
             </div>
 
-            <Button
-              onClick={goNext}
-              disabled={!selectedRole}
-              className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none"
-            >
-              CONTINUE
-              <ArrowRight size={18} className="ml-2" />
+            <Button onClick={goNext} disabled={!selectedRole} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none mt-3">
+              CONTINUE <ArrowRight size={18} className="ml-2" />
             </Button>
           </motion.div>
         )}
 
         {/* ═══════ STEP 3: VIBE ═══════ */}
         {step === 3 && (
-          <motion.div
-            key="vibe"
-            custom={dir}
-            variants={slideVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: 0.35 }}
+          <motion.div key="vibe" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-agni-orange/15 to-transparent pointer-events-none" />
 
             <div className="flex-1 relative z-10">
-              <div className="flex justify-center mb-4">
-                <Agni expression="excited" size={90} speech="How should I teach you? 🎨" animate />
+              <div className="flex justify-center mb-3">
+                <Agni expression="excited" size={80} speech="How should I teach you? 🎨" animate />
               </div>
 
-              <h2 className="text-2xl font-black text-foreground text-center mb-2">
-                My learning style is...
-              </h2>
-              <p className="text-sm text-muted-foreground text-center mb-6">Pick what feels right</p>
+              <h2 className="text-2xl font-black text-foreground text-center mb-1">My learning style is...</h2>
+              <p className="text-xs text-muted-foreground text-center mb-5">Pick what feels right</p>
 
               <div className="space-y-3">
                 {VIBES.map((vibe, i) => {
                   const Icon = vibe.icon;
                   return (
-                    <motion.button
-                      key={vibe.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.15 + i * 0.08 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => setSelectedVibe(vibe.id)}
+                    <motion.button key={vibe.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.08 }}
+                      whileTap={{ scale: 0.97 }} onClick={() => setSelectedVibe(vibe.id)}
                       className={`w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4 transition-all ${
-                        selectedVibe === vibe.id
-                          ? "border-agni-green bg-agni-green/10 shadow-glow-green"
-                          : "border-border bg-card"
+                        selectedVibe === vibe.id ? "border-agni-green bg-agni-green/10 shadow-glow-green" : "border-border bg-card"
                       }`}
                     >
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${vibe.color}`}>
+                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${vibe.gradient} flex items-center justify-center shadow-lg`}>
                         <span className="text-2xl">{vibe.emoji}</span>
                       </div>
                       <div className="flex-1">
@@ -438,11 +356,7 @@ const OnboardingPage = () => {
                         <span className="text-xs text-muted-foreground">{vibe.desc}</span>
                       </div>
                       {selectedVibe === vibe.id && (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          className="w-7 h-7 rounded-full bg-agni-green flex items-center justify-center"
-                        >
+                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-7 h-7 rounded-full bg-agni-green flex items-center justify-center">
                           <Check size={16} className="text-white" strokeWidth={3} />
                         </motion.div>
                       )}
@@ -450,84 +364,67 @@ const OnboardingPage = () => {
                   );
                 })}
               </div>
+
+              {/* Neural OS hint */}
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
+                className="mt-5 bg-agni-purple/5 border border-agni-purple/20 rounded-2xl px-4 py-3"
+              >
+                <p className="text-[10px] text-agni-purple font-bold">💡 Neural OS adapts: If you pick "Fun & Memes", AGNI will use memes & jokes. Pick "Fast", get bullet points & code!</p>
+              </motion.div>
             </div>
 
-            <Button
-              onClick={goNext}
-              disabled={!selectedVibe}
-              className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none"
-            >
-              CONTINUE
-              <ArrowRight size={18} className="ml-2" />
+            <Button onClick={goNext} disabled={!selectedVibe} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none mt-3">
+              CONTINUE <ArrowRight size={18} className="ml-2" />
             </Button>
           </motion.div>
         )}
 
-        {/* ═══════ STEP 4+: CATEGORY SELECTION ═══════ */}
+        {/* ═══════ CATEGORY SELECTION SCREENS ═══════ */}
         {activeCategory && !isConfirmStep && (
-          <motion.div
-            key={`cat-${categoryIndex}`}
-            custom={dir}
-            variants={slideVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: 0.3 }}
+          <motion.div key={`cat-${categoryIndex}`} custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.3 }}
             className="relative z-10 max-w-md mx-auto px-5 pt-16 pb-4 flex flex-col min-h-screen h-screen"
           >
-            {/* Colored accent */}
-            <div className={`absolute inset-0 bg-gradient-to-b ${SCREEN_COLORS[(categoryIndex + 2) % SCREEN_COLORS.length].bg} opacity-10 pointer-events-none`} />
+            {/* Colorful gradient accent */}
+            <div className={`absolute inset-0 bg-gradient-to-b ${CATEGORY_GRADIENTS[categoryIndex % CATEGORY_GRADIENTS.length]} opacity-[0.07] pointer-events-none`} />
+            <motion.div className="absolute top-24 right-4 w-20 h-20 rounded-full bg-agni-gold/8 blur-2xl" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 4, repeat: Infinity }} />
 
             <div className="relative z-10 flex flex-col flex-1 min-h-0">
-              {/* Category header with mascot */}
-              <div className="flex items-center gap-3 mb-3 shrink-0">
-                <Agni
-                  expression={categoryIndex % 2 === 0 ? "teaching" : "happy"}
-                  size={56}
-                  animate
-                />
+              {/* Header with mascot */}
+              <div className="flex items-center gap-3 mb-2 shrink-0">
+                <Agni expression={catHint?.expr || "teaching"} size={56} animate speech={catHint?.speech} />
                 <div className="flex-1">
                   <h2 className="text-lg font-black text-foreground flex items-center gap-2">
                     <span className="text-2xl">{activeCategory.emoji}</span>
                     {activeCategory.label}
                   </h2>
-                  <p className="text-xs text-muted-foreground">{activeCategory.description}</p>
+                  <p className="text-[10px] text-muted-foreground">{activeCategory.description}</p>
                 </div>
-                {currentItems.length > 0 && (
-                  <button
-                    onClick={() => setShowSelected(!showSelected)}
-                    className="bg-agni-green/15 text-agni-green text-xs font-extrabold px-3 py-1.5 rounded-full flex items-center gap-1"
-                  >
-                    {currentItems.length} picked
-                    <motion.div animate={{ rotate: showSelected ? 180 : 0 }}>▼</motion.div>
-                  </button>
-                )}
               </div>
 
-              {/* Selected items panel */}
+              {/* Neural OS capability hint */}
+              {catHint && (
+                <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+                  className="bg-agni-purple/5 border border-agni-purple/15 rounded-xl px-3 py-2 mb-2 shrink-0"
+                >
+                  <p className="text-[9px] text-agni-purple/80 font-semibold leading-relaxed">{catHint.hint}</p>
+                </motion.div>
+              )}
+
+              {/* Selected items panel (always visible when items selected) */}
               <AnimatePresence>
-                {showSelected && currentItems.length > 0 && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden mb-3 shrink-0"
-                  >
-                    <div className="bg-agni-green/5 border border-agni-green/20 rounded-2xl p-3">
-                      <p className="text-[10px] font-extrabold text-agni-green uppercase tracking-wider mb-2">Your picks</p>
+                {currentItems.length > 0 && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden mb-2 shrink-0">
+                    <div className="bg-agni-green/5 border border-agni-green/20 rounded-xl p-2.5">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[9px] font-extrabold text-agni-green uppercase tracking-wider">Your picks ({currentItems.length})</span>
+                      </div>
                       <div className="flex flex-wrap gap-1.5">
                         {currentItems.map((item) => (
-                          <motion.button
-                            key={item}
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            exit={{ scale: 0 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => toggleItem(item)}
-                            className="bg-agni-green/20 text-agni-green text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 hover:bg-agni-red/20 hover:text-agni-red transition-colors"
+                          <motion.button key={item} initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} layout
+                            whileTap={{ scale: 0.9 }} onClick={() => toggleItem(item)}
+                            className="bg-agni-green/20 text-agni-green text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 hover:bg-agni-red/20 hover:text-agni-red transition-colors"
                           >
-                            {item}
-                            <X size={12} />
+                            {item} <X size={10} />
                           </motion.button>
                         ))}
                       </div>
@@ -536,89 +433,56 @@ const OnboardingPage = () => {
                 )}
               </AnimatePresence>
 
-              {/* Search */}
-              <div className="relative mb-3 shrink-0">
+              {/* Search bar — also acts as custom input */}
+              <div className="relative mb-2 shrink-0">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder={`Search ${activeCategory.label.toLowerCase()}...`}
-                  className="w-full bg-card border-2 border-border rounded-2xl pl-10 pr-3 py-3 text-sm font-medium outline-none focus:border-agni-green transition-colors"
+                <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={handleSearchKeyDown}
+                  placeholder={`Search or type to add custom...`}
+                  className="w-full bg-card border-2 border-border rounded-2xl pl-10 pr-3 py-3 text-sm font-medium outline-none focus:border-agni-green transition-colors placeholder:text-muted-foreground/50"
                 />
               </div>
 
+              {/* Add custom hint when searching */}
+              {showAddCustom && (
+                <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => { toggleItem(search.trim()); setSearch(""); }}
+                  className="mb-2 shrink-0 bg-agni-gold/10 border border-agni-gold/30 rounded-xl px-3 py-2 flex items-center gap-2 w-full text-left"
+                >
+                  <Sparkles size={14} className="text-agni-gold shrink-0" />
+                  <span className="text-xs font-bold text-foreground">Add "<span className="text-agni-gold">{search.trim()}</span>"</span>
+                  <span className="text-[9px] text-muted-foreground ml-auto">↵ Enter</span>
+                </motion.button>
+              )}
+
               {/* Suggestions grid */}
-              <div className="flex-1 overflow-y-auto -mx-1 px-1 mb-3 scrollbar-none">
+              <div className="flex-1 overflow-y-auto -mx-1 px-1 mb-2 scrollbar-none">
                 <div className="grid grid-cols-2 gap-2">
                   {filtered.map((s, i) => {
                     const selected = currentItems.includes(s.name);
                     return (
-                      <motion.button
-                        key={s.name}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: Math.min(i * 0.02, 0.4) }}
-                        whileTap={{ scale: 0.93 }}
-                        onClick={() => toggleItem(s.name)}
+                      <motion.button key={s.name} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: Math.min(i * 0.02, 0.3) }}
+                        whileTap={{ scale: 0.93 }} onClick={() => toggleItem(s.name)}
                         className={`p-3 rounded-2xl border-2 text-left transition-all relative ${
-                          selected
-                            ? "bg-agni-green/15 border-agni-green shadow-glow-green"
-                            : "bg-card border-border hover:border-muted-foreground/30"
+                          selected ? "bg-agni-green/15 border-agni-green shadow-glow-green" : "bg-card border-border hover:border-muted-foreground/30"
                         }`}
                       >
                         {selected && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="absolute top-2 right-2 w-5 h-5 rounded-full bg-agni-green flex items-center justify-center"
-                          >
+                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-2 right-2 w-5 h-5 rounded-full bg-agni-green flex items-center justify-center">
                             <Check size={11} className="text-white" strokeWidth={3} />
                           </motion.div>
                         )}
                         <div className="text-xl mb-0.5">{s.emoji || "✨"}</div>
                         <div className="text-xs font-extrabold text-foreground leading-tight pr-5">{s.name}</div>
-                        {s.tag && (
-                          <div className="text-[9px] text-muted-foreground mt-0.5 font-semibold">{s.tag}</div>
-                        )}
+                        {s.tag && <div className="text-[9px] text-muted-foreground mt-0.5 font-semibold">{s.tag}</div>}
                       </motion.button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Custom input */}
-              <div className="flex gap-2 mb-3 shrink-0">
-                <input
-                  type="text"
-                  value={customInput}
-                  onChange={(e) => setCustomInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") addCustom(); }}
-                  placeholder="Add your own..."
-                  className="flex-1 bg-card border-2 border-border rounded-2xl px-4 py-2.5 text-sm font-medium outline-none focus:border-agni-green transition-colors"
-                />
-                <button
-                  onClick={addCustom}
-                  disabled={!customInput.trim()}
-                  className="bg-agni-green text-white rounded-2xl px-4 disabled:opacity-30 font-bold"
-                >
-                  <Plus size={18} />
-                </button>
-              </div>
-
               {/* Bottom actions */}
               <div className="flex gap-3 shrink-0">
-                <Button
-                  onClick={goNext}
-                  variant="outline"
-                  className="flex-1 h-12 rounded-2xl border-2 border-border text-sm font-bold"
-                >
-                  Skip
-                </Button>
-                <Button
-                  onClick={goNext}
-                  className="flex-1 h-12 rounded-2xl bg-agni-green text-white font-extrabold text-sm shadow-btn-3d btn-3d"
-                >
+                <Button onClick={goNext} variant="outline" className="flex-1 h-12 rounded-2xl border-2 border-border text-sm font-bold">Skip</Button>
+                <Button onClick={goNext} className="flex-1 h-12 rounded-2xl bg-agni-green text-white font-extrabold text-sm shadow-btn-3d btn-3d">
                   {categoryIndex < SUGGESTION_CATEGORIES.length - 1 ? (
                     <>Next <ArrowRight size={16} className="ml-1" /></>
                   ) : (
@@ -632,37 +496,24 @@ const OnboardingPage = () => {
 
         {/* ═══════ CONFIRM STEP ═══════ */}
         {isConfirmStep && (
-          <motion.div
-            key="confirm"
-            custom={dir}
-            variants={slideVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: 0.35 }}
+          <motion.div key="confirm" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-agni-green/20 via-agni-blue/10 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-agni-green/20 via-agni-blue/10 to-agni-purple/5 pointer-events-none" />
+            <motion.div className="absolute top-28 left-6 w-16 h-16 rounded-full bg-agni-gold/10 blur-xl" animate={{ y: [0, -10, 0] }} transition={{ duration: 3, repeat: Infinity }} />
 
             <div className="flex-1 relative z-10 overflow-y-auto scrollbar-none">
               <div className="flex justify-center mb-4">
                 <Agni expression="celebrating" size={100} speech={`Looking great, ${name}! 🎉`} animate />
               </div>
 
-              <h2 className="text-2xl font-black text-foreground text-center mb-1">
-                You're all set! 🚀
-              </h2>
-              <p className="text-sm text-muted-foreground text-center mb-6">
-                Here's your learning profile • {totalSelected} interests picked
-              </p>
+              <h2 className="text-2xl font-black text-foreground text-center mb-1">You're all set! 🚀</h2>
+              <p className="text-sm text-muted-foreground text-center mb-5">Here's your Neural OS profile • {totalSelected} interests</p>
 
               {/* Profile summary */}
               <div className="space-y-3 mb-6">
-                {/* Name & Role */}
                 <div className="bg-card border border-border rounded-2xl p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider">Profile</span>
-                  </div>
+                  <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2">Profile</span>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-agni-green/20 flex items-center justify-center text-lg">
                       {ROLES.find(r => r.id === selectedRole)?.emoji || "✨"}
@@ -674,32 +525,35 @@ const OnboardingPage = () => {
                   </div>
                 </div>
 
-                {/* Interest categories */}
+                {/* Neural OS preview */}
+                <div className="bg-agni-purple/5 border border-agni-purple/20 rounded-2xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Brain size={14} className="text-agni-purple" />
+                    <span className="text-[9px] font-extrabold text-agni-purple uppercase tracking-wider">Neural OS Activated</span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    AGNI will now use your interests to create <span className="text-agni-gold font-bold">personalized analogies</span> in every lesson, quiz, and conversation! 🧠✨
+                  </p>
+                </div>
+
                 {SUGGESTION_CATEGORIES.map((cat) => {
                   const items = (persona[cat.field] as string[]) || [];
                   if (items.length === 0) return null;
-                  const CatIcon = CATEGORY_ICONS[cat.id] || Star;
                   return (
                     <div key={cat.id} className="bg-card border border-border rounded-2xl p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-lg">{cat.emoji}</span>
                         <span className="text-xs font-extrabold text-foreground">{cat.label}</span>
-                        <span className="text-[10px] text-muted-foreground ml-auto">{items.length} picked</span>
+                        <span className="text-[10px] text-muted-foreground ml-auto">{items.length}</span>
                       </div>
                       <div className="flex flex-wrap gap-1.5">
                         {items.map((item) => (
-                          <motion.span
-                            key={item}
-                            className="bg-agni-green/10 text-agni-green text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1"
-                          >
+                          <span key={item} className="bg-agni-green/10 text-agni-green text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
                             {item}
-                            <button
-                              onClick={() => removeItem(cat.field as string, item)}
-                              className="hover:text-agni-red transition-colors"
-                            >
+                            <button onClick={() => removeItem(cat.field as string, item)} className="hover:text-agni-red transition-colors">
                               <X size={10} />
                             </button>
-                          </motion.span>
+                          </span>
                         ))}
                       </div>
                     </div>
@@ -709,16 +563,10 @@ const OnboardingPage = () => {
             </div>
 
             <div className="shrink-0 space-y-3 relative z-10">
-              <Button
-                onClick={finish}
-                className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-lg shadow-btn-3d btn-3d"
-              >
-                <Sparkles size={20} className="mr-2" />
-                ACTIVATE AGNI
+              <Button onClick={finish} className="w-full h-14 rounded-2xl bg-gradient-to-r from-agni-green to-agni-blue text-white font-extrabold text-lg shadow-btn-3d btn-3d">
+                <Sparkles size={20} className="mr-2" /> ACTIVATE AGNI
               </Button>
-              <p className="text-[11px] text-muted-foreground text-center">
-                You can change these anytime in Settings
-              </p>
+              <p className="text-[11px] text-muted-foreground text-center">You can change these anytime in Settings</p>
             </div>
           </motion.div>
         )}

@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Zap, Shield, Flame, Star, Rocket, Brain, Wand2, Plus, X } from "lucide-react";
+import { Send, Sparkles, Zap, X, Brain, Flame, ChevronDown } from "lucide-react";
 import Agni from "@/components/Agni";
 import type { AgniExpression } from "@/components/Agni";
 import { SFX } from "@/lib/sounds";
 import { getAIConfig } from "@/lib/aiConfig";
+import { getPersona } from "@/lib/neuralOS";
 
 interface Message {
   role: "user" | "assistant";
@@ -40,7 +41,6 @@ interface PowerUp {
   color: string;
   shadowColor: string;
   soundColor: string;
-  custom?: boolean;
 }
 
 const POWERUPS: Record<string, PowerUp[]> = {
@@ -76,6 +76,25 @@ const POWERUPS: Record<string, PowerUp[]> = {
   ],
 };
 
+// Neural OS powered suggestions based on persona
+function getNeuralSuggestions(): PowerUp[] {
+  const p = getPersona();
+  const extras: PowerUp[] = [];
+  if (p.shows && p.shows.length > 0) {
+    extras.push({ id: "nos-shows", label: `${p.shows[0]} analogy`, emoji: "🎬", prompt: `Explain this using an analogy from "${p.shows[0]}" (the show/movie I love).`, color: "bg-[hsl(323,100%,76%)]", shadowColor: "shadow-[0_4px_0_0_hsl(323,100%,60%)]", soundColor: "pink" });
+  }
+  if (p.sports && p.sports.length > 0) {
+    extras.push({ id: "nos-sports", label: `${p.sports[0]} style`, emoji: "⚽", prompt: `Explain this using a sports analogy involving "${p.sports[0]}".`, color: "bg-[hsl(46,100%,49%)]", shadowColor: "shadow-[0_4px_0_0_hsl(44,100%,38%)]", soundColor: "gold" });
+  }
+  if (p.gaming && p.gaming.length > 0) {
+    extras.push({ id: "nos-gaming", label: `${p.gaming[0]} metaphor`, emoji: "🎮", prompt: `Explain this like a game mechanic from "${p.gaming[0]}".`, color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", soundColor: "purple" });
+  }
+  if (p.currentRole) {
+    extras.push({ id: "nos-role", label: "My Job", emoji: "💼", prompt: `How would this apply to my work as a ${p.currentRole}? Give me a practical example I can use tomorrow.`, color: "bg-[hsl(33,100%,50%)]", shadowColor: "shadow-[0_4px_0_0_hsl(33,100%,38%)]", soundColor: "orange" });
+  }
+  return extras;
+}
+
 function parseSuggestions(text: string): { clean: string; suggestions: string[] } {
   const match = text.match(/\[SUGGESTIONS\](.*?)\[\/SUGGESTIONS\]/s);
   if (!match) return { clean: text, suggestions: [] };
@@ -92,21 +111,17 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
   const [exchangeCount, setExchangeCount] = useState(0);
   const [activeMode, setActiveMode] = useState(initialMode);
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
-  const [customPowerups, setCustomPowerups] = useState<PowerUp[]>([]);
-  const [showAddCustom, setShowAddCustom] = useState(false);
-  const [customLabel, setCustomLabel] = useState("");
-  const [customPrompt, setCustomPrompt] = useState("");
   const [pressedBtn, setPressedBtn] = useState<string | null>(null);
+  const [showNeuralPowers, setShowNeuralPowers] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const agniExpr: AgniExpression = isLoading ? "thinking" : messages.length === 0 ? "teaching" : "happy";
-  const powerups = [...(POWERUPS[activeMode] || POWERUPS.engineer), ...customPowerups];
+  const basePowerups = POWERUPS[activeMode] || POWERUPS.engineer;
+  const neuralPowerups = getNeuralSuggestions();
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, isLoading]);
 
   useEffect(() => {
@@ -139,10 +154,7 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
     try {
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/ai-tutor`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${SUPABASE_KEY}`,
-        },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${SUPABASE_KEY}` },
         body: JSON.stringify(body),
       });
 
@@ -168,14 +180,11 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
           while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
             let line = textBuffer.slice(0, newlineIndex);
             textBuffer = textBuffer.slice(newlineIndex + 1);
-
             if (line.endsWith("\r")) line = line.slice(0, -1);
             if (line.startsWith(":") || line.trim() === "") continue;
             if (!line.startsWith("data: ")) continue;
-
             const jsonStr = line.slice(6).trim();
             if (jsonStr === "[DONE]") break;
-
             try {
               const parsed = JSON.parse(jsonStr);
               const content = parsed.choices?.[0]?.delta?.content as string | undefined;
@@ -219,23 +228,17 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
         const cleanText = clean.replace(/QUIZ_READY/g, "").trim();
         setMessages(prev => [...prev, { role: "assistant", content: cleanText }]);
         if (suggestions.length > 0) setAiSuggestions(suggestions);
-
         if (text.includes("QUIZ_READY")) {
           const allMsgs = [...messages, { role: "assistant" as const, content: cleanText }];
           setTimeout(() => onQuizReady(allMsgs), 2000);
         }
       }
 
-      if (!isInitial) {
-        setExchangeCount(c => c + 1);
-      }
+      if (!isInitial) setExchangeCount(c => c + 1);
       SFX.tap();
     } catch (error: any) {
       console.error("AI chat error:", error);
-      setMessages(prev => [
-        ...prev,
-        { role: "assistant", content: `⚠️ ${error.message || "Something went wrong. Try again!"}` },
-      ]);
+      setMessages(prev => [...prev, { role: "assistant", content: `⚠️ ${error.message || "Something went wrong. Try again!"}` }]);
     } finally {
       setIsLoading(false);
       setIsStreaming(false);
@@ -255,10 +258,7 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
   const handlePowerUpPress = (pu: PowerUp) => {
     SFX.powerup(pu.soundColor);
     setPressedBtn(pu.id);
-    setTimeout(() => {
-      setPressedBtn(null);
-      handleSend(pu.prompt);
-    }, 150);
+    setTimeout(() => { setPressedBtn(null); handleSend(pu.prompt); }, 150);
   };
 
   const handleModeChange = (mode: string) => {
@@ -267,56 +267,17 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
     localStorage.setItem("teaching_mode", mode);
   };
 
-  const handleSkipToQuiz = () => {
-    SFX.tap();
-    onQuizReady(messages);
-  };
-
-  const handleAddCustom = () => {
-    if (!customLabel.trim() || !customPrompt.trim()) return;
-    const colors = [
-      { color: "bg-[hsl(46,100%,49%)]", shadowColor: "shadow-[0_4px_0_0_hsl(44,100%,38%)]", soundColor: "gold" },
-      { color: "bg-[hsl(323,100%,76%)]", shadowColor: "shadow-[0_4px_0_0_hsl(323,100%,60%)]", soundColor: "pink" },
-      { color: "bg-[hsl(33,100%,50%)]", shadowColor: "shadow-[0_4px_0_0_hsl(33,100%,38%)]", soundColor: "orange" },
-    ];
-    const c = colors[customPowerups.length % colors.length];
-    setCustomPowerups(prev => [...prev, {
-      id: `custom-${Date.now()}`,
-      label: customLabel.trim().slice(0, 15),
-      prompt: customPrompt.trim(),
-      emoji: "✨",
-      custom: true,
-      ...c,
-    }]);
-    setCustomLabel("");
-    setCustomPrompt("");
-    setShowAddCustom(false);
-    SFX.tap();
-  };
-
-  const removeCustom = (id: string) => {
-    setCustomPowerups(prev => prev.filter(p => p.id !== id));
-    SFX.tap();
-  };
+  const handleSkipToQuiz = () => { SFX.tap(); onQuizReady(messages); };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="flex flex-col h-full"
-    >
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col h-full">
       {/* Mode selector */}
       <div className="shrink-0 mb-1.5">
         <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1">
           {MODES.map((m) => (
-            <motion.button
-              key={m.key}
-              whileTap={{ scale: 0.92 }}
-              onClick={() => handleModeChange(m.key)}
+            <motion.button key={m.key} whileTap={{ scale: 0.92 }} onClick={() => handleModeChange(m.key)}
               className={`shrink-0 text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 transition-all border ${
-                activeMode === m.key
-                  ? "bg-[hsl(var(--agni-green)/0.15)] text-agni-green border-[hsl(var(--agni-green)/0.5)]"
-                  : "bg-card text-muted-foreground border-border/30"
+                activeMode === m.key ? "bg-[hsl(var(--agni-green)/0.15)] text-agni-green border-[hsl(var(--agni-green)/0.5)]" : "bg-card text-muted-foreground border-border/30"
               }`}
             >
               <span>{m.emoji}</span> {m.label}
@@ -325,25 +286,24 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
         </div>
       </div>
 
-      {/* Chat header */}
+      {/* Chat header with Neural OS badge */}
       <div className="flex items-center gap-2 mb-2 px-2 py-1.5 rounded-xl bg-card border border-border/30">
         <div className="relative">
           <Agni expression={agniExpr} size={36} animate />
-          <motion.div
-            className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-agni-green rounded-full border-2 border-card"
-            animate={{ scale: [1, 1.3, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          />
+          <motion.div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-agni-green rounded-full border-2 border-card"
+            animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 2, repeat: Infinity }} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-black text-agni-green">AGNI is teaching</p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-[10px] font-black text-agni-green">AGNI is teaching</p>
+            {getPersona().completedAt && (
+              <span className="text-[7px] font-black text-agni-purple bg-agni-purple/10 px-1.5 py-0.5 rounded-full">Neural OS</span>
+            )}
+          </div>
           <p className="text-[9px] text-muted-foreground font-semibold truncate">{lessonTitle}</p>
         </div>
         {exchangeCount >= 2 && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            whileTap={{ scale: 0.9 }}
+          <motion.button initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} whileTap={{ scale: 0.9 }}
             onClick={handleSkipToQuiz}
             className="text-[9px] font-black text-white bg-agni-green px-3 py-1.5 rounded-full flex items-center gap-1 shadow-[0_3px_0_0_hsl(100,100%,31%)] active:shadow-[0_1px_0_0_hsl(100,100%,31%)] active:translate-y-[2px] transition-all"
           >
@@ -353,17 +313,10 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
       </div>
 
       {/* Messages */}
-      <div
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto space-y-2.5 px-1 pb-2 scrollbar-none"
-      >
+      <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-2.5 px-1 pb-2 scrollbar-none">
         <AnimatePresence>
           {messages.map((msg, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25 }}
+            <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}
               className={`flex items-end gap-1.5 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
               {msg.role === "assistant" && (
@@ -371,13 +324,11 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
                   <span className="text-[12px]">🤖</span>
                 </div>
               )}
-              <div
-                className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-[12.5px] leading-[1.6] font-semibold ${
-                  msg.role === "user"
-                    ? "bg-agni-green text-white rounded-br-sm shadow-[0_2px_0_0_hsl(100,100%,31%)]"
-                    : "bg-card border border-border/30 text-foreground rounded-bl-sm"
-                }`}
-              >
+              <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-[12.5px] leading-[1.6] font-semibold ${
+                msg.role === "user"
+                  ? "bg-agni-green text-white rounded-br-sm shadow-[0_2px_0_0_hsl(100,100%,31%)]"
+                  : "bg-card border border-border/30 text-foreground rounded-bl-sm"
+              }`}>
                 {msg.content.split("\n").map((line, j) => (
                   <p key={j} className={j > 0 ? "mt-1.5" : ""}>
                     {line.startsWith("**") ? (
@@ -391,9 +342,7 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
                       <code className="bg-[hsl(var(--muted)/0.5)] px-1.5 py-0.5 rounded text-[11px] font-mono text-agni-blue border border-agni-blue/20">
                         {line.replace(/`/g, "")}
                       </code>
-                    ) : (
-                      line
-                    )}
+                    ) : line}
                   </p>
                 ))}
               </div>
@@ -402,20 +351,12 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
         </AnimatePresence>
 
         {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex items-end gap-1.5"
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-end gap-1.5">
             <div className="w-7 h-7 rounded-full bg-card border-2 border-agni-green/30 flex items-center justify-center">
               <span className="text-[12px]">🤖</span>
             </div>
             <div className="bg-card border border-border/30 rounded-2xl rounded-bl-sm px-4 py-3">
-              <motion.div
-                className="flex gap-1.5"
-                animate={{ opacity: [0.3, 1, 0.3] }}
-                transition={{ duration: 1.2, repeat: Infinity }}
-              >
+              <motion.div className="flex gap-1.5" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.2, repeat: Infinity }}>
                 <div className="w-2 h-2 rounded-full bg-agni-green" />
                 <div className="w-2 h-2 rounded-full bg-agni-blue" />
                 <div className="w-2 h-2 rounded-full bg-agni-purple" />
@@ -426,16 +367,11 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
       </div>
 
       {/* === BOTTOM ACTION AREA === */}
-      <div className="shrink-0 pt-1 pb-0.5 space-y-2">
-
-        {/* AI Predictive Suggestions - horizontal scroll */}
+      <div className="shrink-0 pt-1 pb-0.5 space-y-1.5">
+        {/* AI Suggestions */}
         <AnimatePresence>
           {aiSuggestions.length > 0 && !isLoading && (
-            <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-            >
+            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}>
               <div className="flex items-center gap-1.5 px-1 mb-1">
                 <Sparkles size={10} className="text-agni-purple" />
                 <span className="text-[8px] font-black text-agni-purple uppercase tracking-widest">AI Suggests</span>
@@ -443,17 +379,11 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
               </div>
               <div className="flex gap-2 overflow-x-auto scrollbar-none px-0.5">
                 {aiSuggestions.map((suggestion, i) => (
-                  <motion.button
-                    key={`ai-${i}`}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.08 }}
-                    whileTap={{ scale: 0.95, y: 2 }}
-                    onClick={() => handleSend(suggestion)}
-                    disabled={isLoading}
+                  <motion.button key={`ai-${i}`} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.08 }}
+                    whileTap={{ scale: 0.95, y: 2 }} onClick={() => handleSend(suggestion)} disabled={isLoading}
                     className="shrink-0 text-[10px] font-bold text-foreground bg-card border border-agni-purple/30 rounded-xl px-3 py-2 disabled:opacity-40 flex items-center gap-1.5 hover:border-agni-purple/60 transition-colors shadow-[0_3px_0_0_hsl(270,60%,25%)] active:shadow-[0_1px_0_0_hsl(270,60%,25%)] active:translate-y-[2px]"
                   >
-                    <Wand2 size={10} className="text-agni-purple shrink-0" />
+                    <Sparkles size={10} className="text-agni-purple shrink-0" />
                     <span>{suggestion}</span>
                   </motion.button>
                 ))}
@@ -462,90 +392,57 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
           )}
         </AnimatePresence>
 
-        {/* Power-Up Buttons — Duolingo 3D style */}
+        {/* Neural OS Power-Ups — personalized from persona */}
+        {neuralPowerups.length > 0 && (
+          <div>
+            <button onClick={() => setShowNeuralPowers(!showNeuralPowers)}
+              className="flex items-center gap-1.5 px-1 mb-1 w-full"
+            >
+              <Brain size={10} className="text-agni-purple" />
+              <span className="text-[8px] font-black text-agni-purple uppercase tracking-widest">Neural OS Powers</span>
+              <div className="flex-1 h-px bg-[hsl(var(--agni-purple)/0.15)]" />
+              <motion.div animate={{ rotate: showNeuralPowers ? 180 : 0 }}>
+                <ChevronDown size={10} className="text-agni-purple" />
+              </motion.div>
+            </button>
+            <AnimatePresence>
+              {showNeuralPowers && (
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                  <div className="flex gap-2 overflow-x-auto scrollbar-none px-0.5 pb-1">
+                    {neuralPowerups.map((pu) => (
+                      <motion.button key={pu.id} whileTap={{ scale: 0.97 }} onClick={() => handlePowerUpPress(pu)} disabled={isLoading}
+                        className={`shrink-0 relative rounded-xl px-3 py-2 ${pu.color} ${pressedBtn === pu.id ? "shadow-[0_1px_0_0_rgba(0,0,0,0.3)] translate-y-[3px]" : pu.shadowColor} transition-all disabled:opacity-40 flex items-center gap-1.5 min-w-[90px] justify-center border border-white/10`}
+                      >
+                        <span className="text-[12px]">{pu.emoji}</span>
+                        <span className="text-[9px] font-black text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)] truncate max-w-[80px]">{pu.label}</span>
+                      </motion.button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
+
+        {/* Standard Power-Ups */}
         <div>
-          <div className="flex items-center gap-1.5 px-1 mb-1.5">
+          <div className="flex items-center gap-1.5 px-1 mb-1">
             <Zap size={10} className="text-agni-gold" />
             <span className="text-[8px] font-black text-agni-gold uppercase tracking-widest">Power-Ups</span>
             <div className="flex-1 h-px bg-[hsl(var(--agni-gold)/0.2)]" />
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setShowAddCustom(!showAddCustom)}
-              className="w-5 h-5 rounded-full bg-card border border-border/40 flex items-center justify-center"
-            >
-              {showAddCustom ? <X size={10} className="text-muted-foreground" /> : <Plus size={10} className="text-muted-foreground" />}
-            </motion.button>
           </div>
-
-          {/* Add custom powerup form */}
-          <AnimatePresence>
-            {showAddCustom && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden mb-2"
-              >
-                <div className="bg-card border border-border/30 rounded-xl p-2.5 space-y-1.5">
-                  <input
-                    value={customLabel}
-                    onChange={e => setCustomLabel(e.target.value)}
-                    placeholder="Button label (e.g. Analogy)"
-                    maxLength={15}
-                    className="w-full bg-background border border-border/30 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-agni-gold/50"
-                  />
-                  <input
-                    value={customPrompt}
-                    onChange={e => setCustomPrompt(e.target.value)}
-                    placeholder="What should AGNI do? (e.g. Give me an analogy)"
-                    className="w-full bg-background border border-border/30 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-agni-gold/50"
-                  />
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleAddCustom}
-                    disabled={!customLabel.trim() || !customPrompt.trim()}
-                    className="w-full text-[10px] font-black text-white bg-agni-gold rounded-lg py-1.5 shadow-[0_3px_0_0_hsl(44,100%,38%)] active:shadow-[0_1px_0_0_hsl(44,100%,38%)] active:translate-y-[2px] transition-all disabled:opacity-40"
-                  >
-                    + ADD POWER-UP
-                  </motion.button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Powerup grid — 3D buttons */}
           <div className="flex gap-2 overflow-x-auto scrollbar-none px-0.5 pb-0.5">
-            {powerups.map((pu) => (
-              <motion.button
-                key={pu.id}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => handlePowerUpPress(pu)}
-                disabled={isLoading}
-                className={`shrink-0 relative rounded-xl px-3.5 py-2 ${pu.color} ${
-                  pressedBtn === pu.id ? "shadow-[0_1px_0_0_rgba(0,0,0,0.3)] translate-y-[3px]" : pu.shadowColor
-                } transition-all disabled:opacity-40 flex items-center gap-1.5 min-w-[80px] justify-center`}
+            {basePowerups.map((pu) => (
+              <motion.button key={pu.id} whileTap={{ scale: 0.97 }} onClick={() => handlePowerUpPress(pu)} disabled={isLoading}
+                className={`shrink-0 relative rounded-xl px-3.5 py-2 ${pu.color} ${pressedBtn === pu.id ? "shadow-[0_1px_0_0_rgba(0,0,0,0.3)] translate-y-[3px]" : pu.shadowColor} transition-all disabled:opacity-40 flex items-center gap-1.5 min-w-[80px] justify-center`}
               >
                 <span className="text-[13px]">{pu.emoji}</span>
                 <span className="text-[10px] font-black text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]">{pu.label}</span>
-                {pu.custom && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); removeCustom(pu.id); }}
-                    className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-background border border-border/50 flex items-center justify-center"
-                  >
-                    <X size={8} className="text-muted-foreground" />
-                  </button>
-                )}
               </motion.button>
             ))}
-
-            {/* Quiz powerup */}
             {exchangeCount >= 1 && (
-              <motion.button
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={handleSkipToQuiz}
-                disabled={isLoading}
+              <motion.button initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} whileTap={{ scale: 0.97 }}
+                onClick={handleSkipToQuiz} disabled={isLoading}
                 className="shrink-0 rounded-xl px-3.5 py-2 bg-agni-green shadow-[0_4px_0_0_hsl(100,100%,31%)] active:shadow-[0_1px_0_0_hsl(100,100%,31%)] active:translate-y-[3px] transition-all disabled:opacity-40 flex items-center gap-1.5 min-w-[80px] justify-center"
               >
                 <span className="text-[13px]">⚡</span>
@@ -558,19 +455,11 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
 
       {/* Input */}
       <div className="flex items-center gap-2 pt-1.5">
-        <input
-          ref={inputRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          placeholder={`Ask AGNI anything...`}
-          disabled={isLoading}
+        <input ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSend()}
+          placeholder="Ask AGNI anything..." disabled={isLoading}
           className="flex-1 bg-card border-2 border-border/30 rounded-2xl px-4 py-2.5 text-[12px] font-semibold text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-agni-green/50 transition-all disabled:opacity-50"
         />
-        <motion.button
-          whileTap={{ scale: 0.85 }}
-          onClick={() => handleSend()}
-          disabled={!input.trim() || isLoading}
+        <motion.button whileTap={{ scale: 0.85 }} onClick={() => handleSend()} disabled={!input.trim() || isLoading}
           className="w-10 h-10 rounded-xl bg-agni-green flex items-center justify-center shadow-[0_4px_0_0_hsl(100,100%,31%)] active:shadow-[0_1px_0_0_hsl(100,100%,31%)] active:translate-y-[3px] transition-all disabled:opacity-30 disabled:shadow-none"
         >
           <Send size={16} className="text-white" />
