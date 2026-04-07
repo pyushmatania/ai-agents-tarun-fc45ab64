@@ -110,20 +110,16 @@ export default function SmartInputBar({
     onSend(`${pu.emoji} ${pu.label}`, resolved);
   };
 
-  const handleInterestSend = (catId: string, item: string) => {
-    const promptMap: Record<string, string> = {
-      shows: `Explain this using an analogy from "${item}" (the show/movie I love).`,
-      sports: `Explain this using a sports analogy involving "${item}".`,
-      gaming: `Explain this like a game mechanic from "${item}".`,
-      music: `Explain this using a musical analogy with "${item}".`,
-      hobbies: `Explain this through the lens of "${item}" as a hobby.`,
-      books: `Explain this using concepts from "${item}".`,
-    };
-    SFX.powerup("pink");
+  // Interest select — just set as universe vibe, don't send
+  const handleInterestSelect = (catId: string, item: string) => {
+    SFX.select();
     setActivePanel("none");
-    // Show clean label like "🌍 Naruto", hide actual prompt
-    const catEmoji = interestCategories.find(c => c.id === catId)?.emoji || "🌍";
-    onSend(`${catEmoji} Teach me using ${item}`, promptMap[catId] || `Explain using "${item}" as an analogy.`);
+    // Set the interest as universe vibe so it becomes part of the recipe
+    setTeachingSelection("vibe", currentVibe); // keep current vibe
+    // Store selected interest as universe context
+    localStorage.setItem("teaching_universe_vibe", item);
+    window.dispatchEvent(new Event("storage"));
+    setSelectedInterest(item);
   };
 
   // Get labels for active selections
