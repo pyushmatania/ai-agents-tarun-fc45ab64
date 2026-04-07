@@ -3,6 +3,9 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useState, useCallback } from "react";
+import { AnimatePresence } from "framer-motion";
+import SplashScreen from "./pages/SplashScreen";
 import HomePage from "./pages/HomePage";
 import CoursesPage from "./pages/CoursesPage";
 import ProgressPage from "./pages/ProgressPage";
@@ -24,29 +27,48 @@ const OnboardedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/welcome" element={<OnboardingPage />} />
-          <Route path="/auth" element={<AuthPage />} />
-          <Route path="/" element={<OnboardedRoute><HomePage /></OnboardedRoute>} />
-          <Route path="/courses" element={<OnboardedRoute><CoursesPage /></OnboardedRoute>} />
-          <Route path="/curiosity" element={<OnboardedRoute><CuriosityPage /></OnboardedRoute>} />
-          <Route path="/progress" element={<OnboardedRoute><ProgressPage /></OnboardedRoute>} />
-          <Route path="/sources" element={<OnboardedRoute><SourcesPage /></OnboardedRoute>} />
-          <Route path="/roadmap" element={<OnboardedRoute><RoadmapPage /></OnboardedRoute>} />
-          <Route path="/settings" element={<OnboardedRoute><SettingsPage /></OnboardedRoute>} />
-          <Route path="/course/:id" element={<OnboardedRoute><CourseDetailPage /></OnboardedRoute>} />
-          <Route path="/mega-prompt" element={<OnboardedRoute><MegaPromptPage /></OnboardedRoute>} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const [showSplash, setShowSplash] = useState(() => {
+    // Show splash once per session
+    if (sessionStorage.getItem("splash_shown")) return false;
+    return true;
+  });
+
+  const handleSplashComplete = useCallback(() => {
+    sessionStorage.setItem("splash_shown", "true");
+    setShowSplash(false);
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AnimatePresence mode="wait">
+          {showSplash ? (
+            <SplashScreen key="splash" onComplete={handleSplashComplete} />
+          ) : (
+            <BrowserRouter key="app">
+              <Routes>
+                <Route path="/welcome" element={<OnboardingPage />} />
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/" element={<OnboardedRoute><HomePage /></OnboardedRoute>} />
+                <Route path="/courses" element={<OnboardedRoute><CoursesPage /></OnboardedRoute>} />
+                <Route path="/curiosity" element={<OnboardedRoute><CuriosityPage /></OnboardedRoute>} />
+                <Route path="/progress" element={<OnboardedRoute><ProgressPage /></OnboardedRoute>} />
+                <Route path="/sources" element={<OnboardedRoute><SourcesPage /></OnboardedRoute>} />
+                <Route path="/roadmap" element={<OnboardedRoute><RoadmapPage /></OnboardedRoute>} />
+                <Route path="/settings" element={<OnboardedRoute><SettingsPage /></OnboardedRoute>} />
+                <Route path="/course/:id" element={<OnboardedRoute><CourseDetailPage /></OnboardedRoute>} />
+                <Route path="/mega-prompt" element={<OnboardedRoute><MegaPromptPage /></OnboardedRoute>} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          )}
+        </AnimatePresence>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
