@@ -200,7 +200,7 @@ const SettingsPage = () => {
                     </button>
                   )}
                 </div>
-              )
+              )}
 
               {/* Quick Stats */}
               <div className="grid grid-cols-4 gap-2 mb-4">
