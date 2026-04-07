@@ -53,6 +53,7 @@ export type Database = {
           level: number
           updated_at: string
           user_id: string
+          weekly_xp: number
           xp: number
         }
         Insert: {
@@ -63,6 +64,7 @@ export type Database = {
           level?: number
           updated_at?: string
           user_id: string
+          weekly_xp?: number
           xp?: number
         }
         Update: {
@@ -73,6 +75,7 @@ export type Database = {
           level?: number
           updated_at?: string
           user_id?: string
+          weekly_xp?: number
           xp?: number
         }
         Relationships: []
@@ -217,7 +220,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      reset_weekly_leaderboard: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
