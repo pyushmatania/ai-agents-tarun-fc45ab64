@@ -147,29 +147,29 @@ export const UNIVERSE_VIBE_CATEGORIES = [
 
 // Classroom track (formerly Academic)
 export const BRAIN_LEVELS_ACADEMIC: BrainLevel[] = [
-  { id: "class5", label: "Class 5 Student", emoji: "👶", desc: "Pure analogies, no jargon", color: "from-green-300 to-emerald-200" },
-  { id: "class8", label: "Class 8 Student", emoji: "🎒", desc: "Slightly bigger words", color: "from-green-400 to-emerald-300" },
-  { id: "class10", label: "Class 10 Student", emoji: "📓", desc: "Board-exam ready, defined terms", color: "from-blue-400 to-cyan-300" },
-  { id: "class12", label: "Class 12 Student", emoji: "📖", desc: "Can think abstractly", color: "from-blue-500 to-indigo-400" },
-  { id: "college_fresh", label: "College Freshman", emoji: "🎓", desc: "Building intuition", color: "from-indigo-400 to-violet-300" },
-  { id: "college_senior", label: "College Senior", emoji: "🎓", desc: "Technical, placement-ready", color: "from-violet-500 to-purple-400" },
-  { id: "masters", label: "Master's / PhD", emoji: "🎓", desc: "Depth, papers, formal definitions", color: "from-purple-500 to-pink-400" },
-  { id: "uni_professor", label: "University Professor", emoji: "🏫", desc: "Full landscape, alternatives", color: "from-slate-500 to-gray-400" },
+  { id: "class5", label: "Class 5 Student", emoji: "👶", desc: "ELI5 — pure analogies, zero jargon, like explaining to a friend", color: "from-green-300 to-emerald-200" },
+  { id: "class8", label: "Class 8 Student", emoji: "🎒", desc: "Simple words, real-world examples, gentle intro to terms", color: "from-green-400 to-emerald-300" },
+  { id: "class10", label: "Class 10 Student", emoji: "📓", desc: "Clear definitions + diagrams, exam-style clarity", color: "from-blue-400 to-cyan-300" },
+  { id: "class12", label: "Class 12 Student", emoji: "📖", desc: "Abstract thinking, connects dots across topics", color: "from-blue-500 to-indigo-400" },
+  { id: "college_fresh", label: "College Freshman", emoji: "🎓", desc: "Building intuition, first principles + light math", color: "from-indigo-400 to-violet-300" },
+  { id: "college_senior", label: "College Senior", emoji: "🎓", desc: "Technical depth, interview & placement ready", color: "from-violet-500 to-purple-400" },
+  { id: "masters", label: "Master's / PhD", emoji: "🎓", desc: "Research-grade depth, papers & formal proofs", color: "from-purple-500 to-pink-400" },
+  { id: "uni_professor", label: "University Professor", emoji: "🏫", desc: "Full landscape — alternatives, trade-offs, open questions", color: "from-slate-500 to-gray-400" },
 ];
 
 // Skill track
 export const BRAIN_LEVELS_SKILL: BrainLevel[] = [
-  { id: "sprout", label: "Sprout", emoji: "🌱", desc: "Total beginner, never coded", color: "from-green-400 to-emerald-300" },
-  { id: "chill", label: "Chill", emoji: "🌊", desc: "Curious non-technical", color: "from-sky-400 to-blue-300" },
-  { id: "explorer", label: "Explorer", emoji: "🗺️", desc: "Some tech background", color: "from-blue-400 to-cyan-300" },
-  { id: "builder", label: "Builder", emoji: "🛠️", desc: "Can code, wants to ship", color: "from-amber-500 to-yellow-400" },
-  { id: "pro", label: "Pro", emoji: "⚡", desc: "Working developer", color: "from-purple-500 to-violet-400" },
-  { id: "hacker", label: "Hacker", emoji: "🥷", desc: "Edge cases, undocumented tricks", color: "from-emerald-500 to-teal-400" },
-  { id: "scientist", label: "Scientist", emoji: "🔬", desc: "The why — papers, ablations, math", color: "from-pink-500 to-rose-400" },
-  { id: "professor", label: "Professor", emoji: "🎓", desc: "Full theory, citations, history", color: "from-slate-500 to-gray-400" },
-  { id: "architect_brain", label: "Architect", emoji: "🏛️", desc: "System design, scaling, topology", color: "from-indigo-500 to-blue-400" },
-  { id: "researcher", label: "Researcher", emoji: "🧠", desc: "Open problems, frontier-pushing", color: "from-violet-600 to-purple-500" },
-  { id: "demon", label: "Demon Mode", emoji: "👹", desc: "Brutal pace, no encouragement", color: "from-red-600 to-rose-500" },
+  { id: "sprout", label: "Sprout", emoji: "🌱", desc: "Brand new — never coded, no worries, we start from zero", color: "from-green-400 to-emerald-300" },
+  { id: "chill", label: "Chill", emoji: "🌊", desc: "Curious but non-technical — just vibes & concepts", color: "from-sky-400 to-blue-300" },
+  { id: "explorer", label: "Explorer", emoji: "🗺️", desc: "Some tech background — knows basics, wants more", color: "from-blue-400 to-cyan-300" },
+  { id: "builder", label: "Builder", emoji: "🛠️", desc: "Can code — wants to ship real projects fast", color: "from-amber-500 to-yellow-400" },
+  { id: "pro", label: "Pro", emoji: "⚡", desc: "Working dev — production code, best practices", color: "from-purple-500 to-violet-400" },
+  { id: "hacker", label: "Hacker", emoji: "🥷", desc: "Edge cases, undocumented tricks, breaking limits", color: "from-emerald-500 to-teal-400" },
+  { id: "scientist", label: "Scientist", emoji: "🔬", desc: "The why behind everything — papers, math, ablations", color: "from-pink-500 to-rose-400" },
+  { id: "professor", label: "Professor", emoji: "🎓", desc: "Full theory — citations, history, pedagogy", color: "from-slate-500 to-gray-400" },
+  { id: "architect_brain", label: "Architect", emoji: "🏛️", desc: "System design — scaling, topology, trade-offs", color: "from-indigo-500 to-blue-400" },
+  { id: "researcher", label: "Researcher", emoji: "🧠", desc: "Frontier-pushing — open problems, novel approaches", color: "from-violet-600 to-purple-500" },
+  { id: "demon", label: "Demon Mode", emoji: "👹", desc: "Brutal pace, no hand-holding, pure challenge", color: "from-red-600 to-rose-500" },
 ];
 
 // Combined for backward compat
