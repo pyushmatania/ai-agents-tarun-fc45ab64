@@ -168,11 +168,14 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
     if (p.name) personaBits.push(`My name is ${p.name}.`);
     if (p.currentRole) personaBits.push(`I work as a ${p.currentRole}.`);
     if (p.currentCompany) personaBits.push(`I work at ${p.currentCompany}.`);
-    if (p.shows?.length) personaBits.push(`I love watching ${p.shows.slice(0, 3).join(", ")}.`);
-    if (p.sports?.length) personaBits.push(`I follow ${p.sports.slice(0, 2).join(", ")}.`);
-    if (p.curious?.length) personaBits.push(`I'm curious about ${p.curious.slice(0, 2).join(", ")}.`);
-    if (p.hobbies?.length) personaBits.push(`My hobbies include ${p.hobbies.slice(0, 2).join(", ")}.`);
-    if (p.music?.length) personaBits.push(`I listen to ${p.music.slice(0, 2).join(", ")}.`);
+    if (p.shows?.length) personaBits.push(`I love watching ${p.shows.join(", ")}.`);
+    if (p.sports?.length) personaBits.push(`I follow ${p.sports.join(", ")}.`);
+    if (p.curious?.length) personaBits.push(`I'm curious about ${p.curious.join(", ")}.`);
+    if (p.hobbies?.length) personaBits.push(`My hobbies include ${p.hobbies.join(", ")}.`);
+    if (p.music?.length) personaBits.push(`I listen to ${p.music.join(", ")}.`);
+    if (p.gaming?.length) personaBits.push(`I play ${p.gaming.join(", ")}.`);
+    if (p.news?.length) personaBits.push(`I follow ${p.news.join(", ")}.`);
+    if (p.books?.length) personaBits.push(`I read ${p.books.join(", ")}.`);
 
     const personaContext = personaBits.length > 0
       ? `\n\nAbout me: ${personaBits.join(" ")} Use my interests and role to make analogies and examples relatable to me.`
@@ -371,10 +374,14 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
       {(() => {
         const chips: string[] = [];
         if (persona.currentRole) chips.push(persona.currentRole);
-        if (persona.shows?.length) chips.push(persona.shows[0]);
-        if (persona.sports?.length) chips.push(persona.sports[0]);
-        if (persona.curious?.length) chips.push(persona.curious[0]);
-        if (persona.hobbies?.length) chips.push(persona.hobbies[0]);
+        if (persona.shows?.length) chips.push(...persona.shows);
+        if (persona.sports?.length) chips.push(...persona.sports);
+        if (persona.curious?.length) chips.push(...persona.curious);
+        if (persona.hobbies?.length) chips.push(...persona.hobbies);
+        if (persona.music?.length) chips.push(...persona.music);
+        if (persona.gaming?.length) chips.push(...persona.gaming);
+        if (persona.news?.length) chips.push(...persona.news);
+        if (persona.books?.length) chips.push(...persona.books);
 
         return chips.length > 0 ? (
           <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-1 mb-1.5 overflow-x-auto scrollbar-none">
@@ -419,13 +426,16 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
               )}
               <div>
                 {msg.role === "assistant" && i === 0 && persona.completedAt && (() => {
-                  const items: string[] = [];
-                  if (persona.currentRole) items.push(persona.currentRole);
-                  if (persona.shows?.length) items.push(persona.shows[0]);
-                  if (persona.sports?.length) items.push(persona.sports[0]);
-                  if (persona.curious?.length) items.push(persona.curious[0]);
-                  if (persona.hobbies?.length) items.push(persona.hobbies[0]);
-                  if (persona.music?.length) items.push(persona.music[0]);
+                   const items: string[] = [];
+                   if (persona.currentRole) items.push(persona.currentRole);
+                   if (persona.shows?.length) items.push(...persona.shows);
+                   if (persona.sports?.length) items.push(...persona.sports);
+                   if (persona.curious?.length) items.push(...persona.curious);
+                   if (persona.hobbies?.length) items.push(...persona.hobbies);
+                   if (persona.music?.length) items.push(...persona.music);
+                   if (persona.gaming?.length) items.push(...persona.gaming);
+                   if (persona.news?.length) items.push(...persona.news);
+                   if (persona.books?.length) items.push(...persona.books);
                   return (
                     <PersonaBadge items={items} />
                   );
