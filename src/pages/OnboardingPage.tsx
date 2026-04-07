@@ -288,6 +288,22 @@ const OnboardingPage = () => {
   };
   const goBack = () => { SFX.tap(); setDir(-1); setStep(s => Math.max(0, s - 1)); setSearch(""); setActiveSubFilter(null); };
 
+  const skipAll = () => {
+    SFX.celebration();
+    localStorage.setItem("edu_user_name", name.trim() || "Learner");
+    localStorage.setItem("edu_onboarded", "true");
+    localStorage.setItem("edu_user_role", selectedRole || "student");
+    const userCtx = {
+      teaching_identity: selectedRole || "",
+      teaching_mission: selectedMission || "",
+      teaching_vibe: selectedVibe || "",
+      teaching_brain: selectedBrain || "",
+      brain_track: brainTrack,
+    };
+    localStorage.setItem("user_context", JSON.stringify(userCtx));
+    navigate("/");
+  };
+
   // Auto-skip mission followup step if no questions
   useEffect(() => {
     if (step === 6 && (!selectedMission || !MISSION_FOLLOWUPS[selectedMission])) {
@@ -577,6 +593,11 @@ const OnboardingPage = () => {
               <Button onClick={goNext} disabled={!name.trim()} className="w-full h-14 rounded-full bg-[#1CB0F6] hover:bg-[#1A9FE0] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
                 CONTINUE <ArrowRight size={18} className="ml-2" />
               </Button>
+              <div className="flex justify-center gap-4 mt-2">
+                <button onClick={goNext} className="text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip this step</button>
+                <span className="text-gray-300">•</span>
+                <button onClick={skipAll} className="text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip all → Settings</button>
+              </div>
             </div>
           </motion.div>
         )}
@@ -647,6 +668,7 @@ const OnboardingPage = () => {
                   CONTINUE <ArrowRight size={18} className="ml-2" />
                 </Button>
               </div>
+              <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip all → set up later in Settings</button>
             </div>
           </motion.div>
         )}
@@ -721,10 +743,14 @@ const OnboardingPage = () => {
             </div>
 
             <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#FADADD] via-[#FADADD]/95 to-transparent">
-              <Button onClick={goNext} disabled={!selectedRole || (selectedRole === "custom" && !customRole.trim())}
-                className="w-full h-14 rounded-full bg-[#7C5CBF] hover:bg-[#6A4DAF] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
-                Continue <ArrowRight size={18} className="ml-2" />
-              </Button>
+              <div className="flex gap-3">
+                <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-full bg-white/80 border-2 border-white/50 text-gray-700 text-sm font-bold shadow-sm">Skip</Button>
+                <Button onClick={goNext} disabled={!selectedRole || (selectedRole === "custom" && !customRole.trim())}
+                  className="flex-1 h-14 rounded-full bg-[#7C5CBF] hover:bg-[#6A4DAF] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
+                  Continue <ArrowRight size={18} className="ml-2" />
+                </Button>
+              </div>
+              <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip all → set up later in Settings</button>
             </div>
           </motion.div>
         )}
@@ -807,6 +833,7 @@ const OnboardingPage = () => {
                   CONTINUE <ArrowRight size={18} className="ml-2" />
                 </Button>
               </div>
+              <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip all → set up later in Settings</button>
             </div>
           </motion.div>
         )}
@@ -862,10 +889,14 @@ const OnboardingPage = () => {
             </div>
 
             <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#FFE0B2] via-[#FFE0B2]/95 to-transparent">
-              <Button onClick={goNext} disabled={!selectedMission}
-                className="w-full h-14 rounded-full bg-[#D4A853] hover:bg-[#C49A48] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
-                Continue <ArrowRight size={18} className="ml-2" />
-              </Button>
+              <div className="flex gap-3">
+                <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-full bg-white/80 border-2 border-white/50 text-gray-700 text-sm font-bold shadow-sm">Skip</Button>
+                <Button onClick={goNext} disabled={!selectedMission}
+                  className="flex-1 h-14 rounded-full bg-[#D4A853] hover:bg-[#C49A48] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
+                  Continue <ArrowRight size={18} className="ml-2" />
+                </Button>
+              </div>
+              <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip all → set up later in Settings</button>
             </div>
           </motion.div>
         )}
@@ -931,6 +962,7 @@ const OnboardingPage = () => {
                   CONTINUE <ArrowRight size={18} className="ml-2" />
                 </Button>
               </div>
+              <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip all → set up later in Settings</button>
             </div>
           </motion.div>
         )}
@@ -992,10 +1024,14 @@ const OnboardingPage = () => {
             </div>
 
             <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#F3E5F5] via-[#F3E5F5]/95 to-transparent">
-              <Button onClick={goNext} disabled={!selectedVibe}
-                className="w-full h-14 rounded-full bg-[#E91E63] hover:bg-[#C2185B] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
-                Continue <ArrowRight size={18} className="ml-2" />
-              </Button>
+              <div className="flex gap-3">
+                <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-full bg-white/80 border-2 border-white/50 text-gray-700 text-sm font-bold shadow-sm">Skip</Button>
+                <Button onClick={goNext} disabled={!selectedVibe}
+                  className="flex-1 h-14 rounded-full bg-[#E91E63] hover:bg-[#C2185B] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
+                  Continue <ArrowRight size={18} className="ml-2" />
+                </Button>
+              </div>
+              <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip all → set up later in Settings</button>
             </div>
           </motion.div>
         )}
@@ -1078,10 +1114,14 @@ const OnboardingPage = () => {
             </div>
 
             <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#E1F5FE] via-[#E1F5FE]/95 to-transparent">
-              <Button onClick={goNext} disabled={!selectedBrain}
-                className="w-full h-14 rounded-full bg-[#3F51B5] hover:bg-[#303F9F] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
-                Continue <ArrowRight size={18} className="ml-2" />
-              </Button>
+              <div className="flex gap-3">
+                <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-full bg-white/80 border-2 border-white/50 text-gray-700 text-sm font-bold shadow-sm">Skip</Button>
+                <Button onClick={goNext} disabled={!selectedBrain}
+                  className="flex-1 h-14 rounded-full bg-[#3F51B5] hover:bg-[#303F9F] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
+                  Continue <ArrowRight size={18} className="ml-2" />
+                </Button>
+              </div>
+              <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip all → set up later in Settings</button>
             </div>
           </motion.div>
         )}
@@ -1154,6 +1194,7 @@ const OnboardingPage = () => {
               <Button onClick={goNext} className="w-full h-14 rounded-full bg-[#58CC02] hover:bg-[#4CAD02] text-white font-extrabold text-base shadow-lg">
                 LET'S DO THIS 🔥 <ArrowRight size={18} className="ml-2" />
               </Button>
+              <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip all → set up later in Settings</button>
             </div>
           </motion.div>
         )}
@@ -1388,7 +1429,6 @@ const OnboardingPage = () => {
                 </div>
               </div>
 
-              {/* Bottom actions */}
               <div className="flex gap-3 shrink-0">
                 <Button onClick={goNext} variant="outline" className="flex-1 h-12 rounded-2xl border-2 border-border text-sm font-bold">Skip</Button>
                 <Button onClick={goNext} className="flex-1 h-12 rounded-2xl bg-agni-green text-white font-extrabold text-sm shadow-btn-3d btn-3d">
@@ -1399,6 +1439,7 @@ const OnboardingPage = () => {
                   )}
                 </Button>
               </div>
+              <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-muted-foreground hover:text-foreground transition-colors">Skip all → set up later in Settings</button>
             </div>
           </motion.div>
         )}
