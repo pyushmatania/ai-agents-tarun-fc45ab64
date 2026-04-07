@@ -861,10 +861,12 @@ const OnboardingPage = () => {
               </div>
             </div>
 
-            <Button onClick={goNext} disabled={!selectedMission}
-              className="w-full h-14 rounded-full bg-[#D4A853] hover:bg-[#C49A48] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none shrink-0">
-              Continue <ArrowRight size={18} className="ml-2" />
-            </Button>
+            <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#FFE0B2] via-[#FFE0B2]/95 to-transparent">
+              <Button onClick={goNext} disabled={!selectedMission}
+                className="w-full h-14 rounded-full bg-[#D4A853] hover:bg-[#C49A48] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
+                Continue <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </div>
           </motion.div>
         )}
 
