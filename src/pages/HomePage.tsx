@@ -53,6 +53,8 @@ const HomePage = () => {
   const [showProfile, setShowProfile] = useState(false);
   const [showInfoTooltip, setShowInfoTooltip] = useState(false);
   const [leaderboard, setLeaderboard] = useState<{ display_name: string; xp: number; weekly_xp: number; user_id: string }[]>([]);
+  const [lbTab, setLbTab] = useState<"weekly" | "alltime">("weekly");
+  const [prevRank, setPrevRank] = useState<number | null>(null);
 
   // Fetch leaderboard + realtime subscription
   useEffect(() => {
@@ -453,37 +455,76 @@ const HomePage = () => {
           {/* Leaderboard Widget */}
           <FadeIn delay={0.58}>
             <div className="bg-card rounded-2xl p-3.5 mb-4 border border-border/40 shadow-card">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-2">
                 <div className="w-7 h-7 rounded-xl bg-agni-gold flex items-center justify-center">
                   <Trophy size={13} className="text-white" />
                 </div>
                 <span className="text-[10px] font-extrabold text-foreground">Leaderboard</span>
-                <span className="ml-auto text-[8px] font-bold text-muted-foreground">This Week · Resets Mon</span>
               </div>
-              <div className="space-y-1.5">
-                {leaderboard.length > 0 ? (
-                  leaderboard.slice(0, 5).map((player, idx) => {
-                    const isYou = user && player.user_id === user.id;
-                    const rankEmoji = idx === 0 ? "👑" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "⚡";
-                    return (
-                      <div key={player.user_id} className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl ${isYou ? "bg-agni-green/10 border border-agni-green/20" : "bg-muted/20"}`}>
-                        <span className="text-xs font-black text-muted-foreground w-4 text-center">{idx + 1}</span>
-                        <span className="text-sm">{rankEmoji}</span>
-                        <span className={`text-[11px] font-extrabold flex-1 ${isYou ? "text-agni-green" : "text-foreground"}`}>
-                          {player.display_name} {isYou && <span className="text-[8px] font-bold text-agni-green/70">(You)</span>}
-                        </span>
-                        <span className="text-[10px] font-black text-agni-gold">{player.weekly_xp.toLocaleString()} XP</span>
+              {/* Tabs */}
+              <div className="flex gap-1 mb-3">
+                {([
+                  { key: "weekly" as const, label: "This Week" },
+                  { key: "alltime" as const, label: "All Time" },
+                ] as const).map(tab => (
+                  <motion.button key={tab.key} whileTap={{ scale: 0.95 }}
+                    onClick={() => { setLbTab(tab.key); SFX.tap(); }}
+                    className={`text-[9px] font-black px-3 py-1 rounded-full transition-all ${lbTab === tab.key ? "bg-agni-gold/20 text-agni-gold border border-agni-gold/40" : "bg-muted/30 text-muted-foreground border border-transparent"}`}
+                  >
+                    {tab.label}
+                  </motion.button>
+                ))}
+                <span className="ml-auto text-[7px] font-bold text-muted-foreground self-center">
+                  {lbTab === "weekly" ? "Resets Mon" : "Forever"}
+                </span>
+              </div>
+              <AnimatePresence mode="wait">
+                <motion.div key={lbTab} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }} className="space-y-1.5">
+                  {(() => {
+                    const sorted = [...leaderboard].sort((a, b) =>
+                      lbTab === "weekly" ? b.weekly_xp - a.weekly_xp : b.xp - a.xp
+                    );
+                    const myIdx = user ? sorted.findIndex(p => p.user_id === user.id) : -1;
+
+                    return sorted.length > 0 ? (
+                      sorted.slice(0, 5).map((player, idx) => {
+                        const isYou = user && player.user_id === user.id;
+                        const rankEmoji = idx === 0 ? "👑" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "⚡";
+                        const xpVal = lbTab === "weekly" ? player.weekly_xp : player.xp;
+                        // Rank change indicator for current user
+                        let rankChange: React.ReactNode = null;
+                        if (isYou && prevRank !== null && lbTab === "weekly") {
+                          const diff = prevRank - idx;
+                          if (diff > 0) rankChange = <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-[8px] font-black text-agni-green">▲{diff}</motion.span>;
+                          else if (diff < 0) rankChange = <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-[8px] font-black text-red-400">▼{Math.abs(diff)}</motion.span>;
+                        }
+                        return (
+                          <motion.div key={player.user_id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: idx * 0.05 }}
+                            className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl ${isYou ? "bg-agni-green/10 border border-agni-green/20" : "bg-muted/20"}`}
+                          >
+                            <span className="text-xs font-black text-muted-foreground w-4 text-center">{idx + 1}</span>
+                            <span className="text-sm">{rankEmoji}</span>
+                            <span className={`text-[11px] font-extrabold flex-1 ${isYou ? "text-agni-green" : "text-foreground"}`}>
+                              {player.display_name} {isYou && <span className="text-[8px] font-bold text-agni-green/70">(You)</span>}
+                              {rankChange && <span className="ml-1">{rankChange}</span>}
+                            </span>
+                            <span className="text-[10px] font-black text-agni-gold">{xpVal.toLocaleString()} XP</span>
+                          </motion.div>
+                        );
+                      })
+                    ) : (
+                      <div className="text-center py-3">
+                        <p className="text-[11px] text-muted-foreground font-semibold">
+                          {user ? "Earn XP to appear on the leaderboard! 🚀" : "Sign in to compete! 🏆"}
+                        </p>
                       </div>
                     );
-                  })
-                ) : (
-                  <div className="text-center py-3">
-                    <p className="text-[11px] text-muted-foreground font-semibold">
-                      {user ? "Earn XP to appear on the leaderboard! 🚀" : "Sign in to compete! 🏆"}
-                    </p>
-                  </div>
-                )}
-              </div>
+                  })()}
+                </motion.div>
+              </AnimatePresence>
             </div>
           </FadeIn>
 
