@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Sparkles, Loader2, X, Check, Brain, ArrowRight, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { InterestPill } from "./InterestPill";
 import { getSuggestionImage } from "@/lib/suggestionImages";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
@@ -46,17 +45,39 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<AISearchResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [searched, setSearched] = useState(false);
+  const [liveQuery, setLiveQuery] = useState(query);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const lastSearchedQuery = useRef("");
 
-  const doSearch = async () => {
-    if (!query.trim()) return;
+  // Sync liveQuery when parent query changes or modal opens
+  useEffect(() => {
+    if (open) {
+      setLiveQuery(query);
+    }
+  }, [query, open]);
+
+  // Reset everything when modal closes
+  useEffect(() => {
+    if (!open) {
+      setResults(null);
+      setError(null);
+      setLoading(false);
+      lastSearchedQuery.current = "";
+    }
+  }, [open]);
+
+  const doSearch = useCallback(async (searchQuery: string) => {
+    const trimmed = searchQuery.trim();
+    if (!trimmed || trimmed === lastSearchedQuery.current) return;
+    
+    lastSearchedQuery.current = trimmed;
     setLoading(true);
     setError(null);
     setResults(null);
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke("ai-interest-search", {
-        body: { query: query.trim(), currentCategory },
+        body: { query: trimmed, currentCategory },
       });
 
       if (fnError) throw new Error(fnError.message);
@@ -68,21 +89,38 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
       setError(e instanceof Error ? e.message : "Search failed");
     } finally {
       setLoading(false);
-      setSearched(true);
     }
-  };
+  }, [currentCategory]);
 
-  // Auto-search on open
-  if (open && !searched && !loading) {
-    doSearch();
-  }
+  // Auto-search on open with initial query
+  useEffect(() => {
+    if (open && query.trim()) {
+      doSearch(query);
+    }
+  }, [open]); // Only on open change
+
+  // Debounced real-time search as user types
+  useEffect(() => {
+    if (!open) return;
+    const trimmed = liveQuery.trim();
+    if (!trimmed || trimmed === lastSearchedQuery.current) return;
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      doSearch(trimmed);
+    }, 600);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [liveQuery, open, doSearch]);
 
   const handleSelect = (r: AIResult) => {
     onSelect({
       name: r.name,
       category: r.category,
       subCategory: r.subCategory,
-      imageUrl: undefined, // Will use getSuggestionImage fallback
+      imageUrl: undefined,
       metadata: {
         description: r.description,
         ...(r.author ? { author: r.author } : {}),
@@ -94,7 +132,7 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
 
   const handleAddAsIs = () => {
     onSelect({
-      name: query.trim(),
+      name: liveQuery.trim(),
       category: currentCategory,
       subCategory: "",
     });
@@ -125,23 +163,41 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
             <div className="w-10 h-1 bg-border rounded-full" />
           </div>
 
-          {/* Header */}
-          <div className="px-4 pb-3 border-b border-border flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-agni-purple to-agni-pink flex items-center justify-center shadow-lg">
-              <Brain size={18} className="text-white" />
+          {/* Header with live search input */}
+          <div className="px-4 pb-3 border-b border-border space-y-2.5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-agni-purple to-agni-pink flex items-center justify-center shadow-lg shrink-0">
+                <Brain size={18} className="text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-black text-foreground">AI Search</h3>
+                <p className="text-[10px] text-muted-foreground">Type to search in real-time</p>
+              </div>
+              <button onClick={onClose} className="w-8 h-8 rounded-full bg-muted/60 flex items-center justify-center">
+                <X size={14} className="text-muted-foreground" />
+              </button>
             </div>
-            <div className="flex-1">
-              <h3 className="text-sm font-black text-foreground">AI Search: "{query}"</h3>
-              <p className="text-[10px] text-muted-foreground">Finding the exact match across all categories</p>
+
+            {/* Live search input */}
+            <div className="relative">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" />
+              <input
+                type="text"
+                value={liveQuery}
+                onChange={(e) => setLiveQuery(e.target.value)}
+                placeholder="Search anything..."
+                autoFocus
+                className="w-full pl-9 pr-10 py-2.5 bg-muted/30 border border-border/30 rounded-xl text-xs font-bold text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-agni-purple/40 transition-colors"
+              />
+              {loading && (
+                <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-agni-purple animate-spin" />
+              )}
             </div>
-            <button onClick={onClose} className="w-8 h-8 rounded-full bg-muted/60 flex items-center justify-center">
-              <X size={14} className="text-muted-foreground" />
-            </button>
           </div>
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-4">
-            {loading && (
+            {loading && !results && (
               <div className="flex flex-col items-center justify-center py-12">
                 <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
                   <Loader2 size={28} className="text-agni-purple" />
@@ -185,7 +241,7 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
                       const isDiffCategory = r.category !== currentCategory;
                       return (
                         <motion.button
-                          key={i}
+                          key={`${r.name}-${i}`}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.1 }}
@@ -267,7 +323,7 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
             )}
 
             {/* Fallback: add as-is */}
-            {searched && !loading && (
+            {!loading && liveQuery.trim() && (
               <motion.button
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -281,7 +337,7 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
                     <Sparkles size={14} className="text-white" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs font-bold text-foreground">Just add "{query.trim()}" as-is</p>
+                    <p className="text-xs font-bold text-foreground">Just add "{liveQuery.trim()}" as-is</p>
                     <p className="text-[9px] text-muted-foreground">Skip AI matching, add as custom interest</p>
                   </div>
                 </div>
