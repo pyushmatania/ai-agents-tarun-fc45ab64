@@ -30,6 +30,7 @@ interface HeaderProps {
 const Header = ({ name, progress }: HeaderProps) => {
   const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
+  const { avatarUrl } = useAvatar();
   const xp = parseInt(localStorage.getItem("adojo_xp") || "0");
   const level = Math.floor(xp / 100) + 1;
   const personaActive = hasPersona();
@@ -102,14 +103,12 @@ const Header = ({ name, progress }: HeaderProps) => {
           </div>
         </div>
         <div className="flex items-center gap-1.5">
-          <motion.button
-            whileTap={{ scale: 0.9 }}
+          <UserAvatar
+            avatarUrl={avatarUrl}
+            name={name}
+            size="sm"
             onClick={() => navigate("/settings")}
-            className="w-8 h-8 rounded-xl glass flex items-center justify-center border border-border/50 hover:border-primary/30 transition-colors"
-            title="Profile"
-          >
-            <User size={14} className="text-muted-foreground" />
-          </motion.button>
+          />
           <motion.button
             whileTap={{ scale: 0.9 }}
             className="w-8 h-8 rounded-xl glass flex items-center justify-center border border-border/50 hover:border-primary/30 transition-colors relative"
