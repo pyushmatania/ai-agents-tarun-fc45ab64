@@ -207,6 +207,63 @@ export type Database = {
         }
         Relationships: []
       }
+      user_context: {
+        Row: {
+          age_range: string | null
+          brain_track: string | null
+          created_at: string
+          education: string | null
+          gender: string | null
+          id: string
+          job_title: string | null
+          location: string | null
+          mission_followup: Json | null
+          teaching_brain: string | null
+          teaching_identity: string | null
+          teaching_mission: string | null
+          teaching_vibe: string | null
+          updated_at: string
+          user_id: string
+          work_experience: string | null
+        }
+        Insert: {
+          age_range?: string | null
+          brain_track?: string | null
+          created_at?: string
+          education?: string | null
+          gender?: string | null
+          id?: string
+          job_title?: string | null
+          location?: string | null
+          mission_followup?: Json | null
+          teaching_brain?: string | null
+          teaching_identity?: string | null
+          teaching_mission?: string | null
+          teaching_vibe?: string | null
+          updated_at?: string
+          user_id: string
+          work_experience?: string | null
+        }
+        Update: {
+          age_range?: string | null
+          brain_track?: string | null
+          created_at?: string
+          education?: string | null
+          gender?: string | null
+          id?: string
+          job_title?: string | null
+          location?: string | null
+          mission_followup?: Json | null
+          teaching_brain?: string | null
+          teaching_identity?: string | null
+          teaching_mission?: string | null
+          teaching_vibe?: string | null
+          updated_at?: string
+          user_id?: string
+          work_experience?: string | null
+        }
+        Relationships: []
+      }
       user_progress: {
         Row: {
           course_id: string | null
