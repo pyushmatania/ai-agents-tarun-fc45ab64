@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Plus, Search, Sparkles, Check } from "lucide-react";
+import { X, Search, Sparkles, Check, ArrowLeft } from "lucide-react";
 import { getPersona, savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona } from "@/lib/neuralOS";
-import BotIllustration from "./illustrations/BotIllustration";
+import Agni from "./Agni";
 
 interface MascotProfileModalProps {
   open: boolean;
@@ -13,7 +13,6 @@ const MascotProfileModal = ({ open, onClose }: MascotProfileModalProps) => {
   const [persona, setPersona] = useState<NeuralOSPersona>(getPersona());
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [customInput, setCustomInput] = useState("");
 
   const activeCategory = SUGGESTION_CATEGORIES.find(c => c.id === activeCategoryId);
   const currentItems = activeCategory ? ((persona[activeCategory.field] as string[]) || []) : [];
@@ -23,21 +22,19 @@ const MascotProfileModal = ({ open, onClose }: MascotProfileModalProps) => {
     const field = activeCategory.field as keyof NeuralOSPersona;
     const current = (persona[field] as string[]) || [];
     const updated = current.includes(item) ? current.filter(x => x !== item) : [...current, item];
-    const newPersona = { ...persona, [field]: updated };
-    setPersona(newPersona);
+    setPersona({ ...persona, [field]: updated });
     savePersona({ [field]: updated });
   };
 
-  const addCustom = () => {
-    if (!customInput.trim() || !activeCategory) return;
+  const addCustomFromSearch = () => {
+    if (!searchQuery.trim() || !activeCategory) return;
     const field = activeCategory.field as keyof NeuralOSPersona;
     const current = (persona[field] as string[]) || [];
-    if (current.includes(customInput.trim())) return;
-    const updated = [...current, customInput.trim()];
-    const newPersona = { ...persona, [field]: updated };
-    setPersona(newPersona);
+    if (current.includes(searchQuery.trim())) return;
+    const updated = [...current, searchQuery.trim()];
+    setPersona({ ...persona, [field]: updated });
     savePersona({ [field]: updated });
-    setCustomInput("");
+    setSearchQuery("");
   };
 
   const filteredSuggestions = activeCategory
@@ -46,6 +43,10 @@ const MascotProfileModal = ({ open, onClose }: MascotProfileModalProps) => {
         (s.tag && s.tag.toLowerCase().includes(searchQuery.toLowerCase()))
       )
     : [];
+
+  const noExactMatch = searchQuery.trim() && activeCategory &&
+    !activeCategory.suggestions.some(s => s.name.toLowerCase() === searchQuery.trim().toLowerCase()) &&
+    !currentItems.includes(searchQuery.trim());
 
   if (!open) return null;
 
@@ -67,186 +68,49 @@ const MascotProfileModal = ({ open, onClose }: MascotProfileModalProps) => {
           onClick={(e) => e.stopPropagation()}
         >
           {/* Drag handle */}
-          <div className="flex justify-center pt-2">
-            <div className="w-12 h-1 bg-border rounded-full" />
+          <div className="flex justify-center pt-2 pb-1">
+            <div className="w-10 h-1 bg-border rounded-full" />
           </div>
 
           {/* Header */}
-          <div className="px-5 pt-3 pb-4 border-b border-border flex items-center gap-3">
-            <div className="w-12 h-12 shrink-0">
-              <BotIllustration size={48} />
+          <div className="px-4 pb-3 border-b border-border flex items-center gap-3">
+            <div className="w-11 h-11 shrink-0">
+              <Agni expression="happy" size={44} animate={false} />
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-base font-bold text-foreground">My Persona</h2>
-              <p className="text-xs text-muted-foreground">
-                Edit anytime — I learn from this
-              </p>
+              <h2 className="text-sm font-black text-foreground">My Persona</h2>
+              <p className="text-[10px] text-muted-foreground">Edit anytime — AGNI learns from this</p>
             </div>
-            <button
-              onClick={onClose}
-              className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
-            >
-              <X size={16} />
+            <button onClick={onClose} className="w-8 h-8 rounded-full bg-muted/60 flex items-center justify-center hover:bg-muted transition-colors">
+              <X size={14} className="text-muted-foreground" />
             </button>
           </div>
 
           {/* Body */}
           <div className="flex-1 overflow-y-auto">
             {!activeCategory ? (
-              /* CATEGORY GRID */
-              <div className="p-5 space-y-3">
-                <p className="text-xs text-muted-foreground mb-2">
-                  Tap a category to add or edit items
-                </p>
-                {SUGGESTION_CATEGORIES.map((cat) => {
-                  const items = ((persona[cat.field] as string[]) || []);
-                  return (
-                    <motion.button
-                      key={cat.id}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => setActiveCategoryId(cat.id)}
-                      className="w-full bg-muted/50 hover:bg-muted border border-border rounded-2xl p-4 flex items-center gap-3 transition-colors text-left"
-                    >
-                      <div className="w-11 h-11 shrink-0 rounded-xl bg-card flex items-center justify-center text-2xl">
-                        {cat.emoji}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-sm text-foreground">{cat.label}</p>
-                        <p className="text-[11px] text-muted-foreground truncate">
-                          {items.length > 0 ? items.slice(0, 3).join(", ") + (items.length > 3 ? `, +${items.length - 3} more` : "") : cat.description}
-                        </p>
-                      </div>
-                      {items.length > 0 && (
-                        <span className="shrink-0 text-[10px] font-bold bg-primary/10 text-primary px-2 py-1 rounded-full">
-                          {items.length}
-                        </span>
-                      )}
-                    </motion.button>
-                  );
-                })}
-              </div>
+              <CategoryList persona={persona} onSelect={setActiveCategoryId} />
             ) : (
-              /* SUGGESTION GRID for active category */
-              <div className="flex flex-col h-full">
-                {/* Sub-header */}
-                <div className="px-5 pt-4 pb-3 border-b border-border">
-                  <button
-                    onClick={() => { setActiveCategoryId(null); setSearchQuery(""); setCustomInput(""); }}
-                    className="text-xs text-primary font-semibold mb-2"
-                  >
-                    ← All categories
-                  </button>
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">{activeCategory.emoji}</span>
-                    <div>
-                      <h3 className="text-base font-bold text-foreground">{activeCategory.label}</h3>
-                      <p className="text-[11px] text-muted-foreground">{activeCategory.description}</p>
-                    </div>
-                  </div>
-
-                  {/* Search */}
-                  <div className="mt-3 relative">
-                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search suggestions..."
-                      className="w-full bg-muted border border-border rounded-xl pl-9 pr-3 py-2 text-sm outline-none focus:border-primary"
-                    />
-                  </div>
-
-                  {/* Selected count */}
-                  {currentItems.length > 0 && (
-                    <p className="mt-2 text-[11px] text-primary font-semibold">
-                      ✓ {currentItems.length} selected
-                    </p>
-                  )}
-                </div>
-
-                {/* Suggestions grid */}
-                <div className="flex-1 overflow-y-auto p-4">
-                  <div className="grid grid-cols-2 gap-2">
-                    {filteredSuggestions.map((s) => {
-                      const selected = currentItems.includes(s.name);
-                      return (
-                        <motion.button
-                          key={s.name}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => toggleItem(s.name)}
-                          className={`p-3 rounded-2xl border-2 text-left transition-all relative ${
-                            selected
-                              ? "bg-primary/10 border-primary"
-                              : "bg-muted/50 border-border hover:border-muted-foreground/30"
-                          }`}
-                        >
-                          {selected && (
-                            <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                              <Check size={11} className="text-primary-foreground" strokeWidth={3} />
-                            </div>
-                          )}
-                          <div className="text-lg mb-1">{s.emoji || "✨"}</div>
-                          <div className="text-xs font-bold text-foreground leading-tight pr-4">{s.name}</div>
-                          {s.tag && (
-                            <div className="text-[9px] text-muted-foreground mt-0.5">{s.tag}</div>
-                          )}
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Custom items already added (not in suggestions) */}
-                  {currentItems.filter(i => !activeCategory.suggestions.find(s => s.name === i)).length > 0 && (
-                    <div className="mt-4">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Your custom adds</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {currentItems
-                          .filter(i => !activeCategory.suggestions.find(s => s.name === i))
-                          .map((item) => (
-                            <button
-                              key={item}
-                              onClick={() => toggleItem(item)}
-                              className="bg-primary/10 border border-primary text-primary text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5"
-                            >
-                              {item}
-                              <X size={10} />
-                            </button>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Custom add input — sticky at bottom */}
-                <div className="border-t border-border bg-card p-3">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={customInput}
-                      onChange={(e) => setCustomInput(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") addCustom(); }}
-                      placeholder={`Add your own ${activeCategory.label.toLowerCase()}...`}
-                      className="flex-1 bg-muted border border-border rounded-xl px-3 py-2 text-sm outline-none focus:border-primary"
-                    />
-                    <button
-                      onClick={addCustom}
-                      disabled={!customInput.trim()}
-                      className="bg-primary text-primary-foreground rounded-xl px-3 disabled:opacity-30"
-                    >
-                      <Plus size={16} />
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <CategoryDetail
+                category={activeCategory}
+                currentItems={currentItems}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                filteredSuggestions={filteredSuggestions}
+                noExactMatch={!!noExactMatch}
+                onToggle={toggleItem}
+                onAddCustom={addCustomFromSearch}
+                onBack={() => { setActiveCategoryId(null); setSearchQuery(""); }}
+              />
             )}
           </div>
 
           {/* Footer */}
           {!activeCategory && (
-            <div className="border-t border-border p-4 bg-card">
+            <div className="border-t border-border p-3 bg-card">
               <button
                 onClick={onClose}
-                className="w-full bg-primary text-primary-foreground font-bold rounded-2xl py-3 text-sm flex items-center justify-center gap-2"
+                className="w-full bg-agni-green text-white font-black rounded-2xl py-3 text-sm flex items-center justify-center gap-2 shadow-btn-3d active:shadow-btn-3d-pressed active:translate-y-0.5 transition-all"
               >
                 <Sparkles size={14} />
                 Done — Apply to my lessons
@@ -258,5 +122,160 @@ const MascotProfileModal = ({ open, onClose }: MascotProfileModalProps) => {
     </AnimatePresence>
   );
 };
+
+/* ─── Category list (main view) ─── */
+const CategoryList = ({ persona, onSelect }: { persona: NeuralOSPersona; onSelect: (id: string) => void }) => (
+  <div className="p-4 space-y-2">
+    <p className="text-[10px] text-muted-foreground font-semibold mb-1">Tap a category to add or edit items</p>
+    {SUGGESTION_CATEGORIES.map((cat) => {
+      const items = ((persona[cat.field] as string[]) || []);
+      return (
+        <motion.button
+          key={cat.id}
+          whileTap={{ scale: 0.97 }}
+          onClick={() => onSelect(cat.id)}
+          className="w-full bg-muted/40 hover:bg-muted/70 border border-border/60 rounded-2xl p-3.5 flex items-center gap-3 transition-colors text-left"
+        >
+          <div className="w-10 h-10 shrink-0 rounded-xl bg-card flex items-center justify-center text-xl shadow-sm">
+            {cat.emoji}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-xs text-foreground">{cat.label}</p>
+            <p className="text-[10px] text-muted-foreground truncate">
+              {items.length > 0 ? items.slice(0, 3).join(", ") + (items.length > 3 ? `, +${items.length - 3}` : "") : cat.description}
+            </p>
+          </div>
+          {items.length > 0 && (
+            <span className="shrink-0 text-[9px] font-black bg-agni-green/15 text-agni-green px-2 py-0.5 rounded-full">
+              {items.length}
+            </span>
+          )}
+        </motion.button>
+      );
+    })}
+  </div>
+);
+
+/* ─── Category detail (suggestions + selected panel) ─── */
+interface CategoryDetailProps {
+  category: typeof SUGGESTION_CATEGORIES[0];
+  currentItems: string[];
+  searchQuery: string;
+  setSearchQuery: (q: string) => void;
+  filteredSuggestions: typeof SUGGESTION_CATEGORIES[0]["suggestions"];
+  noExactMatch: boolean;
+  onToggle: (item: string) => void;
+  onAddCustom: () => void;
+  onBack: () => void;
+}
+
+const CategoryDetail = ({
+  category, currentItems, searchQuery, setSearchQuery,
+  filteredSuggestions, noExactMatch, onToggle, onAddCustom, onBack,
+}: CategoryDetailProps) => (
+  <div className="flex flex-col h-full">
+    {/* Sub-header */}
+    <div className="px-4 pt-3 pb-2 border-b border-border bg-card/50">
+      <button onClick={onBack} className="text-[11px] text-agni-green font-bold mb-2 flex items-center gap-1">
+        <ArrowLeft size={12} /> All categories
+      </button>
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-xl">{category.emoji}</span>
+        <div>
+          <h3 className="text-sm font-black text-foreground">{category.label}</h3>
+          <p className="text-[10px] text-muted-foreground">{category.description}</p>
+        </div>
+      </div>
+
+      {/* Unified search + custom add bar */}
+      <div className="relative">
+        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter" && noExactMatch) onAddCustom(); }}
+          placeholder={`Search or add custom ${category.label.toLowerCase()}...`}
+          className="w-full bg-muted/60 border border-border rounded-xl pl-8 pr-3 py-2 text-xs outline-none focus:border-agni-green/50 transition-colors"
+        />
+      </div>
+
+      {/* Custom add hint */}
+      {noExactMatch && (
+        <motion.p
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-1.5 text-[10px] text-agni-green font-bold"
+        >
+          ✨ Add "<span className="text-foreground">{searchQuery.trim()}</span>" — press Enter
+        </motion.p>
+      )}
+    </div>
+
+    {/* Selected items panel */}
+    {currentItems.length > 0 && (
+      <div className="px-4 py-2 border-b border-border/50 bg-agni-green/5">
+        <p className="text-[9px] font-black text-agni-green uppercase tracking-wider mb-1.5">
+          ✓ {currentItems.length} selected
+        </p>
+        <div className="flex flex-wrap gap-1.5 max-h-[72px] overflow-y-auto">
+          {currentItems.map((item) => (
+            <motion.button
+              key={item}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => onToggle(item)}
+              className="bg-agni-green/15 border border-agni-green/30 text-agni-green text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 hover:bg-agni-green/25 transition-colors"
+            >
+              {item}
+              <X size={9} className="opacity-60" />
+            </motion.button>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {/* Suggestions grid */}
+    <div className="flex-1 overflow-y-auto p-3">
+      <div className="grid grid-cols-2 gap-1.5">
+        {filteredSuggestions.map((s) => {
+          const selected = currentItems.includes(s.name);
+          return (
+            <motion.button
+              key={s.name}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => onToggle(s.name)}
+              className={`p-2.5 rounded-xl border-2 text-left transition-all relative ${
+                selected
+                  ? "bg-agni-green/10 border-agni-green/40"
+                  : "bg-muted/30 border-border/40 hover:border-muted-foreground/20"
+              }`}
+            >
+              {selected && (
+                <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-agni-green flex items-center justify-center">
+                  <Check size={9} className="text-white" strokeWidth={3} />
+                </div>
+              )}
+              <div className="text-base mb-0.5">{s.emoji || "✨"}</div>
+              <div className="text-[10px] font-bold text-foreground leading-tight pr-4">{s.name}</div>
+              {s.tag && (
+                <div className="text-[8px] text-muted-foreground mt-0.5">{s.tag}</div>
+              )}
+            </motion.button>
+          );
+        })}
+      </div>
+
+      {filteredSuggestions.length === 0 && searchQuery && (
+        <div className="text-center py-8">
+          <p className="text-2xl mb-2">🔍</p>
+          <p className="text-xs text-muted-foreground">No matches found</p>
+          <p className="text-[10px] text-agni-green font-bold mt-1">Press Enter to add "{searchQuery.trim()}"</p>
+        </div>
+      )}
+    </div>
+  </div>
+);
 
 export default MascotProfileModal;
