@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { getPersona } from "@/lib/neuralOS";
 import { supabase } from "@/integrations/supabase/client";
 import { InterestPill } from "@/components/InterestPill";
-import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection } from "@/lib/teachingConfig";
+import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection, getAllOptions } from "@/lib/teachingConfig";
 
 const DAILY_TIPS = [
   { tip: "AI agents use a Perceive→Reason→Act loop — just like humans!", emoji: "🧠" },
@@ -28,7 +28,7 @@ const DAILY_TIPS = [
 ];
 
 // Flat list for lookups (legacy compat)
-const ALL_TEACHING_OPTIONS = TEACHING_CATEGORIES.flatMap(c => c.options);
+const ALL_TEACHING_OPTIONS = TEACHING_CATEGORIES.flatMap(c => getAllOptions(c.id));
 
 const MOTIVATIONAL_QUOTES = [
   { quote: "The best way to predict the future is to build it.", author: "Alan Kay" },
@@ -330,7 +330,7 @@ const HomePage = () => {
                       </p>
                       <p className="text-[7px] text-muted-foreground/40 mb-1 px-0.5">{cat.desc}</p>
                       <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1 flex-wrap">
-                        {cat.options.map((opt: any) => {
+                        {getAllOptions(cat.id).map((opt: any) => {
                           const isSelected = currentVal === opt.id;
                           return (
                             <motion.button
