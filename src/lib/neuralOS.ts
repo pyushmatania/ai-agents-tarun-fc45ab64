@@ -71,6 +71,25 @@ export const clearPersona = () => {
   localStorage.removeItem(PERSONA_KEY);
 };
 
+/** Extract unique sub-filter tags from a category's suggestions — shared across onboarding & settings */
+export function getSubFilters(cat: SuggestionCategory): string[] {
+  const tagMap: Record<string, number> = {};
+  cat.suggestions.forEach(s => {
+    const tag = s.tag || "";
+    if (tag) {
+      const key = tag.split(" ")[0];
+      tagMap[key] = (tagMap[key] || 0) + 1;
+    }
+  });
+  const groups = Object.entries(tagMap).filter(([, c]) => c >= 2).map(([k]) => k);
+  return groups.length >= 3 ? groups.slice(0, 8) : [];
+}
+
+/** Count items matching a sub-filter tag in a category */
+export function getSubFilterCount(cat: SuggestionCategory, tag: string): number {
+  return cat.suggestions.filter(s => s.tag && s.tag.toLowerCase().startsWith(tag.toLowerCase())).length;
+}
+
 /* ============================================================
  * 🌍 SUGGESTION CATALOGS — Twitter-style onboarding suggestions
  * Users tap to add. Can also search and add custom.
