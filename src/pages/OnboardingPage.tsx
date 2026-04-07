@@ -577,10 +577,14 @@ const OnboardingPage = () => {
                     className="w-full bg-transparent pl-10 pr-20 py-3 text-sm font-medium outline-none placeholder:text-muted-foreground/50"
                   />
                   {!search.trim() && (
-                    <div className="absolute right-2 flex items-center gap-1 bg-agni-purple/10 border border-agni-purple/20 rounded-lg px-2 py-1 pointer-events-none">
+                    <motion.div
+                      animate={{ y: [0, -3, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      className="absolute right-2 flex items-center gap-1 bg-agni-purple/10 border border-agni-purple/20 rounded-lg px-2 py-1 pointer-events-none"
+                    >
                       <Sparkles size={10} className="text-agni-purple" />
                       <span className="text-[8px] font-bold text-agni-purple whitespace-nowrap">+ Custom</span>
-                    </div>
+                    </motion.div>
                   )}
                 </div>
               </div>
