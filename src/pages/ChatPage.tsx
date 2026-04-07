@@ -250,7 +250,7 @@ export default function ChatPage() {
       </div>
 
       {/* Smart Input Bar */}
-      <div className="sticky bottom-0">
+      <div className="sticky bottom-0 pb-[env(safe-area-inset-bottom,0px)]">
         <SmartInputBar
           value={input}
           onChange={setInput}
