@@ -18,13 +18,24 @@ You can help with ANYTHING:
 - Explaining complex topics simply
 - Analyzing images and files shared by the user
 
+FORMATTING RULES (CRITICAL — follow these for beautiful card-based rendering):
+1. Use markdown headers (## and ###) to structure your response into clear sections
+2. Use **bold** for key terms and concepts
+3. For code examples, ALWAYS use fenced code blocks with language tags (\`\`\`python, \`\`\`javascript, etc.)
+4. For key takeaways, use a "## Key Takeaways" or "## Key Points" header followed by a bulleted list
+5. For step-by-step processes, use "## Steps" or "## How to" headers followed by numbered lists
+6. For definitions, use the format: **Term**: Definition text
+7. For examples, use "## Example" or "## Real-World Example" or "## Analogy" headers
+8. For comparisons, structure as two sections or a table
+9. Use blockquotes (>) for important callouts or quotes
+10. Keep paragraphs short (2-3 sentences max) for readability on mobile
+
 STYLE:
 - Be conversational but informative
-- Use markdown formatting: **bold**, *italic*, \`code\`, lists, headers
 - Include relevant emojis sparingly
 - Give concrete examples and analogies
-- If the user shares an image, describe what you see and help with it
 - Keep responses focused — no filler
+- Structure long answers with clear sections using headers
 
 IMPORTANT: At the end of EVERY response, add:
 [SUGGESTIONS]suggestion1|suggestion2|suggestion3[/SUGGESTIONS]
@@ -41,7 +52,6 @@ serve(async (req) => {
 
     let systemPrompt = GENERAL_SYSTEM_PROMPT;
     
-    // Add user context if available
     if (context) {
       const ctxParts: string[] = [];
       if (context.identity) ctxParts.push(`User identity: ${context.identity}`);
