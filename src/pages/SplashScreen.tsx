@@ -60,9 +60,10 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.6 }}
-        className="mt-3 text-[9px] text-muted-foreground/50 font-mono tracking-widest"
+        className="mt-3 text-center space-y-0.5"
       >
-        v1.0 "TERMINATOR"
+        <p className="text-[9px] text-muted-foreground/50 font-mono tracking-widest">Version 01</p>
+        <p className="text-[9px] text-muted-foreground/40 font-mono italic">The Genesis</p>
       </motion.div>
 
       {/* Loading dots */}

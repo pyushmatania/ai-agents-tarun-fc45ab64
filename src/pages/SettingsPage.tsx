@@ -629,7 +629,12 @@ const SettingsPage = () => {
             </div>
           </FadeIn>
 
-          <p className="text-center text-[10px] text-muted-foreground mt-4 font-semibold">Neural-OS v1.0 "Terminator" • Made in Jeypore ❤️</p>
+          <div className="text-center mt-6 mb-2 space-y-0.5">
+            <p className="text-[11px] font-black text-foreground/60 tracking-widest uppercase">Neural-OS</p>
+            <p className="text-[10px] font-bold text-muted-foreground">Version 01</p>
+            <p className="text-[10px] font-semibold text-muted-foreground/70 italic">The Genesis</p>
+            <p className="text-[10px] text-muted-foreground mt-1">Made in Jeypore ❤️</p>
+          </div>
         </div>
         <BottomNav />
       </div>
