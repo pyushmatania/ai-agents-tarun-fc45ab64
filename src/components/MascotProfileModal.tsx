@@ -37,12 +37,21 @@ const MascotProfileModal = ({ open, onClose }: MascotProfileModalProps) => {
 
   const addCustomFromSearch = () => {
     if (!searchQuery.trim() || !activeCategory) return;
-    const field = activeCategory.field as keyof NeuralOSPersona;
+    // Open smart search instead of directly adding
+    setSmartSearchQuery(searchQuery.trim());
+    setSmartSearchOpen(true);
+  };
+
+  const handleSmartSearchSelect = (item: { name: string; category: string; subCategory: string }) => {
+    const targetCat = SUGGESTION_CATEGORIES.find(c => c.id === item.category) || activeCategory;
+    if (!targetCat) return;
+    const field = targetCat.field as keyof NeuralOSPersona;
     const current = (persona[field] as string[]) || [];
-    if (current.includes(searchQuery.trim())) return;
-    const updated = [...current, searchQuery.trim()];
-    setPersona({ ...persona, [field]: updated });
-    savePersona({ [field]: updated });
+    if (!current.includes(item.name)) {
+      const updated = [...current, item.name];
+      setPersona({ ...persona, [field]: updated });
+      savePersona({ [field]: updated });
+    }
     setSearchQuery("");
   };
 
