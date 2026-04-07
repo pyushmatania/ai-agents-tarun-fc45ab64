@@ -1112,32 +1112,32 @@ const OnboardingPage = () => {
               </motion.div>
 
               <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                className="text-2xl font-black text-foreground text-center mt-4 mb-2"
+                className="text-2xl font-black text-gray-800 text-center mt-4 mb-2"
               >
                 The more you share,<br />
                 <span className="text-agni-gold">the smarter I get</span> 🧠
               </motion.h2>
 
               <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-                className="text-sm text-muted-foreground text-center mb-6 max-w-[300px]"
+                className="text-sm text-gray-500 text-center mb-6 max-w-[300px]"
               >
-                Tell me your interests so <span className="text-agni-green font-bold">AGNI</span> can personalize <span className="font-bold text-foreground">every lesson, quiz & analogy</span> just for you.
+                Tell me your interests so <span className="text-agni-green font-bold">AGNI</span> can personalize <span className="font-bold text-gray-800">every lesson, quiz & analogy</span> just for you.
               </motion.p>
 
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
                 className="w-full space-y-2.5 mb-6"
               >
                 {[
-                  { emoji: "🥷", text: "Love Naruto? Multi-agent = Shadow Clone Jutsu — each clone does a different task!", color: "border-agni-orange/30 bg-agni-orange/5" },
-                  { emoji: "🏏", text: "Cricket fan? RAG = Dhoni reading the pitch before pulling the right data!", color: "border-agni-blue/30 bg-agni-blue/5" },
-                  { emoji: "🦸", text: "Marvel fan? Agents = Avengers team — each with a unique superpower!", color: "border-agni-purple/30 bg-agni-purple/5" },
-                  { emoji: "🎮", text: "Gamer? Brain levels work like DBZ — Sprout is Kid Goku, Demon Mode is Ultra Instinct!", color: "border-agni-green/30 bg-agni-green/5" },
+                  { emoji: "🥷", text: "Love Naruto? Multi-agent = Shadow Clone Jutsu — each clone does a different task!", color: "border-[#F0805E]/30 bg-[#F0805E]/10" },
+                  { emoji: "🏏", text: "Cricket fan? RAG = Dhoni reading the pitch before pulling the right data!", color: "border-[#1CB0F6]/30 bg-[#1CB0F6]/10" },
+                  { emoji: "🦸", text: "Marvel fan? Agents = Avengers team — each with a unique superpower!", color: "border-[#7C5CBF]/30 bg-[#7C5CBF]/10" },
+                  { emoji: "🎮", text: "Gamer? Brain levels work like DBZ — Sprout is Kid Goku, Demon Mode is Ultra Instinct!", color: "border-[#58CC02]/30 bg-[#58CC02]/10" },
                 ].map((ex, i) => (
                   <motion.div key={i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.8 + i * 0.12 }}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl border ${ex.color}`}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl border bg-white/40 ${ex.color}`}
                   >
                     <span className="text-2xl shrink-0">{ex.emoji}</span>
-                    <p className="text-xs font-bold text-foreground leading-snug">{ex.text}</p>
+                    <p className="text-xs font-bold text-gray-700 leading-snug">{ex.text}</p>
                   </motion.div>
                 ))}
               </motion.div>
@@ -1150,9 +1150,11 @@ const OnboardingPage = () => {
               </motion.div>
             </div>
 
-            <Button onClick={goNext} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d mt-4">
-              LET'S DO THIS 🔥 <ArrowRight size={18} className="ml-2" />
-            </Button>
+            <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#FADADD] via-[#FADADD]/95 to-transparent">
+              <Button onClick={goNext} className="w-full h-14 rounded-full bg-[#58CC02] hover:bg-[#4CAD02] text-white font-extrabold text-base shadow-lg">
+                LET'S DO THIS 🔥 <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </div>
           </motion.div>
         )}
 
