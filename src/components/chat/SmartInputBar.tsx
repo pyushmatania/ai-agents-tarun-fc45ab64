@@ -359,13 +359,13 @@ export default function SmartInputBar({
 
       {/* Input row with action buttons */}
       <div className="px-4 py-3 pb-6">
-        {/* Action chips row */}
-        <div className="flex items-center gap-1.5 mb-2">
+        {/* Action chips row — scrollable */}
+        <div className="flex items-center gap-1.5 mb-2 overflow-x-auto scrollbar-none">
           {/* + button for tools (general) or modes (learn) */}
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => togglePanel(isLearnTab ? "modes" : "tools")}
-            className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+            className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-all ${
               activePanel === "modes" || activePanel === "tools"
                 ? "bg-primary/20 rotate-45"
                 : "bg-muted/30"
@@ -381,7 +381,7 @@ export default function SmartInputBar({
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => togglePanel("powerups")}
-            className={`h-7 px-2.5 rounded-full flex items-center gap-1 text-[9px] font-black transition-all ${
+            className={`shrink-0 h-7 px-2.5 rounded-full flex items-center gap-1 text-[9px] font-black transition-all ${
               activePanel === "powerups"
                 ? "bg-primary/15 text-primary"
                 : "bg-muted/20 text-muted-foreground"
@@ -390,12 +390,38 @@ export default function SmartInputBar({
             <Zap size={10} /> Actions
           </motion.button>
 
+          {/* Vibe button */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => togglePanel("vibe")}
+            className={`shrink-0 h-7 px-2.5 rounded-full flex items-center gap-1 text-[9px] font-black transition-all ${
+              activePanel === "vibe"
+                ? "bg-agni-blue/15 text-agni-blue"
+                : "bg-muted/20 text-muted-foreground"
+            }`}
+          >
+            <Palette size={10} /> Vibe
+          </motion.button>
+
+          {/* Brain button */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => togglePanel("brain")}
+            className={`shrink-0 h-7 px-2.5 rounded-full flex items-center gap-1 text-[9px] font-black transition-all ${
+              activePanel === "brain"
+                ? "bg-agni-purple/15 text-agni-purple"
+                : "bg-muted/20 text-muted-foreground"
+            }`}
+          >
+            <Brain size={10} /> Brain
+          </motion.button>
+
           {/* Interests button */}
           {interestCategories.length > 0 && (
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => togglePanel("interests")}
-              className={`h-7 px-2.5 rounded-full flex items-center gap-1 text-[9px] font-black transition-all ${
+              className={`shrink-0 h-7 px-2.5 rounded-full flex items-center gap-1 text-[9px] font-black transition-all ${
                 activePanel === "interests"
                   ? "bg-agni-purple/15 text-agni-purple"
                   : "bg-muted/20 text-muted-foreground"
@@ -407,7 +433,7 @@ export default function SmartInputBar({
 
           {/* Lesson context badge */}
           {isLearnTab && lessonTitle && (
-            <div className="ml-auto flex items-center gap-1 text-[8px] font-bold text-primary/60">
+            <div className="ml-auto shrink-0 flex items-center gap-1 text-[8px] font-bold text-primary/60">
               <GraduationCap size={9} />
               <span className="truncate max-w-[80px]">{lessonTitle}</span>
             </div>
