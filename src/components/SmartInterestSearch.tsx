@@ -210,7 +210,7 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
               </div>
               <p className="text-sm font-bold text-foreground mb-1">Smart AI Search</p>
               <p className="text-[11px] text-muted-foreground max-w-[240px]">
-                Start typing and AI will find matches instantly — even with typos or partial names
+                Start typing and press Enter or the send button to search — AI handles typos and partial names
               </p>
             </div>
           )}
