@@ -340,9 +340,26 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
     setAiSuggestions([]);
 
     const aiConfig = getAIConfig();
+    
+    // Build 4-dimension teaching context for AGNI v2
+    const identityLabel = getTeachingLabel("identity");
+    const missionLabel = getTeachingLabel("mission");
+    const vibeLabel = getTeachingLabel("vibe");
+    const brainLabel = getTeachingLabel("brain");
+    const universeVibe = getUniverseVibe();
+    
+    const teachingContext = {
+      identity: identityLabel ? `${identityLabel.label} — ${identityLabel.desc || ""}` : undefined,
+      mission: missionLabel ? `${missionLabel.label} — ${missionLabel.desc || ""}` : undefined,
+      vibe: vibeLabel ? `${vibeLabel.label} — ${vibeLabel.desc || ""}` : undefined,
+      level: brainLabel ? `${brainLabel.label} — ${brainLabel.desc || ""}` : undefined,
+      universeVibe: universeVibe || undefined,
+    };
+    
     const body: any = {
       messages: chatMessages,
       teachingMode: activeMode,
+      teachingContext,
       lessonTitle,
       lessonTopic,
       stream: true,
