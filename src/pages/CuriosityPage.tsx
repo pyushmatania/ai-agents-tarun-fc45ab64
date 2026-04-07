@@ -1051,10 +1051,10 @@ const CuriosityPage = () => {
                                 <motion.button
                                   whileTap={{ scale: 0.9 }}
                                   onClick={() => setLearnItem(item)}
-                                  className="flex items-center gap-1 bg-agni-purple/15 text-agni-purple text-[9px] font-black px-3 py-1.5 rounded-full border border-agni-purple/20"
+                                  className="flex items-center gap-1.5 bg-gradient-to-r from-agni-purple/20 to-agni-pink/15 text-agni-purple text-[10px] font-black px-3.5 py-2 rounded-xl border border-agni-purple/25 shadow-sm"
                                 >
-                                  <Brain size={10} />
-                                  Learn with AI
+                                  <Brain size={13} />
+                                  AI Notes ✨
                                 </motion.button>
                               </div>
                             </div>
@@ -1143,9 +1143,9 @@ const CuriosityPage = () => {
                             <motion.button
                               whileTap={{ scale: 0.9 }}
                               onClick={() => setLearnItem(item)}
-                              className="flex items-center gap-1 text-agni-purple text-[8px] font-black px-2 py-1 rounded-full bg-agni-purple/10"
+                              className="flex items-center gap-1.5 bg-gradient-to-r from-agni-purple/20 to-agni-pink/15 text-agni-purple text-[10px] font-black px-3.5 py-2 rounded-xl border border-agni-purple/25 shadow-sm"
                             >
-                              <Brain size={9} /> AI Notes
+                              <Brain size={13} /> AI Notes ✨
                             </motion.button>
                           </div>
 
@@ -1340,8 +1340,8 @@ const CuriosityPage = () => {
                                 </motion.button>
                               </div>
                               <motion.button whileTap={{ scale: 0.9 }} onClick={() => setLearnItem(item)}
-                                className="flex items-center gap-1 text-agni-purple text-[8px] font-black px-2 py-1 rounded-full bg-agni-purple/10">
-                                <Brain size={9} /> AI Notes
+                                className="flex items-center gap-1.5 bg-gradient-to-r from-agni-purple/20 to-agni-pink/15 text-agni-purple text-[10px] font-black px-3.5 py-2 rounded-xl border border-agni-purple/25 shadow-sm">
+                                <Brain size={13} /> AI Notes ✨
                               </motion.button>
                             </div>
                             <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full bg-agni-gold" />
