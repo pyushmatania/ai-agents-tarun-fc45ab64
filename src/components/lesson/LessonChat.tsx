@@ -84,6 +84,38 @@ const POWERUPS: Record<string, PowerUp[]> = {
   ],
 };
 
+// Add powerups for new modes
+POWERUPS["fun"] = [
+  { id: "fn1", label: "Fun Example", emoji: "🎮", prompt: "__INTEREST_DECK_FUN__", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", soundColor: "blue" },
+  { id: "fn2", label: "Meme It", emoji: "😂", prompt: "Turn this concept into a meme-worthy analogy!", color: "bg-[hsl(323,100%,76%)]", shadowColor: "shadow-[0_4px_0_0_hsl(323,100%,60%)]", soundColor: "pink" },
+  { id: "fn3", label: "Quiz Me", emoji: "🧩", prompt: "Give me a fun quick quiz on this!", color: "bg-[hsl(100,95%,40%)]", shadowColor: "shadow-[0_4px_0_0_hsl(100,100%,31%)]", soundColor: "green" },
+];
+POWERUPS["story"] = [
+  { id: "st1", label: "Story Time", emoji: "📖", prompt: "__INTEREST_DECK_STORY__", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", soundColor: "purple" },
+  { id: "st2", label: "Plot Twist", emoji: "🌀", prompt: "Add a plot twist to the story that reveals a deeper concept!", color: "bg-[hsl(323,100%,76%)]", shadowColor: "shadow-[0_4px_0_0_hsl(323,100%,60%)]", soundColor: "pink" },
+  { id: "st3", label: "Continue", emoji: "➡️", prompt: "Continue the story with the next concept.", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", soundColor: "blue" },
+];
+POWERUPS["visual"] = [
+  { id: "v1", label: "Diagram", emoji: "📊", prompt: "Draw me an ASCII diagram of this concept.", color: "bg-[hsl(170,70%,45%)]", shadowColor: "shadow-[0_4px_0_0_hsl(170,70%,35%)]", soundColor: "green" },
+  { id: "v2", label: "Flowchart", emoji: "🔀", prompt: "Show me a flowchart of how this works.", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", soundColor: "blue" },
+  { id: "v3", label: "Compare", emoji: "⚖️", prompt: "Create a visual comparison table.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", soundColor: "purple" },
+];
+POWERUPS["eli5"] = [
+  { id: "el1", label: "Even Simpler", emoji: "🍼", prompt: "Explain like I'm literally 5 years old. Use toys and candy.", color: "bg-[hsl(199,90%,60%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,48%)]", soundColor: "blue" },
+  { id: "el2", label: "Analogy", emoji: "🎈", prompt: "Give me a simple everyday analogy for this.", color: "bg-[hsl(100,95%,40%)]", shadowColor: "shadow-[0_4px_0_0_hsl(100,100%,31%)]", soundColor: "green" },
+  { id: "el3", label: "Why?", emoji: "🤷", prompt: "But why does this matter? Explain simply.", color: "bg-[hsl(46,100%,49%)]", shadowColor: "shadow-[0_4px_0_0_hsl(44,100%,38%)]", soundColor: "gold" },
+];
+POWERUPS["debate"] = [
+  { id: "d1", label: "Challenge", emoji: "🥊", prompt: "Push back on this! What are the counterarguments?", color: "bg-[hsl(0,80%,55%)]", shadowColor: "shadow-[0_4px_0_0_hsl(0,80%,42%)]", soundColor: "orange" },
+  { id: "d2", label: "Devil's Advocate", emoji: "😈", prompt: "Play devil's advocate — why might this NOT work?", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", soundColor: "purple" },
+  { id: "d3", label: "Both Sides", emoji: "⚖️", prompt: "Give me a balanced view — pros vs cons.", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", soundColor: "blue" },
+];
+POWERUPS["researcher"] = [
+  { id: "r1", label: "Papers", emoji: "📄", prompt: "What research papers should I read about this?", color: "bg-[hsl(323,100%,76%)]", shadowColor: "shadow-[0_4px_0_0_hsl(323,100%,60%)]", soundColor: "pink" },
+  { id: "r2", label: "Math", emoji: "∑", prompt: "Show me the mathematical formulation.", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", soundColor: "blue" },
+  { id: "r3", label: "State of Art", emoji: "🏆", prompt: "What's the state-of-the-art in this area?", color: "bg-[hsl(46,100%,49%)]", shadowColor: "shadow-[0_4px_0_0_hsl(44,100%,38%)]", soundColor: "gold" },
+];
+
 // Interest Deck — group persona interests by category for dropdown selection
 interface InterestCategory {
   id: string;
