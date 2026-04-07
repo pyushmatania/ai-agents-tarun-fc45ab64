@@ -670,8 +670,8 @@ const OnboardingPage = () => {
               </div>
               <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip all → set up later in Settings</button>
             </div>
-            </div>
           </motion.div>
+        )}
         )}
 
         {/* ═══════ STEP 3: IDENTITY (Pick your avatar!) ═══════ */}
