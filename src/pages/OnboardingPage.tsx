@@ -141,8 +141,8 @@ const BLOB_STYLES = [
 const TOTAL_STEPS = 10 + SUGGESTION_CATEGORIES.length + 1;
 
 const slideVariants = {
-  enter: (dir: number) => ({ x: dir > 0 ? 300 : -300, opacity: 0 }),
-  center: { x: 0, opacity: 1 },
+  enter: (dir: number) => ({ x: dir > 0 ? 260 : -260, opacity: 0, scale: 0.92 }),
+  center: { x: 0, opacity: 1, scale: 1 },
   exit: (dir: number) => ({ x: dir > 0 ? -300 : 300, opacity: 0 }),
 };
 /* ── Organic Blob Card (outside component to avoid re-mount flicker) ── */
