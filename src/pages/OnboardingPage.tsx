@@ -972,30 +972,35 @@ const OnboardingPage = () => {
           <motion.div key="brain" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
-            <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.brain.bg} pointer-events-none`} />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#E8EAF6] via-[#C5CAE9] to-[#E1F5FE] pointer-events-none" />
 
             <div className="flex flex-col flex-1 min-h-0 relative z-10">
+              <div className="flex justify-center mb-2">
+                <div className="bg-white/70 backdrop-blur-sm rounded-full px-4 py-1.5 shadow-sm border border-white/50">
+                  <span className="text-xs font-bold text-gray-600">What's your power level? 💪</span>
+                </div>
+              </div>
               <div className="flex justify-center mb-2 shrink-0">
-                <Agni expression="teaching" size={80} speech="What's your power level? 💪" animate />
+                <Agni expression="teaching" size={80} animate />
               </div>
 
-              <h2 className="text-2xl font-black text-foreground text-center mb-0.5 shrink-0">🧠 Power Level</h2>
-              <p className="text-xs text-muted-foreground text-center mb-1 shrink-0">
-                <span className="text-agni-blue font-bold">Like Dragon Ball Z — what's your current form? 🔥</span>
+              <h2 className="text-2xl font-black text-gray-800 text-center mb-0.5 shrink-0">🧠 Power Level</h2>
+              <p className="text-xs text-center mb-1 shrink-0">
+                <span className="text-[#3F51B5] font-bold">Like Dragon Ball Z — what's your current form? 🔥</span>
               </p>
-              <p className="text-[10px] text-muted-foreground/70 text-center mb-3 shrink-0">How deep do you want to dive?</p>
+              <p className="text-[10px] text-gray-500 text-center mb-3 shrink-0">How deep do you want to dive?</p>
 
               {/* Track toggle */}
-              <div className="flex gap-1.5 bg-card/60 border border-border/30 rounded-2xl p-1 mb-3 shrink-0">
+              <div className="flex gap-1.5 bg-white/60 border border-white/50 rounded-full p-1 mb-3 shrink-0">
                 {(["skill", "academic"] as const).map(track => (
                   <motion.button
                     key={track}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => { SFX.tap(); setBrainTrackState(track); setBrainTrack(track); }}
-                    className={`flex-1 py-2 rounded-xl text-[11px] font-black transition-all relative ${brainTrack === track ? "text-white" : "text-muted-foreground"}`}
+                    className={`flex-1 py-2.5 rounded-full text-[11px] font-black transition-all relative ${brainTrack === track ? "text-white" : "text-gray-500"}`}
                   >
                     {brainTrack === track && (
-                      <motion.div layoutId="brain-track-bg" className="absolute inset-0 bg-gradient-to-r from-agni-purple to-agni-pink rounded-xl" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
+                      <motion.div layoutId="brain-track-bg" className="absolute inset-0 bg-[#3F51B5] rounded-full" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
                     )}
                     <span className="relative z-10">{track === "skill" ? "⚡ Skill Track" : "🎓 Academic Track"}</span>
                   </motion.button>
@@ -1003,9 +1008,9 @@ const OnboardingPage = () => {
               </div>
 
               <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
-                <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2.5">
                   {[...(brainTrack === "skill" ? BRAIN_LEVELS_SKILL : BRAIN_LEVELS_ACADEMIC), ...customBrains].map((b, i) => (
-                    <ColorListOption
+                    <ColorPill
                       key={b.id}
                       emoji={b.emoji}
                       label={b.label}
@@ -1013,26 +1018,25 @@ const OnboardingPage = () => {
                       selected={selectedBrain === b.id}
                       onClick={() => setSelectedBrain(b.id)}
                       index={i}
-                      color={b.color}
                     />
                   ))}
-
-                  <CustomOptionInput
-                    categoryId="brain"
-                    categoryLabel="Brain Level"
-                    onSave={(opt) => {
-                      const saved = saveCustomOption("brain", opt);
-                      setCustomBrains(prev => [...prev, saved]);
-                      setSelectedBrain(saved.id);
-                    }}
-                  />
                 </div>
+
+                <CustomOptionInput
+                  categoryId="brain"
+                  categoryLabel="Brain Level"
+                  onSave={(opt) => {
+                    const saved = saveCustomOption("brain", opt);
+                    setCustomBrains(prev => [...prev, saved]);
+                    setSelectedBrain(saved.id);
+                  }}
+                />
               </div>
 
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
-                className="bg-agni-green/5 border border-agni-green/20 rounded-2xl px-4 py-2.5 mb-3 shrink-0"
+                className="bg-white/50 border border-[#3F51B5]/20 rounded-2xl px-4 py-2.5 mb-3 shrink-0"
               >
-                <p className="text-[10px] text-agni-green font-bold">
+                <p className="text-[10px] text-[#1A237E] font-bold">
                   {brainTrack === "skill"
                     ? "💡 \"Sprout\" 🌱 = Goku as a kid • \"Pro\" ⚡ = Super Saiyan • \"Demon Mode\" 👹 = Ultra Instinct, no mercy!"
                     : "💡 \"Class 5\" 👶 = Kid Goku • \"College Senior\" 🎓 = Cell Saga • \"PhD\" 🧠 = Beerus-level power!"}
@@ -1040,8 +1044,9 @@ const OnboardingPage = () => {
               </motion.div>
             </div>
 
-            <Button onClick={goNext} disabled={!selectedBrain} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none shrink-0">
-              CONTINUE <ArrowRight size={18} className="ml-2" />
+            <Button onClick={goNext} disabled={!selectedBrain}
+              className="w-full h-14 rounded-full bg-[#3F51B5] hover:bg-[#303F9F] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none shrink-0">
+              Continue <ArrowRight size={18} className="ml-2" />
             </Button>
           </motion.div>
         )}
