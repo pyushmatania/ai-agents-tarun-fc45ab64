@@ -56,9 +56,10 @@ const CuriosityPage = () => {
     setResults(cached);
     if (cached.length > 0) setRefreshing(true);
     setLoading(true);
+    const sourceSeeds = CURIOSITY_SOURCE_SEEDS[cat.id] || [];
     try {
       const { data, error: fnError } = await supabase.functions.invoke("ai-curiosity", {
-        body: { query: cat.query, category: cat.id },
+        body: { query: cat.query, category: cat.id, sourceSeeds },
       });
       if (fnError) throw new Error(fnError.message);
       const items = data?.items || [];
