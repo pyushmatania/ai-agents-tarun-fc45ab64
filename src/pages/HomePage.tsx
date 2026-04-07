@@ -35,6 +35,8 @@ const TEACHING_MODE_CATEGORIES = [
       { id: "fun", label: "Fun Example", emoji: "🎮", desc: "Gamified learning", color: "from-agni-blue to-blue-400" },
       { id: "story", label: "Story Time", emoji: "📖", desc: "Narrative style", color: "from-agni-purple to-purple-400" },
       { id: "silicon", label: "Silicon Valley", emoji: "🎬", desc: "Real-world cases", color: "from-violet-700 to-violet-500" },
+      { id: "visual", label: "Visual", emoji: "🎨", desc: "Diagrams & charts", color: "from-teal-500 to-teal-300" },
+      { id: "eli5", label: "ELI5", emoji: "🍼", desc: "Super simple", color: "from-sky-400 to-blue-300" },
     ],
   },
   {
@@ -45,6 +47,7 @@ const TEACHING_MODE_CATEGORIES = [
       { id: "engineer", label: "Engineer", emoji: "⚙️", desc: "Full depth", color: "from-agni-blue to-cyan-400" },
       { id: "hacker", label: "Hacker", emoji: "💻", desc: "Ship fast", color: "from-agni-purple to-fuchsia-400" },
       { id: "researcher", label: "Researcher", emoji: "🔬", desc: "Papers & math", color: "from-agni-pink to-pink-400" },
+      { id: "academic", label: "Academic", emoji: "📚", desc: "Citations & depth", color: "from-slate-500 to-gray-400" },
     ],
   },
   {
@@ -55,6 +58,8 @@ const TEACHING_MODE_CATEGORIES = [
       { id: "crazy", label: "Crazy", emoji: "🤯", desc: "Sci-fi mode", color: "from-agni-pink to-rose-400" },
       { id: "chip", label: "Chip Expert", emoji: "🏭", desc: "HCL context", color: "from-agni-orange to-orange-400" },
       { id: "artist", label: "Creative", emoji: "🎭", desc: "Visual thinker", color: "from-teal-500 to-teal-300" },
+      { id: "debate", label: "Debate", emoji: "🥊", desc: "Challenge me", color: "from-red-500 to-pink-400" },
+      { id: "podcast", label: "Podcast", emoji: "🎙️", desc: "Conversational", color: "from-violet-500 to-fuchsia-400" },
     ],
   },
 ];
