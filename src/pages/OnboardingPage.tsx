@@ -1146,7 +1146,8 @@ const OnboardingPage = () => {
               </motion.span>
             ))}
 
-            <div className="flex-1 flex flex-col items-center justify-center relative z-10">
+            <div className="flex-1 flex flex-col items-center relative z-10 overflow-y-auto min-h-0">
+              <div className="flex flex-col items-center justify-center flex-1 w-full">
               <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200, damping: 12 }}>
                 <Agni expression="excited" size={130} animate speech="This next part is 🔥" />
               </motion.div>
@@ -1188,6 +1189,7 @@ const OnboardingPage = () => {
                 <Sparkles size={14} className="text-agni-green" />
                 <span className="text-[11px] font-black text-agni-green">Neural OS × AGNI: Your personal AI brain</span>
               </motion.div>
+              </div>
             </div>
 
             <div className="sticky bottom-0 pt-3 pb-2 z-20">
