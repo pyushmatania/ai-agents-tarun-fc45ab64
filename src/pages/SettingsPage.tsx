@@ -363,6 +363,14 @@ const SettingsPage = () => {
                             { id: "story", label: "Story-driven", emoji: "📖" },
                             { id: "serious", label: "Serious", emoji: "🧠" },
                             { id: "fast", label: "Fast & practical", emoji: "⚡" },
+                            { id: "visual", label: "Visual", emoji: "🎨" },
+                            { id: "socratic", label: "Socratic", emoji: "🤔" },
+                            { id: "gamified", label: "Gamified", emoji: "🎮" },
+                            { id: "handson", label: "Hands-on", emoji: "🔧" },
+                            { id: "eli5", label: "ELI5", emoji: "🍼" },
+                            { id: "academic", label: "Academic", emoji: "📚" },
+                            { id: "debate", label: "Debate", emoji: "🥊" },
+                            { id: "podcast", label: "Podcast", emoji: "🎙️" },
                           ].map(v => (
                             <button key={v.id} onClick={() => {
                               const updated = savePersona({ vibe: v.id });
