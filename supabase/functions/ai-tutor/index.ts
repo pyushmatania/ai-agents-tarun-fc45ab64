@@ -49,25 +49,78 @@ You are warm, sharp, a little playful, and never boring. Learning should feel li
 - Reference their goal in every explanation: "Since your goal is [mission], here's how this moves you closer…"`);
   }
 
-  // Vibe
+  // Vibe — with explicit behavioral rules
   if (profile.vibe) {
-    parts.push(`\n🎨 TEACHING VIBE: ${profile.vibe}`);
+    const vibeId = profile.vibe.split(" — ")[0]?.trim().toLowerCase();
+    let vibeRules = "";
+    if (vibeId.includes("meme") || vibeId.includes("fun")) {
+      vibeRules = `\nSTYLE RULES: Use Gen-Z humor, memes, pop culture references, light roasting. Think "if Twitter explained AI." Use emojis liberally. Shitpost energy but accurate.`;
+    } else if (vibeId.includes("story")) {
+      vibeRules = `\nSTYLE RULES: Frame EVERYTHING as a narrative. Characters, conflict, plot twists, resolution. "Once upon a time..." energy.`;
+    } else if (vibeId.includes("visual")) {
+      vibeRules = `\nSTYLE RULES: Use ASCII art, diagrams, flowcharts, "picture this" scenarios. Make concepts visual.`;
+    } else if (vibeId.includes("sensei")) {
+      vibeRules = `\nSTYLE RULES: Disciplined, wise, Karate Kid energy. Short profound statements. "The student who rushes, learns nothing."`;
+    } else if (vibeId.includes("fact")) {
+      vibeRules = `\nSTYLE RULES: Pure technical, no fluff, no jokes. Fastest information transfer. Bullet points. Dry.`;
+    } else if (vibeId.includes("hype")) {
+      vibeRules = `\nSTYLE RULES: HIGH ENERGY! Exclamation marks! This is INCREDIBLE! Motivational speaker energy!`;
+    } else if (vibeId.includes("board")) {
+      vibeRules = `\nSTYLE RULES: Executive summary style. ROI-focused. "Bottom line..." Strategic framing.`;
+    } else if (vibeId.includes("game")) {
+      vibeRules = `\nSTYLE RULES: XP, levels, boss battles, side quests. "You unlocked: new knowledge!" Game UI energy.`;
+    } else if (vibeId.includes("podcast")) {
+      vibeRules = `\nSTYLE RULES: Conversational deep-dive. "So here's the thing..." Interview style, thoughtful.`;
+    } else if (vibeId.includes("lab")) {
+      vibeRules = `\nSTYLE RULES: Hypothesis → experiment → result. Scientific method framing.`;
+    } else if (vibeId.includes("wizard")) {
+      vibeRules = `\nSTYLE RULES: Mysterious, magical framing. Concepts as spells. "The ancient art of..."`;
+    } else if (vibeId.includes("news")) {
+      vibeRules = `\nSTYLE RULES: Breaking news framing. "BREAKING:" headers. Reporter energy.`;
+    }
+    parts.push(`\n🎨 TEACHING VIBE: ${profile.vibe}${vibeRules}`);
   }
 
-  // Universe vibe
+  // Universe vibe — HIGHEST PRIORITY
   if (profile.universeVibe) {
-    parts.push(`\n🌍 UNIVERSE VIBE: Teach through the world of "${profile.universeVibe}"
+    parts.push(`\n🌍 UNIVERSE VIBE (HIGHEST PRIORITY): "${profile.universeVibe}"
+- EVERY example, analogy, and metaphor MUST use characters, scenes, and vocabulary from "${profile.universeVibe}"
 - Cast characters as roles: The LLM = protagonist, tools = abilities, memory = backstory, planning = strategy
 - Use world vocabulary and plot moments as teaching examples
-- Maintain the lens consistently — every example framed inside that world
+- NEVER use examples from other franchises, shows, games, or anime — ONLY "${profile.universeVibe}"
 - Don't break immersion unless asked for "real talk"
-- If the universe has specific characters, use them as examples for different agent roles`);
+- If the user selected Breaking Bad, use Walter White, Jesse, Heisenberg, the lab, the RV — NOT Naruto or Goku
+- This overrides general interests entirely`);
   }
 
-  // Level
+  // Level — with EXPLICIT depth rules
   if (profile.level) {
-    parts.push(`\n🧠 BRAIN LEVEL: ${profile.level}
-- Calibrate vocabulary, depth, assumed background, and pacing to this level`);
+    const levelId = profile.level.split(" — ")[0]?.trim().toLowerCase();
+    let levelRules = "";
+    if (levelId.includes("sprout") || levelId.includes("class 5")) {
+      levelRules = `\nDEPTH RULES (MANDATORY):
+- Explain like talking to a 10-year-old child
+- ZERO jargon — if you MUST use a technical term, immediately explain it in simple words
+- Use ONLY everyday analogies (cooking, playing, school, cartoons)
+- Short sentences. Simple words. Max 2-3 sentence paragraphs
+- "Imagine you have a lunchbox..." level of simplicity
+- If a concept is complex, skip the complexity — give the intuition only`;
+    } else if (levelId.includes("chill") || levelId.includes("class 8")) {
+      levelRules = `\nDEPTH RULES: Simple language, real-world examples. Introduce terms gently with "which basically means..." Keep it casual and accessible.`;
+    } else if (levelId.includes("explorer") || levelId.includes("class 10")) {
+      levelRules = `\nDEPTH RULES: Some technical terms OK but always explain them. Clear definitions + diagrams. Medium depth.`;
+    } else if (levelId.includes("builder") || levelId.includes("class 12")) {
+      levelRules = `\nDEPTH RULES: Technical language OK. Show code examples. Practical, hands-on, "how to actually build this."`;
+    } else if (levelId.includes("pro") || levelId.includes("college")) {
+      levelRules = `\nDEPTH RULES: Professional-grade. Best practices, edge cases, production considerations. Assume solid foundation.`;
+    } else if (levelId.includes("hacker") || levelId.includes("scientist") || levelId.includes("researcher")) {
+      levelRules = `\nDEPTH RULES: Deep technical. Papers, math, internals, undocumented tricks. Assume expert knowledge.`;
+    } else if (levelId.includes("demon") || levelId.includes("professor") || levelId.includes("architect")) {
+      levelRules = `\nDEPTH RULES: Maximum depth. Trade-offs, system design, frontier research, open problems. No hand-holding.`;
+    } else if (levelId.includes("master") || levelId.includes("phd")) {
+      levelRules = `\nDEPTH RULES: Research-grade. Formal notation OK. Papers, proofs, ablation studies. Academic rigor.`;
+    }
+    parts.push(`\n🧠 BRAIN LEVEL: ${profile.level}${levelRules}`);
   }
 
   // Lesson context
