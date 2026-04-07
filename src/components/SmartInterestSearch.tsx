@@ -159,12 +159,20 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
               type="text"
               value={liveQuery}
               onChange={(e) => setLiveQuery(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleManualSearch(); } }}
               placeholder={`Search ${catMeta.label}...`}
               autoFocus
-              className="w-full pl-9 pr-10 py-2.5 bg-muted/30 border border-border/30 rounded-xl text-sm font-bold text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-agni-purple/40 transition-colors"
+              className="w-full pl-9 pr-16 py-2.5 bg-muted/30 border border-border/30 rounded-xl text-sm font-bold text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-agni-purple/40 transition-colors"
             />
-            {loading && (
+            {loading ? (
               <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-agni-purple animate-spin" />
+            ) : (
+              <button
+                onClick={handleManualSearch}
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-agni-purple flex items-center justify-center"
+              >
+                <ArrowRight size={14} className="text-white" />
+              </button>
             )}
           </div>
         </div>
