@@ -30,6 +30,13 @@ const SettingsPage = () => {
   const [showApiKey, setShowApiKey] = useState(false);
   const [aiExpanded, setAiExpanded] = useState(false);
 
+  // Neural OS state
+  const [persona, setPersona] = useState<NeuralOSPersona>(getPersona());
+  const [neuralExpanded, setNeuralExpanded] = useState(false);
+  const [activeCatId, setActiveCatId] = useState<string | null>(null);
+  const [neuralSearch, setNeuralSearch] = useState("");
+  const [neuralCustom, setNeuralCustom] = useState("");
+
   useEffect(() => {
     if (!user) return;
     const fetchProfile = async () => {
