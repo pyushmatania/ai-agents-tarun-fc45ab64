@@ -314,11 +314,11 @@ const OnboardingPage = () => {
 
   const catHint = activeCategory ? AGNI_HINTS[activeCategory.id] : null;
 
-  /* ── Pastel Card Component (matches screenshot style) ── */
+  /* ── Organic Blob Card (matches reference screenshot) ── */
   const ColorPill = ({ emoji, label, desc, selected, onClick, index, color }: {
     emoji: string; label: string; desc: string; selected: boolean; onClick: () => void; index: number; color?: string;
   }) => {
-    const pastel = PASTEL_CARD_COLORS[index % PASTEL_CARD_COLORS.length];
+    const blob = BLOB_STYLES[index % BLOB_STYLES.length];
     return (
       <motion.button
         initial={{ opacity: 0, scale: 0.8, y: 15 }}
@@ -326,8 +326,8 @@ const OnboardingPage = () => {
         transition={{ delay: 0.05 + index * 0.04, type: "spring", stiffness: 300, damping: 20 }}
         whileTap={{ scale: 0.92 }}
         onClick={() => { SFX.select(); onClick(); }}
-        className={`relative px-3 py-4 rounded-3xl border-2 text-left transition-all overflow-hidden ${pastel.bg} ${pastel.border} ${
-          selected ? "ring-2 ring-offset-1 ring-[#58CC02] shadow-lg scale-[1.02]" : "hover:shadow-md"
+        className={`relative px-3.5 py-3.5 ${blob.radius} text-left transition-all overflow-hidden ${blob.bg} ${
+          selected ? "ring-[3px] ring-[#58CC02] shadow-[0_0_20px_rgba(88,204,2,0.3)] scale-[1.03]" : "shadow-sm hover:shadow-md"
         }`}
       >
         {selected && (
@@ -335,11 +335,11 @@ const OnboardingPage = () => {
             <Check size={13} className="text-white" strokeWidth={3} />
           </motion.div>
         )}
-        <div className="flex items-start gap-2.5">
-          <span className="text-3xl mt-0.5">{emoji}</span>
+        <div className="flex items-center gap-2.5">
+          <span className="text-3xl">{emoji}</span>
           <div className="min-w-0 flex-1">
-            <span className={`text-sm font-extrabold block leading-tight ${pastel.text}`}>{label}</span>
-            <span className="text-[10px] text-gray-600 leading-tight block mt-0.5">{desc}</span>
+            <span className={`text-[13px] font-extrabold block leading-tight ${blob.text}`}>{label}</span>
+            <span className={`text-[9px] leading-tight block mt-0.5 ${blob.text} opacity-70`}>{desc}</span>
           </div>
         </div>
       </motion.button>
