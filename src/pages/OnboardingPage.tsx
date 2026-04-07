@@ -15,7 +15,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { InterestPill } from "@/components/InterestPill";
 import type { AgniExpression } from "@/components/Agni";
 import { motion, AnimatePresence } from "framer-motion";
-import { savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona } from "@/lib/neuralOS";
+import { savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona, getSubFilters, getSubFilterCount } from "@/lib/neuralOS";
 
 /* ── EXPANDED ROLES ── */
 const ROLES = [
@@ -86,21 +86,7 @@ const slideVariants = {
   exit: (dir: number) => ({ x: dir > 0 ? -300 : 300, opacity: 0 }),
 };
 
-/** Extract unique sub-filter tags from a category's suggestions */
-function getSubFilters(cat: typeof SUGGESTION_CATEGORIES[0]): string[] {
-  const tagMap: Record<string, number> = {};
-  cat.suggestions.forEach(s => {
-    const tag = s.tag || "";
-    if (tag) {
-      // Normalize: use the broader group tag (e.g. "Cricket" from "Cricket", "Anime" from "Anime sci-fi")
-      const key = tag.split(" ")[0]; // simplify
-      tagMap[key] = (tagMap[key] || 0) + 1;
-    }
-  });
-  // Only show sub-filters if there are 3+ distinct groups with 2+ items
-  const groups = Object.entries(tagMap).filter(([, c]) => c >= 2).map(([k]) => k);
-  return groups.length >= 3 ? groups.slice(0, 8) : [];
-}
+// getSubFilters is now imported from neuralOS
 
 const OnboardingPage = () => {
   const navigate = useNavigate();
@@ -618,37 +604,98 @@ const OnboardingPage = () => {
                 </motion.button>
               )}
 
-              {/* Sub-filter chips */}
+              {/* Sub-filter chips with count badges */}
               {subFilters.length > 0 && !search && (
-                <div className="flex gap-1.5 overflow-x-auto scrollbar-none mb-2 shrink-0 -mx-1 px-1">
-                  <motion.button
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => setActiveSubFilter(null)}
-                    className={`shrink-0 text-[9px] font-extrabold px-3 py-1.5 rounded-full transition-all ${
-                      !activeSubFilter
-                        ? "bg-agni-green text-white shadow-md"
-                        : "bg-card border border-border/40 text-muted-foreground"
-                    }`}
-                  >
-                    All
-                  </motion.button>
-                  {subFilters.map((tag, i) => (
+                <div className="shrink-0 mb-2">
+                  <div className="flex gap-1.5 overflow-x-auto scrollbar-none -mx-1 px-1 mb-1.5">
                     <motion.button
-                      key={tag}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: i * 0.03 }}
                       whileTap={{ scale: 0.9 }}
-                      onClick={() => setActiveSubFilter(activeSubFilter === tag ? null : tag)}
-                      className={`shrink-0 text-[9px] font-extrabold px-3 py-1.5 rounded-full transition-all ${
-                        activeSubFilter === tag
-                          ? "bg-agni-blue text-white shadow-md"
+                      onClick={() => setActiveSubFilter(null)}
+                      className={`shrink-0 text-[9px] font-extrabold px-3 py-1.5 rounded-full transition-all flex items-center gap-1 ${
+                        !activeSubFilter
+                          ? "bg-agni-green text-white shadow-md"
                           : "bg-card border border-border/40 text-muted-foreground"
                       }`}
                     >
-                      {tag}
+                      All
+                      <motion.span
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className={`text-[7px] font-black rounded-full px-1.5 py-0.5 min-w-[16px] text-center ${
+                          !activeSubFilter ? "bg-white/25 text-white" : "bg-muted/50 text-muted-foreground"
+                        }`}
+                      >
+                        {activeCategory?.suggestions.length}
+                      </motion.span>
                     </motion.button>
-                  ))}
+                    {subFilters.map((tag, i) => {
+                      const count = activeCategory ? getSubFilterCount(activeCategory, tag) : 0;
+                      return (
+                        <motion.button
+                          key={tag}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: i * 0.03 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => setActiveSubFilter(activeSubFilter === tag ? null : tag)}
+                          className={`shrink-0 text-[9px] font-extrabold px-3 py-1.5 rounded-full transition-all flex items-center gap-1 ${
+                            activeSubFilter === tag
+                              ? "bg-agni-blue text-white shadow-md"
+                              : "bg-card border border-border/40 text-muted-foreground"
+                          }`}
+                        >
+                          {tag}
+                          <motion.span
+                            key={count}
+                            initial={{ scale: 0.5 }}
+                            animate={{ scale: 1 }}
+                            className={`text-[7px] font-black rounded-full px-1.5 py-0.5 min-w-[16px] text-center ${
+                              activeSubFilter === tag ? "bg-white/25 text-white" : "bg-muted/50 text-muted-foreground"
+                            }`}
+                          >
+                            {count}
+                          </motion.span>
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                  {/* Select All for active sub-filter */}
+                  {activeSubFilter && (
+                    <motion.button
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        if (!activeCategory) return;
+                        const field = activeCategory.field as keyof NeuralOSPersona;
+                        const current = (persona[field] as string[]) || [];
+                        const subItems = activeCategory.suggestions
+                          .filter(s => s.tag && s.tag.toLowerCase().startsWith(activeSubFilter.toLowerCase()))
+                          .map(s => s.name);
+                        const allSelected = subItems.every(item => current.includes(item));
+                        const updated = allSelected
+                          ? current.filter(x => !subItems.includes(x))
+                          : [...new Set([...current, ...subItems])];
+                        setPersona({ ...persona, [field]: updated });
+                      }}
+                      className="text-[9px] font-extrabold text-agni-blue flex items-center gap-1 px-1"
+                    >
+                      {(() => {
+                        if (!activeCategory) return null;
+                        const field = activeCategory.field as keyof NeuralOSPersona;
+                        const current = (persona[field] as string[]) || [];
+                        const subItems = activeCategory.suggestions
+                          .filter(s => s.tag && s.tag.toLowerCase().startsWith(activeSubFilter.toLowerCase()))
+                          .map(s => s.name);
+                        const allSelected = subItems.every(item => current.includes(item));
+                        return allSelected ? (
+                          <><X size={10} /> Deselect all {activeSubFilter}</>
+                        ) : (
+                          <><Check size={10} /> Select all {activeSubFilter}</>
+                        );
+                      })()}
+                    </motion.button>
+                  )}
                 </div>
               )}
 
