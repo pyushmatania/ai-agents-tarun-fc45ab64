@@ -18,7 +18,8 @@ import type { AgniExpression } from "@/components/Agni";
 import { motion, AnimatePresence } from "framer-motion";
 import { savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona, getSubFilters, getSubFilterCount, POPULAR_PICKS } from "@/lib/neuralOS";
 import { TrendingUp, Crown } from "lucide-react";
-import { MISSION_MODES, BRAIN_LEVELS, setTeachingSelection } from "@/lib/teachingConfig";
+import { MISSION_MODES, BRAIN_LEVELS, setTeachingSelection, saveCustomOption, getCustomOptions } from "@/lib/teachingConfig";
+import CustomOptionInput from "@/components/CustomOptionInput";
 
 /* ── EXPANDED ROLES ── */
 const ROLES = [
