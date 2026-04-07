@@ -27,6 +27,7 @@ const typeIcons: Record<string, string> = { tool: "🔧", repo: "📦", article:
 
 const CuriosityPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { stats } = useGamification();
   const storedName = localStorage.getItem("edu_user_name") || "Learner";
   const displayName = user?.user_metadata?.full_name?.split(" ")[0] || storedName;
