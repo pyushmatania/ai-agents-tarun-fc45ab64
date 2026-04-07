@@ -12,7 +12,8 @@ import { LogOut, Moon, Sun, ChevronRight, Shield, Bell, Loader2, LogIn, Brain, K
 import { InterestPill } from "@/components/InterestPill";
 import { motion, AnimatePresence } from "framer-motion";
 import { BUILT_IN_MODELS, BYOK_PROVIDERS, getAIConfig, saveAIConfig, type AIConfig } from "@/lib/aiConfig";
-import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection } from "@/lib/teachingConfig";
+import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection, getAllOptions, saveCustomOption, getCustomOptions } from "@/lib/teachingConfig";
+import CustomOptionInput from "@/components/CustomOptionInput";
 import { getPersona, savePersona, SUGGESTION_CATEGORIES, getSubFilters, getSubFilterCount, POPULAR_PICKS, type NeuralOSPersona } from "@/lib/neuralOS";
 import Agni from "@/components/Agni";
 import StatsSection from "@/components/StatsSection";
@@ -398,10 +399,9 @@ const SettingsPage = () => {
                             <p className="text-micro text-muted-foreground mb-1.5">{cat.label.toUpperCase()}</p>
                             <p className="text-[8px] text-muted-foreground/50 mb-1">{cat.desc}</p>
                             <div className="flex gap-1.5 flex-wrap">
-                              {cat.options.map((opt: any) => (
+                              {getAllOptions(cat.id).map((opt: any) => (
                                 <button key={opt.id} onClick={() => {
                                   setTeachingSelection(cat.id, opt.id);
-                                  // Also sync vibe to persona for backward compat
                                   if (cat.id === "vibe") {
                                     const updated = savePersona({ vibe: opt.id });
                                     setPersonaState(updated);
@@ -419,25 +419,16 @@ const SettingsPage = () => {
                                   {opt.emoji} {opt.label}
                                 </button>
                               ))}
-                              {/* Custom input for vibe */}
-                              {cat.id === "vibe" && (
-                                <div className="w-full mt-1">
-                                  <input
-                                    type="text"
-                                    placeholder="✨ Type your own..."
-                                    className={`w-full bg-muted/20 border border-dashed ${colors.border} rounded-xl px-2.5 py-1.5 text-[10px] font-bold text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-agni-blue/50`}
-                                    onKeyDown={(e) => {
-                                      if (e.key === "Enter" && (e.target as HTMLInputElement).value.trim()) {
-                                        const val = (e.target as HTMLInputElement).value.trim();
-                                        setTeachingSelection("vibe", val);
-                                        const updated = savePersona({ vibe: val });
-                                        setPersonaState(updated);
-                                        (e.target as HTMLInputElement).value = "";
-                                      }
-                                    }}
-                                  />
-                                </div>
-                              )}
+                              {/* Compact custom input for all categories */}
+                              <CustomOptionInput
+                                categoryId={cat.id}
+                                categoryLabel={cat.funName}
+                                compact
+                                onSave={(opt) => {
+                                  const saved = saveCustomOption(cat.id, opt);
+                                  setTeachingSelection(cat.id, saved.id);
+                                }}
+                              />
                             </div>
                           </div>
                         );
