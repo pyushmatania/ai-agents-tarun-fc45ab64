@@ -62,7 +62,7 @@ const MODES = TEACHING_CATEGORIES.flatMap(cat =>
   getAllOptions(cat.id).map((opt: any) => ({ key: opt.id, label: opt.label, emoji: opt.emoji }))
 ).slice(0, 12);
 
-type Panel = "none" | "tools" | "modes" | "powerups" | "interests";
+type Panel = "none" | "tools" | "modes" | "powerups" | "interests" | "vibe" | "brain" | "quiz";
 
 export default function SmartInputBar({
   value, onChange, onSend, onStop, isLoading, isLearnTab,
