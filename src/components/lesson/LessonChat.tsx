@@ -8,7 +8,7 @@ import { getAIConfig } from "@/lib/aiConfig";
 import { getPersona } from "@/lib/neuralOS";
 import { InterestPill } from "@/components/InterestPill";
 import MascotProfileModal from "@/components/MascotProfileModal";
-import { TEACHING_CATEGORIES, getTeachingSelection, getTeachingContext } from "@/lib/teachingConfig";
+import { TEACHING_CATEGORIES, getTeachingSelection, getTeachingContext, getTeachingLabel, getUniverseVibe } from "@/lib/teachingConfig";
 
 interface Message {
   role: "user" | "assistant";
