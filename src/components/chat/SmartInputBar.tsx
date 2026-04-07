@@ -35,6 +35,8 @@ interface SmartInputBarProps {
   onQuizReady?: (difficulty?: string) => void;
   onModeChange?: (mode: string) => void;
   activeMode?: string;
+  hasMessages?: boolean;
+  onRecookLast?: () => void;
 }
 
 // Interest-based prompt resolver
@@ -63,6 +65,7 @@ export default function SmartInputBar({
   value, onChange, onSend, onStop, isLoading, isLearnTab,
   suggestions = [], onSuggestionClick, placeholder, accentColor = "#58CC02",
   lessonTitle, exchangeCount = 0, onQuizReady, onModeChange, activeMode = "engineer",
+  hasMessages = false, onRecookLast,
 }: SmartInputBarProps) {
   const [activePanel, setActivePanel] = useState<Panel>("none");
   const inputRef = useRef<HTMLTextAreaElement>(null);
