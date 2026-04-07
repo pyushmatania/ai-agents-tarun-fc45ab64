@@ -150,6 +150,82 @@ const PersonaBadge = ({ items }: { items: string[] }) => {
   );
 };
 
+// Interest Deck Dropdown Component
+const InterestDropdown = ({ category, selectedItem, onSelect, disabled }: {
+  category: InterestCategory;
+  selectedItem: string;
+  onSelect: (item: string) => void;
+  disabled: boolean;
+}) => {
+  const [open, setOpen] = useState(false);
+  
+  const handlePress = () => {
+    if (category.items.length <= 1) {
+      onSelect(selectedItem);
+      return;
+    }
+    setOpen(!open);
+  };
+
+  const CATEGORY_COLORS: Record<string, { bg: string; shadow: string; sound: string }> = {
+    shows: { bg: "bg-[hsl(323,100%,76%)]", shadow: "shadow-[0_4px_0_0_hsl(323,100%,60%)]", sound: "pink" },
+    sports: { bg: "bg-[hsl(46,100%,49%)]", shadow: "shadow-[0_4px_0_0_hsl(44,100%,38%)]", sound: "gold" },
+    gaming: { bg: "bg-[hsl(270,100%,75%)]", shadow: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", sound: "purple" },
+    music: { bg: "bg-[hsl(199,92%,54%)]", shadow: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", sound: "blue" },
+    news: { bg: "bg-[hsl(33,100%,50%)]", shadow: "shadow-[0_4px_0_0_hsl(33,100%,38%)]", sound: "orange" },
+    hobbies: { bg: "bg-[hsl(100,95%,40%)]", shadow: "shadow-[0_4px_0_0_hsl(100,100%,31%)]", sound: "green" },
+    books: { bg: "bg-[hsl(270,100%,75%)]", shadow: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", sound: "purple" },
+  };
+
+  const colors = CATEGORY_COLORS[category.id] || CATEGORY_COLORS.shows;
+
+  return (
+    <div className="relative shrink-0">
+      <motion.button
+        whileTap={{ scale: 0.93, y: 2 }}
+        onClick={handlePress}
+        disabled={disabled}
+        className={`shrink-0 rounded-xl px-3 py-2 ${colors.bg} ${colors.shadow} transition-all disabled:opacity-40 flex items-center gap-1 min-w-fit`}
+      >
+        <span className="text-[12px]">{category.emoji}</span>
+        <span className="text-[9px] font-black text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)] max-w-[80px] truncate">{selectedItem}</span>
+        {category.items.length > 1 && (
+          <ChevronDown size={10} className={`text-white/70 transition-transform ${open ? "rotate-180" : ""}`} />
+        )}
+      </motion.button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -4, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
+            className="absolute bottom-full left-0 mb-1.5 bg-card border border-border/50 rounded-xl shadow-xl z-50 min-w-[140px] max-h-[180px] overflow-y-auto scrollbar-none"
+          >
+            {category.items.map((item) => (
+              <motion.button
+                key={item}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => { onSelect(item); setOpen(false); SFX.tap(); }}
+                className={`w-full text-left px-3 py-2 text-[10px] font-bold flex items-center gap-1.5 transition-colors ${
+                  item === selectedItem
+                    ? "text-agni-green bg-agni-green/10"
+                    : "text-foreground hover:bg-muted/50"
+                }`}
+              >
+                <span>{category.emoji}</span>
+                <span className="truncate">{item}</span>
+                {item === selectedItem && <span className="ml-auto text-agni-green">✓</span>}
+              </motion.button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQuizReady }: LessonChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -164,11 +240,15 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
   const powerRowRef = useRef<HTMLDivElement>(null);
   const [showSwipeHint, setShowSwipeHint] = useState(true);
   const [showPersonaModal, setShowPersonaModal] = useState(false);
-
-  const persona = getPersona();
-  const agniExpr: AgniExpression = isLoading ? "thinking" : messages.length === 0 ? "teaching" : "happy";
-  const basePowerups = POWERUPS[activeMode] || POWERUPS.engineer;
-  const neuralPowerups = getNeuralSuggestions();
+  // Interest Deck state — track selected item per category
+  const interestDeck = getInterestDeck();
+  const [selectedInterests, setSelectedInterests] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    interestDeck.forEach(cat => { initial[cat.id] = cat.items[0]; });
+    return initial;
+  });
+  // Track used interests to rotate on re-tap
+  const [usedInterests, setUsedInterests] = useState<Record<string, Set<string>>>({});
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
