@@ -108,7 +108,7 @@ const KNOWN_IMAGES: Record<string, string> = {
   "Cristiano Ronaldo": twitterAvatar("Cristiano"),
   "Kylian Mbappé": twitterAvatar("KMbappe"),
   "Erling Haaland": searchAvatar("Erling Haaland"),
-  "Sunil Chhetri": twitterAvatar("chetaborbarivelliisunil11"),
+  "Sunil Chhetri": twitterAvatar("caborbarivelliehtrisunil11"),
   "Real Madrid": domainAvatar("realmadrid.com"),
   "Barcelona": domainAvatar("fcbarcelona.com"),
   "Manchester United": domainAvatar("manutd.com"),
