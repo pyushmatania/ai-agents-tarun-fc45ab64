@@ -290,7 +290,7 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
       </div>
 
       {/* Chat header with Neural OS badge */}
-      <div className="flex items-center gap-2 mb-2 px-2 py-1.5 rounded-xl bg-card border border-border/30">
+      <div className="flex items-center gap-2 mb-1 px-2 py-1.5 rounded-xl bg-card border border-border/30">
         <div className="relative">
           <Agni expression={agniExpr} size={36} animate />
           <motion.div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-agni-green rounded-full border-2 border-card"
@@ -299,8 +299,10 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
             <p className="text-[10px] font-black text-agni-green">AGNI is teaching</p>
-            {getPersona().completedAt && (
-              <span className="text-[7px] font-black text-agni-purple bg-agni-purple/10 px-1.5 py-0.5 rounded-full">Neural OS</span>
+            {persona.completedAt && (
+              <span className="text-[7px] font-black text-agni-purple bg-agni-purple/10 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                <Brain size={7} /> Persona Active
+              </span>
             )}
           </div>
           <p className="text-[9px] text-muted-foreground font-semibold truncate">{lessonTitle}</p>
@@ -314,6 +316,44 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
           </motion.button>
         )}
       </div>
+
+      {/* Persona summary chip row */}
+      {(() => {
+        const chips: string[] = [];
+        if (persona.currentRole) chips.push(persona.currentRole);
+        if (persona.shows?.length) chips.push(persona.shows[0]);
+        if (persona.sports?.length) chips.push(persona.sports[0]);
+        if (persona.curious?.length) chips.push(persona.curious[0]);
+        if (persona.hobbies?.length) chips.push(persona.hobbies[0]);
+
+        return chips.length > 0 ? (
+          <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-1 mb-1.5 overflow-x-auto scrollbar-none">
+            <motion.button whileTap={{ scale: 0.9 }} onClick={() => setShowPersonaModal(true)}
+              className="shrink-0 flex items-center gap-1 text-[8px] font-black text-agni-purple bg-agni-purple/10 border border-agni-purple/20 px-2 py-1 rounded-full"
+            >
+              <Pencil size={8} /> Edit
+            </motion.button>
+            {chips.slice(0, 4).map((chip, i) => (
+              <span key={i} className="shrink-0 text-[8px] font-bold text-muted-foreground bg-card border border-border/30 px-2 py-1 rounded-full">
+                {chip}
+              </span>
+            ))}
+            {chips.length > 4 && (
+              <span className="shrink-0 text-[8px] font-bold text-muted-foreground/60">+{chips.length - 4}</span>
+            )}
+          </motion.div>
+        ) : (
+          <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} whileTap={{ scale: 0.95 }}
+            onClick={() => setShowPersonaModal(true)}
+            className="flex items-center gap-1.5 mb-1.5 text-[9px] font-bold text-agni-purple/70 bg-agni-purple/5 border border-dashed border-agni-purple/20 px-3 py-1.5 rounded-xl w-full justify-center"
+          >
+            <UserCircle size={12} /> Set up your persona for personalized teaching
+          </motion.button>
+        );
+      })()}
+
+      {/* Persona Modal */}
+      <MascotProfileModal isOpen={showPersonaModal} onClose={() => setShowPersonaModal(false)} />
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-2.5 px-1 pb-2 scrollbar-none">
