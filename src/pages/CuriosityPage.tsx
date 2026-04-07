@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import PageTransition, { FadeIn, StaggerContainer, StaggerItem } from "@/components/PageTransition";
 import { ArrowRight, RefreshCw, Loader2, Sparkles, Zap, Copy, Check, Diamond, User } from "lucide-react";
