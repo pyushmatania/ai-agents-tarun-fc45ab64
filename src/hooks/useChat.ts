@@ -99,7 +99,7 @@ export function useChat(tab: ChatTab) {
     }
   }, [user]);
 
-  const sendMessage = useCallback(async (content: string, extraContext?: Record<string, any>, options?: { hiddenPrompt?: string; hideUserMessage?: boolean }) => {
+  const sendMessage = useCallback(async (content: string, extraContext?: Record<string, any>, options?: { hiddenPrompt?: string; hideUserMessage?: boolean }, settingsSnapshot?: { key: string; emoji: string; value: string }[]) => {
     if (!content.trim() || isLoading) return;
 
     const displayText = content.trim();
@@ -127,12 +127,13 @@ export function useChat(tab: ChatTab) {
     let assistantContent = "";
     const assistantId = crypto.randomUUID();
 
-    // Add placeholder assistant message
+    // Add placeholder assistant message with settings snapshot
     setMessages(prev => [...prev, {
       id: assistantId,
       role: "assistant",
       content: "",
       tab,
+      metadata: settingsSnapshot ? { settingsSnapshot } : undefined,
       created_at: new Date().toISOString(),
     }]);
 
