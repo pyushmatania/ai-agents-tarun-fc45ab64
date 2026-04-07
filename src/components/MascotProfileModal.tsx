@@ -320,8 +320,14 @@ const MascotProfileModal = ({ open, onClose }: MascotProfileModalProps) => {
                   {filteredSuggestions.length === 0 && searchQuery && (
                     <div className="text-center py-8">
                       <p className="text-2xl mb-2">🔍</p>
-                      <p className="text-xs text-muted-foreground">No matches found</p>
-                      <p className="text-[10px] text-agni-green font-bold mt-1">Press Enter to add "{searchQuery.trim()}"</p>
+                      <p className="text-xs text-muted-foreground">No matches in our list</p>
+                      <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => addCustomFromSearch()}
+                        className="mt-2 bg-agni-purple/15 text-agni-purple text-[11px] font-bold px-4 py-2 rounded-full mx-auto flex items-center gap-1.5"
+                      >
+                        <Brain size={12} /> Search with AI
+                      </motion.button>
                     </div>
                   )}
                 </div>
