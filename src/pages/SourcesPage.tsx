@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import PageTransition, { FadeIn } from "@/components/PageTransition";
-import { ExternalLink, Search, Zap, User, BookOpen, Wrench, Code2, Mic, Newspaper, GraduationCap, Users, FlaskConical, X, RefreshCw, Loader2, ChevronRight, Clock, Flame, Heart, TrendingUp } from "lucide-react";
+import { ExternalLink, Search, Zap, User, BookOpen, X, RefreshCw, Loader2, ChevronRight, ChevronLeft, Clock, Flame, Heart, TrendingUp } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import Agni from "@/components/Agni";
@@ -12,16 +12,68 @@ import { supabase } from "@/integrations/supabase/client";
 type Source = { title: string; desc: string; url: string; icon: string; type: string };
 type NewsItem = { title: string; summary: string; source: string; category: string; timeAgo: string };
 
-const ZONES = [
-  { id: "youtube", label: "Watch", icon: "🎬", color: "#FF4B4B", gradient: "linear-gradient(135deg, #FF4B4B 0%, #FF6B6B 50%, #E03E3E 100%)", desc: "Video tutorials", shadow: "#CC3333" },
-  { id: "tool", label: "Build", icon: "🔧", color: "#58CC02", gradient: "linear-gradient(135deg, #58CC02 0%, #6EE718 50%, #45A800 100%)", desc: "Frameworks & SDKs", shadow: "#3D9400" },
-  { id: "newsletter", label: "Read", icon: "📨", color: "#FF9600", gradient: "linear-gradient(135deg, #FF9600 0%, #FFB340 50%, #E08500 100%)", desc: "Newsletters", shadow: "#CC7A00" },
-  { id: "github", label: "Code", icon: "💻", color: "#CE82FF", gradient: "linear-gradient(135deg, #CE82FF 0%, #DDA0FF 50%, #A855F7 100%)", desc: "Open-source repos", shadow: "#9333EA" },
-  { id: "course", label: "Study", icon: "🎓", color: "#1CB0F6", gradient: "linear-gradient(135deg, #1CB0F6 0%, #4DC9FF 50%, #1899D6 100%)", desc: "Courses", shadow: "#1480B6" },
-  { id: "paper", label: "Research", icon: "🔬", color: "#FF4B91", gradient: "linear-gradient(135deg, #FF4B91 0%, #FF70AB 50%, #E0357A 100%)", desc: "Papers", shadow: "#CC2D6A" },
-  { id: "community", label: "Connect", icon: "👥", color: "#FFC800", gradient: "linear-gradient(135deg, #FFC800 0%, #FFD84D 50%, #E0B000 100%)", desc: "Communities", shadow: "#CC9F00" },
-  { id: "podcast", label: "Listen", icon: "🎙️", color: "#CE82FF", gradient: "linear-gradient(135deg, #9B59B6 0%, #CE82FF 50%, #8E44AD 100%)", desc: "Podcasts", shadow: "#7D3C98" },
+// Categories (bookshelf-style)
+const CATEGORIES = [
+  {
+    id: "youtube",
+    label: "Watch",
+    shelfColor: "hsl(var(--agni-orange))",
+    shelfGradient: "linear-gradient(180deg, hsl(var(--agni-orange) / 0.6) 0%, hsl(var(--agni-orange) / 0.9) 100%)",
+  },
+  {
+    id: "tool",
+    label: "Build",
+    shelfColor: "hsl(var(--agni-green))",
+    shelfGradient: "linear-gradient(180deg, hsl(var(--agni-green) / 0.6) 0%, hsl(var(--agni-green) / 0.9) 100%)",
+  },
+  {
+    id: "newsletter",
+    label: "Read",
+    shelfColor: "hsl(var(--agni-gold))",
+    shelfGradient: "linear-gradient(180deg, hsl(var(--agni-gold) / 0.6) 0%, hsl(var(--agni-gold) / 0.9) 100%)",
+  },
+  {
+    id: "github",
+    label: "Code",
+    shelfColor: "hsl(var(--agni-purple))",
+    shelfGradient: "linear-gradient(180deg, hsl(var(--agni-purple) / 0.6) 0%, hsl(var(--agni-purple) / 0.9) 100%)",
+  },
+  {
+    id: "course",
+    label: "Study",
+    shelfColor: "hsl(var(--agni-blue))",
+    shelfGradient: "linear-gradient(180deg, hsl(var(--agni-blue) / 0.6) 0%, hsl(var(--agni-blue) / 0.9) 100%)",
+  },
+  {
+    id: "paper",
+    label: "Research",
+    shelfColor: "hsl(var(--agni-pink))",
+    shelfGradient: "linear-gradient(180deg, hsl(var(--agni-pink) / 0.6) 0%, hsl(var(--agni-pink) / 0.9) 100%)",
+  },
+  {
+    id: "community",
+    label: "Connect",
+    shelfColor: "hsl(var(--agni-gold))",
+    shelfGradient: "linear-gradient(180deg, hsl(var(--agni-gold) / 0.6) 0%, hsl(var(--agni-gold) / 0.9) 100%)",
+  },
+  {
+    id: "podcast",
+    label: "Listen",
+    shelfColor: "hsl(var(--agni-purple))",
+    shelfGradient: "linear-gradient(180deg, hsl(var(--agni-purple) / 0.6) 0%, hsl(var(--agni-purple) / 0.9) 100%)",
+  },
 ];
+
+const ICON_BG_COLORS: Record<string, string> = {
+  youtube: "#FF4B4B",
+  tool: "#58CC02",
+  newsletter: "#FF9600",
+  github: "#CE82FF",
+  course: "#1CB0F6",
+  paper: "#FF4B91",
+  community: "#FFC800",
+  podcast: "#9B59B6",
+};
 
 const SOURCES: Source[] = [
   { title: "AI Jason", desc: "Deep dives into AI agents & tutorials", url: "https://youtube.com/@AIJason", icon: "🎬", type: "youtube" },
@@ -71,6 +123,129 @@ const NEWS_CATEGORY_EMOJIS: Record<string, string> = {
   product: "⚡", policy: "🛡️", "open-source": "🌐",
 };
 
+/* ─── Bookshelf Carousel Row ─── */
+const ShelfRow = ({ category, sources }: { category: typeof CATEGORIES[0]; sources: Source[] }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+  const bgColor = ICON_BG_COLORS[category.id] || "#58CC02";
+
+  const checkScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+  };
+
+  const scroll = (dir: "left" | "right") => {
+    scrollRef.current?.scrollBy({ left: dir === "left" ? -160 : 160, behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    checkScroll();
+  }, []);
+
+  if (sources.length === 0) return null;
+
+  return (
+    <div className="mb-6">
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 mb-2.5">
+        <h2 className="text-[16px] font-black text-foreground">{category.label}</h2>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-bold text-muted-foreground">{sources.length} resources</span>
+          <div className="flex gap-1">
+            <motion.button
+              whileTap={{ scale: 0.85 }}
+              onClick={() => scroll("left")}
+              disabled={!canScrollLeft}
+              className={`w-6 h-6 rounded-full border border-border/50 flex items-center justify-center transition-opacity ${canScrollLeft ? "opacity-100" : "opacity-30"}`}
+            >
+              <ChevronLeft size={12} className="text-foreground" />
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.85 }}
+              onClick={() => scroll("right")}
+              disabled={!canScrollRight}
+              className={`w-6 h-6 rounded-full border border-border/50 flex items-center justify-center transition-opacity ${canScrollRight ? "opacity-100" : "opacity-30"}`}
+            >
+              <ChevronRight size={12} className="text-foreground" />
+            </motion.button>
+          </div>
+        </div>
+      </div>
+
+      {/* Shelf with items */}
+      <div className="relative">
+        {/* Scrollable cards */}
+        <div
+          ref={scrollRef}
+          onScroll={checkScroll}
+          className="flex gap-3 overflow-x-auto scrollbar-none px-5 pb-2 snap-x snap-mandatory"
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
+          {sources.map((source, i) => (
+            <motion.a
+              key={i}
+              href={source.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+              whileTap={{ scale: 0.95, y: -4 }}
+              className="snap-start shrink-0 w-[120px] group"
+            >
+              {/* Book card */}
+              <div
+                className="w-[120px] h-[160px] rounded-xl relative overflow-hidden flex flex-col items-center justify-center p-3 text-center transition-shadow"
+                style={{
+                  background: `linear-gradient(145deg, ${bgColor}15 0%, ${bgColor}08 100%)`,
+                  border: `2px solid ${bgColor}25`,
+                  boxShadow: `3px 3px 0 0 ${bgColor}15`,
+                }}
+              >
+                {/* Decorative spine */}
+                <div
+                  className="absolute left-0 top-0 bottom-0 w-[4px] rounded-l-xl"
+                  style={{ background: bgColor }}
+                />
+                {/* Icon */}
+                <div
+                  className="w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-2 shadow-sm"
+                  style={{ background: `${bgColor}20` }}
+                >
+                  {source.icon}
+                </div>
+                <p className="text-[11px] font-black text-foreground leading-tight line-clamp-2">{source.title}</p>
+                <p className="text-[8px] text-muted-foreground font-semibold mt-1 line-clamp-2 leading-tight">{source.desc}</p>
+                {/* External link hint */}
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ExternalLink size={8} className="text-muted-foreground" />
+                </div>
+              </div>
+            </motion.a>
+          ))}
+        </div>
+
+        {/* Shelf bar */}
+        <div
+          className="mx-5 h-[10px] rounded-b-lg relative overflow-hidden"
+          style={{
+            background: category.shelfGradient,
+            boxShadow: `0 3px 6px -2px ${bgColor}30`,
+          }}
+        >
+          {/* Shelf bolts */}
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-foreground/10 border border-foreground/20" />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-foreground/10 border border-foreground/20" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── Swipeable News Card ─── */
 const SwipeableNewsCard = ({ news, index, total, onNext, onPrev }: {
   news: NewsItem; index: number; total: number;
   onNext: () => void; onPrev: () => void;
@@ -101,7 +276,6 @@ const SwipeableNewsCard = ({ news, index, total, onNext, onPrev }: {
     >
       <div className="p-3.5 relative" style={{ background: catColor }}>
         <div className="absolute -right-6 -top-6 w-20 h-20 rounded-full bg-white/15" />
-        <div className="absolute right-12 bottom-0 w-10 h-10 rounded-full bg-white/10" />
         <div className="flex items-center gap-2 relative z-10">
           <span className="text-xl">{catEmoji}</span>
           <span className="text-[10px] font-black text-white tracking-wider uppercase">{news.category}</span>
@@ -125,11 +299,11 @@ const SwipeableNewsCard = ({ news, index, total, onNext, onPrev }: {
   );
 };
 
+/* ─── Main Page ─── */
 const SourcesPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { stats } = useGamification();
-  const [activeZone, setActiveZone] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [newsItems, setNewsItems] = useState<NewsItem[]>(() => {
     try {
@@ -166,46 +340,31 @@ const SourcesPage = () => {
 
   const goNextNews = () => { if (activeNewsIdx < newsItems.length - 1) setActiveNewsIdx(p => p + 1); };
   const goPrevNews = () => { if (activeNewsIdx > 0) setActiveNewsIdx(p => p - 1); };
-  const getZoneSources = (zoneId: string) => SOURCES.filter(s => s.type === zoneId);
+
   const searchResults = searchQuery
     ? SOURCES.filter(s => s.title.toLowerCase().includes(searchQuery.toLowerCase()) || s.desc.toLowerCase().includes(searchQuery.toLowerCase()))
     : [];
-  const filteredSources = activeZone ? getZoneSources(activeZone) : [];
-  const activeZoneData = ZONES.find(z => z.id === activeZone);
+
+  const categoriesWithSources = CATEGORIES.map(cat => ({
+    ...cat,
+    sources: SOURCES.filter(s => s.type === cat.id),
+  })).filter(c => c.sources.length > 0);
 
   return (
     <PageTransition>
       <div className="min-h-screen bg-background pb-24 relative overflow-hidden">
         <div className="max-w-md mx-auto relative z-10">
-          {/* Top bar */}
+          {/* Header */}
           <FadeIn>
-            <div className="px-4 pt-4 pb-2 flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <div className="flex items-center gap-1 bg-agni-orange/15 rounded-full px-2 py-1">
-                  <Flame size={12} className="text-agni-orange" />
-                  <span className="text-[10px] font-black text-agni-orange">{stats.streak}</span>
-                </div>
-                <div className="flex items-center gap-1 bg-agni-green/15 rounded-full px-2 py-1">
-                  <Zap size={12} className="text-agni-green" />
-                  <span className="text-[10px] font-black text-agni-green">{stats.xp}</span>
-                </div>
-              </div>
-              <h1 className="text-sm font-black text-foreground">Hub</h1>
-              <div className="flex items-center gap-1.5">
-                <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate("/settings")} className="w-7 h-7 rounded-xl bg-card flex items-center justify-center border border-border/50">
-                  <User size={12} className="text-muted-foreground" />
-                </motion.button>
-                <div className="flex items-center gap-1 bg-agni-pink/15 rounded-full px-2 py-1">
-                  <Heart size={12} className="text-agni-pink fill-agni-pink" />
-                  <span className="text-[10px] font-black text-agni-pink">5</span>
-                </div>
-              </div>
+            <div className="px-5 pt-5 pb-1 text-center">
+              <p className="text-[11px] font-bold text-muted-foreground tracking-wider">My Favourite</p>
+              <h1 className="text-3xl font-black text-foreground tracking-tight">RESOURCES</h1>
             </div>
           </FadeIn>
 
           {/* Search */}
           <FadeIn delay={0.05}>
-            <div className="px-4 mb-3">
+            <div className="px-5 mb-4 mt-2">
               <div className="relative">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
@@ -222,59 +381,20 @@ const SourcesPage = () => {
             </div>
           </FadeIn>
 
-          {/* NEWS WIDGET */}
-          {!searchQuery && (
-            <FadeIn delay={0.08}>
-              <div className="px-4 mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <TrendingUp size={13} className="text-agni-red" />
-                    <span className="text-[11px] font-black text-foreground">AI Headlines</span>
-                    <span className="text-[8px] font-bold text-white bg-agni-red px-1.5 py-0.5 rounded-full animate-pulse">{newsRefreshing ? "UPDATING" : "LIVE"}</span>
-                  </div>
-                  <button onClick={() => window.location.reload()} className="text-[9px] font-bold text-muted-foreground flex items-center gap-1">
-                    <RefreshCw size={9} /> Refresh
-                  </button>
-                </div>
-                {newsLoading ? (
-                  <div className="h-40 rounded-3xl bg-card animate-pulse border-2 border-border/20" />
-                ) : newsItems.length > 0 ? (
-                  <>
-                    <AnimatePresence mode="wait">
-                      <SwipeableNewsCard key={activeNewsIdx} news={newsItems[activeNewsIdx]} index={activeNewsIdx} total={newsItems.length} onNext={goNextNews} onPrev={goPrevNews} />
-                    </AnimatePresence>
-                    <div className="flex items-center justify-center gap-1.5 mt-2.5">
-                      {newsItems.map((_, i) => (
-                        <button key={i} onClick={() => setActiveNewsIdx(i)} className="rounded-full transition-all duration-300" style={{
-                          width: i === activeNewsIdx ? 18 : 5, height: 5,
-                          background: i === activeNewsIdx ? NEWS_CATEGORY_COLORS[newsItems[i].category] || "#1CB0F6" : "hsl(var(--muted-foreground) / 0.15)",
-                        }} />
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <div className="bg-card rounded-3xl p-4 border-2 border-border/30 text-center">
-                    <p className="text-[10px] text-muted-foreground">Could not load news. Tap refresh.</p>
-                  </div>
-                )}
-              </div>
-            </FadeIn>
-          )}
-
           {/* Search Results */}
           <AnimatePresence>
             {searchQuery && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="px-4 mb-4">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="px-5 mb-4">
                 <p className="text-[10px] text-muted-foreground font-bold mb-2">{searchResults.length} results</p>
                 <div className="space-y-1.5">
                   {searchResults.map((s, i) => {
-                    const zone = ZONES.find(z => z.id === s.type);
+                    const color = ICON_BG_COLORS[s.type] || "#58CC02";
                     return (
                       <motion.a key={i} href={s.url} target="_blank" rel="noopener noreferrer"
                         initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
                         className="flex items-center gap-2.5 bg-card rounded-2xl p-3 border-2 border-border/30 active:scale-[0.98] transition-all"
                       >
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-base" style={{ background: `${zone?.color || "#58CC02"}18` }}>{s.icon}</div>
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-base" style={{ background: `${color}18` }}>{s.icon}</div>
                         <div className="flex-1 min-w-0">
                           <p className="text-[11px] font-extrabold text-foreground truncate">{s.title}</p>
                           <p className="text-[9px] text-muted-foreground truncate">{s.desc}</p>
@@ -288,113 +408,65 @@ const SourcesPage = () => {
             )}
           </AnimatePresence>
 
-          {/* ZONE GRID — colorful filled cards */}
+          {/* Bookshelf Categories */}
           {!searchQuery && (
             <>
-              <FadeIn delay={0.12}>
-                <div className="px-4">
-                  <p className="text-[10px] font-black text-muted-foreground tracking-wider mb-3">EXPLORE ZONES</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    {ZONES.map((zone, i) => {
-                      const sources = getZoneSources(zone.id);
-                      const isActive = activeZone === zone.id;
-                      return (
-                        <motion.button
-                          key={zone.id}
-                          initial={{ opacity: 0, scale: 0.85, y: 20 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          transition={{ delay: 0.12 + i * 0.06, type: "spring", stiffness: 200 }}
-                          whileTap={{ scale: 0.92, y: 4 }}
-                          onClick={() => setActiveZone(prev => prev === zone.id ? null : zone.id)}
-                          className="rounded-3xl p-4 text-left relative overflow-hidden transition-all"
-                          style={{
-                            background: zone.gradient,
-                            boxShadow: isActive
-                              ? `0 6px 0 0 ${zone.shadow}, 0 0 20px ${zone.color}40, inset 0 1px 0 0 rgba(255,255,255,0.2)`
-                              : `0 5px 0 0 ${zone.shadow}, inset 0 1px 0 0 rgba(255,255,255,0.15)`,
-                            transform: isActive ? "translateY(-2px)" : undefined,
-                          }}
-                        >
-                          {/* Decorative shapes */}
-                          <div className="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-white/10" />
-                          <div className="absolute right-6 bottom-2 w-10 h-10 rounded-full bg-black/5" />
-                          <div className="absolute left-1 bottom-0 w-6 h-6 rounded-full bg-white/5" />
-
-                          <div className="relative z-10">
-                            <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-2xl mb-3"
-                              style={{ boxShadow: "0 3px 0 0 rgba(0,0,0,0.1)" }}
-                            >
-                              {zone.icon}
-                            </div>
-                            <p className="text-[14px] font-black text-white leading-tight">{zone.label}</p>
-                            <div className="mt-1.5">
-                              <span className="text-[9px] font-black text-white/80 bg-white/20 px-2 py-0.5 rounded-full">
-                                {sources.length} resources
-                              </span>
-                            </div>
-                          </div>
-
-                          {isActive && (
-                            <motion.div
-                              className="absolute inset-0 bg-white/10"
-                              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                            />
-                          )}
-                        </motion.button>
-                      );
-                    })}
+              {/* NEWS WIDGET */}
+              <FadeIn delay={0.08}>
+                <div className="px-5 mb-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <TrendingUp size={13} className="text-agni-red" />
+                      <span className="text-[11px] font-black text-foreground">AI Headlines</span>
+                      <span className="text-[8px] font-bold text-white bg-agni-red px-1.5 py-0.5 rounded-full animate-pulse">{newsRefreshing ? "UPDATING" : "LIVE"}</span>
+                    </div>
+                    <button onClick={() => window.location.reload()} className="text-[9px] font-bold text-muted-foreground flex items-center gap-1">
+                      <RefreshCw size={9} /> Refresh
+                    </button>
                   </div>
+                  {newsLoading ? (
+                    <div className="h-40 rounded-3xl bg-card animate-pulse border-2 border-border/20" />
+                  ) : newsItems.length > 0 ? (
+                    <>
+                      <AnimatePresence mode="wait">
+                        <SwipeableNewsCard key={activeNewsIdx} news={newsItems[activeNewsIdx]} index={activeNewsIdx} total={newsItems.length} onNext={goNextNews} onPrev={goPrevNews} />
+                      </AnimatePresence>
+                      <div className="flex items-center justify-center gap-1.5 mt-2.5">
+                        {newsItems.map((_, i) => (
+                          <button key={i} onClick={() => setActiveNewsIdx(i)} className="rounded-full transition-all duration-300" style={{
+                            width: i === activeNewsIdx ? 18 : 5, height: 5,
+                            background: i === activeNewsIdx ? NEWS_CATEGORY_COLORS[newsItems[i].category] || "#1CB0F6" : "hsl(var(--muted-foreground) / 0.15)",
+                          }} />
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="bg-card rounded-3xl p-4 border-2 border-border/30 text-center">
+                      <p className="text-[10px] text-muted-foreground">Could not load news. Tap refresh.</p>
+                    </div>
+                  )}
                 </div>
               </FadeIn>
 
-              {/* Active zone resources */}
-              <AnimatePresence mode="wait">
-                {activeZone && activeZoneData && (
-                  <motion.div
-                    key={activeZone}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="px-4 mt-4"
-                  >
-                    <div className="rounded-3xl p-3.5 mb-3 relative overflow-hidden"
-                      style={{ background: activeZoneData.gradient, boxShadow: `0 4px 0 0 ${activeZoneData.shadow}` }}
-                    >
-                      <div className="absolute -right-6 -top-6 w-20 h-20 rounded-full bg-white/15" />
-                      <div className="flex items-center gap-2.5 relative z-10">
-                        <span className="text-2xl">{activeZoneData.icon}</span>
-                        <div>
-                          <h3 className="text-white font-black text-sm">{activeZoneData.label}</h3>
-                          <p className="text-white/70 text-[9px] font-bold">{filteredSources.length} resources</p>
-                        </div>
-                        <button onClick={() => setActiveZone(null)} className="ml-auto w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
-                          <X size={12} className="text-white" />
-                        </button>
-                      </div>
-                    </div>
+              {/* Shelves */}
+              {categoriesWithSources.map((cat, i) => (
+                <FadeIn key={cat.id} delay={0.1 + i * 0.06}>
+                  <ShelfRow category={cat} sources={cat.sources} />
+                </FadeIn>
+              ))}
 
-                    <div className="space-y-2">
-                      {filteredSources.map((s, i) => (
-                        <motion.a key={i} href={s.url} target="_blank" rel="noopener noreferrer"
-                          initial={{ opacity: 0, x: -15 }} animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.04, type: "spring", stiffness: 200 }}
-                          className="flex items-center gap-3 bg-card rounded-2xl p-3 border-2 active:scale-[0.98] transition-all"
-                          style={{ borderColor: `${activeZoneData.color}25`, boxShadow: `0 2px 0 0 ${activeZoneData.color}15` }}
-                        >
-                          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0"
-                            style={{ background: `${activeZoneData.color}20` }}
-                          >{s.icon}</div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[12px] font-extrabold text-foreground truncate">{s.title}</p>
-                            <p className="text-[9px] text-muted-foreground truncate">{s.desc}</p>
-                          </div>
-                          <ChevronRight size={12} style={{ color: activeZoneData.color }} />
-                        </motion.a>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {/* Add Resources CTA */}
+              <FadeIn delay={0.5}>
+                <div className="px-5 pb-4">
+                  <motion.button
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => navigate("/curiosity")}
+                    className="w-full bg-foreground text-background rounded-2xl py-3.5 text-sm font-black text-center shadow-lg"
+                  >
+                    Discover More Resources
+                  </motion.button>
+                </div>
+              </FadeIn>
             </>
           )}
         </div>

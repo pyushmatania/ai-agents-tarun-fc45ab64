@@ -10,6 +10,7 @@ import DailyQuests from "@/components/DailyQuests";
 import { useGamification } from "@/hooks/useGamification";
 import { useState, useEffect, useMemo } from "react";
 import { SFX } from "@/lib/sounds";
+import { toast } from "sonner";
 import { getPersona } from "@/lib/neuralOS";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -317,7 +318,7 @@ const HomePage = () => {
                   <motion.button
                     key={mode.id}
                     whileTap={{ scale: 0.92, y: 2 }}
-                    onClick={() => { setActiveMode(mode.id); localStorage.setItem("teaching_mode", mode.id); SFX.tap(); }}
+                    onClick={() => { setActiveMode(mode.id); localStorage.setItem("teaching_mode", mode.id); SFX.tap(); toast(`${mode.emoji} ${mode.label} mode activated`, { description: mode.desc, duration: 2000 }); }}
                     className={`rounded-2xl p-2.5 text-center transition-all border-2 relative ${activeMode === mode.id ? "border-agni-green/50 bg-agni-green/10 shadow-md" : "border-border/30 bg-card hover:border-border"}`}
                   >
                     {activeMode === mode.id && (
