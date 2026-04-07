@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BUILT_IN_MODELS, BYOK_PROVIDERS, getAIConfig, saveAIConfig, type AIConfig } from "@/lib/aiConfig";
 import { getPersona, savePersona, SUGGESTION_CATEGORIES, type NeuralOSPersona } from "@/lib/neuralOS";
 import Agni from "@/components/Agni";
+import StatsSection from "@/components/StatsSection";
 import { useGamification } from "@/hooks/useGamification";
 import { SFX } from "@/lib/sounds";
 
@@ -593,8 +594,16 @@ const SettingsPage = () => {
             </div>
           </FadeIn>
 
-          {/* Danger Zone */}
+          {/* Stats & Progress */}
           <FadeIn delay={0.25}>
+            <div className="mb-4">
+              <h3 className="text-xs font-black text-foreground mb-3 flex items-center gap-2">📊 Your Stats & Progress</h3>
+              <StatsSection />
+            </div>
+          </FadeIn>
+
+          {/* Danger Zone */}
+          <FadeIn delay={0.3}>
             <div className="space-y-2">
               <motion.button
                 whileTap={{ scale: 0.98 }}
