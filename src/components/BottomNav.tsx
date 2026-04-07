@@ -1,6 +1,8 @@
 import { Home, BookOpen, Sparkles, Library, Map, UserCircle } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
+import { TEACHING_MODE_MAP } from "@/hooks/useTeachingMode";
+import { useState, useEffect } from "react";
 
 const tabs = [
   { icon: Home, path: "/", label: "Home" },
