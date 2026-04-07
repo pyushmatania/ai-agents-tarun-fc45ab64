@@ -258,6 +258,35 @@ export function getActiveExplainStyles(): ExplainStyle[] {
   return ids.map(id => all.find(s => s.id === id)).filter(Boolean) as ExplainStyle[];
 }
 
+// ═══════════════════════════════════════════════
+// ❓ QUIZ DIFFICULTIES — 10 levels from easy to impossible
+// ═══════════════════════════════════════════════
+export interface QuizDifficulty {
+  id: string;
+  label: string;
+  emoji: string;
+  desc: string;
+  color: string;
+  promptModifier: string;
+}
+
+export const QUIZ_DIFFICULTIES: QuizDifficulty[] = [
+  { id: "warmup", label: "Warm Up", emoji: "☀️", desc: "True/false, recall", color: "from-green-300 to-emerald-200", promptModifier: "Make it extremely easy — simple true/false or basic recall questions. A complete beginner should get 100%." },
+  { id: "easy", label: "Easy", emoji: "🌱", desc: "Basic concepts", color: "from-green-400 to-emerald-300", promptModifier: "Keep it easy — basic concept checks, straightforward multiple choice." },
+  { id: "chill", label: "Chill", emoji: "🌊", desc: "Gentle challenge", color: "from-sky-400 to-blue-300", promptModifier: "Gentle challenge — slightly tricky but fair, requires understanding not just memory." },
+  { id: "medium", label: "Medium", emoji: "⚡", desc: "Solid understanding", color: "from-blue-500 to-cyan-400", promptModifier: "Medium difficulty — requires solid understanding, some application questions." },
+  { id: "tricky", label: "Tricky", emoji: "🧩", desc: "Think carefully", color: "from-amber-500 to-yellow-400", promptModifier: "Tricky questions — requires careful thinking, edge cases, and connecting multiple concepts." },
+  { id: "hard", label: "Hard", emoji: "🔥", desc: "Deep knowledge", color: "from-orange-500 to-amber-400", promptModifier: "Hard difficulty — deep knowledge required, multi-step reasoning, real-world scenarios." },
+  { id: "expert", label: "Expert", emoji: "💎", desc: "Production-level", color: "from-purple-500 to-violet-400", promptModifier: "Expert level — production-grade scenarios, architectural decisions, trade-off analysis." },
+  { id: "brutal", label: "Brutal", emoji: "💀", desc: "No mercy", color: "from-red-500 to-rose-400", promptModifier: "Brutal difficulty — trick questions, subtle gotchas, requires intimate knowledge of internals." },
+  { id: "nightmare", label: "Nightmare", emoji: "👹", desc: "Top 1% only", color: "from-red-600 to-rose-500", promptModifier: "Nightmare mode — only top 1% would pass. Research-level depth, obscure edge cases, multi-domain reasoning." },
+  { id: "impossible", label: "Impossible", emoji: "☠️", desc: "Are you sure?", color: "from-gray-800 to-gray-600", promptModifier: "Impossible difficulty — questions even experts would struggle with. Frontier knowledge, unsolved problems, deliberate ambiguity." },
+];
+
+export function getQuizDifficultyPrompt(id: string): string {
+  return QUIZ_DIFFICULTIES.find(q => q.id === id)?.promptModifier || QUIZ_DIFFICULTIES[3].promptModifier;
+}
+
 // ─── CUSTOM OPTIONS STORAGE ───
 const CUSTOM_STORAGE_KEY = "teaching_custom_options";
 
