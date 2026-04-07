@@ -991,10 +991,12 @@ const OnboardingPage = () => {
               </motion.div>
             </div>
 
-            <Button onClick={goNext} disabled={!selectedVibe}
-              className="w-full h-14 rounded-full bg-[#E91E63] hover:bg-[#C2185B] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none shrink-0">
-              Continue <ArrowRight size={18} className="ml-2" />
-            </Button>
+            <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#F3E5F5] via-[#F3E5F5]/95 to-transparent">
+              <Button onClick={goNext} disabled={!selectedVibe}
+                className="w-full h-14 rounded-full bg-[#E91E63] hover:bg-[#C2185B] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
+                Continue <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </div>
           </motion.div>
         )}
 
