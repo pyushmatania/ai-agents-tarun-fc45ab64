@@ -509,7 +509,7 @@ const OnboardingPage = () => {
           </motion.div>
         )}
 
-        {/* ═══════ STEP 5: BRAIN LEVEL ═══════ */}
+        {/* ═══════ STEP 5: BRAIN LEVEL (dual track) ═══════ */}
         {step === 5 && (
           <motion.div key="brain" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
@@ -522,11 +522,28 @@ const OnboardingPage = () => {
               </div>
 
               <h2 className="text-2xl font-black text-foreground text-center mb-1 shrink-0">🧠 Brain Level</h2>
-              <p className="text-xs text-muted-foreground text-center mb-4 shrink-0">How deep do you want to dive?</p>
+              <p className="text-xs text-muted-foreground text-center mb-3 shrink-0">How deep do you want to dive?</p>
+
+              {/* Track toggle */}
+              <div className="flex gap-1.5 bg-card/60 border border-border/30 rounded-2xl p-1 mb-3 shrink-0">
+                {(["skill", "academic"] as const).map(track => (
+                  <motion.button
+                    key={track}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => { setBrainTrackState(track); setBrainTrack(track); }}
+                    className={`flex-1 py-2 rounded-xl text-[11px] font-black transition-all relative ${brainTrack === track ? "text-white" : "text-muted-foreground"}`}
+                  >
+                    {brainTrack === track && (
+                      <motion.div layoutId="brain-track-bg" className="absolute inset-0 bg-gradient-to-r from-agni-purple to-agni-pink rounded-xl" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
+                    )}
+                    <span className="relative z-10">{track === "skill" ? "⚡ Skill Track" : "🎓 Academic Track"}</span>
+                  </motion.button>
+                ))}
+              </div>
 
               <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
                 <div className="space-y-2.5">
-                  {[...BRAIN_LEVELS, ...customBrains].map((b, i) => (
+                  {[...(brainTrack === "skill" ? BRAIN_LEVELS_SKILL : BRAIN_LEVELS_ACADEMIC), ...customBrains].map((b, i) => (
                     <motion.button key={b.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + i * 0.04 }}
                       whileTap={{ scale: 0.97 }} onClick={() => setSelectedBrain(b.id)}
                       className={`w-full p-3.5 rounded-2xl border-2 text-left flex items-center gap-3 transition-all ${
@@ -548,7 +565,6 @@ const OnboardingPage = () => {
                     </motion.button>
                   ))}
 
-                  {/* Custom brain level creator */}
                   <CustomOptionInput
                     categoryId="brain"
                     categoryLabel="Brain Level"
@@ -564,7 +580,11 @@ const OnboardingPage = () => {
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
                 className="bg-agni-green/5 border border-agni-green/20 rounded-2xl px-4 py-2.5 mb-3 shrink-0"
               >
-                <p className="text-[10px] text-agni-green font-bold">💡 "Chill" = bite-sized & easy. "Hacker" = skip theory, just code. "Scientist" = papers & math. Pick your level!</p>
+                <p className="text-[10px] text-agni-green font-bold">
+                  {brainTrack === "skill" 
+                    ? "💡 \"Sprout\" = never coded. \"Hacker\" = edge cases & tricks. \"Demon Mode\" = brutal pace, no mercy!" 
+                    : "💡 \"Class 5\" = pure analogies. \"College Senior\" = placement-ready. \"PhD\" = papers & formal defs!"}
+                </p>
               </motion.div>
             </div>
 
