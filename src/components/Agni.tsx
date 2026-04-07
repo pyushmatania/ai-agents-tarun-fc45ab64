@@ -250,21 +250,20 @@ const Agni = ({ expression = "default", size = 100, speech, animate = true, clas
         ))}
       </AnimatePresence>
 
-      {/* Speech bubble */}
+      {/* Speech bubble — rendered BELOW the bot to avoid cutoff */}
       <AnimatePresence>
         {displaySpeech && (
           <motion.div
-            initial={{ opacity: 0, y: 8, scale: 0.7 }}
+            initial={{ opacity: 0, y: -4, scale: 0.7 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.7 }}
+            exit={{ opacity: 0, y: -4, scale: 0.7 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className="absolute -top-9 left-1/2 -translate-x-1/2 z-20"
-            style={{ minWidth: Math.max(80, displaySpeech.length * 6.5) }}
+            className="z-20 mt-1"
           >
             <div className="bg-card border border-agni-green/20 rounded-2xl px-3 py-1.5 text-[10px] font-bold text-foreground whitespace-nowrap shadow-elevated relative">
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-agni-green/5 to-transparent pointer-events-none" />
               <span className="relative z-10">{displaySpeech}</span>
-              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-card border-b border-r border-agni-green/20 rotate-45" />
+              <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-card border-t border-l border-agni-green/20 rotate-45" />
             </div>
           </motion.div>
         )}
