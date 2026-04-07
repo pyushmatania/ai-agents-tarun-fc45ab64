@@ -680,26 +680,27 @@ const OnboardingPage = () => {
 
               {/* Custom role */}
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
-                className={`mt-3 p-3 rounded-2xl border-2 transition-all ${
-                  selectedRole === "custom" ? "border-agni-green bg-agni-green/10 shadow-glow-green" : "border-dashed border-agni-purple/30 bg-agni-purple/5"
+                className={`mt-3 p-3 rounded-[24px] transition-all ${
+                  selectedRole === "custom" ? "bg-[#58CC02] shadow-lg" : "bg-white/80"
                 }`}
               >
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xl">✏️</span>
-                  <span className="text-xs font-extrabold text-foreground">Something else?</span>
+                  <span className={`text-xs font-extrabold ${selectedRole === "custom" ? "text-white" : "text-gray-700"}`}>Something else?</span>
                 </div>
                 <input
                   type="text" placeholder="Type your role..."
                   value={customRole}
                   onChange={(e) => { setCustomRole(e.target.value); if (e.target.value.trim()) setSelectedRole("custom"); }}
                   onFocus={() => { if (customRole.trim()) setSelectedRole("custom"); }}
-                  className="w-full bg-card border border-border/40 rounded-xl px-3 py-2 text-xs font-bold text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-agni-green/50"
+                  className="w-full bg-white/90 border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold text-gray-800 placeholder:text-gray-400 outline-none focus:border-[#7C5CBF]"
                 />
               </motion.div>
             </div>
 
-            <Button onClick={goNext} disabled={!selectedRole || (selectedRole === "custom" && !customRole.trim())} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none mt-3">
-              CONTINUE <ArrowRight size={18} className="ml-2" />
+            <Button onClick={goNext} disabled={!selectedRole || (selectedRole === "custom" && !customRole.trim())}
+              className="w-full h-14 rounded-full bg-[#7C5CBF] hover:bg-[#6A4DAF] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none mt-3">
+              Continue <ArrowRight size={18} className="ml-2" />
             </Button>
           </motion.div>
         )}
