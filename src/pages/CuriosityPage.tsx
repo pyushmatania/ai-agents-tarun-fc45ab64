@@ -51,9 +51,9 @@ const CuriosityPage = () => {
   const fetchCuriosity = async (cat: typeof CURIOSITY[0]) => {
     setActiveId(cat.id);
     setError("");
-    // Show cached results immediately
     const cached = getCachedResults(cat.id);
     setResults(cached);
+    if (cached.length > 0) setRefreshing(true);
     setLoading(true);
     try {
       const { data, error: fnError } = await supabase.functions.invoke("ai-curiosity", {
@@ -71,6 +71,7 @@ const CuriosityPage = () => {
       if (cached.length === 0) setError(e.message || "Failed to fetch. Try again!");
     }
     setLoading(false);
+    setRefreshing(false);
   };
 
   const handleCopyFact = () => {
