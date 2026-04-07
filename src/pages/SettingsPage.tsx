@@ -138,7 +138,7 @@ const SettingsPage = () => {
           {/* Profile Card */}
           <FadeIn delay={0.05}>
             <div className="bg-card rounded-2xl p-4 border border-border/40 mb-3 shadow-card">
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3 mb-2">
                 <div className="relative">
                   <UserAvatar avatarUrl={avatarUrl} name={fullName} size="lg" onClick={() => user && fileInputRef.current?.click()} />
                   {user && (
@@ -158,30 +158,6 @@ const SettingsPage = () => {
                     }}
                   />
                 </div>
-                {user && (
-                  <div className="flex gap-1.5 mt-1.5">
-                    <button 
-                      onClick={async () => {
-                        const url = await generateAIAvatar();
-                        if (url) toast.success("AI avatar generated! 🎨");
-                        else toast.error("Generation failed, try again");
-                      }}
-                      disabled={generating}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gradient-to-r from-agni-purple/20 to-agni-pink/20 border border-agni-purple/30 text-[9px] font-bold text-agni-purple hover:from-agni-purple/30 hover:to-agni-pink/30 transition-all disabled:opacity-50"
-                    >
-                      {generating ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} />}
-                      {generating ? "Creating..." : "AI Avatar"}
-                    </button>
-                    {avatarUrl && (
-                      <button 
-                        onClick={async () => { await removeAvatar(); toast.success("Avatar removed"); }}
-                        className="flex items-center gap-1 px-2 py-1 rounded-lg bg-destructive/10 border border-destructive/20 text-[9px] font-bold text-destructive hover:bg-destructive/20 transition-all"
-                      >
-                        <Trash2 size={9} /> Remove
-                      </button>
-                    )}
-                  </div>
-                )}
                 <div className="flex-1">
                   <p className="font-black text-foreground text-sm">{fullName || "Your Name"}</p>
                   <p className="text-[10px] text-muted-foreground font-semibold">{role || "Learner"}</p>
@@ -201,6 +177,30 @@ const SettingsPage = () => {
                   })()}
                 </div>
               </div>
+              {user && (
+                <div className="flex gap-1.5 mb-4">
+                  <button 
+                    onClick={async () => {
+                      const url = await generateAIAvatar();
+                      if (url) toast.success("AI avatar generated! 🎨");
+                      else toast.error("Generation failed, try again");
+                    }}
+                    disabled={generating}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gradient-to-r from-agni-purple/20 to-agni-pink/20 border border-agni-purple/30 text-[9px] font-bold text-agni-purple hover:from-agni-purple/30 hover:to-agni-pink/30 transition-all disabled:opacity-50"
+                  >
+                    {generating ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} />}
+                    {generating ? "Creating..." : "AI Avatar"}
+                  </button>
+                  {avatarUrl && (
+                    <button 
+                      onClick={async () => { await removeAvatar(); toast.success("Avatar removed"); }}
+                      className="flex items-center gap-1 px-2 py-1 rounded-lg bg-destructive/10 border border-destructive/20 text-[9px] font-bold text-destructive hover:bg-destructive/20 transition-all"
+                    >
+                      <Trash2 size={9} /> Remove
+                    </button>
+                  )}
+                </div>
+              )}
 
               {/* Quick Stats */}
               <div className="grid grid-cols-4 gap-2 mb-4">

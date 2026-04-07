@@ -8,7 +8,7 @@ import {
 import { useChat, type ChatTab, type ChatMessage } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
 import { getPersona } from "@/lib/neuralOS";
-import BottomNav from "@/components/BottomNav";
+
 import ContentRenderer from "@/components/chat/ContentRenderer";
 import SuggestionBar from "@/components/chat/SuggestionBar";
 import ChatToolbar from "@/components/chat/ChatToolbar";
@@ -218,7 +218,7 @@ export default function ChatPage() {
       )}
 
       {/* Input area — spacious and clean */}
-      <div className="sticky bottom-0 bg-background/95 backdrop-blur-md border-t border-border/10 px-4 py-3 pb-20">
+      <div className="sticky bottom-0 bg-background/95 backdrop-blur-md border-t border-border/10 px-4 py-3 pb-6">
         <div className="flex items-end gap-2">
           {/* Toolbar for general tab */}
           {activeTab === "general" && (
@@ -269,7 +269,7 @@ export default function ChatPage() {
         </div>
       </div>
 
-      <BottomNav />
+      
     </div>
   );
 }
