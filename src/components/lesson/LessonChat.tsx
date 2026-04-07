@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Zap, X, Brain, Flame } from "lucide-react";
+import { Send, Sparkles, Zap, X, Brain, Flame, ChevronRight } from "lucide-react";
 import Agni from "@/components/Agni";
 import type { AgniExpression } from "@/components/Agni";
 import { SFX } from "@/lib/sounds";
@@ -114,6 +114,8 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
   const [pressedBtn, setPressedBtn] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const powerRowRef = useRef<HTMLDivElement>(null);
+  const [showSwipeHint, setShowSwipeHint] = useState(true);
 
   const agniExpr: AgniExpression = isLoading ? "thinking" : messages.length === 0 ? "teaching" : "happy";
   const basePowerups = POWERUPS[activeMode] || POWERUPS.engineer;
@@ -386,46 +388,66 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
           )}
         </AnimatePresence>
 
-        {/* Combined Power-Ups Row */}
-        <div className="flex gap-1.5 overflow-x-auto scrollbar-none px-0.5 pb-0.5">
-          {/* Mode power-ups */}
-          {basePowerups.map((pu) => (
-            <motion.button key={pu.id} whileTap={{ scale: 0.93, y: 2 }} onClick={() => handlePowerUpPress(pu)} disabled={isLoading}
-              className={`shrink-0 rounded-xl px-3 py-2 ${pu.color} ${pressedBtn === pu.id ? "shadow-[0_1px_0_0_rgba(0,0,0,0.3)] translate-y-[3px]" : pu.shadowColor} transition-all disabled:opacity-40 flex items-center gap-1 min-w-fit`}
-            >
-              <span className="text-[12px]">{pu.emoji}</span>
-              <span className="text-[9px] font-black text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]">{pu.label}</span>
-            </motion.button>
-          ))}
+        {/* Combined Power-Ups Row with swipe hint */}
+        <div className="relative">
+          <div ref={powerRowRef} onScroll={() => { if (powerRowRef.current && powerRowRef.current.scrollLeft > 20) setShowSwipeHint(false); }} className="flex gap-1.5 overflow-x-auto scrollbar-none px-0.5 pb-0.5 pr-8">
+            {basePowerups.map((pu) => (
+              <motion.button key={pu.id} whileTap={{ scale: 0.93, y: 2 }} onClick={() => handlePowerUpPress(pu)} disabled={isLoading}
+                className={`shrink-0 rounded-xl px-3 py-2 ${pu.color} ${pressedBtn === pu.id ? "shadow-[0_1px_0_0_rgba(0,0,0,0.3)] translate-y-[3px]" : pu.shadowColor} transition-all disabled:opacity-40 flex items-center gap-1 min-w-fit`}
+              >
+                <span className="text-[12px]">{pu.emoji}</span>
+                <span className="text-[9px] font-black text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]">{pu.label}</span>
+              </motion.button>
+            ))}
 
-          {/* Divider dot if neural powerups exist */}
-          {neuralPowerups.length > 0 && (
-            <div className="shrink-0 flex items-center px-0.5">
-              <div className="w-1 h-1 rounded-full bg-agni-purple/50" />
-            </div>
-          )}
+            {neuralPowerups.length > 0 && (
+              <div className="shrink-0 flex items-center px-0.5">
+                <div className="w-1 h-1 rounded-full bg-agni-purple/50" />
+              </div>
+            )}
 
-          {/* Neural OS power-ups inline */}
-          {neuralPowerups.map((pu) => (
-            <motion.button key={pu.id} whileTap={{ scale: 0.93, y: 2 }} onClick={() => handlePowerUpPress(pu)} disabled={isLoading}
-              className={`shrink-0 rounded-xl px-3 py-2 bg-agni-purple/15 border border-agni-purple/30 ${pressedBtn === pu.id ? "translate-y-[2px] border-agni-purple/50" : ""} transition-all disabled:opacity-40 flex items-center gap-1 min-w-fit`}
-            >
-              <span className="text-[12px]">{pu.emoji}</span>
-              <span className="text-[9px] font-black text-agni-purple drop-shadow-none">{pu.label}</span>
-            </motion.button>
-          ))}
+            {neuralPowerups.map((pu) => (
+              <motion.button key={pu.id} whileTap={{ scale: 0.93, y: 2 }} onClick={() => handlePowerUpPress(pu)} disabled={isLoading}
+                className={`shrink-0 rounded-xl px-3 py-2 bg-agni-purple/15 border border-agni-purple/30 ${pressedBtn === pu.id ? "translate-y-[2px] border-agni-purple/50" : ""} transition-all disabled:opacity-40 flex items-center gap-1 min-w-fit`}
+              >
+                <span className="text-[12px]">{pu.emoji}</span>
+                <span className="text-[9px] font-black text-agni-purple drop-shadow-none">{pu.label}</span>
+              </motion.button>
+            ))}
 
-          {/* Quiz button */}
-          {exchangeCount >= 1 && (
-            <motion.button initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} whileTap={{ scale: 0.93, y: 2 }}
-              onClick={handleSkipToQuiz} disabled={isLoading}
-              className="shrink-0 rounded-xl px-3 py-2 bg-agni-green shadow-[0_3px_0_0_hsl(100,100%,31%)] active:shadow-[0_1px_0_0_hsl(100,100%,31%)] active:translate-y-[2px] transition-all disabled:opacity-40 flex items-center gap-1"
-            >
-              <span className="text-[12px]">⚡</span>
-              <span className="text-[9px] font-black text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]">Quiz Me!</span>
-            </motion.button>
-          )}
+            {exchangeCount >= 1 && (
+              <motion.button initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} whileTap={{ scale: 0.93, y: 2 }}
+                onClick={handleSkipToQuiz} disabled={isLoading}
+                className="shrink-0 rounded-xl px-3 py-2 bg-agni-green shadow-[0_3px_0_0_hsl(100,100%,31%)] active:shadow-[0_1px_0_0_hsl(100,100%,31%)] active:translate-y-[2px] transition-all disabled:opacity-40 flex items-center gap-1"
+              >
+                <span className="text-[12px]">⚡</span>
+                <span className="text-[9px] font-black text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]">Quiz Me!</span>
+              </motion.button>
+            )}
+          </div>
+
+          {/* Swipe arrow hint */}
+          <AnimatePresence>
+            {showSwipeHint && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute right-0 top-0 bottom-0.5 flex items-center pointer-events-none"
+              >
+                <div className="w-8 h-full bg-gradient-to-l from-background via-background/80 to-transparent flex items-center justify-end pr-0.5">
+                  <motion.div
+                    animate={{ x: [0, 4, 0] }}
+                    transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
+                  >
+                    <ChevronRight size={14} className="text-muted-foreground/60" />
+                  </motion.div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
+
       </div>
 
       {/* Input */}
