@@ -366,7 +366,7 @@ const OnboardingPage = () => {
               </motion.div>
             </div>
 
-            <Button onClick={goNext} disabled={!selectedRole} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none mt-3">
+            <Button onClick={goNext} disabled={!selectedRole || (selectedRole === "custom" && !customRole.trim())} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none mt-3">
               CONTINUE <ArrowRight size={18} className="ml-2" />
             </Button>
           </motion.div>
