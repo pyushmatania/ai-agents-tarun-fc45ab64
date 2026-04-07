@@ -654,8 +654,6 @@ const OnboardingPage = () => {
             </div>
           </motion.div>
         )}
-        {/* Skip mission followup if no questions for this mission */}
-        {step === 6 && (!selectedMission || !MISSION_FOLLOWUPS[selectedMission]) && (() => { goNext(); return null; })()}
 
         {step === 7 && (
           <motion.div key="vibe" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
