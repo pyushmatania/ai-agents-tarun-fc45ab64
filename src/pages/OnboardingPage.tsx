@@ -584,64 +584,69 @@ const OnboardingPage = () => {
         {/* ═══════ STEP 2: ABOUT YOU (age/gender) ═══════ */}
         {step === 2 && (
           <motion.div key="aboutyou" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
-            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
+            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
-            <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.aboutYou.bg} pointer-events-none`} />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#FCE4EC] via-[#F8E8D0] to-[#FFF3E0] pointer-events-none" />
 
-            <div className="flex-1 flex flex-col items-center justify-center relative z-10">
-              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200, damping: 12 }}>
+            <div className="flex-1 overflow-y-auto scrollbar-none relative z-10">
+              <div className="flex justify-center mb-2">
+                <div className="bg-white/70 backdrop-blur-sm rounded-full px-4 py-1.5 shadow-sm border border-white/50">
+                  <span className="text-xs font-bold text-gray-600">Tell me about you! 🎯</span>
+                </div>
+              </div>
+              <div className="flex justify-center mb-3">
                 <Agni expression="happy" size={100} speech={`Nice to meet you, ${name}! 🤝`} animate />
-              </motion.div>
+              </div>
 
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="w-full mt-4">
-                <h2 className="text-2xl font-black text-foreground text-center mb-1">Tell me about yourself</h2>
-                <p className="text-xs text-muted-foreground text-center mb-5">So I can pick the right examples & language 🎯</p>
+              <h2 className="text-2xl font-black text-gray-800 text-center mb-0.5">Tell me about yourself</h2>
+              <p className="text-xs text-gray-500 text-center mb-5">So I can pick the right examples & language 🎯</p>
 
-                <div className="space-y-5">
-                  {/* Age — colorful pills */}
-                  <div>
-                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2.5">🎂 How old are you?</label>
-                    <div className="flex flex-wrap gap-2">
-                      {AGE_RANGES.map((age, i) => (
-                        <motion.button key={age} whileTap={{ scale: 0.92 }}
-                          initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 + i * 0.05 }}
-                          onClick={() => { SFX.pop(); setAgeRange(age); }}
-                          className={`px-4 py-2.5 rounded-2xl text-xs font-bold border-2 transition-all ${
-                            ageRange === age ? PILL_SELECTED_COLORS[i % PILL_SELECTED_COLORS.length] : PILL_COLORS[i % PILL_COLORS.length]
-                          }`}
-                        >
-                          {age}
-                        </motion.button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Gender — colorful pills */}
-                  <div>
-                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2.5">👤 Gender</label>
-                    <div className="flex flex-wrap gap-2">
-                      {GENDERS.map((g, i) => (
-                        <motion.button key={g} whileTap={{ scale: 0.92 }}
-                          initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 + i * 0.05 }}
-                          onClick={() => { SFX.pop(); setGender(g); }}
-                          className={`px-4 py-2.5 rounded-2xl text-xs font-bold border-2 transition-all ${
-                            gender === g ? PILL_SELECTED_COLORS[(i + 3) % PILL_SELECTED_COLORS.length] : PILL_COLORS[(i + 3) % PILL_COLORS.length]
-                          }`}
-                        >
-                          {g}
-                        </motion.button>
-                      ))}
-                    </div>
+              <div className="space-y-5">
+                {/* Age — colorful pills */}
+                <div>
+                  <label className="text-[10px] font-extrabold text-gray-600 uppercase tracking-wider block mb-2.5">🎂 How old are you?</label>
+                  <div className="flex flex-wrap gap-2">
+                    {AGE_RANGES.map((age, i) => (
+                      <motion.button key={age} whileTap={{ scale: 0.92 }}
+                        initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 + i * 0.05 }}
+                        onClick={() => { SFX.pop(); setAgeRange(age); }}
+                        className={`px-4 py-2.5 rounded-2xl text-xs font-bold border-2 transition-all ${
+                          ageRange === age ? PILL_SELECTED_COLORS[i % PILL_SELECTED_COLORS.length] : PILL_COLORS[i % PILL_COLORS.length]
+                        }`}
+                      >
+                        {age}
+                      </motion.button>
+                    ))}
                   </div>
                 </div>
-              </motion.div>
+
+                {/* Gender — colorful pills */}
+                <div>
+                  <label className="text-[10px] font-extrabold text-gray-600 uppercase tracking-wider block mb-2.5">👤 Gender</label>
+                  <div className="flex flex-wrap gap-2">
+                    {GENDERS.map((g, i) => (
+                      <motion.button key={g} whileTap={{ scale: 0.92 }}
+                        initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 + i * 0.05 }}
+                        onClick={() => { SFX.pop(); setGender(g); }}
+                        className={`px-4 py-2.5 rounded-2xl text-xs font-bold border-2 transition-all ${
+                          gender === g ? PILL_SELECTED_COLORS[(i + 3) % PILL_SELECTED_COLORS.length] : PILL_COLORS[(i + 3) % PILL_COLORS.length]
+                        }`}
+                      >
+                        {g}
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="flex gap-3">
-              <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-2xl border-2 border-border text-sm font-bold">Skip</Button>
-              <Button onClick={goNext} disabled={!ageRange && !gender} className="flex-1 h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none">
-                CONTINUE <ArrowRight size={18} className="ml-2" />
-              </Button>
+            <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#FFF3E0] via-[#FFF3E0]/95 to-transparent">
+              <div className="flex gap-3">
+                <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-full bg-white/80 border-2 border-white/50 text-gray-700 text-sm font-bold shadow-sm">Skip</Button>
+                <Button onClick={goNext} disabled={!ageRange && !gender} className="flex-1 h-14 rounded-full bg-[#F0805E] hover:bg-[#E06E4E] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
+                  CONTINUE <ArrowRight size={18} className="ml-2" />
+                </Button>
+              </div>
             </div>
           </motion.div>
         )}
