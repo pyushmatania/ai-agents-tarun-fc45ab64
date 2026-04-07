@@ -154,7 +154,7 @@ export default function SmartInputBar({
   };
 
   return (
-    <div className="bg-background/95 backdrop-blur-md border-t border-border/10 flex flex-col-reverse">
+    <div className="bg-background/95 backdrop-blur-md border-t border-border/10">
       {/* AI Suggestions — always visible when available */}
       <AnimatePresence>
         {!isLoading && suggestions.length > 0 && (
