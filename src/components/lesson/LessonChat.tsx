@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Zap, X, Brain, Flame, ChevronRight, UserCircle, Pencil } from "lucide-react";
+import { Send, Sparkles, Zap, X, Brain, Flame, ChevronRight, ChevronDown, UserCircle, Pencil } from "lucide-react";
 import Agni from "@/components/Agni";
 import type { AgniExpression } from "@/components/Agni";
 import { SFX } from "@/lib/sounds";
@@ -47,8 +47,8 @@ interface PowerUp {
 const POWERUPS: Record<string, PowerUp[]> = {
   class5: [
     { id: "s1", label: "Simpler!", emoji: "🧸", prompt: "Explain that in even simpler terms, like I'm 5 years old.", color: "bg-[hsl(100,95%,40%)]", shadowColor: "shadow-[0_4px_0_0_hsl(100,100%,31%)]", soundColor: "green" },
-    { id: "s2", label: "Fun Example", emoji: "🎮", prompt: "Give me a fun, real-world example of this!", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", soundColor: "blue" },
-    { id: "s3", label: "Story Time", emoji: "📖", prompt: "Tell me a short story to explain this concept.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", soundColor: "purple" },
+    { id: "s2", label: "Fun Example", emoji: "🎮", prompt: "__INTEREST_DECK_FUN__", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", soundColor: "blue" },
+    { id: "s3", label: "Story Time", emoji: "📖", prompt: "__INTEREST_DECK_STORY__", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", soundColor: "purple" },
   ],
   engineer: [
     { id: "e1", label: "Show Code", emoji: "💻", prompt: "Show me a code example for this concept.", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", soundColor: "blue" },
@@ -77,19 +77,31 @@ const POWERUPS: Record<string, PowerUp[]> = {
   ],
 };
 
-// Neural OS powered suggestions based on persona
+// Interest Deck — group persona interests by category for dropdown selection
+interface InterestCategory {
+  id: string;
+  emoji: string;
+  label: string;
+  items: string[];
+}
+
+function getInterestDeck(): InterestCategory[] {
+  const p = getPersona();
+  const cats: InterestCategory[] = [];
+  if (p.shows?.length) cats.push({ id: "shows", emoji: "🎬", label: "Shows", items: p.shows });
+  if (p.sports?.length) cats.push({ id: "sports", emoji: "⚽", label: "Sports", items: p.sports });
+  if (p.gaming?.length) cats.push({ id: "gaming", emoji: "🎮", label: "Gaming", items: p.gaming });
+  if (p.music?.length) cats.push({ id: "music", emoji: "🎵", label: "Music", items: p.music });
+  if (p.news?.length) cats.push({ id: "news", emoji: "📰", label: "News", items: p.news });
+  if (p.hobbies?.length) cats.push({ id: "hobbies", emoji: "🎯", label: "Hobbies", items: p.hobbies });
+  if (p.books?.length) cats.push({ id: "books", emoji: "📚", label: "Books", items: p.books });
+  return cats;
+}
+
+// Neural OS powered suggestions based on persona (legacy — now also used for role)
 function getNeuralSuggestions(): PowerUp[] {
   const p = getPersona();
   const extras: PowerUp[] = [];
-  if (p.shows && p.shows.length > 0) {
-    extras.push({ id: "nos-shows", label: `${p.shows[0]} analogy`, emoji: "🎬", prompt: `Explain this using an analogy from "${p.shows[0]}" (the show/movie I love).`, color: "bg-[hsl(323,100%,76%)]", shadowColor: "shadow-[0_4px_0_0_hsl(323,100%,60%)]", soundColor: "pink" });
-  }
-  if (p.sports && p.sports.length > 0) {
-    extras.push({ id: "nos-sports", label: `${p.sports[0]} style`, emoji: "⚽", prompt: `Explain this using a sports analogy involving "${p.sports[0]}".`, color: "bg-[hsl(46,100%,49%)]", shadowColor: "shadow-[0_4px_0_0_hsl(44,100%,38%)]", soundColor: "gold" });
-  }
-  if (p.gaming && p.gaming.length > 0) {
-    extras.push({ id: "nos-gaming", label: `${p.gaming[0]} metaphor`, emoji: "🎮", prompt: `Explain this like a game mechanic from "${p.gaming[0]}".`, color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", soundColor: "purple" });
-  }
   if (p.currentRole) {
     extras.push({ id: "nos-role", label: "My Job", emoji: "💼", prompt: `How would this apply to my work as a ${p.currentRole}? Give me a practical example I can use tomorrow.`, color: "bg-[hsl(33,100%,50%)]", shadowColor: "shadow-[0_4px_0_0_hsl(33,100%,38%)]", soundColor: "orange" });
   }
@@ -138,6 +150,82 @@ const PersonaBadge = ({ items }: { items: string[] }) => {
   );
 };
 
+// Interest Deck Dropdown Component
+const InterestDropdown = ({ category, selectedItem, onSelect, disabled }: {
+  category: InterestCategory;
+  selectedItem: string;
+  onSelect: (item: string) => void;
+  disabled: boolean;
+}) => {
+  const [open, setOpen] = useState(false);
+  
+  const handlePress = () => {
+    if (category.items.length <= 1) {
+      onSelect(selectedItem);
+      return;
+    }
+    setOpen(!open);
+  };
+
+  const CATEGORY_COLORS: Record<string, { bg: string; shadow: string; sound: string }> = {
+    shows: { bg: "bg-[hsl(323,100%,76%)]", shadow: "shadow-[0_4px_0_0_hsl(323,100%,60%)]", sound: "pink" },
+    sports: { bg: "bg-[hsl(46,100%,49%)]", shadow: "shadow-[0_4px_0_0_hsl(44,100%,38%)]", sound: "gold" },
+    gaming: { bg: "bg-[hsl(270,100%,75%)]", shadow: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", sound: "purple" },
+    music: { bg: "bg-[hsl(199,92%,54%)]", shadow: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", sound: "blue" },
+    news: { bg: "bg-[hsl(33,100%,50%)]", shadow: "shadow-[0_4px_0_0_hsl(33,100%,38%)]", sound: "orange" },
+    hobbies: { bg: "bg-[hsl(100,95%,40%)]", shadow: "shadow-[0_4px_0_0_hsl(100,100%,31%)]", sound: "green" },
+    books: { bg: "bg-[hsl(270,100%,75%)]", shadow: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", sound: "purple" },
+  };
+
+  const colors = CATEGORY_COLORS[category.id] || CATEGORY_COLORS.shows;
+
+  return (
+    <div className="relative shrink-0">
+      <motion.button
+        whileTap={{ scale: 0.93, y: 2 }}
+        onClick={handlePress}
+        disabled={disabled}
+        className={`shrink-0 rounded-xl px-3 py-2 ${colors.bg} ${colors.shadow} transition-all disabled:opacity-40 flex items-center gap-1 min-w-fit`}
+      >
+        <span className="text-[12px]">{category.emoji}</span>
+        <span className="text-[9px] font-black text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)] max-w-[80px] truncate">{selectedItem}</span>
+        {category.items.length > 1 && (
+          <ChevronDown size={10} className={`text-white/70 transition-transform ${open ? "rotate-180" : ""}`} />
+        )}
+      </motion.button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -4, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
+            className="absolute bottom-full left-0 mb-1.5 bg-card border border-border/50 rounded-xl shadow-xl z-50 min-w-[140px] max-h-[180px] overflow-y-auto scrollbar-none"
+          >
+            {category.items.map((item) => (
+              <motion.button
+                key={item}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => { onSelect(item); setOpen(false); SFX.tap(); }}
+                className={`w-full text-left px-3 py-2 text-[10px] font-bold flex items-center gap-1.5 transition-colors ${
+                  item === selectedItem
+                    ? "text-agni-green bg-agni-green/10"
+                    : "text-foreground hover:bg-muted/50"
+                }`}
+              >
+                <span>{category.emoji}</span>
+                <span className="truncate">{item}</span>
+                {item === selectedItem && <span className="ml-auto text-agni-green">✓</span>}
+              </motion.button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQuizReady }: LessonChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -152,11 +240,38 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
   const powerRowRef = useRef<HTMLDivElement>(null);
   const [showSwipeHint, setShowSwipeHint] = useState(true);
   const [showPersonaModal, setShowPersonaModal] = useState(false);
+  // Interest Deck state — track selected item per category
+  const interestDeck = getInterestDeck();
+  const [selectedInterests, setSelectedInterests] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    interestDeck.forEach(cat => { initial[cat.id] = cat.items[0]; });
+    return initial;
+  });
+  // Track used interests to rotate on re-tap
+  const [usedInterests, setUsedInterests] = useState<Record<string, Set<string>>>({});
 
   const persona = getPersona();
   const agniExpr: AgniExpression = isLoading ? "thinking" : messages.length === 0 ? "teaching" : "happy";
   const basePowerups = POWERUPS[activeMode] || POWERUPS.engineer;
   const neuralPowerups = getNeuralSuggestions();
+
+  // Handle interest selection and send as prompt
+  const handleInterestSelect = (catId: string, item: string) => {
+    setSelectedInterests(prev => ({ ...prev, [catId]: item }));
+    const cat = interestDeck.find(c => c.id === catId);
+    const promptMap: Record<string, string> = {
+      shows: `Explain this using an analogy from "${item}" (the show/movie I love). Make it vivid and relatable!`,
+      sports: `Explain this using a sports analogy involving "${item}". Make it feel like a match commentary!`,
+      gaming: `Explain this like a game mechanic from "${item}". Use gaming language I'd understand!`,
+      music: `Explain this using a musical analogy with "${item}". Make it rhythmic and memorable!`,
+      news: `Explain this the way "${item}" would cover it. Match their style!`,
+      hobbies: `Explain this through the lens of "${item}" as a hobby. Connect it to something I do!`,
+      books: `Explain this using concepts or characters from "${item}". Make it literary!`,
+    };
+    const prompt = promptMap[catId] || `Explain this using "${item}" as an analogy.`;
+    SFX.powerup("pink");
+    handleSend(prompt);
+  };
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -314,7 +429,40 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
   const handlePowerUpPress = (pu: PowerUp) => {
     SFX.powerup(pu.soundColor);
     setPressedBtn(pu.id);
-    setTimeout(() => { setPressedBtn(null); handleSend(pu.prompt); }, 150);
+    
+    let resolvedPrompt = pu.prompt;
+    
+    // Resolve Interest Deck placeholders — pick from user's favorites
+    if (resolvedPrompt === "__INTEREST_DECK_FUN__" || resolvedPrompt === "__INTEREST_DECK_STORY__") {
+      const allInterests: string[] = [];
+      const p = getPersona();
+      if (p.shows?.length) allInterests.push(...p.shows);
+      if (p.sports?.length) allInterests.push(...p.sports);
+      if (p.gaming?.length) allInterests.push(...p.gaming);
+      if (p.music?.length) allInterests.push(...p.music);
+      if (p.hobbies?.length) allInterests.push(...p.hobbies);
+      if (p.books?.length) allInterests.push(...p.books);
+      
+      if (allInterests.length > 0) {
+        // Pick 2-3 random interests for AI to choose from
+        const shuffled = [...allInterests].sort(() => Math.random() - 0.5);
+        const picks = shuffled.slice(0, Math.min(3, shuffled.length));
+        const interestList = picks.map(i => `"${i}"`).join(", ");
+        
+        if (resolvedPrompt === "__INTEREST_DECK_FUN__") {
+          resolvedPrompt = `Pick the BEST one from these things I love: ${interestList} — and give me a fun, vivid example of this concept using it. Make it entertaining and memorable! If none fit well, use a general fun example instead.`;
+        } else {
+          resolvedPrompt = `Pick the BEST one from these things I love: ${interestList} — and tell me a short, engaging story that explains this concept through it. Make it dramatic and memorable! If none fit well, tell an original story.`;
+        }
+      } else {
+        // Fallback if no interests set
+        resolvedPrompt = resolvedPrompt === "__INTEREST_DECK_FUN__"
+          ? "Give me a fun, real-world example of this!"
+          : "Tell me a short story to explain this concept.";
+      }
+    }
+    
+    setTimeout(() => { setPressedBtn(null); handleSend(resolvedPrompt); }, 150);
   };
 
   const handleModeChange = (mode: string) => {
@@ -565,6 +713,21 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
             )}
           </AnimatePresence>
         </div>
+
+        {/* Interest Deck — one item per category with dropdown */}
+        {interestDeck.length > 0 && (
+          <div className="flex gap-1.5 overflow-x-auto scrollbar-none px-0.5 pt-1.5 pb-0.5">
+            {interestDeck.map((cat) => (
+              <InterestDropdown
+                key={cat.id}
+                category={cat}
+                selectedItem={selectedInterests[cat.id] || cat.items[0]}
+                onSelect={(item) => handleInterestSelect(cat.id, item)}
+                disabled={isLoading}
+              />
+            ))}
+          </div>
+        )}
 
       </div>
 
