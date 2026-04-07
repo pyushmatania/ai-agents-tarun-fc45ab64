@@ -47,8 +47,8 @@ interface PowerUp {
 const POWERUPS: Record<string, PowerUp[]> = {
   class5: [
     { id: "s1", label: "Simpler!", emoji: "🧸", prompt: "Explain that in even simpler terms, like I'm 5 years old.", color: "bg-[hsl(100,95%,40%)]", shadowColor: "shadow-[0_4px_0_0_hsl(100,100%,31%)]", soundColor: "green" },
-    { id: "s2", label: "Fun Example", emoji: "🎮", prompt: "Give me a fun, real-world example of this!", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", soundColor: "blue" },
-    { id: "s3", label: "Story Time", emoji: "📖", prompt: "Tell me a short story to explain this concept.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", soundColor: "purple" },
+    { id: "s2", label: "Fun Example", emoji: "🎮", prompt: "__INTEREST_DECK_FUN__", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", soundColor: "blue" },
+    { id: "s3", label: "Story Time", emoji: "📖", prompt: "__INTEREST_DECK_STORY__", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", soundColor: "purple" },
   ],
   engineer: [
     { id: "e1", label: "Show Code", emoji: "💻", prompt: "Show me a code example for this concept.", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", soundColor: "blue" },
