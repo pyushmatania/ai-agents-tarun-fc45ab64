@@ -112,20 +112,30 @@ const PILL_SELECTED_COLORS = [
   "bg-agni-green/30 border-agni-green text-agni-green shadow-glow-green",
 ];
 
-/* ── Pastel card colors for avatar/identity grid (matches screenshot) ── */
-const PASTEL_CARD_COLORS = [
-  { bg: "bg-[#C8F7C5]/70", border: "border-[#7ED957]", text: "text-[#2D8C2D]" },
-  { bg: "bg-[#E8D5F5]/70", border: "border-[#C291E2]", text: "text-[#8B3FCF]" },
-  { bg: "bg-[#D0EAFF]/70", border: "border-[#7CB8E8]", text: "text-[#2878B5]" },
-  { bg: "bg-[#FFF3C4]/70", border: "border-[#E8C84A]", text: "text-[#B8860B]" },
-  { bg: "bg-[#FFD6D6]/70", border: "border-[#F28B82]", text: "text-[#CC3333]" },
-  { bg: "bg-[#FFD6EC]/70", border: "border-[#F28BC8]", text: "text-[#CC3399]" },
-  { bg: "bg-[#FFE0C2]/70", border: "border-[#E8A54A]", text: "text-[#CC6600]" },
-  { bg: "bg-[#D6F5E0]/70", border: "border-[#7ED9A0]", text: "text-[#2D8C50]" },
-  { bg: "bg-[#E0D6F5]/70", border: "border-[#A091E2]", text: "text-[#5B3FCF]" },
-  { bg: "bg-[#D6EBF5]/70", border: "border-[#7CBAE8]", text: "text-[#2878B5]" },
-  { bg: "bg-[#F5E6D6]/70", border: "border-[#D9A97E]", text: "text-[#8C5B2D]" },
-  { bg: "bg-[#F5D6E6]/70", border: "border-[#E282B5]", text: "text-[#B5286E]" },
+/* ── Organic blob card styles (like reference image) ── */
+const BLOB_STYLES = [
+  { bg: "bg-[#7C5CBF]", text: "text-white", radius: "rounded-[24px]" },
+  { bg: "bg-[#F0805E]", text: "text-white", radius: "rounded-[28px_28px_8px_28px]" },
+  { bg: "bg-[#F5EDE3]", text: "text-gray-800", radius: "rounded-[20px_28px_28px_8px]" },
+  { bg: "bg-[#1A1A2E]", text: "text-white", radius: "rounded-[28px]" },
+  { bg: "bg-[#F5EDE3]", text: "text-gray-800", radius: "rounded-[8px_28px_28px_28px]" },
+  { bg: "bg-[#D4A853]", text: "text-white", radius: "rounded-[28px_8px_28px_28px]" },
+  { bg: "bg-[#C5E8F0]", text: "text-gray-800", radius: "rounded-[28px_28px_28px_8px]" },
+  { bg: "bg-white", text: "text-gray-800", radius: "rounded-[24px]" },
+  { bg: "bg-[#1A1A2E]", text: "text-white", radius: "rounded-[28px_8px_28px_28px]" },
+  { bg: "bg-[#F0805E]", text: "text-white", radius: "rounded-[8px_28px_28px_28px]" },
+  { bg: "bg-[#7C5CBF]", text: "text-white", radius: "rounded-[28px_28px_8px_28px]" },
+  { bg: "bg-[#C5E8F0]", text: "text-gray-800", radius: "rounded-[24px]" },
+  { bg: "bg-[#D4A853]", text: "text-white", radius: "rounded-[28px]" },
+  { bg: "bg-[#F5EDE3]", text: "text-gray-800", radius: "rounded-[28px_8px_28px_28px]" },
+  { bg: "bg-[#1A1A2E]", text: "text-white", radius: "rounded-[8px_28px_28px_28px]" },
+  { bg: "bg-[#F0805E]", text: "text-white", radius: "rounded-[28px_28px_28px_8px]" },
+  { bg: "bg-white", text: "text-gray-800", radius: "rounded-[28px_8px_28px_28px]" },
+  { bg: "bg-[#7C5CBF]", text: "text-white", radius: "rounded-[24px]" },
+  { bg: "bg-[#C5E8F0]", text: "text-gray-800", radius: "rounded-[28px_28px_8px_28px]" },
+  { bg: "bg-[#D4A853]", text: "text-white", radius: "rounded-[8px_28px_28px_28px]" },
+  { bg: "bg-[#F5EDE3]", text: "text-gray-800", radius: "rounded-[28px]" },
+  { bg: "bg-[#1A1A2E]", text: "text-white", radius: "rounded-[28px_28px_28px_8px]" },
 ];
 
 const TOTAL_STEPS = 10 + SUGGESTION_CATEGORIES.length + 1;
@@ -304,11 +314,11 @@ const OnboardingPage = () => {
 
   const catHint = activeCategory ? AGNI_HINTS[activeCategory.id] : null;
 
-  /* ── Pastel Card Component (matches screenshot style) ── */
+  /* ── Organic Blob Card (matches reference screenshot) ── */
   const ColorPill = ({ emoji, label, desc, selected, onClick, index, color }: {
     emoji: string; label: string; desc: string; selected: boolean; onClick: () => void; index: number; color?: string;
   }) => {
-    const pastel = PASTEL_CARD_COLORS[index % PASTEL_CARD_COLORS.length];
+    const blob = BLOB_STYLES[index % BLOB_STYLES.length];
     return (
       <motion.button
         initial={{ opacity: 0, scale: 0.8, y: 15 }}
@@ -316,8 +326,8 @@ const OnboardingPage = () => {
         transition={{ delay: 0.05 + index * 0.04, type: "spring", stiffness: 300, damping: 20 }}
         whileTap={{ scale: 0.92 }}
         onClick={() => { SFX.select(); onClick(); }}
-        className={`relative px-3 py-4 rounded-3xl border-2 text-left transition-all overflow-hidden ${pastel.bg} ${pastel.border} ${
-          selected ? "ring-2 ring-offset-1 ring-[#58CC02] shadow-lg scale-[1.02]" : "hover:shadow-md"
+        className={`relative px-3.5 py-3.5 ${blob.radius} text-left transition-all overflow-hidden ${blob.bg} ${
+          selected ? "ring-[3px] ring-[#58CC02] shadow-[0_0_20px_rgba(88,204,2,0.3)] scale-[1.03]" : "shadow-sm hover:shadow-md"
         }`}
       >
         {selected && (
@@ -325,11 +335,11 @@ const OnboardingPage = () => {
             <Check size={13} className="text-white" strokeWidth={3} />
           </motion.div>
         )}
-        <div className="flex items-start gap-2.5">
-          <span className="text-3xl mt-0.5">{emoji}</span>
+        <div className="flex items-center gap-2.5">
+          <span className="text-3xl">{emoji}</span>
           <div className="min-w-0 flex-1">
-            <span className={`text-sm font-extrabold block leading-tight ${pastel.text}`}>{label}</span>
-            <span className="text-[10px] text-gray-600 leading-tight block mt-0.5">{desc}</span>
+            <span className={`text-[13px] font-extrabold block leading-tight ${blob.text}`}>{label}</span>
+            <span className={`text-[9px] leading-tight block mt-0.5 ${blob.text} opacity-70`}>{desc}</span>
           </div>
         </div>
       </motion.button>
@@ -670,26 +680,27 @@ const OnboardingPage = () => {
 
               {/* Custom role */}
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
-                className={`mt-3 p-3 rounded-2xl border-2 transition-all ${
-                  selectedRole === "custom" ? "border-agni-green bg-agni-green/10 shadow-glow-green" : "border-dashed border-agni-purple/30 bg-agni-purple/5"
+                className={`mt-3 p-3 rounded-[24px] transition-all ${
+                  selectedRole === "custom" ? "bg-[#58CC02] shadow-lg" : "bg-white/80"
                 }`}
               >
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xl">✏️</span>
-                  <span className="text-xs font-extrabold text-foreground">Something else?</span>
+                  <span className={`text-xs font-extrabold ${selectedRole === "custom" ? "text-white" : "text-gray-700"}`}>Something else?</span>
                 </div>
                 <input
                   type="text" placeholder="Type your role..."
                   value={customRole}
                   onChange={(e) => { setCustomRole(e.target.value); if (e.target.value.trim()) setSelectedRole("custom"); }}
                   onFocus={() => { if (customRole.trim()) setSelectedRole("custom"); }}
-                  className="w-full bg-card border border-border/40 rounded-xl px-3 py-2 text-xs font-bold text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-agni-green/50"
+                  className="w-full bg-white/90 border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold text-gray-800 placeholder:text-gray-400 outline-none focus:border-[#7C5CBF]"
                 />
               </motion.div>
             </div>
 
-            <Button onClick={goNext} disabled={!selectedRole || (selectedRole === "custom" && !customRole.trim())} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none mt-3">
-              CONTINUE <ArrowRight size={18} className="ml-2" />
+            <Button onClick={goNext} disabled={!selectedRole || (selectedRole === "custom" && !customRole.trim())}
+              className="w-full h-14 rounded-full bg-[#7C5CBF] hover:bg-[#6A4DAF] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none mt-3">
+              Continue <ArrowRight size={18} className="ml-2" />
             </Button>
           </motion.div>
         )}
