@@ -20,10 +20,10 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
 
 const CURIOSITY = [
-  { id: "industry", label: "Your Industry", emoji: "🏭", desc: "Semiconductor & manufacturing", query: "AI agents semiconductor manufacturing India 2026 latest", color: "#FF9600", shadow: "#CC7A00" },
-  { id: "general", label: "General", emoji: "🌍", desc: "What people are building", query: "amazing AI agent projects people built 2026 showcase", color: "#CE82FF", shadow: "#9333EA" },
-  { id: "crazy", label: "Crazy Future", emoji: "🤯", desc: "Bleeding edge AI", query: "most crazy futuristic AI agent applications autonomous 2026", color: "#FF4B91", shadow: "#CC2D6A" },
-  { id: "daily", label: "Daily Work", emoji: "💼", desc: "Productivity agents", query: "AI agents automate daily office work productivity examples 2026", color: "#58CC02", shadow: "#3D9400" },
+  { id: "industry", label: "Your Industry", emoji: "🏭", desc: "Semiconductor & manufacturing", query: "AI agents semiconductor manufacturing India 2026 latest", color: "#FF9600", shadow: "#CC7A00", bgGradient: "linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%)" },
+  { id: "general", label: "General", emoji: "🌍", desc: "What people are building", query: "amazing AI agent projects people built 2026 showcase", color: "#CE82FF", shadow: "#9333EA", bgGradient: "linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)" },
+  { id: "crazy", label: "Crazy Future", emoji: "🤯", desc: "Bleeding edge AI", query: "most crazy futuristic AI agent applications autonomous 2026", color: "#FF4B91", shadow: "#CC2D6A", bgGradient: "linear-gradient(135deg, #F59E0B 0%, #D97706 100%)" },
+  { id: "daily", label: "Daily Work", emoji: "💼", desc: "Productivity agents", query: "AI agents automate daily office work productivity examples 2026", color: "#58CC02", shadow: "#3D9400", bgGradient: "linear-gradient(135deg, #059669 0%, #047857 100%)" },
 ];
 
 const SPARK_FACTS = [
