@@ -347,31 +347,29 @@ const OnboardingPage = () => {
     );
   };
 
-  /* ── Colorful List Option Component ── */
+  /* ── Blob List Option (organic style matching avatar cards) ── */
   const ColorListOption = ({ emoji, label, desc, selected, onClick, index, color }: {
     emoji: string; label: string; desc: string; selected: boolean; onClick: () => void; index: number; color?: string;
   }) => {
-    const colorIdx = index % PILL_COLORS.length;
+    const blob = BLOB_STYLES[index % BLOB_STYLES.length];
     return (
       <motion.button
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.05 + index * 0.04 }}
-        whileTap={{ scale: 0.97 }}
+        whileTap={{ scale: 0.95 }}
         onClick={() => { SFX.select(); onClick(); }}
-        className={`w-full p-3.5 rounded-2xl border-2 text-left flex items-center gap-3 transition-all ${
-          selected ? PILL_SELECTED_COLORS[colorIdx] : `border-border/50 bg-card/80 hover:${PILL_COLORS[colorIdx]}`
+        className={`w-full p-3.5 ${blob.radius} text-left flex items-center gap-3 transition-all ${blob.bg} ${
+          selected ? "ring-[3px] ring-[#58CC02] shadow-[0_0_20px_rgba(88,204,2,0.3)] scale-[1.02]" : "shadow-sm hover:shadow-md"
         }`}
       >
-        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color || "from-agni-green to-agni-blue"} flex items-center justify-center shadow-lg shrink-0`}>
-          <span className="text-2xl">{emoji}</span>
-        </div>
+        <span className="text-3xl shrink-0">{emoji}</span>
         <div className="flex-1 min-w-0">
-          <span className="text-sm font-extrabold text-foreground block">{label}</span>
-          <span className="text-[10px] text-muted-foreground">{desc}</span>
+          <span className={`text-[13px] font-extrabold block ${blob.text}`}>{label}</span>
+          <span className={`text-[10px] block mt-0.5 ${blob.text} opacity-70`}>{desc}</span>
         </div>
         {selected && (
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-6 h-6 rounded-full bg-agni-green flex items-center justify-center shrink-0">
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-6 h-6 rounded-full bg-[#58CC02] flex items-center justify-center shrink-0 shadow-md">
             <Check size={14} className="text-white" strokeWidth={3} />
           </motion.div>
         )}
