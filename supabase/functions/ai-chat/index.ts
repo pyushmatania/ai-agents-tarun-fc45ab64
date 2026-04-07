@@ -58,10 +58,10 @@ serve(async (req) => {
       if (context.mission) ctxParts.push(`User's mission: ${context.mission}`);
       if (context.vibe) ctxParts.push(`Preferred teaching style: ${context.vibe}`);
       if (context.level) ctxParts.push(`Brain level: ${context.level}`);
-      if (context.universeVibe) ctxParts.push(`Universe vibe: Teach through the world of "${context.universeVibe}" — use characters, vocabulary, and plot moments from this universe`);
-      if (context.interests) ctxParts.push(`Interests: ${context.interests}`);
+      if (context.universeVibe) ctxParts.push(`Universe vibe (HIGHEST PRIORITY): The user selected "${context.universeVibe}" as their world. ALL examples, analogies, metaphors, and references MUST come from "${context.universeVibe}" — NEVER use other franchises, shows, or games.`);
+      if (context.interests) ctxParts.push(`General interests (use ONLY if no universe vibe is set): ${context.interests}`);
       if (ctxParts.length > 0) {
-        systemPrompt += `\n\nUSER PROFILE:\n${ctxParts.join("\n")}\n\nIMPORTANT: Adapt your tone, depth, analogies, and examples to match ALL of the user's profile settings above. They are not decorative — they define how you should respond.`;
+        systemPrompt += `\n\nUSER PROFILE:\n${ctxParts.join("\n")}\n\nCRITICAL: If a "Universe vibe" is set, it overrides everything — every single example and analogy MUST use that universe. Never mix in other franchises.`;
       }
     }
 
