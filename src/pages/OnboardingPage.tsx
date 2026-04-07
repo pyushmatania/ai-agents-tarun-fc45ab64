@@ -18,46 +18,28 @@ import type { AgniExpression } from "@/components/Agni";
 import { motion, AnimatePresence } from "framer-motion";
 import { savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona, getSubFilters, getSubFilterCount, POPULAR_PICKS } from "@/lib/neuralOS";
 import { TrendingUp, Crown } from "lucide-react";
-import { MISSION_MODES, BRAIN_LEVELS, setTeachingSelection, saveCustomOption, getCustomOptions } from "@/lib/teachingConfig";
+import { MISSION_MODES, BRAIN_LEVELS, IDENTITIES, BRAIN_LEVELS_ACADEMIC, BRAIN_LEVELS_SKILL, TEACHING_VIBES, UNIVERSE_VIBE_CATEGORIES, setTeachingSelection, saveCustomOption, getCustomOptions, setUniverseVibe, setBrainTrack } from "@/lib/teachingConfig";
 import CustomOptionInput from "@/components/CustomOptionInput";
 
-/* ── EXPANDED ROLES ── */
-const ROLES = [
-  { id: "student", label: "Student", emoji: "🎓", desc: "Learning AI from scratch", goal: "Learn AI from zero", exp: "beginner", icon: GraduationCap },
-  { id: "developer", label: "Developer", emoji: "💻", desc: "Building real agents", goal: "Build production AI agents", exp: "engineer", icon: Code },
-  { id: "founder", label: "Founder / CEO", emoji: "🚀", desc: "Scaling with AI", goal: "Build a startup with AI", exp: "some experience", icon: Rocket },
-  { id: "manager", label: "PM / Manager", emoji: "📊", desc: "Leading AI teams", goal: "Lead AI product teams", exp: "some experience", icon: Briefcase },
-  { id: "researcher", label: "Researcher", emoji: "🔬", desc: "Deep exploration", goal: "Research AI deeply", exp: "engineer", icon: Brain },
-  { id: "designer", label: "Designer", emoji: "🎨", desc: "AI meets creativity", goal: "Use AI in design workflows", exp: "some experience", icon: Palette },
-  { id: "marketer", label: "Marketer", emoji: "📢", desc: "Growth with AI", goal: "Use AI for marketing", exp: "beginner", icon: Target },
-  { id: "freelancer", label: "Freelancer", emoji: "🌍", desc: "AI superpowers", goal: "Freelance with AI tools", exp: "some experience", icon: Globe },
-  { id: "data", label: "Data / ML", emoji: "📈", desc: "Models & pipelines", goal: "Build ML pipelines", exp: "engineer", icon: Wrench },
-  { id: "content", label: "Content Creator", emoji: "🎬", desc: "AI-powered content", goal: "Create content with AI", exp: "some experience", icon: Film },
-  { id: "teacher", label: "Teacher / Educator", emoji: "📚", desc: "Teach smarter with AI", goal: "Enhance teaching with AI", exp: "beginner", icon: BookOpen },
-  { id: "consultant", label: "Consultant", emoji: "💼", desc: "AI advisory & strategy", goal: "Consult on AI strategy", exp: "some experience", icon: Briefcase },
-  { id: "productdesigner", label: "Product Designer", emoji: "🖌️", desc: "Design AI products", goal: "Design AI-first products", exp: "some experience", icon: Palette },
-  { id: "dataanalyst", label: "Data Analyst", emoji: "📊", desc: "Insights from data", goal: "Analyze data with AI", exp: "some experience", icon: Target },
-  { id: "office", label: "Office / Operations", emoji: "🏢", desc: "Automate workflows", goal: "Automate office tasks with AI", exp: "beginner", icon: Globe },
-  { id: "sales", label: "Sales / BizDev", emoji: "🤝", desc: "Close deals with AI", goal: "Use AI in sales pipeline", exp: "beginner", icon: Trophy },
-  { id: "writer", label: "Writer / Journalist", emoji: "✍️", desc: "AI-assisted writing", goal: "Write better with AI", exp: "beginner", icon: Newspaper },
-  { id: "hobbyist", label: "Hobbyist / Tinkerer", emoji: "🛠️", desc: "Build for fun", goal: "Experiment with AI for fun", exp: "beginner", icon: Wrench },
-  { id: "curious", label: "Just Curious", emoji: "✨", desc: "Here for fun!", goal: "Explore for fun", exp: "beginner", icon: Star },
-];
+/* ── ROLES now powered by IDENTITIES from teachingConfig ── */
+const ROLES = IDENTITIES.map(id => ({
+  id: id.id,
+  label: id.label,
+  emoji: id.emoji,
+  desc: id.desc,
+  goal: `Master AI agents as a ${id.label}`,
+  exp: "some experience",
+  icon: Brain, // fallback icon
+}));
 
-const VIBES = [
-  { id: "fun", label: "Fun & Memes", emoji: "😂", desc: "Make me LOL while learning", icon: Heart, gradient: "from-pink-500 to-rose-400" },
-  { id: "story", label: "Story-driven", emoji: "📖", desc: "Tales & analogies", icon: BookOpen, gradient: "from-purple-500 to-violet-400" },
-  { id: "serious", label: "Deep & Serious", emoji: "🧠", desc: "No fluff, pure knowledge", icon: Brain, gradient: "from-blue-500 to-cyan-400" },
-  { id: "fast", label: "Fast & Practical", emoji: "⚡", desc: "Ship it now!", icon: Zap, gradient: "from-amber-500 to-yellow-400" },
-  { id: "visual", label: "Visual & Diagrams", emoji: "🎨", desc: "Show me, don't tell me", icon: Palette, gradient: "from-teal-500 to-emerald-400" },
-  { id: "socratic", label: "Socratic / Q&A", emoji: "🤔", desc: "Guide me with questions", icon: Lightbulb, gradient: "from-orange-500 to-amber-400" },
-  { id: "gamified", label: "Gamified & Challenges", emoji: "🎮", desc: "XP, quests & leaderboards", icon: Gamepad2, gradient: "from-indigo-500 to-blue-400" },
-  { id: "handson", label: "Hands-on Builder", emoji: "🔧", desc: "Learn by building projects", icon: Wrench, gradient: "from-lime-500 to-green-400" },
-  { id: "eli5", label: "ELI5 / Simple", emoji: "🍼", desc: "Explain like I'm 5", icon: Star, gradient: "from-sky-400 to-blue-300" },
-  { id: "academic", label: "Academic & Research", emoji: "📚", desc: "Papers, citations & depth", icon: GraduationCap, gradient: "from-slate-500 to-gray-400" },
-  { id: "debate", label: "Debate & Challenge Me", emoji: "🥊", desc: "Push back on my ideas", icon: Shield, gradient: "from-red-500 to-pink-400" },
-  { id: "podcast", label: "Podcast / Conversational", emoji: "🎙️", desc: "Like chatting with a friend", icon: MessageCircle, gradient: "from-violet-500 to-fuchsia-400" },
-];
+const VIBES = TEACHING_VIBES.map(v => ({
+  id: v.id,
+  label: v.label,
+  emoji: v.emoji,
+  desc: v.desc,
+  icon: Heart,
+  gradient: v.color,
+}));
 
 /* ── AGNI HINTS — shown on each category screen ── */
 const AGNI_HINTS: Record<string, { speech: string; expr: AgniExpression; hint: string }> = {
@@ -110,6 +92,8 @@ const OnboardingPage = () => {
   const [activeSubFilter, setActiveSubFilter] = useState<string | null>(null);
   const [smartSearchOpen, setSmartSearchOpen] = useState(false);
   const [smartSearchQuery, setSmartSearchQuery] = useState("");
+  const [brainTrack, setBrainTrackState] = useState<"skill" | "academic">("skill");
+  const [universeVibeInput, setUniverseVibeInput] = useState("");
 
   // Steps: 0=splash, 1=name, 2=role, 3=mission, 4=vibe, 5=brain, 6=why-matters, 7+=categories, last=confirm
   const categoryIndex = step >= 7 ? step - 7 : -1;
@@ -186,7 +170,7 @@ const OnboardingPage = () => {
   const finish = () => {
     const role = ROLES.find(r => r.id === selectedRole);
     const roleLabel = selectedRole === "custom" ? customRole.trim() : role?.label;
-    const depthMap: Record<string, string> = { chill: "basic", explorer: "normal", pro: "deep", hacker: "deep", scientist: "deep", professor: "deep" };
+    const depthMap: Record<string, string> = { chill: "basic", sprout: "basic", explorer: "normal", builder: "normal", pro: "deep", hacker: "deep", scientist: "deep", professor: "deep", architect_brain: "deep", researcher: "deep", demon: "deep", class5: "basic", class8: "basic", class10: "normal", class12: "normal", college_fresh: "normal", college_senior: "deep", masters: "deep", uni_professor: "deep" };
     savePersona({
       ...persona,
       name: name.trim(),
@@ -197,12 +181,13 @@ const OnboardingPage = () => {
       currentRole: roleLabel,
       completedAt: new Date().toISOString(),
     });
-    // Save teaching selections
+    // Save all 4 teaching dimension selections
+    if (selectedRole) setTeachingSelection("identity", selectedRole);
     if (selectedMission) setTeachingSelection("mission", selectedMission);
     if (selectedVibe) setTeachingSelection("vibe", selectedVibe);
     if (selectedBrain) setTeachingSelection("brain", selectedBrain);
     localStorage.setItem("edu_user_name", name.trim());
-    localStorage.setItem("edu_user_role", selectedRole || "curious");
+    localStorage.setItem("edu_user_role", selectedRole || "student");
     localStorage.setItem("edu_onboarded", "true");
     navigate("/");
   };
@@ -342,8 +327,8 @@ const OnboardingPage = () => {
                 <Agni expression="thinking" size={80} speech="What brings you here? 🤔" animate />
               </div>
 
-              <h2 className="text-2xl font-black text-foreground text-center mb-1">I am a...</h2>
-              <p className="text-xs text-muted-foreground text-center mb-5">Pick what fits best</p>
+              <h2 className="text-2xl font-black text-foreground text-center mb-1">🪪 Who are you?</h2>
+              <p className="text-xs text-muted-foreground text-center mb-5">Your identity shapes how AGNI teaches — pick the world you live in</p>
 
               <div className="grid grid-cols-2 gap-2.5">
                 {ROLES.map((role, i) => {
@@ -508,13 +493,49 @@ const OnboardingPage = () => {
                       setSelectedVibe(saved.id);
                     }}
                   />
+                  {/* Universe Vibes section */}
+                  <div className="mt-4 mb-2">
+                    <p className="text-[10px] font-black text-agni-gold uppercase tracking-wider mb-2 px-1">🌍 OR TEACH THROUGH A UNIVERSE</p>
+                    <p className="text-[9px] text-muted-foreground mb-2 px-1">Pick a movie, anime, game, or character — AGNI teaches through that world!</p>
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {UNIVERSE_VIBE_CATEGORIES.map(cat => (
+                        <span key={cat.id} className="text-[8px] font-bold bg-agni-gold/10 text-agni-gold px-2 py-1 rounded-full border border-agni-gold/20">
+                          {cat.emoji} {cat.label}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="e.g. Goku, Naruto, The Matrix, Iron Man..."
+                        value={universeVibeInput}
+                        onChange={(e) => setUniverseVibeInput(e.target.value)}
+                        className="flex-1 bg-card border border-agni-gold/30 rounded-xl px-3 py-2.5 text-xs font-bold text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-agni-gold/60"
+                      />
+                      {universeVibeInput.trim() && (
+                        <motion.button
+                          initial={{ scale: 0 }} animate={{ scale: 1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => { setUniverseVibe(universeVibeInput.trim()); }}
+                          className="px-3 rounded-xl bg-agni-gold text-white text-[10px] font-black shrink-0"
+                        >
+                          Set ✓
+                        </motion.button>
+                      )}
+                    </div>
+                    {universeVibeInput.trim() && (
+                      <p className="text-[9px] text-agni-gold/70 mt-1.5 px-1">
+                        🎬 AGNI will teach through the world of "<span className="font-bold">{universeVibeInput}</span>" — using characters, plot moments, and vocabulary from this universe!
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
                 className="bg-agni-purple/5 border border-agni-purple/20 rounded-2xl px-4 py-2.5 mb-3 shrink-0"
               >
-                <p className="text-[10px] text-agni-purple font-bold">💡 Neural OS adapts: Pick "Fun & Memes" → memes & jokes. "Socratic" → guided questions. "ELI5" → super simple. Or write your own!</p>
+                <p className="text-[10px] text-agni-purple font-bold">💡 Pick a style OR a universe — AGNI adapts everything. "Sensei" = Karate Kid energy. "Wizard" = spells & incantations. Or type "Goku" for Dragon Ball-style teaching!</p>
               </motion.div>
             </div>
 
@@ -524,7 +545,7 @@ const OnboardingPage = () => {
           </motion.div>
         )}
 
-        {/* ═══════ STEP 5: BRAIN LEVEL ═══════ */}
+        {/* ═══════ STEP 5: BRAIN LEVEL (dual track) ═══════ */}
         {step === 5 && (
           <motion.div key="brain" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
@@ -537,11 +558,28 @@ const OnboardingPage = () => {
               </div>
 
               <h2 className="text-2xl font-black text-foreground text-center mb-1 shrink-0">🧠 Brain Level</h2>
-              <p className="text-xs text-muted-foreground text-center mb-4 shrink-0">How deep do you want to dive?</p>
+              <p className="text-xs text-muted-foreground text-center mb-3 shrink-0">How deep do you want to dive?</p>
+
+              {/* Track toggle */}
+              <div className="flex gap-1.5 bg-card/60 border border-border/30 rounded-2xl p-1 mb-3 shrink-0">
+                {(["skill", "academic"] as const).map(track => (
+                  <motion.button
+                    key={track}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => { setBrainTrackState(track); setBrainTrack(track); }}
+                    className={`flex-1 py-2 rounded-xl text-[11px] font-black transition-all relative ${brainTrack === track ? "text-white" : "text-muted-foreground"}`}
+                  >
+                    {brainTrack === track && (
+                      <motion.div layoutId="brain-track-bg" className="absolute inset-0 bg-gradient-to-r from-agni-purple to-agni-pink rounded-xl" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
+                    )}
+                    <span className="relative z-10">{track === "skill" ? "⚡ Skill Track" : "🎓 Academic Track"}</span>
+                  </motion.button>
+                ))}
+              </div>
 
               <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
                 <div className="space-y-2.5">
-                  {[...BRAIN_LEVELS, ...customBrains].map((b, i) => (
+                  {[...(brainTrack === "skill" ? BRAIN_LEVELS_SKILL : BRAIN_LEVELS_ACADEMIC), ...customBrains].map((b, i) => (
                     <motion.button key={b.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + i * 0.04 }}
                       whileTap={{ scale: 0.97 }} onClick={() => setSelectedBrain(b.id)}
                       className={`w-full p-3.5 rounded-2xl border-2 text-left flex items-center gap-3 transition-all ${
@@ -563,7 +601,6 @@ const OnboardingPage = () => {
                     </motion.button>
                   ))}
 
-                  {/* Custom brain level creator */}
                   <CustomOptionInput
                     categoryId="brain"
                     categoryLabel="Brain Level"
@@ -579,7 +616,11 @@ const OnboardingPage = () => {
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
                 className="bg-agni-green/5 border border-agni-green/20 rounded-2xl px-4 py-2.5 mb-3 shrink-0"
               >
-                <p className="text-[10px] text-agni-green font-bold">💡 "Chill" = bite-sized & easy. "Hacker" = skip theory, just code. "Scientist" = papers & math. Pick your level!</p>
+                <p className="text-[10px] text-agni-green font-bold">
+                  {brainTrack === "skill" 
+                    ? "💡 \"Sprout\" = never coded. \"Hacker\" = edge cases & tricks. \"Demon Mode\" = brutal pace, no mercy!" 
+                    : "💡 \"Class 5\" = pure analogies. \"College Senior\" = placement-ready. \"PhD\" = papers & formal defs!"}
+                </p>
               </motion.div>
             </div>
 
