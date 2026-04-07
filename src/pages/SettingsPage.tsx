@@ -8,17 +8,19 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { LogOut, Moon, Sun, ChevronRight, Shield, Bell, Loader2, LogIn, Brain, Key, Check, Eye, EyeOff, Zap, Diamond, Heart, Flame, Trash2, Sparkles, X, Plus, Search, TrendingUp } from "lucide-react";
+import { LogOut, Moon, Sun, ChevronRight, Shield, Bell, Loader2, LogIn, Brain, Key, Check, Eye, EyeOff, Zap, Diamond, Heart, Flame, Trash2, Sparkles, X, Plus, Search, TrendingUp, User, MapPin, Briefcase, GraduationCap, Target } from "lucide-react";
 import { InterestPill } from "@/components/InterestPill";
 import { motion, AnimatePresence } from "framer-motion";
 import { BUILT_IN_MODELS, BYOK_PROVIDERS, getAIConfig, saveAIConfig, type AIConfig } from "@/lib/aiConfig";
-import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection, getAllOptions, saveCustomOption, getCustomOptions } from "@/lib/teachingConfig";
+import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection, getAllOptions, saveCustomOption, getCustomOptions, IDENTITIES, MISSION_MODES } from "@/lib/teachingConfig";
 import CustomOptionInput from "@/components/CustomOptionInput";
 import { getPersona, savePersona, SUGGESTION_CATEGORIES, getSubFilters, getSubFilterCount, POPULAR_PICKS, type NeuralOSPersona } from "@/lib/neuralOS";
 import Agni from "@/components/Agni";
 import StatsSection from "@/components/StatsSection";
 import { useGamification } from "@/hooks/useGamification";
 import { SFX } from "@/lib/sounds";
+import { useUserContext } from "@/hooks/useUserContext";
+import { AGE_RANGES, GENDERS, EDUCATION_LEVELS, EXPERIENCE_LEVELS, MISSION_FOLLOWUPS } from "@/lib/missionFollowups";
 
 const SettingsPage = () => {
   const { user, signOut } = useAuth();
