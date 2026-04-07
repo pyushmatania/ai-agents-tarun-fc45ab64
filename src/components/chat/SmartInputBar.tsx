@@ -87,7 +87,10 @@ export default function SmartInputBar({
     SFX.tap();
   };
 
-  const powerups = MODE_POWERUPS[activeMode] || DEFAULT_POWERUPS;
+  const explainStyles = useMemo(() => getActiveExplainStyles(), []);
+  const powerups: PowerUp[] = explainStyles.map(s => ({
+    id: s.id, label: s.label, emoji: s.emoji, prompt: s.prompt, color: s.color,
+  }));
 
   const interestCategories = useMemo(() => {
     const cats: { id: string; emoji: string; label: string; items: string[] }[] = [];
