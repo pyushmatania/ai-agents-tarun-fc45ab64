@@ -96,17 +96,32 @@ export default function ChatPage() {
     }
   }, [chat.messages]);
 
+  // Build a snapshot of current settings for the blueprint stamp
+  const buildSettingsSnapshot = () => {
+    const ctx = buildTeachingContext();
+    const parts: { key: string; emoji: string; value: string }[] = [];
+    if (ctx.universeVibe) parts.push({ key: "World", emoji: "🌍", value: ctx.universeVibe });
+    if (ctx.vibe) parts.push({ key: "Vibe", emoji: "🎨", value: ctx.vibe.split(" — ")[0] });
+    if (ctx.level) parts.push({ key: "Brain", emoji: "🧠", value: ctx.level.split(" — ")[0] });
+    if (ctx.identity) parts.push({ key: "Identity", emoji: "🪪", value: ctx.identity.split(" — ")[0] });
+    if (ctx.mission) parts.push({ key: "Mission", emoji: "🎯", value: ctx.mission.split(" — ")[0] });
+    return parts;
+  };
+
   const handleSend = (text?: string, hiddenPrompt?: string) => {
     const msg = text || input.trim();
     if (!msg) return;
     const ctx = buildTeachingContext();
+    const snapshot = buildSettingsSnapshot();
     const opts = hiddenPrompt ? { hiddenPrompt, hideUserMessage: true } : undefined;
-    chat.sendMessage(msg, ctx, opts);
+    chat.sendMessage(msg, ctx, opts, snapshot);
     setInput("");
   };
 
   const handleSuggestionClick = (suggestion: string) => {
-    chat.sendMessage(suggestion, buildTeachingContext());
+    const ctx = buildTeachingContext();
+    const snapshot = buildSettingsSnapshot();
+    chat.sendMessage(suggestion, ctx, undefined, snapshot);
   };
 
   const handleModeChange = (mode: string) => {
@@ -209,13 +224,25 @@ export default function ChatPage() {
           <div className="space-y-1">
             {chat.messages.map((msg) => {
               const { text } = parseSuggestions(msg.content);
+              const snapshot = msg.metadata?.settingsSnapshot as { key: string; emoji: string; value: string }[] | undefined;
               return (
-                <ContentRenderer
-                  key={msg.id}
-                  content={text}
-                  isUser={msg.role === "user"}
-                  showActions={msg.role === "assistant" && !!text}
-                />
+                <div key={msg.id}>
+                  <ContentRenderer
+                    content={text}
+                    isUser={msg.role === "user"}
+                    showActions={msg.role === "assistant" && !!text}
+                  />
+                  {/* Settings blueprint stamp */}
+                  {msg.role === "assistant" && text && snapshot && snapshot.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1 mb-2 px-1">
+                      {snapshot.map((s) => (
+                        <span key={s.key} className="text-[8px] font-bold text-muted-foreground/40 bg-muted/10 rounded-lg px-1.5 py-0.5">
+                          {s.emoji} {s.value}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>

@@ -101,12 +101,12 @@ serve(async (req) => {
       
       // Universe vibe — HIGHEST PRIORITY, overrides interests
       if (context.universeVibe) {
-        ctxParts.push(`Universe vibe (HIGHEST PRIORITY): "${context.universeVibe}"\nMANDATORY: ALL examples, analogies, metaphors, and references MUST come from "${context.universeVibe}" — NEVER use other franchises, shows, or games. This is non-negotiable.`);
+        ctxParts.push(`Universe vibe (HIGHEST PRIORITY): "${context.universeVibe}"\nMANDATORY: ALL examples, analogies, metaphors, and references MUST come from "${context.universeVibe}" — NEVER use other franchises, shows, or games. Even if previous messages in the conversation used a different franchise, IGNORE those and ONLY use "${context.universeVibe}" from now on. This is non-negotiable.`);
       }
       if (context.interests) ctxParts.push(`General interests (use ONLY if no universe vibe is set): ${context.interests}`);
       
       if (ctxParts.length > 0) {
-        systemPrompt += `\n\nUSER PROFILE (BINDING — these are rules, not suggestions):\n${ctxParts.join("\n\n")}\n\nCRITICAL RULES:\n1. Brain level controls HOW SIMPLY you explain — a Sprout/Class 5 answer should be understandable by a child\n2. If Universe Vibe is set, EVERY example uses that world — never mix franchises\n3. Vibe controls your tone and style — commit fully to it\n4. These are NOT decorative tags — they define your entire response style`;
+        systemPrompt += `\n\nUSER PROFILE (BINDING — these are rules, not suggestions):\n${ctxParts.join("\n\n")}\n\nCRITICAL RULES:\n1. Brain level controls HOW SIMPLY you explain — a Sprout/Class 5 answer should be understandable by a child\n2. If Universe Vibe is set, EVERY example uses ONLY that world — IGNORE any different franchise references from earlier in the conversation\n3. Vibe controls your tone and style — commit fully to it\n4. These are NOT decorative tags — they define your entire response style\n5. The user profile above reflects the CURRENT settings — always follow these, not what was used in previous messages`;
       }
     }
 
