@@ -64,6 +64,7 @@ function getContentMeta(url: string): { type: "youtube" | "instagram" | "article
 
 const TABS = [
   { id: "feed", label: "Feed", icon: TrendingUp },
+  { id: "saved", label: "Saved", icon: Bookmark },
   { id: "explore", label: "Explore", icon: Sparkles },
 ] as const;
 
