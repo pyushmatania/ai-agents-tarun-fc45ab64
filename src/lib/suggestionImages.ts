@@ -93,7 +93,7 @@ const KNOWN_IMAGES: Record<string, string> = {
   "Rishabh Pant": twitterAvatar("RishabhPant17"),
   "Jasprit Bumrah": twitterAvatar("Jaspritbumrah93"),
   "Hardik Pandya": twitterAvatar("hardikpandya7"),
-  "Suryakumar Yadav": twitterAvatar("suaborbarivelliyakumar"),
+  "Suryakumar Yadav": searchAvatar("Suryakumar Yadav"),
   "Shubman Gill": twitterAvatar("ShubmanGill"),
   "Cricket": searchAvatar("cricket sport"),
   // IPL teams
@@ -108,7 +108,7 @@ const KNOWN_IMAGES: Record<string, string> = {
   "Cristiano Ronaldo": twitterAvatar("Cristiano"),
   "Kylian Mbappé": twitterAvatar("KMbappe"),
   "Erling Haaland": searchAvatar("Erling Haaland"),
-  "Sunil Chhetri": twitterAvatar("caborbarivelliehtrisunil11"),
+  "Sunil Chhetri": searchAvatar("Sunil Chhetri"),
   "Real Madrid": domainAvatar("realmadrid.com"),
   "Barcelona": domainAvatar("fcbarcelona.com"),
   "Manchester United": domainAvatar("manutd.com"),
@@ -146,7 +146,7 @@ const KNOWN_IMAGES: Record<string, string> = {
 
   // ── Music Artists (fixed handles) ──
   "Arijit Singh": searchAvatar("Arijit Singh"),
-  "A.R. Rahman": twitterAvatar("araborbarivellihman"),
+  "A.R. Rahman": searchAvatar("AR Rahman"),
   "Diljit Dosanjh": twitterAvatar("diljitdosanjh"),
   "Pritam": searchAvatar("Pritam Bollywood"),
   "Anuv Jain": searchAvatar("Anuv Jain singer"),
