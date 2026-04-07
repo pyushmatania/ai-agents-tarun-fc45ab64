@@ -79,14 +79,14 @@ const AGNI_HINTS: Record<string, { speech: string; expr: AgniExpression; hint: s
 };
 
 const CATEGORY_GRADIENTS = [
-  "from-[#FCE4EC] via-[#F8BBD0] to-[#F3E5F5]",
-  "from-[#E0F2FE] via-[#E8F4F8] to-[#E8EAF6]",
-  "from-[#E8F5E9] via-[#F0F4C3] to-[#FFF8E1]",
-  "from-[#FFF3E0] via-[#FFECD2] to-[#FFE0B2]",
-  "from-[#F0E6FA] via-[#F5E0F0] to-[#FADADD]",
-  "from-[#E1F5FE] via-[#E8EAF6] to-[#F3E5F5]",
-  "from-[#FFF8E1] via-[#FFE0B2] to-[#FCE4EC]",
-  "from-[#E8F5E9] via-[#E0F2FE] to-[#E8EAF6]",
+  "from-agni-pink/10 via-agni-purple/5 to-transparent",
+  "from-agni-blue/10 via-agni-blue/5 to-transparent",
+  "from-agni-green/10 via-agni-gold/5 to-transparent",
+  "from-agni-orange/10 via-agni-gold/5 to-transparent",
+  "from-agni-purple/10 via-agni-pink/5 to-transparent",
+  "from-agni-blue/10 via-agni-purple/5 to-transparent",
+  "from-agni-gold/10 via-agni-orange/5 to-transparent",
+  "from-agni-green/10 via-agni-blue/5 to-transparent",
 ];
 
 /* ── Colorful pill colors for options ── */
