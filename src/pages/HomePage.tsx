@@ -327,7 +327,7 @@ const HomePage = () => {
             {[
               { nav: "/curiosity", emoji: "🔮", label: "Spark", sub: "AI Insights", color: "bg-agni-purple" },
               { nav: "/sources", emoji: "🌐", label: "Hub", sub: "Resources", color: "bg-agni-blue" },
-              { nav: "/mega-prompt", emoji: "📋", label: "Prompt", sub: "Reference", color: "bg-agni-orange" },
+              { nav: "/roadmap", emoji: "🗺️", label: "Path", sub: "Roadmap", color: "bg-agni-orange" },
             ].map((a, i) => (
               <StaggerItem key={i}>
                 <motion.button whileHover={{ y: -3 }} whileTap={{ scale: 0.93, y: 2 }} onClick={() => navigate(a.nav)}
@@ -341,6 +341,113 @@ const HomePage = () => {
               </StaggerItem>
             ))}
           </StaggerContainer>
+
+          {/* League & Achievements Row */}
+          <FadeIn delay={0.45}>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {/* League Card */}
+              <motion.div whileTap={{ scale: 0.97 }} onClick={() => navigate("/settings")}
+                className="bg-card rounded-2xl p-3 border border-border/40 shadow-card cursor-pointer">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-7 h-7 rounded-xl bg-agni-purple flex items-center justify-center">
+                    <Crown size={13} className="text-white" />
+                  </div>
+                  <span className="text-[10px] font-extrabold text-foreground">League</span>
+                </div>
+                <motion.span className="text-2xl block mb-1" animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
+                  {league.emoji}
+                </motion.span>
+                <p className={`text-xs font-black ${league.color}`}>{league.name}</p>
+                <p className="text-[8px] text-muted-foreground font-bold">{stats.xp} XP total</p>
+              </motion.div>
+
+              {/* Achievements Card */}
+              <motion.div whileTap={{ scale: 0.97 }} onClick={() => navigate("/settings")}
+                className="bg-card rounded-2xl p-3 border border-border/40 shadow-card cursor-pointer">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-7 h-7 rounded-xl bg-agni-gold flex items-center justify-center">
+                    <Trophy size={13} className="text-white" />
+                  </div>
+                  <span className="text-[10px] font-extrabold text-foreground">Badges</span>
+                </div>
+                <div className="flex gap-1 mb-1.5">
+                  {achievements.slice(0, 4).map(a => (
+                    <span key={a.id} className={`text-lg ${a.unlocked ? "" : "grayscale opacity-30"}`}>{a.emoji}</span>
+                  ))}
+                </div>
+                <p className="text-xs font-black text-agni-gold">{unlockedAchievements}/{achievements.length}</p>
+                <p className="text-[8px] text-muted-foreground font-bold">Unlocked</p>
+              </motion.div>
+            </div>
+          </FadeIn>
+
+          {/* Neural OS Persona Widget */}
+          <FadeIn delay={0.5}>
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setShowProfile(true)}
+              className="w-full bg-card border border-agni-purple/20 rounded-2xl p-3.5 mb-4 shadow-card text-left"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-7 h-7 rounded-xl bg-agni-purple flex items-center justify-center">
+                  <Brain size={13} className="text-white" />
+                </div>
+                <span className="text-[10px] font-extrabold text-foreground">Neural OS Persona</span>
+                <span className="ml-auto text-[9px] font-black text-agni-purple bg-agni-purple/15 px-2 py-0.5 rounded-full">
+                  {personaItemCount > 0 ? `${personaItemCount} items` : "Set up"}
+                </span>
+              </div>
+              {personaItemCount > 0 ? (
+                <div className="flex flex-wrap gap-1">
+                  {persona.currentRole && <span className="text-[9px] font-bold text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">💼 {persona.currentRole}</span>}
+                  {persona.shows?.slice(0, 2).map(s => <span key={s} className="text-[9px] font-bold text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">🎬 {s}</span>)}
+                  {persona.sports?.slice(0, 2).map(s => <span key={s} className="text-[9px] font-bold text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">⚽ {s}</span>)}
+                  {personaItemCount > 4 && <span className="text-[9px] font-bold text-agni-purple/60">+{personaItemCount - 4} more</span>}
+                </div>
+              ) : (
+                <p className="text-[10px] text-muted-foreground font-semibold">Tap to set up — AGNI personalizes every lesson for you ✨</p>
+              )}
+            </motion.button>
+          </FadeIn>
+
+          {/* Motivational Quote */}
+          <FadeIn delay={0.55}>
+            <div className="bg-gradient-to-br from-agni-green/10 to-agni-blue/5 border border-agni-green/15 rounded-2xl p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <Sparkles size={16} className="text-agni-green shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-[12px] text-foreground font-bold leading-relaxed italic">"{todayQuote.quote}"</p>
+                  <p className="text-[10px] text-muted-foreground font-semibold mt-1">— {todayQuote.author}</p>
+                </div>
+              </div>
+            </div>
+          </FadeIn>
+
+          {/* More Quick Links Row */}
+          <FadeIn delay={0.6}>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <motion.button whileTap={{ scale: 0.95 }} onClick={() => navigate("/mega-prompt")}
+                className="bg-card rounded-2xl p-3 border border-border/40 shadow-card flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-agni-green flex items-center justify-center shrink-0">
+                  <span className="text-base">📋</span>
+                </div>
+                <div className="text-left">
+                  <p className="text-[10px] font-extrabold text-foreground">Mega Prompt</p>
+                  <p className="text-[8px] text-muted-foreground font-semibold">Reference guide</p>
+                </div>
+              </motion.button>
+              <motion.button whileTap={{ scale: 0.95 }} onClick={() => navigate("/progress")}
+                className="bg-card rounded-2xl p-3 border border-border/40 shadow-card flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-agni-blue flex items-center justify-center shrink-0">
+                  <Target size={16} className="text-white" />
+                </div>
+                <div className="text-left">
+                  <p className="text-[10px] font-extrabold text-foreground">Full Stats</p>
+                  <p className="text-[8px] text-muted-foreground font-semibold">Detailed progress</p>
+                </div>
+              </motion.button>
+            </div>
+          </FadeIn>
 
           {/* Sign in prompt */}
           {!user && (
