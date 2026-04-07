@@ -38,6 +38,7 @@ const SettingsPage = () => {
   const [activeCatId, setActiveCatId] = useState<string | null>(null);
   const [neuralSearch, setNeuralSearch] = useState("");
   const [neuralCustom, setNeuralCustom] = useState("");
+  const [settingsSubFilter, setSettingsSubFilter] = useState<string | null>(null);
 
   // Re-sync persona when page gains focus (e.g. after editing in modal elsewhere)
   useEffect(() => {
