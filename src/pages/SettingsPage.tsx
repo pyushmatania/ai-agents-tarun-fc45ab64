@@ -13,7 +13,7 @@ import { LogOut, Moon, Sun, ChevronRight, Shield, Bell, Loader2, LogIn, Brain, K
 import { InterestPill } from "@/components/InterestPill";
 import { motion, AnimatePresence } from "framer-motion";
 import { BUILT_IN_MODELS, BYOK_PROVIDERS, getAIConfig, saveAIConfig, type AIConfig } from "@/lib/aiConfig";
-import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection, getAllOptions, saveCustomOption, getCustomOptions, IDENTITIES, MISSION_MODES, getAllExplainStyles, getActiveExplainStyleIds, setActiveExplainStyleIds, saveCustomExplainStyle, removeCustomExplainStyle, type ExplainStyle } from "@/lib/teachingConfig";
+import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection, getAllOptions, saveCustomOption, getCustomOptions, IDENTITIES, MISSION_MODES, TEACHING_VIBES, BRAIN_LEVELS_SKILL, BRAIN_LEVELS_ACADEMIC, getAllExplainStyles, getActiveExplainStyleIds, setActiveExplainStyleIds, saveCustomExplainStyle, removeCustomExplainStyle, type ExplainStyle } from "@/lib/teachingConfig";
 import CustomOptionInput from "@/components/CustomOptionInput";
 import { getPersona, savePersona, SUGGESTION_CATEGORIES, getSubFilters, getSubFilterCount, POPULAR_PICKS, type NeuralOSPersona } from "@/lib/neuralOS";
 import Agni from "@/components/Agni";
@@ -45,6 +45,9 @@ const SettingsPage = () => {
   // Personal details state
   const [detailsExpanded, setDetailsExpanded] = useState(false);
   const [identityExpanded, setIdentityExpanded] = useState(false);
+  const [motiveExpanded, setMotiveExpanded] = useState(false);
+  const [vibeExpanded, setVibeExpanded] = useState(false);
+  const [brainExpanded, setBrainExpanded] = useState(false);
 
   // Neural OS state
   const [persona, setPersonaState] = useState<NeuralOSPersona>(getPersona());
@@ -585,7 +588,190 @@ const SettingsPage = () => {
             </div>
           </FadeIn>
 
-          {/* Neural OS Personality */}
+          {/* Motive Card */}
+          <FadeIn delay={0.12}>
+            {(() => {
+              const currentMotive = getTeachingSelection("mission");
+              const motiveInfo = MISSION_MODES.find(m => m.id === currentMotive);
+              return (
+                <div className="bg-card rounded-2xl border border-border/40 mb-3 shadow-card overflow-hidden">
+                  <motion.button
+                    whileTap={{ scale: 0.99 }}
+                    onClick={() => setMotiveExpanded(!motiveExpanded)}
+                    className="flex items-center justify-between w-full p-3.5"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-agni-orange flex items-center justify-center shadow-md">
+                        <Target size={16} className="text-white" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-extrabold text-foreground text-xs">Motive</p>
+                        <p className="text-[10px] text-muted-foreground font-semibold">
+                          {motiveInfo ? `${motiveInfo.emoji} ${motiveInfo.label}` : "Not set"}
+                        </p>
+                      </div>
+                    </div>
+                    <motion.div animate={{ rotate: motiveExpanded ? 90 : 0 }}>
+                      <ChevronRight size={14} className="text-muted-foreground" />
+                    </motion.div>
+                  </motion.button>
+                  <AnimatePresence>
+                    {motiveExpanded && (
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                        <div className="px-3.5 pb-3.5">
+                          <p className="text-micro text-muted-foreground mb-2">WHY ARE YOU LEARNING? — Drives priorities</p>
+                          <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto scrollbar-none">
+                            {getAllOptions("mission").map((opt: any) => (
+                              <button key={opt.id} onClick={() => {
+                                setTeachingSelection("mission", opt.id);
+                                updateContext({ teaching_mission: opt.id });
+                              }}
+                                className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${
+                                  currentMotive === opt.id
+                                    ? "bg-agni-orange/10 border-agni-orange/30 text-agni-orange"
+                                    : "bg-muted/30 border-border/40 text-muted-foreground"
+                                }`}
+                              >
+                                {opt.emoji} {opt.label}
+                              </button>
+                            ))}
+                            <CustomOptionInput categoryId="mission" categoryLabel="Motive" compact
+                              onSave={(opt) => { const saved = saveCustomOption("mission", opt); setTeachingSelection("mission", saved.id); }} />
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })()}
+          </FadeIn>
+
+          {/* Vibe Card */}
+          <FadeIn delay={0.14}>
+            {(() => {
+              const currentVibe = getTeachingSelection("vibe");
+              const vibeInfoSettings = TEACHING_VIBES.find(v => v.id === currentVibe);
+              return (
+                <div className="bg-card rounded-2xl border border-border/40 mb-3 shadow-card overflow-hidden">
+                  <motion.button
+                    whileTap={{ scale: 0.99 }}
+                    onClick={() => setVibeExpanded(!vibeExpanded)}
+                    className="flex items-center justify-between w-full p-3.5"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-md"
+                        style={{ background: "linear-gradient(135deg, #1CB0F6, #CE82FF)" }}>
+                        <Sparkles size={16} className="text-white" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-extrabold text-foreground text-xs">Vibe</p>
+                        <p className="text-[10px] text-muted-foreground font-semibold">
+                          {vibeInfoSettings ? `${vibeInfoSettings.emoji} ${vibeInfoSettings.label}` : "Not set"}
+                        </p>
+                      </div>
+                    </div>
+                    <motion.div animate={{ rotate: vibeExpanded ? 90 : 0 }}>
+                      <ChevronRight size={14} className="text-muted-foreground" />
+                    </motion.div>
+                  </motion.button>
+                  <AnimatePresence>
+                    {vibeExpanded && (
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                        <div className="px-3.5 pb-3.5">
+                          <p className="text-micro text-muted-foreground mb-2">HOW SHOULD AGNI TEACH? — Drives voice & style</p>
+                          <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto scrollbar-none">
+                            {getAllOptions("vibe").map((opt: any) => (
+                              <button key={opt.id} onClick={() => {
+                                setTeachingSelection("vibe", opt.id);
+                                updateContext({ teaching_vibe: opt.id });
+                                const updated = savePersona({ vibe: opt.id });
+                                setPersonaState(updated);
+                              }}
+                                className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${
+                                  currentVibe === opt.id
+                                    ? "bg-agni-blue/10 border-agni-blue/30 text-agni-blue"
+                                    : "bg-muted/30 border-border/40 text-muted-foreground"
+                                }`}
+                              >
+                                {opt.emoji} {opt.label}
+                              </button>
+                            ))}
+                            <CustomOptionInput categoryId="vibe" categoryLabel="Vibe" compact
+                              onSave={(opt) => { const saved = saveCustomOption("vibe", opt); setTeachingSelection("vibe", saved.id); }} />
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })()}
+          </FadeIn>
+
+          {/* Brain Level Card */}
+          <FadeIn delay={0.16}>
+            {(() => {
+              const currentBrain = getTeachingSelection("brain");
+              const brainInfoSettings = [...BRAIN_LEVELS_SKILL, ...BRAIN_LEVELS_ACADEMIC].find(b => b.id === currentBrain);
+              return (
+                <div className="bg-card rounded-2xl border border-border/40 mb-3 shadow-card overflow-hidden">
+                  <motion.button
+                    whileTap={{ scale: 0.99 }}
+                    onClick={() => setBrainExpanded(!brainExpanded)}
+                    className="flex items-center justify-between w-full p-3.5"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-agni-purple flex items-center justify-center shadow-md">
+                        <Brain size={16} className="text-white" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-extrabold text-foreground text-xs">Brain Level</p>
+                        <p className="text-[10px] text-muted-foreground font-semibold">
+                          {brainInfoSettings ? `${brainInfoSettings.emoji} ${brainInfoSettings.label}` : "Not set"}
+                        </p>
+                      </div>
+                    </div>
+                    <motion.div animate={{ rotate: brainExpanded ? 90 : 0 }}>
+                      <ChevronRight size={14} className="text-muted-foreground" />
+                    </motion.div>
+                  </motion.button>
+                  <AnimatePresence>
+                    {brainExpanded && (
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                        <div className="px-3.5 pb-3.5">
+                          <p className="text-micro text-muted-foreground mb-2">HOW DEEP? — Drives complexity & depth</p>
+                          <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto scrollbar-none">
+                            {getAllOptions("brain").map((opt: any) => (
+                              <button key={opt.id} onClick={() => {
+                                setTeachingSelection("brain", opt.id);
+                                updateContext({ teaching_brain: opt.id });
+                                const depthMap: Record<string, string> = { chill: "basic", explorer: "normal", pro: "deep", hacker: "deep", scientist: "deep", professor: "deep" };
+                                const updated = savePersona({ preferredDepth: (depthMap[opt.id] || "normal") as any });
+                                setPersonaState(updated);
+                              }}
+                                className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${
+                                  currentBrain === opt.id
+                                    ? "bg-agni-purple/10 border-agni-purple/30 text-agni-purple"
+                                    : "bg-muted/30 border-border/40 text-muted-foreground"
+                                }`}
+                              >
+                                {opt.emoji} {opt.label}
+                              </button>
+                            ))}
+                            <CustomOptionInput categoryId="brain" categoryLabel="Brain Level" compact
+                              onSave={(opt) => { const saved = saveCustomOption("brain", opt); setTeachingSelection("brain", saved.id); }} />
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })()}
+          </FadeIn>
+
+          {/* My World — Interests (separate) */}
           <FadeIn delay={0.18}>
             <div className="bg-card rounded-2xl border border-border/40 mb-3 shadow-card overflow-hidden">
               <motion.button
@@ -600,13 +786,13 @@ const SettingsPage = () => {
                     <Sparkles size={16} className="text-white" />
                   </div>
                   <div className="text-left">
-                    <p className="font-extrabold text-foreground text-xs">Neural OS Personality</p>
+                    <p className="font-extrabold text-foreground text-xs">My World</p>
                     <p className="text-[10px] text-muted-foreground font-semibold">
-                      {persona.vibe ? `Vibe: ${persona.vibe}` : "Not configured"} • {(() => {
+                      {(() => {
                         let total = 0;
                         SUGGESTION_CATEGORIES.forEach(cat => { total += ((persona[cat.field] as string[]) || []).length; });
                         return total;
-                      })()} interests
+                      })()} interests — teach using what I love
                     </p>
                   </div>
                 </div>
@@ -639,55 +825,6 @@ const SettingsPage = () => {
                     className="overflow-hidden"
                   >
                     <div className="px-3.5 pb-3.5 space-y-3">
-                      {/* 3-Category Teaching Config */}
-                      {TEACHING_CATEGORIES.map((cat) => {
-                        const currentVal = getTeachingSelection(cat.id);
-                        const catColors: Record<string, { active: string; border: string }> = {
-                          mission: { active: "bg-agni-orange/10 border-agni-orange/30 text-agni-orange", border: "border-agni-orange/25" },
-                          vibe: { active: "bg-agni-blue/10 border-agni-blue/30 text-agni-blue", border: "border-agni-blue/25" },
-                          brain: { active: "bg-agni-purple/10 border-agni-purple/30 text-agni-purple", border: "border-agni-purple/25" },
-                        };
-                        const colors = catColors[cat.id] || catColors.vibe;
-                        return (
-                          <div key={cat.id}>
-                            <p className="text-micro text-muted-foreground mb-1.5">{cat.label.toUpperCase()}</p>
-                            <p className="text-[8px] text-muted-foreground/50 mb-1">{cat.desc}</p>
-                            <div className="flex gap-1.5 flex-wrap">
-                              {getAllOptions(cat.id).map((opt: any) => (
-                                <button key={opt.id} onClick={() => {
-                                  setTeachingSelection(cat.id, opt.id);
-                                  if (cat.id === "vibe") {
-                                    const updated = savePersona({ vibe: opt.id });
-                                    setPersonaState(updated);
-                                  }
-                                  if (cat.id === "brain") {
-                                    const depthMap: Record<string, string> = { chill: "basic", explorer: "normal", pro: "deep", hacker: "deep", scientist: "deep", professor: "deep" };
-                                    const updated = savePersona({ preferredDepth: (depthMap[opt.id] || "normal") as any });
-                                    setPersonaState(updated);
-                                  }
-                                }}
-                                  className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${
-                                    currentVal === opt.id ? colors.active : "bg-muted/30 border-border/40 text-muted-foreground"
-                                  }`}
-                                >
-                                  {opt.emoji} {opt.label}
-                                </button>
-                              ))}
-                              {/* Compact custom input for all categories */}
-                              <CustomOptionInput
-                                categoryId={cat.id}
-                                categoryLabel={cat.funName}
-                                compact
-                                onSave={(opt) => {
-                                  const saved = saveCustomOption(cat.id, opt);
-                                  setTeachingSelection(cat.id, saved.id);
-                                }}
-                              />
-                            </div>
-                          </div>
-                        );
-                      })}
-
                       {/* Interest categories */}
                       <div>
                         <p className="text-micro text-muted-foreground mb-1.5">YOUR INTERESTS</p>
@@ -729,14 +866,6 @@ const SettingsPage = () => {
                             setPersonaState(newPersona);
                           };
 
-                          const addCustomItem = () => {
-                            if (!neuralCustom.trim() || selected.includes(neuralCustom.trim())) return;
-                            const updated = [...selected, neuralCustom.trim()];
-                            const newPersona = savePersona({ [field]: updated });
-                            setPersonaState(newPersona);
-                            setNeuralCustom("");
-                          };
-
                           return (
                             <motion.div key={activeCatId}
                               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
@@ -749,7 +878,7 @@ const SettingsPage = () => {
                                 </button>
                               </div>
 
-                              {/* Search — also adds custom on Enter */}
+                              {/* Search */}
                               <div className="relative">
                                 <Search size={10} className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
                                 <input value={neuralSearch} onChange={e => setNeuralSearch(e.target.value)}
@@ -766,69 +895,48 @@ const SettingsPage = () => {
                                 />
                               </div>
 
-                              {/* Sub-filter chips with count badges */}
+                              {/* Sub-filter chips */}
                               {subFilters.length > 0 && !neuralSearch && (
                                 <div>
                                   <div className="flex gap-1 overflow-x-auto scrollbar-none mb-1">
                                     <button
                                       onClick={() => setSettingsSubFilter(null)}
                                       className={`shrink-0 text-[8px] font-extrabold px-2 py-1 rounded-full transition-all flex items-center gap-0.5 ${
-                                        !settingsSubFilter
-                                          ? "bg-agni-green text-white"
-                                          : "bg-card border border-border/30 text-muted-foreground"
+                                        !settingsSubFilter ? "bg-agni-green text-white" : "bg-card border border-border/30 text-muted-foreground"
                                       }`}
                                     >
                                       All
-                                      <span className={`text-[7px] font-black rounded-full px-1 min-w-[14px] text-center ${
-                                        !settingsSubFilter ? "bg-white/25 text-white" : "bg-muted/50"
-                                      }`}>{cat.suggestions.length}</span>
+                                      <span className={`text-[7px] font-black rounded-full px-1 min-w-[14px] text-center ${!settingsSubFilter ? "bg-white/25 text-white" : "bg-muted/50"}`}>{cat.suggestions.length}</span>
                                     </button>
                                     {subFilters.map(tag => {
                                       const count = getSubFilterCount(cat, tag);
                                       return (
-                                        <button
-                                          key={tag}
-                                          onClick={() => setSettingsSubFilter(settingsSubFilter === tag ? null : tag)}
+                                        <button key={tag} onClick={() => setSettingsSubFilter(settingsSubFilter === tag ? null : tag)}
                                           className={`shrink-0 text-[8px] font-extrabold px-2 py-1 rounded-full transition-all flex items-center gap-0.5 ${
-                                            settingsSubFilter === tag
-                                              ? "bg-agni-blue text-white"
-                                              : "bg-card border border-border/30 text-muted-foreground"
+                                            settingsSubFilter === tag ? "bg-agni-blue text-white" : "bg-card border border-border/30 text-muted-foreground"
                                           }`}
                                         >
                                           {tag}
-                                          <span className={`text-[7px] font-black rounded-full px-1 min-w-[14px] text-center ${
-                                            settingsSubFilter === tag ? "bg-white/25 text-white" : "bg-muted/50"
-                                          }`}>{count}</span>
+                                          <span className={`text-[7px] font-black rounded-full px-1 min-w-[14px] text-center ${settingsSubFilter === tag ? "bg-white/25 text-white" : "bg-muted/50"}`}>{count}</span>
                                         </button>
                                       );
                                     })}
                                   </div>
-                                  {/* Select All for active sub-filter */}
                                   {settingsSubFilter && (
                                     <button
                                       onClick={() => {
-                                        const subItems = cat.suggestions
-                                          .filter(s => s.tag && s.tag.toLowerCase().startsWith(settingsSubFilter.toLowerCase()))
-                                          .map(s => s.name);
+                                        const subItems = cat.suggestions.filter(s => s.tag && s.tag.toLowerCase().startsWith(settingsSubFilter.toLowerCase())).map(s => s.name);
                                         const allSelected = subItems.every(item => selected.includes(item));
-                                        const updated = allSelected
-                                          ? selected.filter(x => !subItems.includes(x))
-                                          : [...new Set([...selected, ...subItems])];
+                                        const updated = allSelected ? selected.filter(x => !subItems.includes(x)) : [...new Set([...selected, ...subItems])];
                                         const newPersona = savePersona({ [field]: updated });
                                         setPersonaState(newPersona);
                                       }}
                                       className="text-[8px] font-extrabold text-agni-blue flex items-center gap-0.5"
                                     >
                                       {(() => {
-                                        const subItems = cat.suggestions
-                                          .filter(s => s.tag && s.tag.toLowerCase().startsWith(settingsSubFilter.toLowerCase()))
-                                          .map(s => s.name);
+                                        const subItems = cat.suggestions.filter(s => s.tag && s.tag.toLowerCase().startsWith(settingsSubFilter.toLowerCase())).map(s => s.name);
                                         const allSelected = subItems.every(item => selected.includes(item));
-                                        return allSelected ? (
-                                          <><X size={8} /> Deselect all {settingsSubFilter}</>
-                                        ) : (
-                                          <><Check size={8} /> Select all {settingsSubFilter}</>
-                                        );
+                                        return allSelected ? (<><X size={8} /> Deselect all {settingsSubFilter}</>) : (<><Check size={8} /> Select all {settingsSubFilter}</>);
                                       })()}
                                     </button>
                                   )}
@@ -839,20 +947,12 @@ const SettingsPage = () => {
                               {selected.length > 0 && (
                                 <div className="flex flex-wrap gap-1.5">
                                   {selected.map((s, idx) => (
-                                    <InterestPill
-                                      key={s}
-                                      name={s}
-                                      categoryId={cat.id}
-                                      index={idx}
-                                      compact
-                                      removable
-                                      onClick={() => toggleItem(s)}
-                                    />
+                                    <InterestPill key={s} name={s} categoryId={cat.id} index={idx} compact removable onClick={() => toggleItem(s)} />
                                   ))}
                                 </div>
                               )}
 
-                              {/* Show "add as custom" hint */}
+                              {/* Add as custom hint */}
                               {neuralSearch.trim().length > 1 && !cat.suggestions.some(s => s.name.toLowerCase() === neuralSearch.toLowerCase().trim()) && (
                                 <button onClick={() => {
                                   if (!selected.includes(neuralSearch.trim())) {
@@ -868,19 +968,11 @@ const SettingsPage = () => {
                                 </button>
                               )}
 
-
-                              {/* Suggestions — colorful pills */}
+                              {/* Suggestions */}
                               <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto scrollbar-none">
                                 {filtered.map((s, idx) => (
-                                  <InterestPill
-                                    key={s.name}
-                                    name={s.name}
-                                    emoji={s.emoji}
-                                    categoryId={cat.id}
-                                    index={idx}
-                                    selected={selected.includes(s.name)}
-                                    onClick={() => toggleItem(s.name)}
-                                  />
+                                  <InterestPill key={s.name} name={s.name} emoji={s.emoji} categoryId={cat.id} index={idx}
+                                    selected={selected.includes(s.name)} onClick={() => toggleItem(s.name)} />
                                 ))}
                               </div>
                             </motion.div>
@@ -888,11 +980,8 @@ const SettingsPage = () => {
                         })()}
                       </AnimatePresence>
 
-                      {/* Re-do onboarding button */}
-                      <button onClick={() => {
-                        localStorage.removeItem("edu_onboarded");
-                        navigate("/welcome");
-                      }}
+                      {/* Re-do onboarding */}
+                      <button onClick={() => { localStorage.removeItem("edu_onboarded"); navigate("/welcome"); }}
                         className="w-full text-[10px] font-bold text-agni-blue flex items-center justify-center gap-1 py-1.5"
                       >
                         🔄 Re-do full onboarding

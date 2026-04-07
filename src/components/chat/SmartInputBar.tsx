@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Send, Plus, X, Sparkles, Brain, Zap, ChevronRight,
-  GraduationCap, Flame, Mic, Search, Image, Paperclip,
-  StopCircle, ChevronDown, Pencil, Lightbulb, Palette,
+  Send, Plus, X, Sparkles, Brain, Zap,
+  GraduationCap, Mic, Search, Image, Paperclip,
+  StopCircle, Palette, Target,
 } from "lucide-react";
 import { getPersona } from "@/lib/neuralOS";
-import { getTeachingLabel, getTeachingSelection, setTeachingSelection, TEACHING_CATEGORIES, getAllOptions, getActiveExplainStyles, TEACHING_VIBES, BRAIN_LEVELS_SKILL, BRAIN_LEVELS_ACADEMIC, getBrainTrack, QUIZ_DIFFICULTIES, type QuizDifficulty } from "@/lib/teachingConfig";
+import { getTeachingLabel, getTeachingSelection, setTeachingSelection, MISSION_MODES, TEACHING_VIBES, BRAIN_LEVELS_SKILL, BRAIN_LEVELS_ACADEMIC, getBrainTrack, QUIZ_DIFFICULTIES, getActiveExplainStyles, type QuizDifficulty } from "@/lib/teachingConfig";
 import { InterestPill } from "@/components/InterestPill";
 import { SFX } from "@/lib/sounds";
 
@@ -57,12 +57,7 @@ function resolveInterestPrompt(prompt: string): string {
     : `Pick the BEST from: ${list} — tell a dramatic story explaining this concept!`;
 }
 
-// ── Modes list from teaching categories ──
-const MODES = TEACHING_CATEGORIES.flatMap(cat =>
-  getAllOptions(cat.id).map((opt: any) => ({ key: opt.id, label: opt.label, emoji: opt.emoji }))
-).slice(0, 12);
-
-type Panel = "none" | "tools" | "modes" | "powerups" | "interests" | "vibe" | "brain" | "quiz";
+type Panel = "none" | "tools" | "motive" | "powerups" | "interests" | "vibe" | "brain" | "quiz";
 
 export default function SmartInputBar({
   value, onChange, onSend, onStop, isLoading, isLearnTab,
@@ -72,6 +67,11 @@ export default function SmartInputBar({
   const [activePanel, setActivePanel] = useState<Panel>("none");
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const persona = getPersona();
+
+  // Track current selections for chips
+  const [currentMotive, setCurrentMotive] = useState(() => getTeachingSelection("mission"));
+  const [currentVibe, setCurrentVibe] = useState(() => getTeachingSelection("vibe"));
+  const [currentBrain, setCurrentBrain] = useState(() => getTeachingSelection("brain"));
 
   // Auto-resize textarea
   useEffect(() => {
@@ -123,10 +123,27 @@ export default function SmartInputBar({
     onSend(promptMap[catId] || `Explain using "${item}" as an analogy.`);
   };
 
-  const handleModeSelect = (mode: string) => {
+  // Get labels for active selections
+  const motiveInfo = MISSION_MODES.find(m => m.id === currentMotive);
+  const vibeInfo = TEACHING_VIBES.find(v => v.id === currentVibe);
+  const brainLevels = getBrainTrack() === "academic" ? BRAIN_LEVELS_ACADEMIC : BRAIN_LEVELS_SKILL;
+  const brainInfo = brainLevels.find(b => b.id === currentBrain);
+
+  // Check if any selection is active (not default)
+  const hasActiveSelections = motiveInfo || vibeInfo || brainInfo;
+
+  const clearSelection = (type: "motive" | "vibe" | "brain") => {
     SFX.tap();
-    setActivePanel("none");
-    onModeChange?.(mode);
+    if (type === "motive") {
+      setTeachingSelection("mission", "explore");
+      setCurrentMotive("explore");
+    } else if (type === "vibe") {
+      setTeachingSelection("vibe", "fun");
+      setCurrentVibe("fun");
+    } else if (type === "brain") {
+      setTeachingSelection("brain", "explorer");
+      setCurrentBrain("explorer");
+    }
   };
 
   return (
@@ -194,19 +211,24 @@ export default function SmartInputBar({
               </div>
             )}
 
-            {/* Modes panel (Learn chat) */}
-            {activePanel === "modes" && (
+            {/* Motive panel (replaces Teaching Mode) */}
+            {activePanel === "motive" && (
               <div className="py-3">
-                <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">Teaching Mode</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {MODES.map(m => (
+                <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">🎯 Motive — Why are you learning?</p>
+                <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto scrollbar-none">
+                  {MISSION_MODES.map(m => (
                     <motion.button
-                      key={m.key}
+                      key={m.id}
                       whileTap={{ scale: 0.93 }}
-                      onClick={() => handleModeSelect(m.key)}
+                      onClick={() => {
+                        SFX.select();
+                        setTeachingSelection("mission", m.id);
+                        setCurrentMotive(m.id);
+                        setActivePanel("none");
+                      }}
                       className={`text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all border ${
-                        activeMode === m.key
-                          ? "bg-primary/15 text-primary border-primary/40"
+                        currentMotive === m.id
+                          ? "bg-agni-orange/15 text-agni-orange border-agni-orange/40"
                           : "bg-card text-muted-foreground border-border/30 hover:border-border/60"
                       }`}
                     >
@@ -217,10 +239,10 @@ export default function SmartInputBar({
               </div>
             )}
 
-            {/* Power-ups panel */}
+            {/* Power-ups panel (one-time actions) */}
             {activePanel === "powerups" && (
               <div className="py-3">
-                <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">Quick Actions</p>
+                <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">⚡ Quick Actions — one-time use</p>
                 <div className="flex flex-wrap gap-1.5">
                   {powerups.map(pu => (
                     <motion.button
@@ -272,25 +294,27 @@ export default function SmartInputBar({
             {/* Vibe panel */}
             {activePanel === "vibe" && (
               <div className="py-3">
-                <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">🎨 Teaching Vibe</p>
+                <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">🎨 Teaching Vibe — How should I teach?</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {TEACHING_VIBES.map(v => {
-                    const current = getTeachingSelection("vibe");
-                    return (
-                      <motion.button
-                        key={v.id}
-                        whileTap={{ scale: 0.93 }}
-                        onClick={() => { SFX.select(); setTeachingSelection("vibe", v.id); setActivePanel("none"); }}
-                        className={`text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all border ${
-                          current === v.id
-                            ? "bg-agni-blue/15 text-agni-blue border-agni-blue/40"
-                            : "bg-card text-muted-foreground border-border/30"
-                        }`}
-                      >
-                        <span>{v.emoji}</span> {v.label}
-                      </motion.button>
-                    );
-                  })}
+                  {TEACHING_VIBES.map(v => (
+                    <motion.button
+                      key={v.id}
+                      whileTap={{ scale: 0.93 }}
+                      onClick={() => {
+                        SFX.select();
+                        setTeachingSelection("vibe", v.id);
+                        setCurrentVibe(v.id);
+                        setActivePanel("none");
+                      }}
+                      className={`text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all border ${
+                        currentVibe === v.id
+                          ? "bg-agni-blue/15 text-agni-blue border-agni-blue/40"
+                          : "bg-card text-muted-foreground border-border/30"
+                      }`}
+                    >
+                      <span>{v.emoji}</span> {v.label}
+                    </motion.button>
+                  ))}
                 </div>
               </div>
             )}
@@ -298,33 +322,35 @@ export default function SmartInputBar({
             {/* Brain level panel */}
             {activePanel === "brain" && (
               <div className="py-3">
-                <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">🧠 Brain Level</p>
+                <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">🧠 Brain Level — How deep?</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {(getBrainTrack() === "academic" ? BRAIN_LEVELS_ACADEMIC : BRAIN_LEVELS_SKILL).map(b => {
-                    const current = getTeachingSelection("brain");
-                    return (
-                      <motion.button
-                        key={b.id}
-                        whileTap={{ scale: 0.93 }}
-                        onClick={() => { SFX.select(); setTeachingSelection("brain", b.id); setActivePanel("none"); }}
-                        className={`text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all border ${
-                          current === b.id
-                            ? "bg-agni-purple/15 text-agni-purple border-agni-purple/40"
-                            : "bg-card text-muted-foreground border-border/30"
-                        }`}
-                      >
-                        <span>{b.emoji}</span> {b.label}
-                      </motion.button>
-                    );
-                  })}
+                  {brainLevels.map(b => (
+                    <motion.button
+                      key={b.id}
+                      whileTap={{ scale: 0.93 }}
+                      onClick={() => {
+                        SFX.select();
+                        setTeachingSelection("brain", b.id);
+                        setCurrentBrain(b.id);
+                        setActivePanel("none");
+                      }}
+                      className={`text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all border ${
+                        currentBrain === b.id
+                          ? "bg-agni-purple/15 text-agni-purple border-agni-purple/40"
+                          : "bg-card text-muted-foreground border-border/30"
+                      }`}
+                    >
+                      <span>{b.emoji}</span> {b.label}
+                    </motion.button>
+                  ))}
                 </div>
               </div>
             )}
 
-            {/* Interests panel */}
+            {/* Interests panel (My World) */}
             {activePanel === "interests" && (
               <div className="py-3">
-                <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">Teach using my interests</p>
+                <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">🌍 My World — Teach using my interests</p>
                 {interestCategories.length > 0 ? (
                   <div className="space-y-2">
                     {interestCategories.map(cat => (
@@ -348,7 +374,7 @@ export default function SmartInputBar({
                   </div>
                 ) : (
                   <p className="text-[10px] text-muted-foreground/60 text-center py-4">
-                    Set up your persona in Settings to see your interests here ✨
+                    Set up your interests in Settings to see them here ✨
                   </p>
                 )}
               </div>
@@ -357,27 +383,69 @@ export default function SmartInputBar({
         )}
       </AnimatePresence>
 
+      {/* Active selection chips with ✕ — subtle bar above input */}
+      <AnimatePresence>
+        {hasActiveSelections && activePanel === "none" && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="px-4 pt-1.5 overflow-hidden"
+          >
+            <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
+              {motiveInfo && (
+                <motion.div layout className="shrink-0 flex items-center gap-1 bg-agni-orange/8 border border-agni-orange/15 rounded-full px-2 py-0.5">
+                  <span className="text-[8px]">{motiveInfo.emoji}</span>
+                  <span className="text-[8px] font-bold text-agni-orange/70">{motiveInfo.label}</span>
+                  <button onClick={() => clearSelection("motive")} className="ml-0.5 opacity-50 hover:opacity-100">
+                    <X size={7} className="text-agni-orange" />
+                  </button>
+                </motion.div>
+              )}
+              {vibeInfo && (
+                <motion.div layout className="shrink-0 flex items-center gap-1 bg-agni-blue/8 border border-agni-blue/15 rounded-full px-2 py-0.5">
+                  <span className="text-[8px]">{vibeInfo.emoji}</span>
+                  <span className="text-[8px] font-bold text-agni-blue/70">{vibeInfo.label}</span>
+                  <button onClick={() => clearSelection("vibe")} className="ml-0.5 opacity-50 hover:opacity-100">
+                    <X size={7} className="text-agni-blue" />
+                  </button>
+                </motion.div>
+              )}
+              {brainInfo && (
+                <motion.div layout className="shrink-0 flex items-center gap-1 bg-agni-purple/8 border border-agni-purple/15 rounded-full px-2 py-0.5">
+                  <span className="text-[8px]">{brainInfo.emoji}</span>
+                  <span className="text-[8px] font-bold text-agni-purple/70">{brainInfo.label}</span>
+                  <button onClick={() => clearSelection("brain")} className="ml-0.5 opacity-50 hover:opacity-100">
+                    <X size={7} className="text-agni-purple" />
+                  </button>
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Input row with action buttons */}
       <div className="px-4 py-3 pb-6">
         {/* Action chips row — scrollable */}
         <div className="flex items-center gap-1.5 mb-2 overflow-x-auto scrollbar-none">
-          {/* + button for tools (general) or modes (learn) */}
+          {/* + button for tools (general) or motive (learn) */}
           <motion.button
             whileTap={{ scale: 0.9 }}
-            onClick={() => togglePanel(isLearnTab ? "modes" : "tools")}
+            onClick={() => togglePanel(isLearnTab ? "motive" : "tools")}
             className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-all ${
-              activePanel === "modes" || activePanel === "tools"
+              activePanel === "motive" || activePanel === "tools"
                 ? "bg-primary/20 rotate-45"
                 : "bg-muted/30"
             }`}
           >
-            {activePanel === "modes" || activePanel === "tools"
+            {activePanel === "motive" || activePanel === "tools"
               ? <X size={12} style={{ color: accentColor }} />
               : <Plus size={12} className="text-muted-foreground" />
             }
           </motion.button>
 
-          {/* Power-ups button */}
+          {/* Actions button (one-time powerups) */}
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => togglePanel("powerups")}
@@ -416,7 +484,7 @@ export default function SmartInputBar({
             <Brain size={10} /> Brain
           </motion.button>
 
-          {/* Interests button */}
+          {/* My World button */}
           {interestCategories.length > 0 && (
             <motion.button
               whileTap={{ scale: 0.9 }}
