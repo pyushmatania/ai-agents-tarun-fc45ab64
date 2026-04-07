@@ -21,28 +21,16 @@ import { TrendingUp, Crown } from "lucide-react";
 import { MISSION_MODES, BRAIN_LEVELS, IDENTITIES, BRAIN_LEVELS_ACADEMIC, BRAIN_LEVELS_SKILL, UNIVERSE_VIBE_CATEGORIES, setTeachingSelection, saveCustomOption, getCustomOptions, setUniverseVibe, setBrainTrack } from "@/lib/teachingConfig";
 import CustomOptionInput from "@/components/CustomOptionInput";
 
-/* ── EXPANDED ROLES ── */
-const ROLES = [
-  { id: "student", label: "Student", emoji: "🎓", desc: "Learning AI from scratch", goal: "Learn AI from zero", exp: "beginner", icon: GraduationCap },
-  { id: "developer", label: "Developer", emoji: "💻", desc: "Building real agents", goal: "Build production AI agents", exp: "engineer", icon: Code },
-  { id: "founder", label: "Founder / CEO", emoji: "🚀", desc: "Scaling with AI", goal: "Build a startup with AI", exp: "some experience", icon: Rocket },
-  { id: "manager", label: "PM / Manager", emoji: "📊", desc: "Leading AI teams", goal: "Lead AI product teams", exp: "some experience", icon: Briefcase },
-  { id: "researcher", label: "Researcher", emoji: "🔬", desc: "Deep exploration", goal: "Research AI deeply", exp: "engineer", icon: Brain },
-  { id: "designer", label: "Designer", emoji: "🎨", desc: "AI meets creativity", goal: "Use AI in design workflows", exp: "some experience", icon: Palette },
-  { id: "marketer", label: "Marketer", emoji: "📢", desc: "Growth with AI", goal: "Use AI for marketing", exp: "beginner", icon: Target },
-  { id: "freelancer", label: "Freelancer", emoji: "🌍", desc: "AI superpowers", goal: "Freelance with AI tools", exp: "some experience", icon: Globe },
-  { id: "data", label: "Data / ML", emoji: "📈", desc: "Models & pipelines", goal: "Build ML pipelines", exp: "engineer", icon: Wrench },
-  { id: "content", label: "Content Creator", emoji: "🎬", desc: "AI-powered content", goal: "Create content with AI", exp: "some experience", icon: Film },
-  { id: "teacher", label: "Teacher / Educator", emoji: "📚", desc: "Teach smarter with AI", goal: "Enhance teaching with AI", exp: "beginner", icon: BookOpen },
-  { id: "consultant", label: "Consultant", emoji: "💼", desc: "AI advisory & strategy", goal: "Consult on AI strategy", exp: "some experience", icon: Briefcase },
-  { id: "productdesigner", label: "Product Designer", emoji: "🖌️", desc: "Design AI products", goal: "Design AI-first products", exp: "some experience", icon: Palette },
-  { id: "dataanalyst", label: "Data Analyst", emoji: "📊", desc: "Insights from data", goal: "Analyze data with AI", exp: "some experience", icon: Target },
-  { id: "office", label: "Office / Operations", emoji: "🏢", desc: "Automate workflows", goal: "Automate office tasks with AI", exp: "beginner", icon: Globe },
-  { id: "sales", label: "Sales / BizDev", emoji: "🤝", desc: "Close deals with AI", goal: "Use AI in sales pipeline", exp: "beginner", icon: Trophy },
-  { id: "writer", label: "Writer / Journalist", emoji: "✍️", desc: "AI-assisted writing", goal: "Write better with AI", exp: "beginner", icon: Newspaper },
-  { id: "hobbyist", label: "Hobbyist / Tinkerer", emoji: "🛠️", desc: "Build for fun", goal: "Experiment with AI for fun", exp: "beginner", icon: Wrench },
-  { id: "curious", label: "Just Curious", emoji: "✨", desc: "Here for fun!", goal: "Explore for fun", exp: "beginner", icon: Star },
-];
+/* ── ROLES now powered by IDENTITIES from teachingConfig ── */
+const ROLES = IDENTITIES.map(id => ({
+  id: id.id,
+  label: id.label,
+  emoji: id.emoji,
+  desc: id.desc,
+  goal: `Master AI agents as a ${id.label}`,
+  exp: "some experience",
+  icon: Brain, // fallback icon
+}));
 
 const VIBES = [
   { id: "fun", label: "Fun & Memes", emoji: "😂", desc: "Make me LOL while learning", icon: Heart, gradient: "from-pink-500 to-rose-400" },
