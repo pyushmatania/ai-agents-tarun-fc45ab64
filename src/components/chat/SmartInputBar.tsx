@@ -58,7 +58,7 @@ function resolveInterestPrompt(prompt: string): string {
     : `Pick the BEST from: ${list} — tell a dramatic story explaining this concept!`;
 }
 
-type Panel = "none" | "tools" | "motive" | "powerups" | "interests" | "vibe" | "brain" | "quiz";
+type Panel = "none" | "motive" | "powerups" | "interests" | "vibe" | "brain" | "quiz";
 
 export default function SmartInputBar({
   value, onChange, onSend, onStop, isLoading, isLearnTab,
