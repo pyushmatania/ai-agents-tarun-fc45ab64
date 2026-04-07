@@ -541,7 +541,7 @@ const OnboardingPage = () => {
 
               <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
                 <div className="space-y-2.5">
-                  {BRAIN_LEVELS.map((b, i) => (
+                  {[...BRAIN_LEVELS, ...customBrains].map((b, i) => (
                     <motion.button key={b.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + i * 0.04 }}
                       whileTap={{ scale: 0.97 }} onClick={() => setSelectedBrain(b.id)}
                       className={`w-full p-3.5 rounded-2xl border-2 text-left flex items-center gap-3 transition-all ${
@@ -562,7 +562,19 @@ const OnboardingPage = () => {
                       )}
                     </motion.button>
                   ))}
+
+                  {/* Custom brain level creator */}
+                  <CustomOptionInput
+                    categoryId="brain"
+                    categoryLabel="Brain Level"
+                    onSave={(opt) => {
+                      const saved = saveCustomOption("brain", opt);
+                      setCustomBrains(prev => [...prev, saved]);
+                      setSelectedBrain(saved.id);
+                    }}
+                  />
                 </div>
+              </div>
               </div>
 
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
