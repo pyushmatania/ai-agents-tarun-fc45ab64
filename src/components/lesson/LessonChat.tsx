@@ -589,17 +589,18 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
               <div>
                 {msg.role === "assistant" && i === 0 && persona.completedAt && (() => {
                    const items: string[] = [];
+                   const categories: { catId: string; items: string[] }[] = [];
                    if (persona.currentRole) items.push(persona.currentRole);
-                   if (persona.shows?.length) items.push(...persona.shows);
-                   if (persona.sports?.length) items.push(...persona.sports);
-                   if (persona.curious?.length) items.push(...persona.curious);
-                   if (persona.hobbies?.length) items.push(...persona.hobbies);
-                   if (persona.music?.length) items.push(...persona.music);
-                   if (persona.gaming?.length) items.push(...persona.gaming);
-                   if (persona.news?.length) items.push(...persona.news);
-                   if (persona.books?.length) items.push(...persona.books);
+                   if (persona.shows?.length) { items.push(...persona.shows); categories.push({ catId: "shows", items: persona.shows }); }
+                   if (persona.sports?.length) { items.push(...persona.sports); categories.push({ catId: "sports", items: persona.sports }); }
+                   if (persona.curious?.length) { items.push(...persona.curious); categories.push({ catId: "curious", items: persona.curious }); }
+                   if (persona.hobbies?.length) { items.push(...persona.hobbies); categories.push({ catId: "hobbies", items: persona.hobbies }); }
+                   if (persona.music?.length) { items.push(...persona.music); categories.push({ catId: "music", items: persona.music }); }
+                   if (persona.gaming?.length) { items.push(...persona.gaming); categories.push({ catId: "gaming", items: persona.gaming }); }
+                   if (persona.news?.length) { items.push(...persona.news); categories.push({ catId: "news", items: persona.news }); }
+                   if (persona.books?.length) { items.push(...persona.books); categories.push({ catId: "books", items: persona.books }); }
                   return (
-                    <PersonaBadge items={items} />
+                    <PersonaBadge items={items} categories={categories} />
                   );
                 })()}
                 <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-[12.5px] leading-[1.6] font-semibold ${
