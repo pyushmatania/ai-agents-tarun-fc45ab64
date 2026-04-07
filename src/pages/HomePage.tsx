@@ -52,20 +52,29 @@ const HomePage = () => {
   const [agniExpression, setAgniExpression] = useState<"default" | "happy" | "excited">("default");
   const [showProfile, setShowProfile] = useState(false);
   const [showInfoTooltip, setShowInfoTooltip] = useState(false);
-  const [leaderboard, setLeaderboard] = useState<{ display_name: string; xp: number; user_id: string }[]>([]);
+  const [leaderboard, setLeaderboard] = useState<{ display_name: string; xp: number; weekly_xp: number; user_id: string }[]>([]);
 
-  // Fetch leaderboard
+  // Fetch leaderboard + realtime subscription
   useEffect(() => {
     const fetchLeaderboard = async () => {
       const { data } = await supabase
         .from("leaderboard")
-        .select("display_name, xp, user_id")
-        .order("xp", { ascending: false })
+        .select("display_name, xp, weekly_xp, user_id")
+        .order("weekly_xp", { ascending: false })
         .limit(10);
-      if (data) setLeaderboard(data);
+      if (data) setLeaderboard(data as any);
     };
     fetchLeaderboard();
-  }, [stats.xp]);
+
+    const channel = supabase
+      .channel("leaderboard-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "leaderboard" }, () => {
+        fetchLeaderboard();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
   const persona = useMemo(() => getPersona(), []);
 
   const totalLessons = 22;
@@ -449,7 +458,7 @@ const HomePage = () => {
                   <Trophy size={13} className="text-white" />
                 </div>
                 <span className="text-[10px] font-extrabold text-foreground">Leaderboard</span>
-                <span className="ml-auto text-[8px] font-bold text-muted-foreground">All Time</span>
+                <span className="ml-auto text-[8px] font-bold text-muted-foreground">This Week · Resets Mon</span>
               </div>
               <div className="space-y-1.5">
                 {leaderboard.length > 0 ? (
@@ -463,7 +472,7 @@ const HomePage = () => {
                         <span className={`text-[11px] font-extrabold flex-1 ${isYou ? "text-agni-green" : "text-foreground"}`}>
                           {player.display_name} {isYou && <span className="text-[8px] font-bold text-agni-green/70">(You)</span>}
                         </span>
-                        <span className="text-[10px] font-black text-agni-gold">{player.xp.toLocaleString()} XP</span>
+                        <span className="text-[10px] font-black text-agni-gold">{player.weekly_xp.toLocaleString()} XP</span>
                       </div>
                     );
                   })
