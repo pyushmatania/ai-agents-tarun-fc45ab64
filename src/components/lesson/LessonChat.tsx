@@ -104,6 +104,40 @@ function parseSuggestions(text: string): { clean: string; suggestions: string[] 
   return { clean, suggestions };
 }
 
+const PersonaBadge = ({ items }: { items: string[] }) => {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="mb-1">
+      <motion.button
+        onClick={() => setExpanded(!expanded)}
+        whileTap={{ scale: 0.95 }}
+        className="text-[8px] font-black text-agni-purple bg-agni-purple/10 px-2 py-0.5 rounded-full inline-flex items-center gap-1"
+      >
+        ✨ Personalized for you
+      </motion.button>
+      <AnimatePresence>
+        {expanded && items.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="flex flex-wrap gap-1 mt-1">
+              <span className="text-[7px] font-bold text-muted-foreground/60">Using:</span>
+              {items.map((item, idx) => (
+                <span key={idx} className="text-[7px] font-bold text-agni-purple/80 bg-agni-purple/5 border border-agni-purple/15 px-1.5 py-0.5 rounded-full">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
+
 const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQuizReady }: LessonChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
