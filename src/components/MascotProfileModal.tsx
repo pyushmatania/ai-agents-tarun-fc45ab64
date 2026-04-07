@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Search, Sparkles, Check, ArrowLeft } from "lucide-react";
 import { getPersona, savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona } from "@/lib/neuralOS";
@@ -13,6 +13,11 @@ const MascotProfileModal = ({ open, onClose }: MascotProfileModalProps) => {
   const [persona, setPersona] = useState<NeuralOSPersona>(getPersona());
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Re-read persona every time modal opens
+  useEffect(() => {
+    if (open) setPersona(getPersona());
+  }, [open]);
 
   const activeCategory = SUGGESTION_CATEGORIES.find(c => c.id === activeCategoryId);
   const currentItems = activeCategory ? ((persona[activeCategory.field] as string[]) || []) : [];

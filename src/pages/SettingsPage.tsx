@@ -32,11 +32,18 @@ const SettingsPage = () => {
   const [aiExpanded, setAiExpanded] = useState(false);
 
   // Neural OS state
-  const [persona, setPersona] = useState<NeuralOSPersona>(getPersona());
+  const [persona, setPersonaState] = useState<NeuralOSPersona>(getPersona());
   const [neuralExpanded, setNeuralExpanded] = useState(false);
   const [activeCatId, setActiveCatId] = useState<string | null>(null);
   const [neuralSearch, setNeuralSearch] = useState("");
   const [neuralCustom, setNeuralCustom] = useState("");
+
+  // Re-sync persona when page gains focus (e.g. after editing in modal elsewhere)
+  useEffect(() => {
+    const sync = () => setPersonaState(getPersona());
+    window.addEventListener("focus", sync);
+    return () => window.removeEventListener("focus", sync);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -375,7 +382,7 @@ const SettingsPage = () => {
                           ].map(v => (
                             <button key={v.id} onClick={() => {
                               const updated = savePersona({ vibe: v.id });
-                              setPersona(updated);
+                              setPersonaState(updated);
                             }}
                               className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${
                                 persona.vibe === v.id
@@ -396,7 +403,7 @@ const SettingsPage = () => {
                           {(["basic", "normal", "deep"] as const).map(d => (
                             <button key={d} onClick={() => {
                               const updated = savePersona({ preferredDepth: d });
-                              setPersona(updated);
+                              setPersonaState(updated);
                             }}
                               className={`flex-1 px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all capitalize ${
                                 persona.preferredDepth === d
@@ -445,14 +452,14 @@ const SettingsPage = () => {
                           const toggleItem = (name: string) => {
                             const updated = selected.includes(name) ? selected.filter(x => x !== name) : [...selected, name];
                             const newPersona = savePersona({ [field]: updated });
-                            setPersona(newPersona);
+                            setPersonaState(newPersona);
                           };
 
                           const addCustomItem = () => {
                             if (!neuralCustom.trim() || selected.includes(neuralCustom.trim())) return;
                             const updated = [...selected, neuralCustom.trim()];
                             const newPersona = savePersona({ [field]: updated });
-                            setPersona(newPersona);
+                            setPersonaState(newPersona);
                             setNeuralCustom("");
                           };
 
@@ -476,7 +483,7 @@ const SettingsPage = () => {
                                     if (e.key === "Enter" && neuralSearch.trim() && !selected.includes(neuralSearch.trim())) {
                                       const updated = [...selected, neuralSearch.trim()];
                                       const newPersona = savePersona({ [field]: updated });
-                                      setPersona(newPersona);
+                                      setPersonaState(newPersona);
                                       setNeuralSearch("");
                                     }
                                   }}
@@ -504,7 +511,7 @@ const SettingsPage = () => {
                                   if (!selected.includes(neuralSearch.trim())) {
                                     const updated = [...selected, neuralSearch.trim()];
                                     const newPersona = savePersona({ [field]: updated });
-                                    setPersona(newPersona);
+                                    setPersonaState(newPersona);
                                   }
                                   setNeuralSearch("");
                                 }}
@@ -622,7 +629,12 @@ const SettingsPage = () => {
             </div>
           </FadeIn>
 
-          <p className="text-center text-[10px] text-muted-foreground mt-4 font-semibold">Neural-OS v1.0 "Terminator" • Made in Jeypore ❤️</p>
+          <div className="text-center mt-6 mb-2 space-y-0.5">
+            <p className="text-[11px] font-black text-foreground/60 tracking-widest uppercase">Neural-OS</p>
+            <p className="text-[10px] font-bold text-muted-foreground">Version 01</p>
+            <p className="text-[10px] font-semibold text-muted-foreground/70 italic">The Genesis</p>
+            <p className="text-[10px] text-muted-foreground mt-1">Made in Jeypore ❤️</p>
+          </div>
         </div>
         <BottomNav />
       </div>
