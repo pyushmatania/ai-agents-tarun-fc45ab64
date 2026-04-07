@@ -20,10 +20,10 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
 
 const CURIOSITY = [
-  { id: "industry", label: "Your Industry", emoji: "🏭", desc: "Semiconductor & manufacturing", query: "AI agents semiconductor manufacturing India 2026 latest", color: "#FF9600", shadow: "#CC7A00" },
-  { id: "general", label: "General", emoji: "🌍", desc: "What people are building", query: "amazing AI agent projects people built 2026 showcase", color: "#CE82FF", shadow: "#9333EA" },
-  { id: "crazy", label: "Crazy Future", emoji: "🤯", desc: "Bleeding edge AI", query: "most crazy futuristic AI agent applications autonomous 2026", color: "#FF4B91", shadow: "#CC2D6A" },
-  { id: "daily", label: "Daily Work", emoji: "💼", desc: "Productivity agents", query: "AI agents automate daily office work productivity examples 2026", color: "#58CC02", shadow: "#3D9400" },
+  { id: "industry", label: "Your Industry", emoji: "🏭", desc: "Semiconductor & manufacturing", query: "AI agents semiconductor manufacturing India 2026 latest", color: "#FF9600", shadow: "#CC7A00", bgGradient: "linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%)" },
+  { id: "general", label: "General", emoji: "🌍", desc: "What people are building", query: "amazing AI agent projects people built 2026 showcase", color: "#CE82FF", shadow: "#9333EA", bgGradient: "linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)" },
+  { id: "crazy", label: "Crazy Future", emoji: "🤯", desc: "Bleeding edge AI", query: "most crazy futuristic AI agent applications autonomous 2026", color: "#FF4B91", shadow: "#CC2D6A", bgGradient: "linear-gradient(135deg, #F59E0B 0%, #D97706 100%)" },
+  { id: "daily", label: "Daily Work", emoji: "💼", desc: "Productivity agents", query: "AI agents automate daily office work productivity examples 2026", color: "#58CC02", shadow: "#3D9400", bgGradient: "linear-gradient(135deg, #059669 0%, #047857 100%)" },
 ];
 
 const SPARK_FACTS = [
@@ -509,6 +509,20 @@ const CuriosityPage = () => {
     setFeedLoading(false);
     setFeedLoadingMore(false);
   }, [followed, feedItems]);
+
+  // Auto-refresh explore data every 15 minutes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (activeId) {
+        const cat = CURIOSITY.find(c => c.id === activeId);
+        if (cat) fetchCuriosity(cat);
+      }
+      if (followed.length > 0 && feedItems.length > 0) {
+        fetchFeed(false);
+      }
+    }, 15 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [activeId, followed, feedItems.length]);
 
   // Infinite scroll
   useEffect(() => {
@@ -1183,7 +1197,7 @@ const CuriosityPage = () => {
               </motion.div>
             )}
 
-            {/* ═══ EXPLORE TAB — Redesigned ═══ */}
+            {/* ═══ EXPLORE TAB — Redesigned like job cards ═══ */}
             {activeTab === "explore" && (
               <motion.div key="explore-tab" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }}>
                 <div className="px-4">
@@ -1225,12 +1239,19 @@ const CuriosityPage = () => {
                     })}
                   </div>
 
-                  {/* Category Cards — Job-listing style */}
+                  {/* Auto-refresh message */}
+                  <div className="flex items-center gap-1.5 mb-3 px-1">
+                    <div className="w-1.5 h-1.5 rounded-full bg-agni-green animate-pulse" />
+                    <span className="text-[8px] font-bold text-muted-foreground/60">Auto-refreshes every 15 mins with fresh AI insights</span>
+                  </div>
+
+                  {/* Category Cards — Netflix-ranked colorful cards */}
                   <div className="space-y-3">
                     {CURIOSITY
                       .filter(cat => !exploreSearch || cat.label.toLowerCase().includes(exploreSearch.toLowerCase()) || cat.desc.toLowerCase().includes(exploreSearch.toLowerCase()))
                       .map((cat, i) => {
                       const isActive = activeId === cat.id;
+                      const rank = i + 1;
                       const tags = cat.desc.split(/[,&]/).map(t => t.trim()).filter(Boolean);
                       return (
                         <motion.div
@@ -1238,38 +1259,36 @@ const CuriosityPage = () => {
                           initial={{ opacity: 0, y: 15 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.06 }}
-                          className="rounded-2xl overflow-hidden border-2 transition-all"
-                          style={{ borderColor: isActive ? `${cat.color}60` : 'hsl(var(--border) / 0.15)' }}
+                          className="rounded-2xl overflow-hidden"
+                          style={{ border: isActive ? `2px solid ${cat.color}80` : '2px solid transparent' }}
                         >
-                          {/* Card header */}
+                          {/* Card header with colored background */}
                           <motion.button
                             whileTap={{ scale: 0.98 }}
                             onClick={() => fetchCuriosity(cat)}
                             className="w-full text-left p-4 relative overflow-hidden"
-                            style={{ background: `hsl(var(--card))` }}
+                            style={{ background: cat.bgGradient }}
                           >
-                            {/* Colored accent background */}
-                            <div className="absolute top-0 right-0 w-24 h-24 rounded-full opacity-10 -translate-y-1/2 translate-x-1/2" style={{ background: cat.color }} />
+                            {/* Decorative circles */}
+                            <div className="absolute top-0 right-0 w-28 h-28 rounded-full opacity-15 -translate-y-1/2 translate-x-1/2 bg-white" />
+                            <div className="absolute bottom-0 left-0 w-16 h-16 rounded-full opacity-10 translate-y-1/2 -translate-x-1/4 bg-white" />
 
                             <div className="flex items-start justify-between relative z-10">
                               <div className="flex items-center gap-3">
-                                <div
-                                  className="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0 shadow-lg"
-                                  style={{ background: `${cat.color}20`, boxShadow: `0 4px 12px ${cat.color}15` }}
-                                >
-                                  {isActive && loading ? (
-                                    <Loader2 size={18} className="animate-spin" style={{ color: cat.color }} />
-                                  ) : cat.emoji}
+                                {/* Netflix-style rank number */}
+                                <div className="relative">
+                                  <span className="text-[42px] font-black text-white/20 leading-none" style={{ fontFamily: 'Georgia, serif', WebkitTextStroke: '1.5px rgba(255,255,255,0.3)' }}>
+                                    {rank}
+                                  </span>
                                 </div>
                                 <div>
-                                  <p className="text-[13px] font-black text-foreground">{cat.label}</p>
-                                  <p className="text-[9px] text-muted-foreground mt-0.5">{cat.desc}</p>
+                                  <p className="text-[14px] font-black text-white">{cat.label}</p>
+                                  <p className="text-[10px] text-white/70 mt-0.5">{cat.desc}</p>
                                 </div>
                               </div>
                               <motion.div
                                 whileTap={{ scale: 0.85 }}
-                                className="flex items-center gap-1 rounded-full px-3 py-1.5 border-2 text-[9px] font-black"
-                                style={{ borderColor: `${cat.color}40`, color: cat.color }}
+                                className="flex items-center gap-1 rounded-full px-3 py-1.5 bg-white/20 backdrop-blur-sm border border-white/20 text-[9px] font-black text-white"
                               >
                                 View <ExternalLink size={9} />
                               </motion.div>
@@ -1280,22 +1299,26 @@ const CuriosityPage = () => {
                               {tags.map((tag, ti) => (
                                 <span
                                   key={ti}
-                                  className="text-[8px] font-bold px-2.5 py-1 rounded-full"
-                                  style={{ background: `${cat.color}12`, color: cat.color, border: `1px solid ${cat.color}20` }}
+                                  className="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/15 text-white border border-white/20 backdrop-blur-sm"
                                 >
                                   {tag}
                                 </span>
                               ))}
+                              {isActive && loading && (
+                                <span className="text-[8px] font-bold px-2.5 py-1 rounded-full bg-white/25 text-white flex items-center gap-1">
+                                  <Loader2 size={8} className="animate-spin" /> Loading...
+                                </span>
+                              )}
                             </div>
                           </motion.button>
 
-                          {/* Bottom colored bar with meta */}
-                          <div className="px-4 py-2 flex items-center justify-between" style={{ background: `${cat.color}08` }}>
+                          {/* Bottom bar — dark card style */}
+                          <div className="px-4 py-2.5 flex items-center justify-between bg-card border-t border-border/10">
                             <div className="flex items-center gap-1.5 text-[8px] font-bold text-muted-foreground">
                               <Clock size={9} className="opacity-50" />
                               Updated recently
                             </div>
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-1.5">
                               <motion.button
                                 whileTap={{ scale: 0.8 }}
                                 onClick={() => setLearnItem({ title: cat.label, desc: cat.desc, url: "" })}
@@ -1323,7 +1346,7 @@ const CuriosityPage = () => {
                                 exit={{ opacity: 0, height: 0 }}
                                 className="overflow-hidden"
                               >
-                                <div className="px-4 pb-3 pt-1 space-y-2 border-t" style={{ borderColor: `${cat.color}15` }}>
+                                <div className="px-4 pb-3 pt-1 space-y-2 bg-card border-t border-border/10">
                                   {error && (
                                     <div className="bg-agni-red/10 border border-agni-red/20 rounded-xl p-2.5">
                                       <p className="text-[10px] text-agni-red font-semibold">{error}</p>
@@ -1348,6 +1371,8 @@ const CuriosityPage = () => {
                                       className="flex items-center gap-2 rounded-xl p-2.5 border"
                                       style={{ background: `${cat.color}05`, borderColor: `${cat.color}15` }}
                                     >
+                                      {/* Result rank */}
+                                      <span className="text-[18px] font-black shrink-0 w-6 text-center" style={{ color: `${cat.color}40` }}>{j + 1}</span>
                                       <a href={item.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 flex-1 min-w-0">
                                         <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0"
                                           style={{ background: `${cat.color}15` }}
@@ -1365,9 +1390,6 @@ const CuriosityPage = () => {
                                       >
                                         <Brain size={11} style={{ color: cat.color }} />
                                       </motion.button>
-                                      <a href={item.url} target="_blank" rel="noopener noreferrer" className="shrink-0">
-                                        <ExternalLink size={9} style={{ color: cat.color }} className="opacity-40" />
-                                      </a>
                                     </motion.div>
                                   ))}
                                 </div>
