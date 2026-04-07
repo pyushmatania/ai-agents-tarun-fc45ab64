@@ -1,6 +1,6 @@
 import BottomNav from "@/components/BottomNav";
 import PageTransition, { StaggerContainer, StaggerItem, FadeIn } from "@/components/PageTransition";
-import { ArrowRight, Zap, Clock, BookOpen, Flame, Lightbulb, Rocket, Brain, Heart, Diamond, User } from "lucide-react";
+import { ArrowRight, Zap, Clock, BookOpen, Flame, Lightbulb, Rocket, Brain, Heart, Diamond, User, Info } from "lucide-react";
 import MascotProfileModal from "@/components/MascotProfileModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -39,12 +39,24 @@ const HomePage = () => {
   const [activeMode, setActiveMode] = useState(localStorage.getItem("teaching_mode") || "engineer");
   const [agniExpression, setAgniExpression] = useState<"default" | "happy" | "excited">("default");
   const [showProfile, setShowProfile] = useState(false);
+  const [showInfoTooltip, setShowInfoTooltip] = useState(false);
 
   const totalLessons = 22;
   const overallProgress = Math.round((stats.done.length / totalLessons) * 100);
   const todayTip = DAILY_TIPS[new Date().getDay() % DAILY_TIPS.length];
   const greeting = new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening";
   const dailyProgress = (Math.min(stats.dailyXp, stats.dailyGoal) / stats.dailyGoal) * 100;
+
+  const storedRole = localStorage.getItem("edu_user_role");
+  const roleLabel = storedRole ? TEACHING_MODES.find(m => m.id === storedRole)?.label || storedRole : null;
+
+  // Personalized features shown under the greeting
+  const personalFeatures = [
+    { label: `${stats.streak}d streak`, color: "bg-agni-green/15 text-agni-green", icon: Flame },
+    { label: league.name, color: "bg-agni-purple/15 text-agni-purple", icon: null, emoji: league.emoji },
+    ...(roleLabel ? [{ label: roleLabel, color: "bg-agni-blue/15 text-agni-blue", icon: User, emoji: undefined }] : []),
+    { label: `L${stats.level}`, color: "bg-agni-gold/15 text-agni-gold", icon: Zap, emoji: undefined },
+  ];
 
   useEffect(() => {
     const timer = setTimeout(() => setAgniExpression("happy"), 2000);
@@ -90,21 +102,47 @@ const HomePage = () => {
           {/* AGNI Hero Section */}
           <FadeIn delay={0.1}>
             <motion.div className="relative rounded-3xl mb-4 overflow-hidden bg-gradient-card-accent border border-border/40 shadow-card">
-              <div className="flex items-center px-4 py-4">
-                <div className="flex-1">
+              {/* Info button */}
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setShowInfoTooltip(!showInfoTooltip)}
+                className="absolute top-3 right-3 z-20 w-6 h-6 rounded-full bg-muted/40 flex items-center justify-center"
+              >
+                <Info size={12} className="text-muted-foreground" />
+              </motion.button>
+
+              {/* Info tooltip */}
+              {showInfoTooltip && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}
+                  className="absolute top-10 right-3 z-30 bg-card border border-border rounded-xl px-3 py-2 shadow-lg max-w-[200px]"
+                >
+                  <p className="text-[10px] text-muted-foreground leading-relaxed">
+                    <span className="font-bold text-agni-green">Double-tap AGNI</span> to open your Neural OS profile & personalize how AI teaches you!
+                  </p>
+                </motion.div>
+              )}
+
+              <div className="flex items-start px-4 py-4">
+                <div className="flex-1 min-w-0 pr-2">
                   <p className="text-micro text-agni-green mb-1">{greeting.toUpperCase()}</p>
                   <h2 className="text-xl font-black text-foreground leading-snug mb-2">Hey, {displayName}! 👋</h2>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] bg-agni-green/15 text-agni-green font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1">
-                      <Flame size={10} /> {stats.streak}d streak
-                    </span>
-                    <span className="text-[10px] bg-agni-purple/15 text-agni-purple font-extrabold px-2.5 py-1 rounded-full">
-                      {league.emoji} {league.name}
-                    </span>
+                  <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                    {personalFeatures.map((feat, i) => (
+                      <span key={i} className={`text-[10px] ${feat.color} font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1`}>
+                        {feat.icon && <feat.icon size={10} />}
+                        {feat.emoji && <span className="text-[10px]">{feat.emoji}</span>}
+                        {feat.label}
+                      </span>
+                    ))}
                   </div>
+                  {/* Neural OS personalization hint */}
+                  <p className="text-[10px] text-muted-foreground leading-snug">
+                    🧠 <span className="text-agni-purple font-bold">Neural OS</span> active — lessons personalized for you
+                  </p>
                 </div>
-                <div className="relative">
-                  <svg viewBox="0 0 130 130" className="w-[120px] h-[120px] -rotate-90">
+                <div className="relative shrink-0">
+                  <svg viewBox="0 0 130 130" className="w-[110px] h-[110px] -rotate-90">
                     <circle cx="65" cy="65" r="58" fill="none" stroke="hsl(var(--muted))" strokeWidth="4" opacity="0.3" />
                     <motion.circle
                       cx="65" cy="65" r="58" fill="none" stroke="hsl(var(--agni-green))" strokeWidth="4" strokeLinecap="round"
@@ -114,8 +152,14 @@ const HomePage = () => {
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center" onDoubleClick={() => setShowProfile(true)}>
-                    <Agni expression={agniExpression} size={90} speech={agniSpeech} interactive />
+                    <Agni expression={agniExpression} size={80} interactive />
                   </div>
+                </div>
+              </div>
+              {/* AGNI speech below the bot */}
+              <div className="px-4 -mt-1 mb-2">
+                <div className="bg-agni-green/10 border border-agni-green/20 rounded-xl px-3 py-1.5 inline-block">
+                  <p className="text-[11px] font-bold text-agni-green">{agniSpeech}</p>
                 </div>
               </div>
               <div className="px-4 pb-3">
