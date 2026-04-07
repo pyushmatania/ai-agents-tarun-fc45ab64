@@ -3,10 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Send, Plus, X, Sparkles, Brain, Zap, ChevronRight,
   GraduationCap, Flame, Mic, Search, Image, Paperclip,
-  StopCircle, ChevronDown, Pencil, Lightbulb,
+  StopCircle, ChevronDown, Pencil, Lightbulb, Palette,
 } from "lucide-react";
 import { getPersona } from "@/lib/neuralOS";
-import { getTeachingLabel, getTeachingSelection, TEACHING_CATEGORIES, getAllOptions, getActiveExplainStyles } from "@/lib/teachingConfig";
+import { getTeachingLabel, getTeachingSelection, setTeachingSelection, TEACHING_CATEGORIES, getAllOptions, getActiveExplainStyles, TEACHING_VIBES, BRAIN_LEVELS_SKILL, BRAIN_LEVELS_ACADEMIC, getBrainTrack, QUIZ_DIFFICULTIES, type QuizDifficulty } from "@/lib/teachingConfig";
 import { InterestPill } from "@/components/InterestPill";
 import { SFX } from "@/lib/sounds";
 
