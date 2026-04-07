@@ -686,7 +686,7 @@ const CuriosityPage = () => {
             {activeTab === "feed" && (
               <motion.div key="feed-tab" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
 
-                {/* Followed sources strip */}
+                {/* Followed sources strip — tap to filter */}
                 {followedSources.length > 0 && (
                   <FadeIn delay={0.03}>
                     <div className="px-4 mb-3">
@@ -698,25 +698,32 @@ const CuriosityPage = () => {
                       <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1">
                         {followedSources.slice(0, 12).map((source, i) => {
                           const catMeta = SOURCE_CATEGORIES.find(c => c.id === source.category);
+                          const isActive = activeSource === source.name;
                           return (
-                            <motion.div
+                            <motion.button
                               key={source.name}
                               initial={{ opacity: 0, scale: 0.8 }}
                               animate={{ opacity: 1, scale: 1 }}
                               transition={{ delay: i * 0.03 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => setActiveSource(isActive ? null : source.name)}
                               className="flex flex-col items-center gap-1 shrink-0"
                             >
                               <div className="relative">
-                                <Avatar className="w-11 h-11 border-2" style={{ borderColor: `${catMeta?.color || '#58CC02'}50` }}>
+                                <Avatar className={`w-11 h-11 border-2 transition-all ${isActive ? "ring-2 ring-offset-2 ring-offset-background" : ""}`}
+                                  style={{ 
+                                    borderColor: isActive ? catMeta?.color || '#58CC02' : `${catMeta?.color || '#58CC02'}50`,
+                                    ...(isActive ? { ringColor: catMeta?.color } : {}),
+                                  }}>
                                   <AvatarImage src={getSourceAvatar(source)} alt={source.name} />
                                   <AvatarFallback className="text-[9px] font-black bg-card" style={{ color: catMeta?.color }}>
                                     {source.name.slice(0, 2)}
                                   </AvatarFallback>
                                 </Avatar>
-                                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-background bg-agni-green" />
+                                <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-background ${isActive ? "bg-agni-gold" : "bg-agni-green"}`} />
                               </div>
-                              <span className="text-[8px] font-bold text-muted-foreground text-center w-12 truncate">{source.name}</span>
-                            </motion.div>
+                              <span className={`text-[8px] font-bold text-center w-12 truncate ${isActive ? "text-foreground" : "text-muted-foreground"}`}>{source.name}</span>
+                            </motion.button>
                           );
                         })}
                         <motion.button
@@ -733,6 +740,33 @@ const CuriosityPage = () => {
                     </div>
                   </FadeIn>
                 )}
+
+                {/* Active source banner */}
+                <AnimatePresence>
+                  {activeSource && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="px-4 mb-3 overflow-hidden"
+                    >
+                      <div className="bg-agni-blue/10 border border-agni-blue/20 rounded-2xl px-3 py-2 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Filter size={11} className="text-agni-blue" />
+                          <span className="text-[10px] font-black text-agni-blue">
+                            Showing: {activeSource}
+                          </span>
+                          <span className="text-[9px] font-bold text-muted-foreground">
+                            ({filteredFeedItems.length} items)
+                          </span>
+                        </div>
+                        <button onClick={() => setActiveSource(null)} className="w-5 h-5 rounded-full bg-agni-blue/10 flex items-center justify-center">
+                          <X size={10} className="text-agni-blue" />
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* FEED HEADER + FILTERS + REFRESH */}
                 {followedSources.length > 0 && (
