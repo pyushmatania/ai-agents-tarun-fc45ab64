@@ -8,7 +8,7 @@ interface SplashScreenProps {
 
 const SplashScreen = ({ onComplete }: SplashScreenProps) => {
   const [wordmark, setWordmark] = useState("");
-  const fullText = "AgentDojo";
+  const fullText = "Neural-OS";
 
   useEffect(() => {
     let i = 0;
@@ -69,7 +69,7 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
         transition={{ delay: 1.5 }}
         className="text-xs text-muted-foreground font-semibold mt-2"
       >
-        Master AI Agents. Level Up.
+        The operating system of becoming
       </motion.p>
 
       {/* Loading dots */}

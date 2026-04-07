@@ -17,7 +17,7 @@ const TEACHING_MODE_PROMPTS: Record<string, string> = {
   semiconductor: `You are AGNI, an AI tutor specialized in semiconductor manufacturing context (HCL/fab environment). Relate AI agent concepts to chip manufacturing, yield optimization, defect detection, supply chain. Use industry-specific examples. Keep responses under 200 words.`,
 };
 
-const BASE_SYSTEM = `You are AGNI, an expert AI tutor for the AgentDojo learning platform that teaches people about AI agents. You are enthusiastic, encouraging, and make complex topics accessible.`;
+const BASE_SYSTEM = `You are AGNI, an expert AI tutor for the Neural-OS learning platform that teaches people about AI agents. You are enthusiastic, encouraging, and make complex topics accessible.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });

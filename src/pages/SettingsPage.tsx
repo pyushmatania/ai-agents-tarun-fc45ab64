@@ -613,7 +613,7 @@ const SettingsPage = () => {
             </div>
           </FadeIn>
 
-          <p className="text-center text-[10px] text-muted-foreground mt-4 font-semibold">AgentDojo v2.0 • Made with ❤️ by AGNI</p>
+          <p className="text-center text-[10px] text-muted-foreground mt-4 font-semibold">Neural-OS v1.0 "Terminator" • Made in Jeypore ❤️</p>
         </div>
         <BottomNav />
       </div>
