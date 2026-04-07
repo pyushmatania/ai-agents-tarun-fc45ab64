@@ -350,6 +350,16 @@ const MascotProfileModal = ({ open, onClose }: MascotProfileModalProps) => {
         </motion.div>
       </motion.div>
     </AnimatePresence>
+
+    {/* Smart AI Interest Search Modal */}
+    <SmartInterestSearch
+      query={smartSearchQuery}
+      currentCategory={activeCategory?.id || ""}
+      open={smartSearchOpen}
+      onClose={() => { setSmartSearchOpen(false); setSmartSearchQuery(""); }}
+      onSelect={handleSmartSearchSelect}
+    />
+  </>
   );
 };
 
