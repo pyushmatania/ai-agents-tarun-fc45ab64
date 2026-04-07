@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
+import FloatingChatButton from "@/components/FloatingChatButton";
 import PageTransition, { FadeIn } from "@/components/PageTransition";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -933,6 +934,7 @@ const SettingsPage = () => {
             <p className="text-[10px] text-muted-foreground mt-1">Made in Jeypore ❤️</p>
           </div>
         </div>
+        <FloatingChatButton tab="general" />
         <BottomNav />
       </div>
     </PageTransition>

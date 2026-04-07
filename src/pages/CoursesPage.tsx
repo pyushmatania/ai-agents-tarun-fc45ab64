@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
+import FloatingChatButton from "@/components/FloatingChatButton";
 import PageTransition, { FadeIn } from "@/components/PageTransition";
 import { CheckCircle2, Lock, Star, Crown, Diamond, Heart, Flame, ChevronRight, Trophy, Target, Zap, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -534,6 +535,7 @@ const CoursesPage = () => {
             )}
           </div>
         </div>
+        <FloatingChatButton tab="curriculum" />
         <BottomNav />
       </div>
     </PageTransition>
