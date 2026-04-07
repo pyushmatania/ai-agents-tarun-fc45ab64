@@ -1,56 +1,40 @@
 
-# AgentDojo Redesign — Phase Plan
+## Splash & Onboarding Redesign Plan
 
-Based on the 50+ page mega prompt spec. Each phase builds on the previous.
+### 1. Fix Build Error
+- Restore missing `toggleItem` function declaration on line 141
 
----
+### 2. Splash Screen Redesign
+- Full-screen colorful gradient background (Duolingo-style bright colors)
+- Large AGNI mascot with bounce-in animation + particle effects
+- Playful typewriter effect for "Neural-OS" with color highlights
+- Sound: boot-up chime on splash load
+- Fun tagline: "Your AI Sensei awaits! 🔥"
+- Animated loading dots with color cycling
 
-## **Phase 1: Design System + AGNI Mascot** 🎨
-- Implement the full color palette (dark mode: #131F24 bg, #58CC02 green primary, gold, red, blue, purple accents)
-- Add Nunito font (ExtraBold for headlines, Regular for body, JetBrains Mono for code)
-- Set up spacing system, border radius tokens, 3D button shadow system
-- **Rebuild AGNI mascot** with all 8 expression states (default, happy, excited, thinking, sad, teaching, sleeping, celebrating)
-- Add blinking eyes, breathing animation, squash & stretch
+### 3. Onboarding Redesign — Colorful Pill/Card Style
+- **Step headers**: Fun catchy names for 4D steps:
+  - Identity → "Pick Your Avatar 🎭" (Like choosing a character in a game)
+  - Mission → "Choose Your Quest 🎯" (Like Naruto picking a mission scroll)
+  - Vibe → "Set Your Vibe 🎨" (How AGNI talks - like picking a DJ)
+  - Brain → "Power Level 🧠" (Like Dragon Ball Z power levels)
+- **Colorful pill-style option cards** (like reference image): Each option gets a unique bright color pill with emoji icon, rounded shapes, varied sizes
+- **Mascot transition screens**: Between major steps, show AGNI in different states (thinking, setting up, celebrating) with fun loading messages
+- **Pop culture examples**: Naruto shadow clones = multi-agent, Goku power levels = brain levels, etc.
 
-## **Phase 2: Splash + Onboarding + Home** 🏠
-- **Splash screen**: AGNI center, wordmark typewriter effect, animated loading dots, auto-transition
-- **Onboarding**: 3 swipeable slides with AGNI in different poses, progress dots, "Get Started" button
-- **Home page**: Full Duolingo-style with streak flame, XP display, hearts, daily goal ring, continue learning card, AGNI greeting
+### 4. Sound System Enhancement
+- Add sounds to: button taps, step transitions, option selections, splash boot, completion celebration
+- Wire SFX.tap() on all interactive elements throughout onboarding
+- Add a "whoosh" transition sound between steps
+- Victory sound on completion
 
-## **Phase 3: Learning Path (Courses Page)** 🛤️
-- Winding bubble trail (Duolingo unit path) with proper S-curve layout
-- Lesson nodes: locked (gray), current (glowing green pulse), completed (green + crown), perfect (gold)
-- Treasure chest nodes between sections
-- AGNI peeking from behind nodes
-- Module banners with progress bars
-- Proper 3D button feel on nodes
+### 5. Transition Animations
+- Mascot "interlude" screens between major sections (thinking → loading → ready)
+- Confetti/particles on step completion
+- Smooth spring animations on pill selections
+- Staggered entrance for option lists
 
-## **Phase 4: Lesson & Quiz Experience** 📚
-- **Full-screen lesson cards** — swipeable concept cards (not chat/scroll)
-- Progress bar at top, heart counter
-- Concept explanation → diagram → quiz flow
-- **Quiz types**: Multiple choice, drag-and-drop, fill-in-blank, true/false
-- Correct/wrong animations with AGNI reactions
-- XP earned popup, lesson complete celebration with confetti
-
-## **Phase 5: Gamification Systems** 🎮
-- XP tracking + level system (Level = XP / 500, titles: Novice → Legend)
-- Streak system with flame animation
-- Hearts (5 max, lose on wrong, regenerate over time)
-- Gems currency (earn/spend)
-- Daily quests (3 random challenges)
-- Achievement badges (30+ unlockable)
-- League system (Bronze → Legendary)
-
-## **Phase 6: Polish & Remaining Pages** ✨
-- Progress/stats page with charts and AGNI
-- Curiosity page refinements
-- Roadmap page
-- Settings with sound toggle, daily goal picker
-- Micro-interactions library (button press squash, celebrations)
-- Loading/empty/error states with AGNI expressions
-- Page transition animations (swoosh)
-
----
-
-**Shall I start with Phase 1?** Each phase is a focused chunk that I'll implement in one go.
+### Files to modify:
+- `src/pages/SplashScreen.tsx` — full redesign
+- `src/pages/OnboardingPage.tsx` — full redesign of UI, fix build error
+- `src/lib/sounds.ts` — add transition/whoosh/boot sounds
