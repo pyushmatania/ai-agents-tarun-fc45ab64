@@ -25,6 +25,15 @@ const ROLES = [
   { id: "marketer", label: "Marketer", emoji: "📢", desc: "Growth with AI", goal: "Use AI for marketing", exp: "beginner", icon: Target },
   { id: "freelancer", label: "Freelancer", emoji: "🌍", desc: "AI superpowers", goal: "Freelance with AI tools", exp: "some experience", icon: Globe },
   { id: "data", label: "Data / ML", emoji: "📈", desc: "Models & pipelines", goal: "Build ML pipelines", exp: "engineer", icon: Wrench },
+  { id: "content", label: "Content Creator", emoji: "🎬", desc: "AI-powered content", goal: "Create content with AI", exp: "some experience", icon: Film },
+  { id: "teacher", label: "Teacher / Educator", emoji: "📚", desc: "Teach smarter with AI", goal: "Enhance teaching with AI", exp: "beginner", icon: BookOpen },
+  { id: "consultant", label: "Consultant", emoji: "💼", desc: "AI advisory & strategy", goal: "Consult on AI strategy", exp: "some experience", icon: Briefcase },
+  { id: "productdesigner", label: "Product Designer", emoji: "🖌️", desc: "Design AI products", goal: "Design AI-first products", exp: "some experience", icon: Palette },
+  { id: "dataanalyst", label: "Data Analyst", emoji: "📊", desc: "Insights from data", goal: "Analyze data with AI", exp: "some experience", icon: Target },
+  { id: "office", label: "Office / Operations", emoji: "🏢", desc: "Automate workflows", goal: "Automate office tasks with AI", exp: "beginner", icon: Globe },
+  { id: "sales", label: "Sales / BizDev", emoji: "🤝", desc: "Close deals with AI", goal: "Use AI in sales pipeline", exp: "beginner", icon: Trophy },
+  { id: "writer", label: "Writer / Journalist", emoji: "✍️", desc: "AI-assisted writing", goal: "Write better with AI", exp: "beginner", icon: Newspaper },
+  { id: "hobbyist", label: "Hobbyist / Tinkerer", emoji: "🛠️", desc: "Build for fun", goal: "Experiment with AI for fun", exp: "beginner", icon: Wrench },
   { id: "curious", label: "Just Curious", emoji: "✨", desc: "Here for fun!", goal: "Explore for fun", exp: "beginner", icon: Star },
 ];
 
@@ -66,7 +75,7 @@ const CATEGORY_GRADIENTS = [
   "from-[#FF86D8] to-[#CE82FF]",
 ];
 
-const TOTAL_STEPS = 4 + SUGGESTION_CATEGORIES.length + 1;
+const TOTAL_STEPS = 5 + SUGGESTION_CATEGORIES.length + 1;
 
 const slideVariants = {
   enter: (dir: number) => ({ x: dir > 0 ? 300 : -300, opacity: 0 }),
@@ -84,10 +93,10 @@ const OnboardingPage = () => {
   const [persona, setPersona] = useState<Partial<NeuralOSPersona>>({});
   const [search, setSearch] = useState("");
 
-  const categoryIndex = step >= 4 ? step - 4 : -1;
+  const categoryIndex = step >= 5 ? step - 5 : -1;
   const activeCategory = categoryIndex >= 0 && categoryIndex < SUGGESTION_CATEGORIES.length
     ? SUGGESTION_CATEGORIES[categoryIndex] : null;
-  const isConfirmStep = step === 4 + SUGGESTION_CATEGORIES.length;
+  const isConfirmStep = step === 5 + SUGGESTION_CATEGORIES.length;
 
   const currentItems = activeCategory
     ? ((persona[activeCategory.field] as string[]) || [])
@@ -286,7 +295,7 @@ const OnboardingPage = () => {
         {/* ═══════ STEP 2: ROLE (expanded) ═══════ */}
         {step === 2 && (
           <motion.div key="role" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
-            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
+            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-agni-purple/15 via-agni-pink/5 to-transparent pointer-events-none" />
 
@@ -418,6 +427,66 @@ const OnboardingPage = () => {
 
             <Button onClick={goNext} disabled={!selectedVibe} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none shrink-0">
               CONTINUE <ArrowRight size={18} className="ml-2" />
+            </Button>
+          </motion.div>
+        )}
+
+        {/* ═══════ STEP 4: WHY THIS MATTERS — ATTENTION HOOK ═══════ */}
+        {step === 4 && (
+          <motion.div key="whymatters" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-agni-gold/20 via-agni-orange/10 to-agni-pink/10 pointer-events-none" />
+            <motion.div className="absolute top-32 left-6 w-24 h-24 rounded-full bg-agni-green/10 blur-3xl" animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0.8, 0.5] }} transition={{ duration: 5, repeat: Infinity }} />
+            <motion.div className="absolute bottom-40 right-4 w-20 h-20 rounded-full bg-agni-blue/10 blur-2xl" animate={{ y: [0, -15, 0] }} transition={{ duration: 4, repeat: Infinity }} />
+
+            <div className="flex-1 flex flex-col items-center justify-center relative z-10">
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200, damping: 12 }}>
+                <Agni expression="excited" size={130} animate speech="This next part is 🔥" />
+              </motion.div>
+
+              <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+                className="text-2xl font-black text-foreground text-center mt-4 mb-2"
+              >
+                The more you share,<br />
+                <span className="text-agni-gold">the smarter I get</span> 🧠
+              </motion.h2>
+
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+                className="text-sm text-muted-foreground text-center mb-6 max-w-[300px]"
+              >
+                Answer the next few questions so <span className="text-agni-green font-bold">AGNI</span> can personalize <span className="font-bold text-foreground">every lesson, quiz & analogy</span> just for you.
+              </motion.p>
+
+              {/* Power examples */}
+              <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
+                className="w-full space-y-2.5 mb-6"
+              >
+                {[
+                  { emoji: "🎬", text: "Love Naruto? I'll explain multi-agent systems as shadow clones!", color: "border-agni-pink/30 bg-agni-pink/5" },
+                  { emoji: "🏏", text: "Cricket fan? RAG = Dhoni reading the pitch before pulling data!", color: "border-agni-blue/30 bg-agni-blue/5" },
+                  { emoji: "🎵", text: "Into A.R. Rahman? LLMs compose patterns — just like him!", color: "border-agni-purple/30 bg-agni-purple/5" },
+                  { emoji: "🎮", text: "Gamer? Agents have roles — just like your Valorant squad!", color: "border-agni-green/30 bg-agni-green/5" },
+                ].map((ex, i) => (
+                  <motion.div key={i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.8 + i * 0.12 }}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl border ${ex.color}`}
+                  >
+                    <span className="text-2xl shrink-0">{ex.emoji}</span>
+                    <p className="text-xs font-bold text-foreground leading-snug">{ex.text}</p>
+                  </motion.div>
+                ))}
+              </motion.div>
+
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.3 }}
+                className="flex items-center gap-2 bg-agni-green/10 border border-agni-green/20 rounded-full px-4 py-2"
+              >
+                <Sparkles size={14} className="text-agni-green" />
+                <span className="text-[11px] font-black text-agni-green">Neural OS × AGNI: Your personal AI brain</span>
+              </motion.div>
+            </div>
+
+            <Button onClick={goNext} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d mt-4">
+              LET'S DO THIS 🔥 <ArrowRight size={18} className="ml-2" />
             </Button>
           </motion.div>
         )}
