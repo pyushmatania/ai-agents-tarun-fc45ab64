@@ -1,12 +1,12 @@
-import { Home, BookOpen, BarChart3, FileText, Sparkles, Compass, Map } from "lucide-react";
+import { Home, BookOpen, BarChart3, Sparkles, Map, Library } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import Agni from "@/components/Agni";
 
 const tabs = [
   { icon: Home, path: "/", label: "Home" },
   { icon: BookOpen, path: "/courses", label: "Learn" },
   { icon: Sparkles, path: "/curiosity", label: "Spark", center: true },
+  { icon: Library, path: "/sources", label: "Hub" },
   { icon: Map, path: "/roadmap", label: "Path" },
   { icon: BarChart3, path: "/progress", label: "Stats" },
 ];
@@ -58,14 +58,14 @@ const BottomNav = () => {
                 key={tab.path}
                 onClick={() => navigate(tab.path)}
                 whileTap={{ scale: 0.9 }}
-                className={`relative flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-2xl transition-all duration-300 ${
+                className={`relative flex flex-col items-center gap-0.5 px-1.5 py-1.5 rounded-2xl transition-all duration-300 ${
                   isActive
                     ? "text-agni-green"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <tab.icon size={16} strokeWidth={isActive ? 2.5 : 1.8} />
-                <span className={`text-[8px] font-bold leading-none tracking-wide ${isActive ? "text-agni-green" : "text-muted-foreground"}`}>
+                <tab.icon size={15} strokeWidth={isActive ? 2.5 : 1.8} />
+                <span className={`text-[7px] font-bold leading-none tracking-wide ${isActive ? "text-agni-green" : "text-muted-foreground"}`}>
                   {tab.label}
                 </span>
                 {isActive && (
