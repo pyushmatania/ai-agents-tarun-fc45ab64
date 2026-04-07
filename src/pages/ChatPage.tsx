@@ -72,17 +72,21 @@ export default function ChatPage() {
     const brain = getTeachingLabel("brain");
     const universeVibe = getUniverseVibe();
 
+    // When a specific universe vibe is selected, DON'T send generic interests
+    // to prevent the AI from picking random interests instead of the selected one
+    const allInterests = [
+      ...(persona.shows || []),
+      ...(persona.music || []),
+      ...(persona.sports || []),
+    ].slice(0, 5).join(", ") || undefined;
+
     return {
       identity: identity ? `${identity.label}${identity.desc ? ` — ${identity.desc}` : ""}` : persona.currentRole || undefined,
       mission: mission ? `${mission.label}${mission.desc ? ` — ${mission.desc}` : ""}` : persona.goal || undefined,
       vibe: vibe ? `${vibe.label}${vibe.desc ? ` — ${vibe.desc}` : ""}` : persona.vibe || undefined,
       level: brain ? `${brain.label}${brain.desc ? ` — ${brain.desc}` : ""}` : persona.experience || undefined,
       universeVibe: universeVibe || undefined,
-      interests: [
-        ...(persona.shows || []),
-        ...(persona.music || []),
-        ...(persona.sports || []),
-      ].slice(0, 5).join(", ") || undefined,
+      interests: universeVibe ? undefined : allInterests,
     };
   };
 
