@@ -359,20 +359,24 @@ export default function SmartInputBar({
               <div className="py-3">
                 <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">🌍 My World — Teach using my interests</p>
                 {interestCategories.length > 0 ? (
-                  <div className="space-y-2">
+                  <div className="space-y-2 max-h-48 overflow-y-auto scrollbar-none">
                     {interestCategories.map(cat => (
                       <div key={cat.id}>
                         <p className="text-[8px] font-bold text-muted-foreground mb-1">{cat.emoji} {cat.label}</p>
-                        <div className="flex flex-wrap gap-1">
-                          {cat.items.map((item, i) => (
+                        <div className="flex flex-wrap gap-1.5">
+                          {cat.items.map((item) => (
                             <motion.button
                               key={item}
                               whileTap={{ scale: 0.93 }}
                               onClick={() => handleInterestSelect(cat.id, item)}
                               disabled={isLoading}
-                              className="shrink-0"
+                              className={`text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all border ${
+                                selectedInterest === item
+                                  ? "bg-agni-pink/15 text-agni-pink border-agni-pink/40"
+                                  : "bg-card text-muted-foreground border-border/30 hover:border-border/60"
+                              }`}
                             >
-                              <InterestPill name={item} categoryId={cat.id} index={i} compact />
+                              <span>{cat.emoji}</span> {item}
                             </motion.button>
                           ))}
                         </div>
