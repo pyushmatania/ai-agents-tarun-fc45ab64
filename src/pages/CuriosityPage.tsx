@@ -366,6 +366,19 @@ function QuizSection({ quiz }: { quiz: any[] }) {
   );
 }
 
+const DATE_FILTERS = [
+  { id: "all", label: "All Time" },
+  { id: "24h", label: "Last 24h" },
+  { id: "week", label: "This Week" },
+  { id: "month", label: "This Month" },
+] as const;
+
+const SORT_OPTIONS = [
+  { id: "newest", label: "Newest First" },
+  { id: "popular", label: "Most Popular" },
+  { id: "recommended", label: "Recommended" },
+] as const;
+
 const CuriosityPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -384,6 +397,11 @@ const CuriosityPage = () => {
   const [feedLoading, setFeedLoading] = useState(false);
   const [feedLoadingMore, setFeedLoadingMore] = useState(false);
   const [feedFilter, setFeedFilter] = useState("all");
+  const [activeSource, setActiveSource] = useState<string | null>(null);
+  const [dateFilter, setDateFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("newest");
+  const [showFilters, setShowFilters] = useState(false);
+  const [lastFetchTime, setLastFetchTime] = useState<string | null>(() => localStorage.getItem("spark_last_fetch"));
   const [savedItems, setSavedItems] = useState<Set<number>>(() => {
     try {
       const s = localStorage.getItem("spark_saved");
