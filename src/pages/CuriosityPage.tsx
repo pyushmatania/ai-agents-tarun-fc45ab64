@@ -1183,106 +1183,207 @@ const CuriosityPage = () => {
               </motion.div>
             )}
 
-            {/* ═══ EXPLORE TAB ═══ */}
+            {/* ═══ EXPLORE TAB — Redesigned ═══ */}
             {activeTab === "explore" && (
               <motion.div key="explore-tab" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }}>
-                <div className="px-4 space-y-2.5">
-                  {CURIOSITY.map((cat, i) => {
-                    const isActive = activeId === cat.id;
-                    return (
-                      <div key={cat.id}>
+                <div className="px-4">
+                  {/* Search bar */}
+                  <div className="relative mb-3">
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40" />
+                    <input
+                      type="text"
+                      placeholder="Search topics or categories..."
+                      value={exploreSearch}
+                      onChange={(e) => setExploreSearch(e.target.value)}
+                      className="w-full bg-card border border-border/30 rounded-xl pl-9 pr-4 py-2.5 text-[11px] font-bold text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-agni-green/40"
+                    />
+                  </div>
+
+                  {/* Filter chips */}
+                  <div className="flex gap-1.5 overflow-x-auto scrollbar-none mb-4">
+                    {[
+                      { id: "all", label: "Discover", color: "#58CC02" },
+                      { id: "saved", label: "Saved", color: "#FFC800" },
+                      { id: "trending", label: "Trending", color: "#FF4B91" },
+                      { id: "new", label: "New", color: "#1CB0F6" },
+                    ].map(chip => {
+                      const isChipActive = exploreFilter === chip.id;
+                      return (
                         <motion.button
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.05 }}
-                          whileTap={{ scale: 0.97 }}
-                          onClick={() => fetchCuriosity(cat)}
-                          className="w-full rounded-2xl p-3.5 text-left flex items-center gap-3 relative overflow-hidden border-2 transition-colors"
+                          key={chip.id}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => setExploreFilter(chip.id)}
+                          className="shrink-0 px-4 py-2 rounded-full text-[10px] font-black transition-all"
                           style={{
-                            borderColor: isActive ? `${cat.color}40` : 'hsl(var(--border) / 0.2)',
-                            background: isActive ? `${cat.color}08` : 'hsl(var(--card))',
+                            background: isChipActive ? chip.color : 'hsl(var(--card))',
+                            color: isChipActive ? '#fff' : 'hsl(var(--muted-foreground))',
+                            border: `1.5px solid ${isChipActive ? chip.color : 'hsl(var(--border) / 0.3)'}`,
                           }}
                         >
-                          <div
-                            className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
-                            style={{ background: `${cat.color}15` }}
-                          >
-                            {isActive && loading ? (
-                              <Loader2 size={18} className="animate-spin" style={{ color: cat.color }} />
-                            ) : cat.emoji}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[12px] font-black text-foreground">{cat.label}</p>
-                            <p className="text-[9px] text-muted-foreground">{cat.desc}</p>
-                          </div>
-                          <ChevronRight size={14} style={{ color: cat.color }} className="shrink-0 opacity-40" />
+                          {chip.label}
                         </motion.button>
+                      );
+                    })}
+                  </div>
 
-                        <AnimatePresence>
-                          {isActive && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: "auto" }}
-                              exit={{ opacity: 0, height: 0 }}
-                              className="overflow-hidden"
-                            >
-                              <div className="pt-2 space-y-1.5">
-                                {error && (
-                                  <div className="bg-agni-red/10 border border-agni-red/20 rounded-xl p-2.5">
-                                    <p className="text-[10px] text-agni-red font-semibold">{error}</p>
-                                    <button onClick={() => fetchCuriosity(cat)} className="mt-1 text-[9px] font-bold text-agni-green flex items-center gap-1">
-                                      <RefreshCw size={9} /> Retry
-                                    </button>
-                                  </div>
-                                )}
+                  {/* Category Cards — Job-listing style */}
+                  <div className="space-y-3">
+                    {CURIOSITY
+                      .filter(cat => !exploreSearch || cat.label.toLowerCase().includes(exploreSearch.toLowerCase()) || cat.desc.toLowerCase().includes(exploreSearch.toLowerCase()))
+                      .map((cat, i) => {
+                      const isActive = activeId === cat.id;
+                      const tags = cat.desc.split(/[,&]/).map(t => t.trim()).filter(Boolean);
+                      return (
+                        <motion.div
+                          key={cat.id}
+                          initial={{ opacity: 0, y: 15 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.06 }}
+                          className="rounded-2xl overflow-hidden border-2 transition-all"
+                          style={{ borderColor: isActive ? `${cat.color}60` : 'hsl(var(--border) / 0.15)' }}
+                        >
+                          {/* Card header */}
+                          <motion.button
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => fetchCuriosity(cat)}
+                            className="w-full text-left p-4 relative overflow-hidden"
+                            style={{ background: `hsl(var(--card))` }}
+                          >
+                            {/* Colored accent background */}
+                            <div className="absolute top-0 right-0 w-24 h-24 rounded-full opacity-10 -translate-y-1/2 translate-x-1/2" style={{ background: cat.color }} />
 
-                                {loading && !results.length && (
-                                  <div className="space-y-1.5">
-                                    {[1, 2, 3].map(j => (
-                                      <div key={j} className="h-14 rounded-xl bg-muted/10 animate-pulse" style={{ animationDelay: `${j * 100}ms` }} />
-                                    ))}
-                                  </div>
-                                )}
-
-                                {results.map((item: any, j: number) => (
-                                  <motion.div key={j}
-                                    initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: j * 0.04 }}
-                                    className="flex items-center gap-2 bg-card rounded-xl p-2.5 border border-border/15"
-                                  >
-                                    <a href={item.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 flex-1 min-w-0">
-                                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0"
-                                        style={{ background: `${cat.color}12` }}
-                                      >{typeIcons[item.type] || "🔗"}</div>
-                                      <div className="flex-1 min-w-0">
-                                        <p className="text-[10px] font-extrabold text-foreground truncate">{item.title}</p>
-                                        <p className="text-[8px] text-muted-foreground truncate">{item.desc}</p>
-                                      </div>
-                                    </a>
-                                    <motion.button
-                                      whileTap={{ scale: 0.8 }}
-                                      onClick={() => setLearnItem(item)}
-                                      className="shrink-0 w-7 h-7 rounded-lg bg-agni-purple/10 flex items-center justify-center"
-                                    >
-                                      <Brain size={11} className="text-agni-purple" />
-                                    </motion.button>
-                                    <a href={item.url} target="_blank" rel="noopener noreferrer" className="shrink-0">
-                                      <ExternalLink size={9} style={{ color: cat.color }} className="opacity-40" />
-                                    </a>
-                                  </motion.div>
-                                ))}
+                            <div className="flex items-start justify-between relative z-10">
+                              <div className="flex items-center gap-3">
+                                <div
+                                  className="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0 shadow-lg"
+                                  style={{ background: `${cat.color}20`, boxShadow: `0 4px 12px ${cat.color}15` }}
+                                >
+                                  {isActive && loading ? (
+                                    <Loader2 size={18} className="animate-spin" style={{ color: cat.color }} />
+                                  ) : cat.emoji}
+                                </div>
+                                <div>
+                                  <p className="text-[13px] font-black text-foreground">{cat.label}</p>
+                                  <p className="text-[9px] text-muted-foreground mt-0.5">{cat.desc}</p>
+                                </div>
                               </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    );
-                  })}
+                              <motion.div
+                                whileTap={{ scale: 0.85 }}
+                                className="flex items-center gap-1 rounded-full px-3 py-1.5 border-2 text-[9px] font-black"
+                                style={{ borderColor: `${cat.color}40`, color: cat.color }}
+                              >
+                                View <ExternalLink size={9} />
+                              </motion.div>
+                            </div>
+
+                            {/* Tags */}
+                            <div className="flex flex-wrap gap-1.5 mt-3 relative z-10">
+                              {tags.map((tag, ti) => (
+                                <span
+                                  key={ti}
+                                  className="text-[8px] font-bold px-2.5 py-1 rounded-full"
+                                  style={{ background: `${cat.color}12`, color: cat.color, border: `1px solid ${cat.color}20` }}
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </motion.button>
+
+                          {/* Bottom colored bar with meta */}
+                          <div className="px-4 py-2 flex items-center justify-between" style={{ background: `${cat.color}08` }}>
+                            <div className="flex items-center gap-1.5 text-[8px] font-bold text-muted-foreground">
+                              <Clock size={9} className="opacity-50" />
+                              Updated recently
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <motion.button
+                                whileTap={{ scale: 0.8 }}
+                                onClick={() => setLearnItem({ title: cat.label, desc: cat.desc, url: "" })}
+                                className="w-6 h-6 rounded-full flex items-center justify-center"
+                                style={{ background: `${cat.color}15` }}
+                              >
+                                <Brain size={10} style={{ color: cat.color }} />
+                              </motion.button>
+                              <motion.button
+                                whileTap={{ scale: 0.8 }}
+                                onClick={() => shareItem({ title: cat.label, desc: cat.desc })}
+                                className="w-6 h-6 rounded-full flex items-center justify-center bg-muted/20"
+                              >
+                                <Share2 size={10} className="text-muted-foreground/50" />
+                              </motion.button>
+                            </div>
+                          </div>
+
+                          {/* Expanded results */}
+                          <AnimatePresence>
+                            {isActive && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="px-4 pb-3 pt-1 space-y-2 border-t" style={{ borderColor: `${cat.color}15` }}>
+                                  {error && (
+                                    <div className="bg-agni-red/10 border border-agni-red/20 rounded-xl p-2.5">
+                                      <p className="text-[10px] text-agni-red font-semibold">{error}</p>
+                                      <button onClick={() => fetchCuriosity(cat)} className="mt-1 text-[9px] font-bold text-agni-green flex items-center gap-1">
+                                        <RefreshCw size={9} /> Retry
+                                      </button>
+                                    </div>
+                                  )}
+
+                                  {loading && !results.length && (
+                                    <div className="space-y-1.5">
+                                      {[1, 2, 3].map(j => (
+                                        <div key={j} className="h-14 rounded-xl bg-muted/10 animate-pulse" style={{ animationDelay: `${j * 100}ms` }} />
+                                      ))}
+                                    </div>
+                                  )}
+
+                                  {results.map((item: any, j: number) => (
+                                    <motion.div key={j}
+                                      initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
+                                      transition={{ delay: j * 0.04 }}
+                                      className="flex items-center gap-2 rounded-xl p-2.5 border"
+                                      style={{ background: `${cat.color}05`, borderColor: `${cat.color}15` }}
+                                    >
+                                      <a href={item.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 flex-1 min-w-0">
+                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0"
+                                          style={{ background: `${cat.color}15` }}
+                                        >{typeIcons[item.type] || "🔗"}</div>
+                                        <div className="flex-1 min-w-0">
+                                          <p className="text-[10px] font-extrabold text-foreground truncate">{item.title}</p>
+                                          <p className="text-[8px] text-muted-foreground truncate">{item.desc}</p>
+                                        </div>
+                                      </a>
+                                      <motion.button
+                                        whileTap={{ scale: 0.8 }}
+                                        onClick={() => setLearnItem(item)}
+                                        className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center"
+                                        style={{ background: `${cat.color}15` }}
+                                      >
+                                        <Brain size={11} style={{ color: cat.color }} />
+                                      </motion.button>
+                                      <a href={item.url} target="_blank" rel="noopener noreferrer" className="shrink-0">
+                                        <ExternalLink size={9} style={{ color: cat.color }} className="opacity-40" />
+                                      </a>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
 
                   <motion.button
                     whileTap={{ scale: 0.97 }}
                     onClick={() => navigate("/sources")}
-                    className="w-full bg-foreground text-background rounded-2xl py-3 text-[12px] font-black text-center mt-2"
+                    className="w-full bg-foreground text-background rounded-2xl py-3 text-[12px] font-black text-center mt-4"
                   >
                     📚 Browse Sources Hub
                   </motion.button>
