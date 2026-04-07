@@ -477,17 +477,17 @@ export default function SmartInputBar({
       <div className="px-4 py-3 pb-6">
         {/* Action chips row — scrollable */}
         <div className="flex items-center gap-1.5 mb-2 overflow-x-auto scrollbar-none">
-          {/* + button for tools (general) or motive (learn) */}
+          {/* + button — opens motive panel on both tabs */}
           <motion.button
             whileTap={{ scale: 0.9 }}
-            onClick={() => togglePanel(isLearnTab ? "motive" : "tools")}
+            onClick={() => togglePanel("motive")}
             className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-all ${
-              activePanel === "motive" || activePanel === "tools"
+              activePanel === "motive"
                 ? "bg-primary/20 rotate-45"
                 : "bg-muted/30"
             }`}
           >
-            {activePanel === "motive" || activePanel === "tools"
+            {activePanel === "motive"
               ? <X size={12} style={{ color: accentColor }} />
               : <Plus size={12} className="text-muted-foreground" />
             }
