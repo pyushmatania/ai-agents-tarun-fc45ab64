@@ -18,8 +18,11 @@ import type { AgniExpression } from "@/components/Agni";
 import { motion, AnimatePresence } from "framer-motion";
 import { savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona, getSubFilters, getSubFilterCount, POPULAR_PICKS } from "@/lib/neuralOS";
 import { TrendingUp, Crown } from "lucide-react";
-import { MISSION_MODES, BRAIN_LEVELS, IDENTITIES, BRAIN_LEVELS_ACADEMIC, BRAIN_LEVELS_SKILL, TEACHING_VIBES, UNIVERSE_VIBE_CATEGORIES, setTeachingSelection, saveCustomOption, getCustomOptions, setUniverseVibe, setBrainTrack } from "@/lib/teachingConfig";
+import { MISSION_MODES, BRAIN_LEVELS, IDENTITIES, BRAIN_LEVELS_ACADEMIC, BRAIN_LEVELS_SKILL, TEACHING_VIBES, setTeachingSelection, saveCustomOption, getCustomOptions, setBrainTrack } from "@/lib/teachingConfig";
 import CustomOptionInput from "@/components/CustomOptionInput";
+import { MISSION_FOLLOWUPS, AGE_RANGES, GENDERS, EDUCATION_LEVELS, EXPERIENCE_LEVELS } from "@/lib/missionFollowups";
+import { getUserContextLocal } from "@/hooks/useUserContext";
+import { MapPin } from "lucide-react";
 
 /* ── ROLES now powered by IDENTITIES from teachingConfig ── */
 const ROLES = IDENTITIES.map(id => ({
@@ -64,7 +67,7 @@ const CATEGORY_GRADIENTS = [
   "from-[#FF86D8] to-[#CE82FF]",
 ];
 
-const TOTAL_STEPS = 7 + SUGGESTION_CATEGORIES.length + 1; // splash, name, role, mission, vibe, brain, why-matters, categories..., confirm
+const TOTAL_STEPS = 10 + SUGGESTION_CATEGORIES.length + 1; // splash, name, aboutYou, role, lifeContext, mission, missionFollowup, vibe, brain, why-matters, categories..., confirm
 
 const slideVariants = {
   enter: (dir: number) => ({ x: dir > 0 ? 300 : -300, opacity: 0 }),
@@ -93,9 +96,17 @@ const OnboardingPage = () => {
   const [smartSearchOpen, setSmartSearchOpen] = useState(false);
   const [smartSearchQuery, setSmartSearchQuery] = useState("");
   const [brainTrack, setBrainTrackState] = useState<"skill" | "academic">("skill");
-  const [universeVibeInput, setUniverseVibeInput] = useState("");
+  // Personal details
+  const [ageRange, setAgeRange] = useState("");
+  const [gender, setGender] = useState("");
+  const [education, setEducation] = useState("");
+  const [location, setLocation] = useState("");
+  const [workExperience, setWorkExperience] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  // Mission follow-up
+  const [missionFollowup, setMissionFollowup] = useState<Record<string, string>>({});
 
-  // Steps: 0=splash, 1=name, 2=role, 3=mission, 4=vibe, 5=brain, 6=why-matters, 7+=categories, last=confirm
+  // Steps: 0=splash, 1=name, 2=aboutYou, 3=role, 4=lifeContext, 5=mission, 6=missionFollowup, 7=vibe, 8=brain, 9=why-matters, 10+=categories, last=confirm
   const categoryIndex = step >= 7 ? step - 7 : -1;
   const activeCategory = categoryIndex >= 0 && categoryIndex < SUGGESTION_CATEGORIES.length
     ? SUGGESTION_CATEGORIES[categoryIndex] : null;
