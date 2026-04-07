@@ -21,10 +21,11 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const mascotMood = view === "signup" ? "excited" : view === "forgot" ? "thinking" : "waving";
+  const mascotMood = view === "signup" ? "excited" : view === "forgot" ? "thinking" : view === "verify" ? "celebrating" : "waving";
   const mascotSpeech =
     view === "signin" ? "Welcome back, learner! 🔥" :
     view === "signup" ? "Let's start your journey! 🚀" :
+    view === "verify" ? "Check your inbox! 📬" :
     "No worries, I got you! 🤝";
 
   const handleSubmit = async (e: React.FormEvent) => {
