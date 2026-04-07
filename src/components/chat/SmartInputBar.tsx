@@ -2,8 +2,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Send, Plus, X, Sparkles, Brain, Zap,
-  GraduationCap, Mic, Search, Image, Paperclip,
-  StopCircle, Palette, Target,
+  GraduationCap, StopCircle, Palette, Target,
 } from "lucide-react";
 import { getPersona } from "@/lib/neuralOS";
 import { getTeachingLabel, getTeachingSelection, setTeachingSelection, MISSION_MODES, TEACHING_VIBES, BRAIN_LEVELS_SKILL, BRAIN_LEVELS_ACADEMIC, getBrainTrack, QUIZ_DIFFICULTIES, getActiveExplainStyles, type QuizDifficulty } from "@/lib/teachingConfig";
