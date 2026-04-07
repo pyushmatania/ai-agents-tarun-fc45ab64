@@ -354,8 +354,8 @@ export default function SmartInputBar({
                   <p className="text-[9px] font-black text-muted-foreground uppercase tracking-wider">🧠 Brain Level — How deep?</p>
                   <button onClick={() => setActivePanel("none")} className="w-5 h-5 rounded-full bg-muted/30 flex items-center justify-center"><X size={10} className="text-muted-foreground" /></button>
                 </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {brainLevels.map(b => (
+                <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto scrollbar-none">
+                  {allBrainLevelsForChat.map(b => (
                     <motion.button
                       key={b.id}
                       whileTap={{ scale: 0.93 }}
