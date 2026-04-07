@@ -4,7 +4,7 @@ import { ArrowRight, Zap, Clock, BookOpen, Flame, Lightbulb, Rocket, Brain, Hear
 import MascotProfileModal from "@/components/MascotProfileModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Agni from "@/components/Agni";
 import DailyQuests from "@/components/DailyQuests";
 import { useGamification } from "@/hooks/useGamification";
