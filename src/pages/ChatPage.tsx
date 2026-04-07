@@ -2,16 +2,14 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ArrowLeft, Send, Loader2, Brain, Sparkles, Trash2,
-  StopCircle, GraduationCap
+  ArrowLeft, Loader2, Brain, Sparkles, Trash2,
+  GraduationCap
 } from "lucide-react";
-import { useChat, type ChatTab, type ChatMessage } from "@/hooks/useChat";
+import { useChat, type ChatTab } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
 import { getPersona } from "@/lib/neuralOS";
-
 import ContentRenderer from "@/components/chat/ContentRenderer";
-import SuggestionBar from "@/components/chat/SuggestionBar";
-import ChatToolbar from "@/components/chat/ChatToolbar";
+import SmartInputBar from "@/components/chat/SmartInputBar";
 import { toast } from "sonner";
 
 function parseSuggestions(content: string): { text: string; suggestions: string[] } {
@@ -53,9 +51,9 @@ export default function ChatPage() {
 
   const initialTab = (location.state as any)?.tab || "general";
   const [activeTab, setActiveTab] = useState<ChatTab>(initialTab);
+  const [activeMode, setActiveMode] = useState(localStorage.getItem("teaching_mode") || "engineer");
 
   const chat = useChat(activeTab);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
 
@@ -77,22 +75,20 @@ export default function ChatPage() {
     }
   }, [chat.messages]);
 
-  // Auto-resize textarea
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.style.height = "auto";
-      inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 120) + "px";
-    }
-  }, [input]);
-
-  const handleSend = () => {
-    if (!input.trim()) return;
-    chat.sendMessage(input, teachingContext);
+  const handleSend = (text?: string) => {
+    const msg = text || input.trim();
+    if (!msg) return;
+    chat.sendMessage(msg, teachingContext);
     setInput("");
   };
 
   const handleSuggestionClick = (suggestion: string) => {
     chat.sendMessage(suggestion, teachingContext);
+  };
+
+  const handleModeChange = (mode: string) => {
+    setActiveMode(mode);
+    localStorage.setItem("teaching_mode", mode);
   };
 
   // Get last assistant suggestions
@@ -105,14 +101,14 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header - clean and minimal */}
+      {/* Header */}
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/10">
         <div className="flex items-center justify-between px-4 py-3">
           <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-2xl bg-muted/20 flex items-center justify-center hover:bg-muted/30 transition-colors">
             <ArrowLeft size={18} className="text-foreground" />
           </button>
 
-          {/* Tab switcher — pill style */}
+          {/* Tab switcher */}
           <div className="flex bg-muted/15 rounded-2xl p-1">
             {(Object.entries(TAB_CONFIG) as [ChatTab, typeof TAB_CONFIG.curriculum][]).map(([key, cfg]) => {
               const isActive = activeTab === key;
@@ -141,10 +137,7 @@ export default function ChatPage() {
           </div>
 
           <button
-            onClick={() => {
-              chat.clearHistory();
-              toast.success("Chat cleared");
-            }}
+            onClick={() => { chat.clearHistory(); toast.success("Chat cleared"); }}
             className="w-10 h-10 rounded-2xl bg-muted/20 flex items-center justify-center hover:bg-muted/30 transition-colors"
           >
             <Trash2 size={15} className="text-muted-foreground" />
@@ -152,7 +145,7 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* Messages area — spacious */}
+      {/* Messages area */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
         {chat.isLoadingHistory ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
@@ -160,7 +153,6 @@ export default function ChatPage() {
             <p className="text-[11px] font-bold text-muted-foreground">Loading history...</p>
           </div>
         ) : chat.messages.length === 0 ? (
-          // Empty state — welcoming and spacious
           <div className="flex flex-col items-center justify-center py-12 gap-6">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
@@ -207,69 +199,24 @@ export default function ChatPage() {
         )}
       </div>
 
-      {/* AI Suggestions — collapsible */}
-      {!chat.isLoading && lastSuggestions.length > 0 && (
-        <SuggestionBar
-          suggestions={lastSuggestions}
-          onSelect={handleSuggestionClick}
-          color={tabConfig.color}
-          disabled={chat.isLoading}
+      {/* Smart Input Bar */}
+      <div className="sticky bottom-0">
+        <SmartInputBar
+          value={input}
+          onChange={setInput}
+          onSend={handleSend}
+          onStop={chat.stopStreaming}
+          isLoading={chat.isLoading}
+          isLearnTab={activeTab === "curriculum"}
+          suggestions={!chat.isLoading ? lastSuggestions : []}
+          onSuggestionClick={handleSuggestionClick}
+          placeholder={tabConfig.placeholder}
+          accentColor={tabConfig.color}
+          activeMode={activeMode}
+          onModeChange={handleModeChange}
+          exchangeCount={chat.messages.filter(m => m.role === "user").length}
         />
-      )}
-
-      {/* Input area — spacious and clean */}
-      <div className="sticky bottom-0 bg-background/95 backdrop-blur-md border-t border-border/10 px-4 py-3 pb-6">
-        <div className="flex items-end gap-2">
-          {/* Toolbar for general tab */}
-          {activeTab === "general" && (
-            <ChatToolbar
-              onImageClick={() => toast.info("Image generation coming soon!")}
-              onFileClick={() => toast.info("File upload coming soon!")}
-              onVoiceClick={() => toast.info("Voice input coming soon!")}
-              onSearchClick={() => toast.info("Web search coming soon!")}
-            />
-          )}
-
-          <div className="flex-1 relative">
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-              placeholder={tabConfig.placeholder}
-              rows={1}
-              className="w-full bg-card border border-border/20 rounded-2xl pl-4 pr-12 py-3 text-[13px] font-medium text-foreground placeholder:text-muted-foreground/30 focus:outline-none resize-none overflow-hidden transition-all"
-              style={{ 
-                borderColor: input.trim() ? `${tabConfig.color}30` : undefined,
-              }}
-            />
-            {chat.isLoading ? (
-              <button
-                onClick={chat.stopStreaming}
-                className="absolute right-2 bottom-2 w-8 h-8 rounded-xl bg-destructive/20 flex items-center justify-center hover:bg-destructive/30 transition-colors"
-              >
-                <StopCircle size={16} className="text-destructive" />
-              </button>
-            ) : (
-              <button
-                onClick={handleSend}
-                disabled={!input.trim()}
-                className="absolute right-2 bottom-2 w-8 h-8 rounded-xl flex items-center justify-center transition-all disabled:opacity-20"
-                style={{ background: input.trim() ? tabConfig.color : "hsl(var(--muted))" }}
-              >
-                <Send size={14} className="text-white" />
-              </button>
-            )}
-          </div>
-        </div>
       </div>
-
-      
     </div>
   );
 }
