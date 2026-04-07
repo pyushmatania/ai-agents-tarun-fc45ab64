@@ -227,7 +227,10 @@ export default function SmartInputBar({
             {/* Motive panel (replaces Teaching Mode) */}
             {activePanel === "motive" && (
               <div className="py-3">
-                <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">🎯 Motive — Why are you learning?</p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-wider">🎯 Motive — Why are you learning?</p>
+                  <button onClick={() => setActivePanel("none")} className="w-5 h-5 rounded-full bg-muted/30 flex items-center justify-center"><X size={10} className="text-muted-foreground" /></button>
+                </div>
                 <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto scrollbar-none">
                   {MISSION_MODES.map(m => (
                     <motion.button
@@ -238,6 +241,7 @@ export default function SmartInputBar({
                         setTeachingSelection("mission", m.id);
                         setCurrentMotive(m.id);
                         setActivePanel("none");
+                        maybeRecook();
                       }}
                       className={`text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all border ${
                         currentMotive === m.id
