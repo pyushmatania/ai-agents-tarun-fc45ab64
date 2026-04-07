@@ -1357,10 +1357,14 @@ const CuriosityPage = () => {
                                   )}
 
                                   {loading && !results.length && (
-                                    <div className="space-y-1.5">
-                                      {[1, 2, 3].map(j => (
-                                        <div key={j} className="h-14 rounded-xl bg-muted/10 animate-pulse" style={{ animationDelay: `${j * 100}ms` }} />
-                                      ))}
+                                    <div className="flex flex-col items-center justify-center py-6 gap-2">
+                                      <Loader2 size={24} className="animate-spin" style={{ color: cat.color }} />
+                                      <p className="text-[10px] font-bold text-muted-foreground">Loading insights...</p>
+                                      <div className="space-y-1.5 w-full mt-1">
+                                        {[1, 2, 3].map(j => (
+                                          <div key={j} className="h-14 rounded-xl bg-muted/10 animate-pulse" style={{ animationDelay: `${j * 100}ms` }} />
+                                        ))}
+                                      </div>
                                     </div>
                                   )}
 

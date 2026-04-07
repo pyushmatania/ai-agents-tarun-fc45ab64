@@ -43,6 +43,12 @@ const EXPRESSION_IMAGES: Record<AgniExpression, string> = {
   celebrating: agniCelebrating,
 };
 
+// Preload all mascot images into browser cache immediately
+Object.values(EXPRESSION_IMAGES).forEach(src => {
+  const img = new Image();
+  img.src = src;
+});
+
 const CLICK_EXPRESSIONS: AgniExpression[] = ["happy", "excited", "celebrating", "teaching", "thinking", "default"];
 
 const CLICK_SPEECHES: Record<AgniExpression, string[]> = {
@@ -269,29 +275,23 @@ const Agni = ({ expression = "default", size = 100, speech, animate = true, clas
       )}
 
       {/* AGNI Body */}
-      <AnimatePresence mode="wait">
-        <motion.div
+      <motion.div>
+        <motion.img
           key={currentExpr}
-          initial={{ opacity: 0, scale: 0.85 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.85 }}
-          transition={{ duration: 0.25 }}
-        >
-          <motion.img
-            src={imageSrc}
-            alt={`AGNI ${currentExpr}`}
-            width={size}
-            height={size}
-            loading="eager"
-            animate={animate ? getBodyAnimation(currentExpr) : {}}
-            className="object-contain select-none"
-            style={{
-              filter: `drop-shadow(${getGlowColor(currentExpr)})`,
-            }}
-            draggable={false}
-          />
-        </motion.div>
-      </AnimatePresence>
+          src={imageSrc}
+          alt={`AGNI ${currentExpr}`}
+          width={size}
+          height={size}
+          loading="eager"
+          decoding="sync"
+          animate={animate ? getBodyAnimation(currentExpr) : {}}
+          className="object-contain select-none"
+          style={{
+            filter: `drop-shadow(${getGlowColor(currentExpr)})`,
+          }}
+          draggable={false}
+        />
+      </motion.div>
     </div>
   );
 };
