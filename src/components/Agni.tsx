@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SFX } from "@/lib/sounds";
 
@@ -282,7 +282,7 @@ const Agni = ({ expression = "default", size = 100, speech, animate = true, clas
             alt={`AGNI ${currentExpr}`}
             width={size}
             height={size}
-            loading="lazy"
+            loading="eager"
             animate={animate ? getBodyAnimation(currentExpr) : {}}
             className="object-contain select-none"
             style={{
