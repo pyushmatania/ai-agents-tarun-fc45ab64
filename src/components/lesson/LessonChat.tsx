@@ -6,6 +6,7 @@ import type { AgniExpression } from "@/components/Agni";
 import { SFX } from "@/lib/sounds";
 import { getAIConfig } from "@/lib/aiConfig";
 import { getPersona } from "@/lib/neuralOS";
+import { InterestPill } from "@/components/InterestPill";
 import MascotProfileModal from "@/components/MascotProfileModal";
 
 interface Message {
@@ -32,6 +33,12 @@ const MODES = [
   { key: "hacker", label: "Hacker", emoji: "⚡" },
   { key: "crazy", label: "Crazy", emoji: "🤯" },
   { key: "semiconductor", label: "Semi", emoji: "🏭" },
+  { key: "fun", label: "Fun", emoji: "🎮" },
+  { key: "story", label: "Story", emoji: "📖" },
+  { key: "visual", label: "Visual", emoji: "🎨" },
+  { key: "eli5", label: "ELI5", emoji: "🍼" },
+  { key: "debate", label: "Debate", emoji: "🥊" },
+  { key: "researcher", label: "Research", emoji: "🔬" },
 ];
 
 interface PowerUp {
@@ -77,6 +84,38 @@ const POWERUPS: Record<string, PowerUp[]> = {
   ],
 };
 
+// Add powerups for new modes
+POWERUPS["fun"] = [
+  { id: "fn1", label: "Fun Example", emoji: "🎮", prompt: "__INTEREST_DECK_FUN__", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", soundColor: "blue" },
+  { id: "fn2", label: "Meme It", emoji: "😂", prompt: "Turn this concept into a meme-worthy analogy!", color: "bg-[hsl(323,100%,76%)]", shadowColor: "shadow-[0_4px_0_0_hsl(323,100%,60%)]", soundColor: "pink" },
+  { id: "fn3", label: "Quiz Me", emoji: "🧩", prompt: "Give me a fun quick quiz on this!", color: "bg-[hsl(100,95%,40%)]", shadowColor: "shadow-[0_4px_0_0_hsl(100,100%,31%)]", soundColor: "green" },
+];
+POWERUPS["story"] = [
+  { id: "st1", label: "Story Time", emoji: "📖", prompt: "__INTEREST_DECK_STORY__", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", soundColor: "purple" },
+  { id: "st2", label: "Plot Twist", emoji: "🌀", prompt: "Add a plot twist to the story that reveals a deeper concept!", color: "bg-[hsl(323,100%,76%)]", shadowColor: "shadow-[0_4px_0_0_hsl(323,100%,60%)]", soundColor: "pink" },
+  { id: "st3", label: "Continue", emoji: "➡️", prompt: "Continue the story with the next concept.", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", soundColor: "blue" },
+];
+POWERUPS["visual"] = [
+  { id: "v1", label: "Diagram", emoji: "📊", prompt: "Draw me an ASCII diagram of this concept.", color: "bg-[hsl(170,70%,45%)]", shadowColor: "shadow-[0_4px_0_0_hsl(170,70%,35%)]", soundColor: "green" },
+  { id: "v2", label: "Flowchart", emoji: "🔀", prompt: "Show me a flowchart of how this works.", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", soundColor: "blue" },
+  { id: "v3", label: "Compare", emoji: "⚖️", prompt: "Create a visual comparison table.", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", soundColor: "purple" },
+];
+POWERUPS["eli5"] = [
+  { id: "el1", label: "Even Simpler", emoji: "🍼", prompt: "Explain like I'm literally 5 years old. Use toys and candy.", color: "bg-[hsl(199,90%,60%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,48%)]", soundColor: "blue" },
+  { id: "el2", label: "Analogy", emoji: "🎈", prompt: "Give me a simple everyday analogy for this.", color: "bg-[hsl(100,95%,40%)]", shadowColor: "shadow-[0_4px_0_0_hsl(100,100%,31%)]", soundColor: "green" },
+  { id: "el3", label: "Why?", emoji: "🤷", prompt: "But why does this matter? Explain simply.", color: "bg-[hsl(46,100%,49%)]", shadowColor: "shadow-[0_4px_0_0_hsl(44,100%,38%)]", soundColor: "gold" },
+];
+POWERUPS["debate"] = [
+  { id: "d1", label: "Challenge", emoji: "🥊", prompt: "Push back on this! What are the counterarguments?", color: "bg-[hsl(0,80%,55%)]", shadowColor: "shadow-[0_4px_0_0_hsl(0,80%,42%)]", soundColor: "orange" },
+  { id: "d2", label: "Devil's Advocate", emoji: "😈", prompt: "Play devil's advocate — why might this NOT work?", color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", soundColor: "purple" },
+  { id: "d3", label: "Both Sides", emoji: "⚖️", prompt: "Give me a balanced view — pros vs cons.", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", soundColor: "blue" },
+];
+POWERUPS["researcher"] = [
+  { id: "r1", label: "Papers", emoji: "📄", prompt: "What research papers should I read about this?", color: "bg-[hsl(323,100%,76%)]", shadowColor: "shadow-[0_4px_0_0_hsl(323,100%,60%)]", soundColor: "pink" },
+  { id: "r2", label: "Math", emoji: "∑", prompt: "Show me the mathematical formulation.", color: "bg-[hsl(199,92%,54%)]", shadowColor: "shadow-[0_4px_0_0_hsl(199,80%,42%)]", soundColor: "blue" },
+  { id: "r3", label: "State of Art", emoji: "🏆", prompt: "What's the state-of-the-art in this area?", color: "bg-[hsl(46,100%,49%)]", shadowColor: "shadow-[0_4px_0_0_hsl(44,100%,38%)]", soundColor: "gold" },
+];
+
 // Interest Deck — group persona interests by category for dropdown selection
 interface InterestCategory {
   id: string;
@@ -116,7 +155,7 @@ function parseSuggestions(text: string): { clean: string; suggestions: string[] 
   return { clean, suggestions };
 }
 
-const PersonaBadge = ({ items }: { items: string[] }) => {
+const PersonaBadge = ({ items, categories }: { items: string[]; categories: { catId: string; items: string[] }[] }) => {
   const [expanded, setExpanded] = useState(false);
   return (
     <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="mb-1">
@@ -125,10 +164,10 @@ const PersonaBadge = ({ items }: { items: string[] }) => {
         whileTap={{ scale: 0.95 }}
         className="text-[8px] font-black text-agni-purple bg-agni-purple/10 px-2 py-0.5 rounded-full inline-flex items-center gap-1"
       >
-        ✨ Personalized for you
+        ✨ Personalized for you ({items.length})
       </motion.button>
       <AnimatePresence>
-        {expanded && items.length > 0 && (
+        {expanded && categories.length > 0 && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
@@ -136,12 +175,17 @@ const PersonaBadge = ({ items }: { items: string[] }) => {
             className="overflow-hidden"
           >
             <div className="flex flex-wrap gap-1 mt-1">
-              <span className="text-[7px] font-bold text-muted-foreground/60">Using:</span>
-              {items.map((item, idx) => (
-                <span key={idx} className="text-[7px] font-bold text-agni-purple/80 bg-agni-purple/5 border border-agni-purple/15 px-1.5 py-0.5 rounded-full">
-                  {item}
-                </span>
-              ))}
+              {categories.map(cat =>
+                cat.items.slice(0, 3).map((item, idx) => (
+                  <InterestPill
+                    key={`${cat.catId}-${item}`}
+                    name={item}
+                    categoryId={cat.catId}
+                    index={idx}
+                    compact
+                  />
+                ))
+              )}
             </div>
           </motion.div>
         )}
@@ -525,16 +569,16 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
 
       {/* Persona summary chip row */}
       {(() => {
-        const groups: { emoji: string; items: string[] }[] = [];
-        if (persona.currentRole) groups.push({ emoji: "💼", items: [persona.currentRole] });
-        if (persona.shows?.length) groups.push({ emoji: "🎬", items: persona.shows });
-        if (persona.sports?.length) groups.push({ emoji: "⚽", items: persona.sports });
-        if (persona.curious?.length) groups.push({ emoji: "🔍", items: persona.curious });
-        if (persona.hobbies?.length) groups.push({ emoji: "🎯", items: persona.hobbies });
-        if (persona.music?.length) groups.push({ emoji: "🎵", items: persona.music });
-        if (persona.gaming?.length) groups.push({ emoji: "🎮", items: persona.gaming });
-        if (persona.news?.length) groups.push({ emoji: "📰", items: persona.news });
-        if (persona.books?.length) groups.push({ emoji: "📚", items: persona.books });
+        const groups: { emoji: string; catId: string; items: string[] }[] = [];
+        if (persona.currentRole) groups.push({ emoji: "💼", catId: "hobbies", items: [persona.currentRole] });
+        if (persona.shows?.length) groups.push({ emoji: "🎬", catId: "shows", items: persona.shows });
+        if (persona.sports?.length) groups.push({ emoji: "⚽", catId: "sports", items: persona.sports });
+        if (persona.curious?.length) groups.push({ emoji: "🔍", catId: "curious", items: persona.curious });
+        if (persona.hobbies?.length) groups.push({ emoji: "🎯", catId: "hobbies", items: persona.hobbies });
+        if (persona.music?.length) groups.push({ emoji: "🎵", catId: "music", items: persona.music });
+        if (persona.gaming?.length) groups.push({ emoji: "🎮", catId: "gaming", items: persona.gaming });
+        if (persona.news?.length) groups.push({ emoji: "📰", catId: "news", items: persona.news });
+        if (persona.books?.length) groups.push({ emoji: "📚", catId: "books", items: persona.books });
 
         return groups.length > 0 ? (
           <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-1.5 mb-1.5 overflow-x-auto scrollbar-none">
@@ -543,11 +587,23 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
             >
               <Pencil size={8} /> Edit
             </motion.button>
-            {groups.map((g, i) => (
-              <span key={i} className="shrink-0 text-[8px] font-bold text-muted-foreground bg-card border border-border/30 px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap">
-                <span>{g.emoji}</span>{g.items.join(", ")}
+            {groups.map((g, i) =>
+              g.items.slice(0, 2).map((item, idx) => (
+                <div key={`${i}-${idx}`} className="shrink-0">
+                  <InterestPill
+                    name={item}
+                    categoryId={g.catId || "shows"}
+                    index={idx}
+                    compact
+                  />
+                </div>
+              ))
+            )}
+            {groups.reduce((sum, g) => sum + g.items.length, 0) > groups.length * 2 && (
+              <span className="shrink-0 text-[8px] font-bold text-muted-foreground/60">
+                +{groups.reduce((sum, g) => sum + Math.max(0, g.items.length - 2), 0)} more
               </span>
-            ))}
+            )}
           </motion.div>
         ) : (
           <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} whileTap={{ scale: 0.95 }}
@@ -577,17 +633,18 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
               <div>
                 {msg.role === "assistant" && i === 0 && persona.completedAt && (() => {
                    const items: string[] = [];
+                   const categories: { catId: string; items: string[] }[] = [];
                    if (persona.currentRole) items.push(persona.currentRole);
-                   if (persona.shows?.length) items.push(...persona.shows);
-                   if (persona.sports?.length) items.push(...persona.sports);
-                   if (persona.curious?.length) items.push(...persona.curious);
-                   if (persona.hobbies?.length) items.push(...persona.hobbies);
-                   if (persona.music?.length) items.push(...persona.music);
-                   if (persona.gaming?.length) items.push(...persona.gaming);
-                   if (persona.news?.length) items.push(...persona.news);
-                   if (persona.books?.length) items.push(...persona.books);
+                   if (persona.shows?.length) { items.push(...persona.shows); categories.push({ catId: "shows", items: persona.shows }); }
+                   if (persona.sports?.length) { items.push(...persona.sports); categories.push({ catId: "sports", items: persona.sports }); }
+                   if (persona.curious?.length) { items.push(...persona.curious); categories.push({ catId: "curious", items: persona.curious }); }
+                   if (persona.hobbies?.length) { items.push(...persona.hobbies); categories.push({ catId: "hobbies", items: persona.hobbies }); }
+                   if (persona.music?.length) { items.push(...persona.music); categories.push({ catId: "music", items: persona.music }); }
+                   if (persona.gaming?.length) { items.push(...persona.gaming); categories.push({ catId: "gaming", items: persona.gaming }); }
+                   if (persona.news?.length) { items.push(...persona.news); categories.push({ catId: "news", items: persona.news }); }
+                   if (persona.books?.length) { items.push(...persona.books); categories.push({ catId: "books", items: persona.books }); }
                   return (
-                    <PersonaBadge items={items} />
+                    <PersonaBadge items={items} categories={categories} />
                   );
                 })()}
                 <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-[12.5px] leading-[1.6] font-semibold ${

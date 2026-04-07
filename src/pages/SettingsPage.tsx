@@ -346,13 +346,32 @@ const SettingsPage = () => {
                   <div className="text-left">
                     <p className="font-extrabold text-foreground text-xs">Neural OS Personality</p>
                     <p className="text-[10px] text-muted-foreground font-semibold">
-                      {persona.vibe ? `Vibe: ${persona.vibe}` : "Not configured"} • {(persona.shows?.length || 0) + (persona.sports?.length || 0) + (persona.music?.length || 0)} interests
+                      {persona.vibe ? `Vibe: ${persona.vibe}` : "Not configured"} • {(() => {
+                        let total = 0;
+                        SUGGESTION_CATEGORIES.forEach(cat => { total += ((persona[cat.field] as string[]) || []).length; });
+                        return total;
+                      })()} interests
                     </p>
                   </div>
                 </div>
-                <motion.div animate={{ rotate: neuralExpanded ? 90 : 0 }}>
-                  <ChevronRight size={14} className="text-muted-foreground" />
-                </motion.div>
+                <div className="flex items-center gap-1.5">
+                  {(() => {
+                    let total = 0;
+                    SUGGESTION_CATEGORIES.forEach(cat => { total += ((persona[cat.field] as string[]) || []).length; });
+                    return total > 0 ? (
+                      <motion.span
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="text-[9px] font-black text-white bg-agni-purple rounded-full w-5 h-5 flex items-center justify-center shadow-md"
+                      >
+                        {total}
+                      </motion.span>
+                    ) : null;
+                  })()}
+                  <motion.div animate={{ rotate: neuralExpanded ? 90 : 0 }}>
+                    <ChevronRight size={14} className="text-muted-foreground" />
+                  </motion.div>
+                </div>
               </motion.button>
 
               <AnimatePresence>
@@ -395,6 +414,22 @@ const SettingsPage = () => {
                               {v.emoji} {v.label}
                             </button>
                           ))}
+                          {/* Custom vibe input */}
+                          <div className="w-full mt-1">
+                            <input
+                              type="text"
+                              placeholder="✨ Type your own..."
+                              className="w-full bg-muted/20 border border-dashed border-agni-orange/25 rounded-xl px-2.5 py-1.5 text-[10px] font-bold text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-agni-orange/50"
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" && (e.target as HTMLInputElement).value.trim()) {
+                                  const val = (e.target as HTMLInputElement).value.trim();
+                                  const updated = savePersona({ vibe: val });
+                                  setPersonaState(updated);
+                                  (e.target as HTMLInputElement).value = "";
+                                }
+                              }}
+                            />
+                          </div>
                         </div>
                       </div>
 
