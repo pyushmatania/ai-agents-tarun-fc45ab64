@@ -555,11 +555,23 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
             >
               <Pencil size={8} /> Edit
             </motion.button>
-            {groups.map((g, i) => (
-              <span key={i} className="shrink-0 text-[8px] font-bold text-muted-foreground bg-card border border-border/30 px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap">
-                <span>{g.emoji}</span>{g.items.join(", ")}
+            {groups.map((g, i) =>
+              g.items.slice(0, 2).map((item, idx) => (
+                <div key={`${i}-${idx}`} className="shrink-0">
+                  <InterestPill
+                    name={item}
+                    categoryId={g.catId || "shows"}
+                    index={idx}
+                    compact
+                  />
+                </div>
+              ))
+            )}
+            {groups.reduce((sum, g) => sum + g.items.length, 0) > groups.length * 2 && (
+              <span className="shrink-0 text-[8px] font-bold text-muted-foreground/60">
+                +{groups.reduce((sum, g) => sum + Math.max(0, g.items.length - 2), 0)} more
               </span>
-            ))}
+            )}
           </motion.div>
         ) : (
           <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} whileTap={{ scale: 0.95 }}
