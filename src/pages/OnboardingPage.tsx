@@ -344,6 +344,26 @@ const OnboardingPage = () => {
                   );
                 })}
               </div>
+
+              {/* Custom role */}
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
+                className={`mt-2.5 p-3 rounded-2xl border-2 transition-all ${
+                  selectedRole === "custom" ? "border-agni-green bg-agni-green/10 shadow-glow-green" : "border-dashed border-agni-purple/30 bg-agni-purple/5"
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xl">✏️</span>
+                  <span className="text-xs font-extrabold text-foreground">Something else?</span>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Type your role..."
+                  value={customRole}
+                  onChange={(e) => { setCustomRole(e.target.value); if (e.target.value.trim()) setSelectedRole("custom"); }}
+                  onFocus={() => { if (customRole.trim()) setSelectedRole("custom"); }}
+                  className="w-full bg-card border border-border/40 rounded-xl px-3 py-2 text-xs font-bold text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-agni-green/50"
+                />
+              </motion.div>
             </div>
 
             <Button onClick={goNext} disabled={!selectedRole} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none mt-3">
