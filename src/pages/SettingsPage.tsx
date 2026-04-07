@@ -8,9 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { LogOut, Moon, Sun, ChevronRight, Shield, Bell, Loader2, LogIn, Brain, Key, Check, Eye, EyeOff, Zap, Diamond, Heart, Flame, Trash2 } from "lucide-react";
+import { LogOut, Moon, Sun, ChevronRight, Shield, Bell, Loader2, LogIn, Brain, Key, Check, Eye, EyeOff, Zap, Diamond, Heart, Flame, Trash2, Sparkles, X, Plus, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BUILT_IN_MODELS, BYOK_PROVIDERS, getAIConfig, saveAIConfig, type AIConfig } from "@/lib/aiConfig";
+import { getPersona, savePersona, SUGGESTION_CATEGORIES, type NeuralOSPersona } from "@/lib/neuralOS";
 import Agni from "@/components/Agni";
 import { useGamification } from "@/hooks/useGamification";
 import { SFX } from "@/lib/sounds";
@@ -28,6 +29,13 @@ const SettingsPage = () => {
   const [aiConfig, setAiConfig] = useState<AIConfig>(getAIConfig());
   const [showApiKey, setShowApiKey] = useState(false);
   const [aiExpanded, setAiExpanded] = useState(false);
+
+  // Neural OS state
+  const [persona, setPersona] = useState<NeuralOSPersona>(getPersona());
+  const [neuralExpanded, setNeuralExpanded] = useState(false);
+  const [activeCatId, setActiveCatId] = useState<string | null>(null);
+  const [neuralSearch, setNeuralSearch] = useState("");
+  const [neuralCustom, setNeuralCustom] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -311,7 +319,217 @@ const SettingsPage = () => {
             </div>
           </FadeIn>
 
-          {/* Preferences */}
+          {/* Neural OS Personality */}
+          <FadeIn delay={0.18}>
+            <div className="bg-card rounded-2xl border border-border/40 mb-3 shadow-card overflow-hidden">
+              <motion.button
+                whileTap={{ scale: 0.99 }}
+                onClick={() => setNeuralExpanded(!neuralExpanded)}
+                className="flex items-center justify-between w-full p-3.5"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-md"
+                    style={{ background: "linear-gradient(135deg, #FF9600, #FF4B91)" }}
+                  >
+                    <Sparkles size={16} className="text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-extrabold text-foreground text-xs">Neural OS Personality</p>
+                    <p className="text-[10px] text-muted-foreground font-semibold">
+                      {persona.vibe ? `Vibe: ${persona.vibe}` : "Not configured"} • {(persona.shows?.length || 0) + (persona.sports?.length || 0) + (persona.music?.length || 0)} interests
+                    </p>
+                  </div>
+                </div>
+                <motion.div animate={{ rotate: neuralExpanded ? 90 : 0 }}>
+                  <ChevronRight size={14} className="text-muted-foreground" />
+                </motion.div>
+              </motion.button>
+
+              <AnimatePresence>
+                {neuralExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-3.5 pb-3.5 space-y-3">
+                      {/* Vibe selector */}
+                      <div>
+                        <p className="text-micro text-muted-foreground mb-1.5">LEARNING VIBE</p>
+                        <div className="flex gap-1.5 flex-wrap">
+                          {[
+                            { id: "fun", label: "Fun & memes", emoji: "😂" },
+                            { id: "story", label: "Story-driven", emoji: "📖" },
+                            { id: "serious", label: "Serious", emoji: "🧠" },
+                            { id: "fast", label: "Fast & practical", emoji: "⚡" },
+                          ].map(v => (
+                            <button key={v.id} onClick={() => {
+                              const updated = savePersona({ vibe: v.id });
+                              setPersona(updated);
+                            }}
+                              className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${
+                                persona.vibe === v.id
+                                  ? "bg-agni-orange/10 border-agni-orange/30 text-agni-orange"
+                                  : "bg-muted/30 border-border/40 text-muted-foreground"
+                              }`}
+                            >
+                              {v.emoji} {v.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Depth preference */}
+                      <div>
+                        <p className="text-micro text-muted-foreground mb-1.5">PREFERRED DEPTH</p>
+                        <div className="flex gap-1.5">
+                          {(["basic", "normal", "deep"] as const).map(d => (
+                            <button key={d} onClick={() => {
+                              const updated = savePersona({ preferredDepth: d });
+                              setPersona(updated);
+                            }}
+                              className={`flex-1 px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all capitalize ${
+                                persona.preferredDepth === d
+                                  ? "bg-agni-purple/10 border-agni-purple/30 text-agni-purple"
+                                  : "bg-muted/30 border-border/40 text-muted-foreground"
+                              }`}
+                            >
+                              {d === "basic" ? "🌱" : d === "normal" ? "🌿" : "🌳"} {d}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Interest categories */}
+                      <div>
+                        <p className="text-micro text-muted-foreground mb-1.5">YOUR INTERESTS</p>
+                        <div className="flex gap-1.5 flex-wrap">
+                          {SUGGESTION_CATEGORIES.map(cat => {
+                            const items = (persona[cat.field] as string[]) || [];
+                            return (
+                              <button key={cat.id} onClick={() => setActiveCatId(activeCatId === cat.id ? null : cat.id)}
+                                className={`px-2 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${
+                                  activeCatId === cat.id
+                                    ? "bg-agni-green/10 border-agni-green/30 text-agni-green"
+                                    : "bg-muted/30 border-border/40 text-muted-foreground"
+                                }`}
+                              >
+                                {cat.emoji} {cat.label} {items.length > 0 && <span className="text-[8px] ml-0.5 opacity-70">({items.length})</span>}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Active category detail */}
+                      <AnimatePresence mode="wait">
+                        {activeCatId && (() => {
+                          const cat = SUGGESTION_CATEGORIES.find(c => c.id === activeCatId);
+                          if (!cat) return null;
+                          const field = cat.field as keyof NeuralOSPersona;
+                          const selected = (persona[field] as string[]) || [];
+                          const filtered = neuralSearch
+                            ? cat.suggestions.filter(s => s.name.toLowerCase().includes(neuralSearch.toLowerCase()))
+                            : cat.suggestions;
+
+                          const toggleItem = (name: string) => {
+                            const updated = selected.includes(name) ? selected.filter(x => x !== name) : [...selected, name];
+                            const newPersona = savePersona({ [field]: updated });
+                            setPersona(newPersona);
+                          };
+
+                          const addCustomItem = () => {
+                            if (!neuralCustom.trim() || selected.includes(neuralCustom.trim())) return;
+                            const updated = [...selected, neuralCustom.trim()];
+                            const newPersona = savePersona({ [field]: updated });
+                            setPersona(newPersona);
+                            setNeuralCustom("");
+                          };
+
+                          return (
+                            <motion.div key={activeCatId}
+                              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                              className="bg-muted/20 rounded-xl p-3 space-y-2"
+                            >
+                              <div className="flex items-center justify-between">
+                                <p className="text-[11px] font-black text-foreground">{cat.emoji} {cat.label}</p>
+                                <button onClick={() => setActiveCatId(null)}>
+                                  <X size={12} className="text-muted-foreground" />
+                                </button>
+                              </div>
+
+                              {/* Search */}
+                              <div className="relative">
+                                <Search size={10} className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                                <input value={neuralSearch} onChange={e => setNeuralSearch(e.target.value)}
+                                  placeholder={`Search ${cat.label.toLowerCase()}...`}
+                                  className="w-full h-7 pl-6 pr-2 bg-card border border-border/30 rounded-lg text-[10px] text-foreground placeholder:text-muted-foreground focus:outline-none"
+                                />
+                              </div>
+
+                              {/* Selected chips */}
+                              {selected.length > 0 && (
+                                <div className="flex flex-wrap gap-1">
+                                  {selected.map(s => (
+                                    <span key={s} onClick={() => toggleItem(s)}
+                                      className="text-[9px] font-bold bg-agni-green/15 text-agni-green px-2 py-0.5 rounded-full cursor-pointer flex items-center gap-0.5"
+                                    >
+                                      {s} <X size={8} />
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* Suggestions grid */}
+                              <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
+                                {filtered.map(s => (
+                                  <button key={s.name} onClick={() => toggleItem(s.name)}
+                                    className={`text-[9px] font-bold px-2 py-1 rounded-lg border transition-all ${
+                                      selected.includes(s.name)
+                                        ? "bg-agni-green/10 border-agni-green/30 text-agni-green"
+                                        : "bg-card border-border/30 text-muted-foreground"
+                                    }`}
+                                  >
+                                    {s.emoji || ""} {s.name}
+                                  </button>
+                                ))}
+                              </div>
+
+                              {/* Add custom */}
+                              <div className="flex gap-1.5">
+                                <input value={neuralCustom} onChange={e => setNeuralCustom(e.target.value)}
+                                  onKeyDown={e => e.key === "Enter" && addCustomItem()}
+                                  placeholder="Add custom..."
+                                  className="flex-1 h-7 px-2 bg-card border border-border/30 rounded-lg text-[10px] text-foreground placeholder:text-muted-foreground focus:outline-none"
+                                />
+                                <button onClick={addCustomItem}
+                                  className="h-7 w-7 rounded-lg bg-agni-green/15 flex items-center justify-center"
+                                >
+                                  <Plus size={12} className="text-agni-green" />
+                                </button>
+                              </div>
+                            </motion.div>
+                          );
+                        })()}
+                      </AnimatePresence>
+
+                      {/* Re-do onboarding button */}
+                      <button onClick={() => {
+                        localStorage.removeItem("edu_onboarded");
+                        navigate("/welcome");
+                      }}
+                        className="w-full text-[10px] font-bold text-agni-blue flex items-center justify-center gap-1 py-1.5"
+                      >
+                        🔄 Re-do full onboarding
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </FadeIn>
+
           <FadeIn delay={0.2}>
             <div className="bg-card rounded-2xl border border-border/40 overflow-hidden mb-3 shadow-card">
               <div className="flex items-center justify-between p-3.5 border-b border-border/30">
