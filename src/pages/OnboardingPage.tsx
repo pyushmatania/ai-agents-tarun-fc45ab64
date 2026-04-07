@@ -1024,10 +1024,14 @@ const OnboardingPage = () => {
             </div>
 
             <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#F3E5F5] via-[#F3E5F5]/95 to-transparent">
-              <Button onClick={goNext} disabled={!selectedVibe}
-                className="w-full h-14 rounded-full bg-[#E91E63] hover:bg-[#C2185B] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
-                Continue <ArrowRight size={18} className="ml-2" />
-              </Button>
+              <div className="flex gap-3">
+                <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-full bg-white/80 border-2 border-white/50 text-gray-700 text-sm font-bold shadow-sm">Skip</Button>
+                <Button onClick={goNext} disabled={!selectedVibe}
+                  className="flex-1 h-14 rounded-full bg-[#E91E63] hover:bg-[#C2185B] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
+                  Continue <ArrowRight size={18} className="ml-2" />
+                </Button>
+              </div>
+              <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip all → set up later in Settings</button>
             </div>
           </motion.div>
         )}
@@ -1110,10 +1114,14 @@ const OnboardingPage = () => {
             </div>
 
             <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#E1F5FE] via-[#E1F5FE]/95 to-transparent">
-              <Button onClick={goNext} disabled={!selectedBrain}
-                className="w-full h-14 rounded-full bg-[#3F51B5] hover:bg-[#303F9F] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
-                Continue <ArrowRight size={18} className="ml-2" />
-              </Button>
+              <div className="flex gap-3">
+                <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-full bg-white/80 border-2 border-white/50 text-gray-700 text-sm font-bold shadow-sm">Skip</Button>
+                <Button onClick={goNext} disabled={!selectedBrain}
+                  className="flex-1 h-14 rounded-full bg-[#3F51B5] hover:bg-[#303F9F] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
+                  Continue <ArrowRight size={18} className="ml-2" />
+                </Button>
+              </div>
+              <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip all → set up later in Settings</button>
             </div>
           </motion.div>
         )}
@@ -1186,6 +1194,7 @@ const OnboardingPage = () => {
               <Button onClick={goNext} className="w-full h-14 rounded-full bg-[#58CC02] hover:bg-[#4CAD02] text-white font-extrabold text-base shadow-lg">
                 LET'S DO THIS 🔥 <ArrowRight size={18} className="ml-2" />
               </Button>
+              <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip all → set up later in Settings</button>
             </div>
           </motion.div>
         )}
@@ -1420,7 +1429,6 @@ const OnboardingPage = () => {
                 </div>
               </div>
 
-              {/* Bottom actions */}
               <div className="flex gap-3 shrink-0">
                 <Button onClick={goNext} variant="outline" className="flex-1 h-12 rounded-2xl border-2 border-border text-sm font-bold">Skip</Button>
                 <Button onClick={goNext} className="flex-1 h-12 rounded-2xl bg-agni-green text-white font-extrabold text-sm shadow-btn-3d btn-3d">
@@ -1431,6 +1439,7 @@ const OnboardingPage = () => {
                   )}
                 </Button>
               </div>
+              <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-muted-foreground hover:text-foreground transition-colors">Skip all → set up later in Settings</button>
             </div>
           </motion.div>
         )}
