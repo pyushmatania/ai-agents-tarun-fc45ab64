@@ -5,14 +5,15 @@ import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Mail, Lock, User, ArrowRight, Eye, EyeOff, ArrowLeft, Sparkles } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Eye, EyeOff, ArrowLeft, Sparkles, CheckCircle, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MascotRobot from "@/components/MascotRobot";
 
-type AuthView = "signin" | "signup" | "forgot";
+type AuthView = "signin" | "signup" | "forgot" | "verify";
 
 const AuthPage = () => {
   const [view, setView] = useState<AuthView>("signin");
+  const [signupEmail, setSignupEmail] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -20,10 +21,11 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const mascotMood = view === "signup" ? "excited" : view === "forgot" ? "thinking" : "waving";
+  const mascotMood = view === "signup" ? "excited" : view === "forgot" ? "thinking" : view === "verify" ? "celebrating" : "waving";
   const mascotSpeech =
     view === "signin" ? "Welcome back, learner! 🔥" :
     view === "signup" ? "Let's start your journey! 🚀" :
+    view === "verify" ? "Check your inbox! 📬" :
     "No worries, I got you! 🤝";
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,7 +55,8 @@ const AuthPage = () => {
           },
         });
         if (error) throw error;
-        toast.success("Account created! Check your email to verify.");
+        setSignupEmail(email);
+        setView("verify");
       }
     } catch (error: any) {
       toast.error(error.message);
@@ -109,6 +112,69 @@ const AuthPage = () => {
             transition={{ duration: 0.25 }}
             className="flex-1 flex flex-col"
           >
+            {/* Email Verification Screen */}
+            {view === "verify" ? (
+              <div className="flex-1 flex flex-col items-center justify-center text-center gap-5 py-8">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
+                  className="w-20 h-20 rounded-3xl bg-primary/10 border-2 border-primary/20 flex items-center justify-center"
+                >
+                  <Mail size={36} className="text-primary" />
+                </motion.div>
+
+                <div>
+                  <h2 className="text-xl font-bold text-foreground mb-2">Verify Your Email</h2>
+                  <p className="text-sm text-muted-foreground leading-relaxed max-w-[280px]">
+                    We sent a verification link to
+                  </p>
+                  <p className="text-sm font-bold text-primary mt-1">{signupEmail}</p>
+                </div>
+
+                <div className="bg-card border border-border/20 rounded-2xl p-4 max-w-[300px] space-y-2">
+                  <div className="flex items-start gap-2.5">
+                    <CheckCircle size={16} className="text-primary mt-0.5 shrink-0" />
+                    <p className="text-xs text-muted-foreground text-left">Open the email and tap the verification link</p>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <CheckCircle size={16} className="text-primary mt-0.5 shrink-0" />
+                    <p className="text-xs text-muted-foreground text-left">You'll be redirected back to sign in</p>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <CheckCircle size={16} className="text-primary mt-0.5 shrink-0" />
+                    <p className="text-xs text-muted-foreground text-left">Check spam folder if you don't see it</p>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={() => {
+                    setView("signin");
+                    toast.success("Ready to sign in!");
+                  }}
+                  className="w-full max-w-[280px] h-13 rounded-2xl bg-primary text-primary-foreground font-bold text-sm hover:brightness-110 shadow-lg shadow-primary/20"
+                >
+                  Go to Sign In
+                  <ArrowRight size={17} className="ml-2" />
+                </Button>
+
+                <button
+                  onClick={async () => {
+                    try {
+                      await supabase.auth.resend({ type: "signup", email: signupEmail });
+                      toast.success("Verification email resent!");
+                    } catch {
+                      toast.error("Failed to resend. Try again.");
+                    }
+                  }}
+                  className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <RefreshCw size={12} />
+                  Resend verification email
+                </button>
+              </div>
+            ) : (
+            <>
             {/* View Title */}
             <div className="flex items-center gap-3 mb-5">
               {view === "forgot" && (
@@ -267,6 +333,8 @@ const AuthPage = () => {
                 <Sparkles size={14} className="text-secondary" />
                 <span>Earn <span className="text-secondary font-bold">+50 XP</span> on signup!</span>
               </motion.div>
+            )}
+            </>
             )}
           </motion.div>
         </AnimatePresence>
