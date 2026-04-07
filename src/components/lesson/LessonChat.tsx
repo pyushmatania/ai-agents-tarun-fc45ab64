@@ -6,6 +6,7 @@ import type { AgniExpression } from "@/components/Agni";
 import { SFX } from "@/lib/sounds";
 import { getAIConfig } from "@/lib/aiConfig";
 import { getPersona } from "@/lib/neuralOS";
+import { InterestPill } from "@/components/InterestPill";
 import MascotProfileModal from "@/components/MascotProfileModal";
 
 interface Message {
@@ -32,6 +33,12 @@ const MODES = [
   { key: "hacker", label: "Hacker", emoji: "⚡" },
   { key: "crazy", label: "Crazy", emoji: "🤯" },
   { key: "semiconductor", label: "Semi", emoji: "🏭" },
+  { key: "fun", label: "Fun", emoji: "🎮" },
+  { key: "story", label: "Story", emoji: "📖" },
+  { key: "visual", label: "Visual", emoji: "🎨" },
+  { key: "eli5", label: "ELI5", emoji: "🍼" },
+  { key: "debate", label: "Debate", emoji: "🥊" },
+  { key: "researcher", label: "Research", emoji: "🔬" },
 ];
 
 interface PowerUp {
