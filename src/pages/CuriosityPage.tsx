@@ -808,7 +808,7 @@ const CuriosityPage = () => {
                             className="rounded-2xl bg-card border-2 border-border/20 overflow-hidden"
                           >
                             {/* Thumbnail */}
-                            <a href={item.url} target="_blank" rel="noopener noreferrer" className="block">
+                            <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={() => markViewed(i)} className="block">
                               {meta.thumbnail ? (
                                 <div className="relative w-full h-44 bg-muted/10">
                                   <img src={meta.thumbnail} alt="" className="w-full h-full object-cover" />
