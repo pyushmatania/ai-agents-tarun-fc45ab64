@@ -32,11 +32,18 @@ const SettingsPage = () => {
   const [aiExpanded, setAiExpanded] = useState(false);
 
   // Neural OS state
-  const [persona, setPersona] = useState<NeuralOSPersona>(getPersona());
+  const [persona, setPersonaState] = useState<NeuralOSPersona>(getPersona());
   const [neuralExpanded, setNeuralExpanded] = useState(false);
   const [activeCatId, setActiveCatId] = useState<string | null>(null);
   const [neuralSearch, setNeuralSearch] = useState("");
   const [neuralCustom, setNeuralCustom] = useState("");
+
+  // Re-sync persona when page gains focus (e.g. after editing in modal elsewhere)
+  useEffect(() => {
+    const sync = () => setPersonaState(getPersona());
+    window.addEventListener("focus", sync);
+    return () => window.removeEventListener("focus", sync);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
