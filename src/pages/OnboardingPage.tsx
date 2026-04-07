@@ -668,6 +668,8 @@ const OnboardingPage = () => {
                   CONTINUE <ArrowRight size={18} className="ml-2" />
                 </Button>
               </div>
+              <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip all → set up later in Settings</button>
+            </div>
             </div>
           </motion.div>
         )}
@@ -742,10 +744,14 @@ const OnboardingPage = () => {
             </div>
 
             <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#FADADD] via-[#FADADD]/95 to-transparent">
-              <Button onClick={goNext} disabled={!selectedRole || (selectedRole === "custom" && !customRole.trim())}
-                className="w-full h-14 rounded-full bg-[#7C5CBF] hover:bg-[#6A4DAF] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
-                Continue <ArrowRight size={18} className="ml-2" />
-              </Button>
+              <div className="flex gap-3">
+                <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-full bg-white/80 border-2 border-white/50 text-gray-700 text-sm font-bold shadow-sm">Skip</Button>
+                <Button onClick={goNext} disabled={!selectedRole || (selectedRole === "custom" && !customRole.trim())}
+                  className="flex-1 h-14 rounded-full bg-[#7C5CBF] hover:bg-[#6A4DAF] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
+                  Continue <ArrowRight size={18} className="ml-2" />
+                </Button>
+              </div>
+              <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip all → set up later in Settings</button>
             </div>
           </motion.div>
         )}
@@ -828,6 +834,7 @@ const OnboardingPage = () => {
                   CONTINUE <ArrowRight size={18} className="ml-2" />
                 </Button>
               </div>
+              <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip all → set up later in Settings</button>
             </div>
           </motion.div>
         )}
@@ -883,10 +890,14 @@ const OnboardingPage = () => {
             </div>
 
             <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#FFE0B2] via-[#FFE0B2]/95 to-transparent">
-              <Button onClick={goNext} disabled={!selectedMission}
-                className="w-full h-14 rounded-full bg-[#D4A853] hover:bg-[#C49A48] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
-                Continue <ArrowRight size={18} className="ml-2" />
-              </Button>
+              <div className="flex gap-3">
+                <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-full bg-white/80 border-2 border-white/50 text-gray-700 text-sm font-bold shadow-sm">Skip</Button>
+                <Button onClick={goNext} disabled={!selectedMission}
+                  className="flex-1 h-14 rounded-full bg-[#D4A853] hover:bg-[#C49A48] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
+                  Continue <ArrowRight size={18} className="ml-2" />
+                </Button>
+              </div>
+              <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip all → set up later in Settings</button>
             </div>
           </motion.div>
         )}
@@ -952,7 +963,7 @@ const OnboardingPage = () => {
                   CONTINUE <ArrowRight size={18} className="ml-2" />
                 </Button>
               </div>
-            </div>
+              <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip all → set up later in Settings</button>
           </motion.div>
         )}
 
