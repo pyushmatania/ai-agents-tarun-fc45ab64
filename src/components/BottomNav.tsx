@@ -16,6 +16,18 @@ const tabs = [
 const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [modeId, setModeId] = useState(() => localStorage.getItem("teaching_mode") || "engineer");
+
+  // Listen for storage changes from other components
+  useEffect(() => {
+    const handler = () => setModeId(localStorage.getItem("teaching_mode") || "engineer");
+    window.addEventListener("storage", handler);
+    // Also poll on route change
+    handler();
+    return () => window.removeEventListener("storage", handler);
+  }, [location.pathname]);
+
+  const modeInfo = TEACHING_MODE_MAP[modeId] || TEACHING_MODE_MAP.engineer;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50">
