@@ -35,43 +35,35 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
         <div className="w-64 h-64 rounded-full bg-agni-green/10 blur-[80px]" />
       </div>
 
-      {/* Neural-OS Logo */}
+      {/* Cinematic Neural-OS Logo */}
       <motion.div
-        initial={{ scale: 0, rotate: -20 }}
-        animate={{ scale: 1, rotate: 0 }}
-        transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
+        initial={{ scale: 0.7, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 120, damping: 20, delay: 0.2 }}
+        className="px-8"
       >
-        <img src={neuralLogo} alt="Neural-OS" width={120} height={120} className="drop-shadow-[0_0_30px_hsl(var(--agni-green)/0.4)]" />
-      </motion.div>
-
-      {/* Wordmark typewriter */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="mt-6 flex items-center"
-      >
-        <h1 className="text-4xl font-black text-foreground tracking-tight">
-          {wordmark}
-          <motion.span
-            animate={{ opacity: [1, 0] }}
-            transition={{ duration: 0.5, repeat: Infinity }}
-            className="text-agni-green"
-          >
-            |
-          </motion.span>
-        </h1>
+        <img src={neuralLogo} alt="Neural-OS" width={320} height={320} className="drop-shadow-[0_0_60px_hsl(var(--agni-green)/0.3)]" />
       </motion.div>
 
       {/* Tagline */}
       <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
-        className="text-xs text-muted-foreground font-semibold mt-2"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.2 }}
+        className="text-xs text-muted-foreground font-semibold mt-1 tracking-[0.2em] uppercase"
       >
         The operating system of becoming
       </motion.p>
+
+      {/* Version badge */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.6 }}
+        className="mt-3 text-[9px] text-muted-foreground/50 font-mono tracking-widest"
+      >
+        v1.0 "TERMINATOR"
+      </motion.div>
 
       {/* Loading dots */}
       <motion.div
