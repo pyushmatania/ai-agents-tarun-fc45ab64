@@ -168,10 +168,16 @@
   * {
     @apply border-border;
   }
+  html, body {
+    overflow-x: hidden;
+    overscroll-behavior: none;
+  }
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Nunito', system-ui, sans-serif;
     background-attachment: fixed;
+    -webkit-text-size-adjust: 100%;
+    touch-action: pan-y;
   }
   :root body {
     background-image:
