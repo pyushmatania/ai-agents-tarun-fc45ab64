@@ -52,6 +52,7 @@ export default function ChatPage() {
 
   const initialTab = (location.state as any)?.tab || "general";
   const prefill = (location.state as any)?.prefill || "";
+  const autoSend = (location.state as any)?.autoSend || false;
   const [activeTab, setActiveTab] = useState<ChatTab>(initialTab);
   const [activeMode, setActiveMode] = useState(() => {
     const saved = localStorage.getItem("teaching_mode");
@@ -63,6 +64,7 @@ export default function ChatPage() {
   const chat = useChat(activeTab);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState(prefill);
+  const hasAutoSent = useRef(false);
 
   // Build teaching context LIVE on each send (not memoized — selections change without re-render)
   const buildTeachingContext = () => {

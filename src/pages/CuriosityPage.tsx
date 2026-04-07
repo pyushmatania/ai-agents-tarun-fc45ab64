@@ -272,8 +272,16 @@ function AILearnModal({ item, onClose }: { item: any; onClose: () => void }) {
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={() => {
+                  // Build a summary string from the AI result
+                  const summaryParts: string[] = [];
+                  summaryParts.push(`Topic: ${item.title}`);
+                  if (result.summary) summaryParts.push(`Summary: ${result.summary}`);
+                  if (result.keyPoints?.length) summaryParts.push(`Key Points:\n${result.keyPoints.map((p: string, i: number) => `${i + 1}. ${p}`).join("\n")}`);
+                  if (result.concepts?.length) summaryParts.push(`Key Concepts:\n${result.concepts.map((c: any) => `• ${c.term}: ${c.explanation}`).join("\n")}`);
+                  if (result.actionItems?.length) summaryParts.push(`Action Items:\n${result.actionItems.map((a: string) => `• ${a}`).join("\n")}`);
+                  const fullSummary = summaryParts.join("\n\n");
                   onClose();
-                  navigate("/chat", { state: { tab: "curriculum", prefill: `Explain this in detail: "${item.title}"` } });
+                  navigate("/chat", { state: { tab: "curriculum", prefill: `I just read this summary, help me dive deeper:\n\n${fullSummary}`, autoSend: true } });
                 }}
                 className="w-full py-3 rounded-2xl bg-gradient-to-r from-agni-green to-agni-blue text-white text-[12px] font-black flex items-center justify-center gap-2 mt-2 shadow-lg"
               >
