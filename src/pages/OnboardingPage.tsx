@@ -168,7 +168,7 @@ const OnboardingPage = () => {
   const finish = () => {
     const role = ROLES.find(r => r.id === selectedRole);
     const roleLabel = selectedRole === "custom" ? customRole.trim() : role?.label;
-    const depthMap: Record<string, string> = { chill: "basic", explorer: "normal", pro: "deep", hacker: "deep", scientist: "deep", professor: "deep" };
+    const depthMap: Record<string, string> = { chill: "basic", sprout: "basic", explorer: "normal", builder: "normal", pro: "deep", hacker: "deep", scientist: "deep", professor: "deep", architect_brain: "deep", researcher: "deep", demon: "deep", class5: "basic", class8: "basic", class10: "normal", class12: "normal", college_fresh: "normal", college_senior: "deep", masters: "deep", uni_professor: "deep" };
     savePersona({
       ...persona,
       name: name.trim(),
@@ -179,12 +179,13 @@ const OnboardingPage = () => {
       currentRole: roleLabel,
       completedAt: new Date().toISOString(),
     });
-    // Save teaching selections
+    // Save all 4 teaching dimension selections
+    if (selectedRole) setTeachingSelection("identity", selectedRole);
     if (selectedMission) setTeachingSelection("mission", selectedMission);
     if (selectedVibe) setTeachingSelection("vibe", selectedVibe);
     if (selectedBrain) setTeachingSelection("brain", selectedBrain);
     localStorage.setItem("edu_user_name", name.trim());
-    localStorage.setItem("edu_user_role", selectedRole || "curious");
+    localStorage.setItem("edu_user_role", selectedRole || "student");
     localStorage.setItem("edu_onboarded", "true");
     navigate("/");
   };
