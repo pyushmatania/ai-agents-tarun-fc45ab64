@@ -235,14 +235,17 @@ const CourseDetailPage = () => {
     }
   }, [activeMode, lesson]);
 
-  const handleSend = (text?: string) => {
+  const handleSend = (text?: string, hiddenPrompt?: string) => {
     const msg = text || input.trim();
     if (!msg || isLoading) return;
-    const userMsg: Message = { role: "user", content: msg };
-    const updated = [...messages, userMsg];
-    setMessages(updated);
+    const displayMsg: Message = { role: "user", content: msg };
+    const aiMsg: Message = { role: "user", content: hiddenPrompt || msg };
+    const updatedDisplay = [...messages, displayMsg];
+    setMessages(updatedDisplay);
     setInput("");
-    sendToAI(updated);
+    // Send with hidden prompt to AI but display clean text
+    const updatedForAI = [...messages, aiMsg];
+    sendToAI(updatedForAI);
   };
 
   const handleStop = () => {
