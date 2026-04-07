@@ -382,7 +382,7 @@ const SettingsPage = () => {
                           ].map(v => (
                             <button key={v.id} onClick={() => {
                               const updated = savePersona({ vibe: v.id });
-                              setPersona(updated);
+                              setPersonaState(updated);
                             }}
                               className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${
                                 persona.vibe === v.id
@@ -403,7 +403,7 @@ const SettingsPage = () => {
                           {(["basic", "normal", "deep"] as const).map(d => (
                             <button key={d} onClick={() => {
                               const updated = savePersona({ preferredDepth: d });
-                              setPersona(updated);
+                              setPersonaState(updated);
                             }}
                               className={`flex-1 px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all capitalize ${
                                 persona.preferredDepth === d
@@ -452,14 +452,14 @@ const SettingsPage = () => {
                           const toggleItem = (name: string) => {
                             const updated = selected.includes(name) ? selected.filter(x => x !== name) : [...selected, name];
                             const newPersona = savePersona({ [field]: updated });
-                            setPersona(newPersona);
+                            setPersonaState(newPersona);
                           };
 
                           const addCustomItem = () => {
                             if (!neuralCustom.trim() || selected.includes(neuralCustom.trim())) return;
                             const updated = [...selected, neuralCustom.trim()];
                             const newPersona = savePersona({ [field]: updated });
-                            setPersona(newPersona);
+                            setPersonaState(newPersona);
                             setNeuralCustom("");
                           };
 
@@ -483,7 +483,7 @@ const SettingsPage = () => {
                                     if (e.key === "Enter" && neuralSearch.trim() && !selected.includes(neuralSearch.trim())) {
                                       const updated = [...selected, neuralSearch.trim()];
                                       const newPersona = savePersona({ [field]: updated });
-                                      setPersona(newPersona);
+                                      setPersonaState(newPersona);
                                       setNeuralSearch("");
                                     }
                                   }}
@@ -511,7 +511,7 @@ const SettingsPage = () => {
                                   if (!selected.includes(neuralSearch.trim())) {
                                     const updated = [...selected, neuralSearch.trim()];
                                     const newPersona = savePersona({ [field]: updated });
-                                    setPersona(newPersona);
+                                    setPersonaState(newPersona);
                                   }
                                   setNeuralSearch("");
                                 }}
