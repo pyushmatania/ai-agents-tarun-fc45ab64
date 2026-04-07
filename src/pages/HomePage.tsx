@@ -14,6 +14,7 @@ import { SFX } from "@/lib/sounds";
 import { toast } from "sonner";
 import { getPersona } from "@/lib/neuralOS";
 import { supabase } from "@/integrations/supabase/client";
+import { InterestPill } from "@/components/InterestPill";
 
 const DAILY_TIPS = [
   { tip: "AI agents use a Perceive→Reason→Act loop — just like humans!", emoji: "🧠" },
@@ -483,11 +484,18 @@ const HomePage = () => {
                 </span>
               </div>
               {personaItemCount > 0 ? (
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1.5">
                   {persona.currentRole && <span className="text-[9px] font-bold text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">💼 {persona.currentRole}</span>}
-                  {persona.shows?.slice(0, 2).map(s => <span key={s} className="text-[9px] font-bold text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">🎬 {s}</span>)}
-                  {persona.sports?.slice(0, 2).map(s => <span key={s} className="text-[9px] font-bold text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">⚽ {s}</span>)}
-                  {personaItemCount > 4 && <span className="text-[9px] font-bold text-agni-purple/60">+{personaItemCount - 4} more</span>}
+                  {persona.shows?.slice(0, 2).map((s, i) => (
+                    <InterestPill key={s} name={s} categoryId="shows" index={i} compact />
+                  ))}
+                  {persona.sports?.slice(0, 2).map((s, i) => (
+                    <InterestPill key={s} name={s} categoryId="sports" index={i} compact />
+                  ))}
+                  {persona.music?.slice(0, 1).map((s, i) => (
+                    <InterestPill key={s} name={s} categoryId="music" index={i} compact />
+                  ))}
+                  {personaItemCount > 5 && <span className="text-[9px] font-bold text-agni-purple/60 self-center">+{personaItemCount - 5} more</span>}
                 </div>
               ) : (
                 <p className="text-[10px] text-muted-foreground font-semibold">Tap to set up — AGNI personalizes every lesson for you ✨</p>

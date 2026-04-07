@@ -12,6 +12,7 @@ import {
 import Agni from "@/components/Agni";
 import { getSuggestionImage, getPillColor } from "@/lib/suggestionImages";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { InterestPill } from "@/components/InterestPill";
 import type { AgniExpression } from "@/components/Agni";
 import { motion, AnimatePresence } from "framer-motion";
 import { savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona } from "@/lib/neuralOS";
@@ -654,67 +655,23 @@ const OnboardingPage = () => {
               {/* Suggestions — Colorful Pills */}
               <div className="flex-1 overflow-y-auto -mx-1 px-1 mb-2 scrollbar-none">
                 <div className="flex flex-wrap gap-2">
-                  {filtered.map((s, i) => {
-                    const selected = currentItems.includes(s.name);
-                    const pillColor = getPillColor(activeCategory.id, i);
-                    const imageUrl = getSuggestionImage(s.name, activeCategory.id);
-
-                    return (
-                      <motion.button
-                        key={s.name}
-                        initial={{ opacity: 0, scale: 0.85 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: Math.min(i * 0.015, 0.25), type: "spring", stiffness: 300, damping: 20 }}
-                        whileTap={{ scale: 0.9 }}
+                  {filtered.map((s, i) => (
+                    <motion.div
+                      key={s.name}
+                      initial={{ opacity: 0, scale: 0.85 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: Math.min(i * 0.015, 0.25), type: "spring", stiffness: 300, damping: 20 }}
+                    >
+                      <InterestPill
+                        name={s.name}
+                        emoji={s.emoji}
+                        categoryId={activeCategory.id}
+                        index={i}
+                        selected={currentItems.includes(s.name)}
                         onClick={() => toggleItem(s.name)}
-                        className="relative flex items-center gap-1.5 rounded-full transition-all duration-200"
-                        style={{
-                          background: selected ? pillColor : `${pillColor}18`,
-                          border: `2px solid ${selected ? pillColor : `${pillColor}35`}`,
-                          paddingLeft: 4,
-                          paddingRight: selected ? 10 : 12,
-                          paddingTop: 4,
-                          paddingBottom: 4,
-                          boxShadow: selected ? `0 4px 12px ${pillColor}40` : 'none',
-                        }}
-                      >
-                        {/* Small round image */}
-                        <Avatar className="w-7 h-7 shrink-0 border-2" style={{ borderColor: selected ? 'rgba(255,255,255,0.3)' : `${pillColor}30` }}>
-                          <AvatarImage src={imageUrl} alt={s.name} loading="lazy" />
-                          <AvatarFallback
-                            className="text-xs"
-                            style={{
-                              background: selected ? 'rgba(255,255,255,0.2)' : `${pillColor}25`,
-                              color: selected ? '#fff' : pillColor,
-                              fontSize: '14px',
-                            }}
-                          >
-                            {s.emoji || "✨"}
-                          </AvatarFallback>
-                        </Avatar>
-
-                        {/* Name */}
-                        <span
-                          className="text-[11px] font-extrabold whitespace-nowrap pr-1"
-                          style={{ color: selected ? '#fff' : 'hsl(var(--foreground))' }}
-                        >
-                          {s.name}
-                        </span>
-
-                        {/* Check mark when selected */}
-                        {selected && (
-                          <motion.div
-                            initial={{ scale: 0, rotate: -90 }}
-                            animate={{ scale: 1, rotate: 0 }}
-                            className="absolute -top-1 -right-1 w-4.5 h-4.5 rounded-full bg-white flex items-center justify-center shadow-md"
-                            style={{ width: 18, height: 18 }}
-                          >
-                            <Check size={10} style={{ color: pillColor }} strokeWidth={3} />
-                          </motion.div>
-                        )}
-                      </motion.button>
-                    );
-                  })}
+                      />
+                    </motion.div>
+                  ))}
                 </div>
               </div>
 
@@ -786,26 +743,17 @@ const OnboardingPage = () => {
                         <span className="text-[10px] text-muted-foreground ml-auto">{items.length}</span>
                       </div>
                       <div className="flex flex-wrap gap-1.5">
-                        {items.map((item, idx) => {
-                          const pillColor = getPillColor(cat.id, idx);
-                          const imageUrl = getSuggestionImage(item, cat.id);
-                          return (
-                            <span key={item} className="flex items-center gap-1 rounded-full px-1 py-0.5 pr-2"
-                              style={{ background: `${pillColor}20`, border: `1.5px solid ${pillColor}40` }}
-                            >
-                              <Avatar className="w-5 h-5">
-                                <AvatarImage src={imageUrl} alt={item} loading="lazy" />
-                                <AvatarFallback className="text-[8px]" style={{ background: `${pillColor}30`, color: pillColor }}>
-                                  {item.slice(0, 1)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="text-[10px] font-bold" style={{ color: pillColor }}>{item}</span>
-                              <button onClick={() => removeItem(cat.field as string, item)} className="hover:text-agni-red transition-colors ml-0.5">
-                                <X size={10} style={{ color: pillColor }} />
-                              </button>
-                            </span>
-                          );
-                        })}
+                        {items.map((item, idx) => (
+                          <InterestPill
+                            key={item}
+                            name={item}
+                            categoryId={cat.id}
+                            index={idx}
+                            compact
+                            removable
+                            onClick={() => removeItem(cat.field as string, item)}
+                          />
+                        ))}
                       </div>
                     </div>
                   );

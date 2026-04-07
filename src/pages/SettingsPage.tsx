@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { LogOut, Moon, Sun, ChevronRight, Shield, Bell, Loader2, LogIn, Brain, Key, Check, Eye, EyeOff, Zap, Diamond, Heart, Flame, Trash2, Sparkles, X, Plus, Search } from "lucide-react";
+import { InterestPill } from "@/components/InterestPill";
 import { motion, AnimatePresence } from "framer-motion";
 import { BUILT_IN_MODELS, BYOK_PROVIDERS, getAIConfig, saveAIConfig, type AIConfig } from "@/lib/aiConfig";
 import { getPersona, savePersona, SUGGESTION_CATEGORIES, type NeuralOSPersona } from "@/lib/neuralOS";
@@ -494,13 +495,17 @@ const SettingsPage = () => {
 
                               {/* Selected chips */}
                               {selected.length > 0 && (
-                                <div className="flex flex-wrap gap-1">
-                                  {selected.map(s => (
-                                    <span key={s} onClick={() => toggleItem(s)}
-                                      className="text-[9px] font-bold bg-agni-green/15 text-agni-green px-2 py-0.5 rounded-full cursor-pointer flex items-center gap-0.5"
-                                    >
-                                      {s} <X size={8} />
-                                    </span>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {selected.map((s, idx) => (
+                                    <InterestPill
+                                      key={s}
+                                      name={s}
+                                      categoryId={cat.id}
+                                      index={idx}
+                                      compact
+                                      removable
+                                      onClick={() => toggleItem(s)}
+                                    />
                                   ))}
                                 </div>
                               )}
@@ -521,18 +526,18 @@ const SettingsPage = () => {
                                 </button>
                               )}
 
-                              {/* Suggestions grid */}
-                              <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
-                                {filtered.map(s => (
-                                  <button key={s.name} onClick={() => toggleItem(s.name)}
-                                    className={`text-[9px] font-bold px-2 py-1 rounded-lg border transition-all ${
-                                      selected.includes(s.name)
-                                        ? "bg-agni-green/10 border-agni-green/30 text-agni-green"
-                                        : "bg-card border-border/30 text-muted-foreground"
-                                    }`}
-                                  >
-                                    {s.emoji || ""} {s.name}
-                                  </button>
+                              {/* Suggestions — colorful pills */}
+                              <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto scrollbar-none">
+                                {filtered.map((s, idx) => (
+                                  <InterestPill
+                                    key={s.name}
+                                    name={s.name}
+                                    emoji={s.emoji}
+                                    categoryId={cat.id}
+                                    index={idx}
+                                    selected={selected.includes(s.name)}
+                                    onClick={() => toggleItem(s.name)}
+                                  />
                                 ))}
                               </div>
                             </motion.div>
