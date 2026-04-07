@@ -449,7 +449,7 @@ const OnboardingPage = () => {
       <AnimatePresence mode="wait" custom={dir}>
         {/* ═══════ STEP 0: SPLASH ═══════ */}
         {step === 0 && (
-          <motion.div key="splash" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+          <motion.div key="splash" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen items-center justify-center"
           >
             {/* Animated colorful background */}
@@ -541,7 +541,7 @@ const OnboardingPage = () => {
 
         {/* ═══════ STEP 1: NAME ═══════ */}
         {step === 1 && (
-          <motion.div key="name" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+          <motion.div key="name" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
             <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.name.bg} pointer-events-none`} />
@@ -581,7 +581,7 @@ const OnboardingPage = () => {
 
         {/* ═══════ STEP 2: ABOUT YOU (age/gender) ═══════ */}
         {step === 2 && (
-          <motion.div key="aboutyou" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+          <motion.div key="aboutyou" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
             <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.aboutYou.bg} pointer-events-none`} />
@@ -646,7 +646,7 @@ const OnboardingPage = () => {
 
         {/* ═══════ STEP 3: IDENTITY (Pick your avatar!) ═══════ */}
         {step === 3 && (
-          <motion.div key="role" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+          <motion.div key="role" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-[#F0E6FA] via-[#F5E0F0] to-[#FADADD] pointer-events-none" />
@@ -722,7 +722,7 @@ const OnboardingPage = () => {
 
         {/* ═══════ STEP 4: BACKGROUND ═══════ */}
         {step === 4 && (
-          <motion.div key="lifecontext" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+          <motion.div key="lifecontext" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
             <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.background.bg} pointer-events-none`} />
@@ -797,7 +797,7 @@ const OnboardingPage = () => {
 
         {/* ═══════ STEP 5: MISSION MODE (Choose your quest!) ═══════ */}
         {step === 5 && (
-           <motion.div key="mission" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+           <motion.div key="mission" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-[#FFF3E0] via-[#FFECD2] to-[#FFE0B2] pointer-events-none" />
@@ -854,7 +854,7 @@ const OnboardingPage = () => {
 
         {/* ═══════ STEP 6: MISSION FOLLOW-UP ═══════ */}
         {step === 6 && selectedMission && MISSION_FOLLOWUPS[selectedMission] && (
-          <motion.div key="missionfollowup" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+          <motion.div key="missionfollowup" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
             <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.missionFollowup.bg} pointer-events-none`} />
@@ -912,7 +912,7 @@ const OnboardingPage = () => {
 
         {/* ═══════ STEP 7: TEACHING VIBE (Set your DJ!) ═══════ */}
         {step === 7 && (
-          <motion.div key="vibe" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+          <motion.div key="vibe" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-[#FCE4EC] via-[#F8BBD0] to-[#F3E5F5] pointer-events-none" />
@@ -975,7 +975,7 @@ const OnboardingPage = () => {
 
         {/* ═══════ STEP 8: BRAIN LEVEL (Power Level!) ═══════ */}
         {step === 8 && (
-          <motion.div key="brain" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+          <motion.div key="brain" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-[#E8EAF6] via-[#C5CAE9] to-[#E1F5FE] pointer-events-none" />
@@ -1059,7 +1059,7 @@ const OnboardingPage = () => {
 
         {/* ═══════ STEP 9: WHY THIS MATTERS ═══════ */}
         {step === 9 && (
-          <motion.div key="whymatters" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+          <motion.div key="whymatters" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
             <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.whyMatters.bg} pointer-events-none`} />
@@ -1129,7 +1129,7 @@ const OnboardingPage = () => {
 
         {/* ═══════ CATEGORY SELECTION SCREENS ═══════ */}
         {activeCategory && !isConfirmStep && (
-          <motion.div key={`cat-${categoryIndex}`} custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.3 }}
+          <motion.div key={`cat-${categoryIndex}`} custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-5 pt-16 pb-4 flex flex-col min-h-screen h-screen"
           >
             <div className={`absolute inset-0 bg-gradient-to-b ${CATEGORY_GRADIENTS[categoryIndex % CATEGORY_GRADIENTS.length]} opacity-[0.07] pointer-events-none`} />
@@ -1374,7 +1374,7 @@ const OnboardingPage = () => {
 
         {/* ═══════ CONFIRM STEP ═══════ */}
         {isConfirmStep && (
-          <motion.div key="confirm" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+          <motion.div key="confirm" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-agni-green/20 via-agni-blue/10 to-agni-purple/5 pointer-events-none" />
