@@ -366,6 +366,19 @@ function QuizSection({ quiz }: { quiz: any[] }) {
   );
 }
 
+const DATE_FILTERS = [
+  { id: "all", label: "All Time" },
+  { id: "24h", label: "Last 24h" },
+  { id: "week", label: "This Week" },
+  { id: "month", label: "This Month" },
+] as const;
+
+const SORT_OPTIONS = [
+  { id: "newest", label: "Newest First" },
+  { id: "popular", label: "Most Popular" },
+  { id: "recommended", label: "Recommended" },
+] as const;
+
 const CuriosityPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -384,6 +397,11 @@ const CuriosityPage = () => {
   const [feedLoading, setFeedLoading] = useState(false);
   const [feedLoadingMore, setFeedLoadingMore] = useState(false);
   const [feedFilter, setFeedFilter] = useState("all");
+  const [activeSource, setActiveSource] = useState<string | null>(null);
+  const [dateFilter, setDateFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("newest");
+  const [showFilters, setShowFilters] = useState(false);
+  const [lastFetchTime, setLastFetchTime] = useState<string | null>(() => localStorage.getItem("spark_last_fetch"));
   const [savedItems, setSavedItems] = useState<Set<number>>(() => {
     try {
       const s = localStorage.getItem("spark_saved");
@@ -419,17 +437,37 @@ const CuriosityPage = () => {
     [followed, isFollowed]
   );
 
-  // Filter feed items by type
+  // Filter feed items by type, source, date
   const filteredFeedItems = useMemo(() => {
-    if (feedFilter === "all") return feedItems;
-    return feedItems.filter(item => {
-      const meta = getContentMeta(item.url);
-      if (feedFilter === "youtube") return meta.type === "youtube" || meta.type === "instagram";
-      if (feedFilter === "article") return meta.type === "article";
-      if (feedFilter === "news") return item.type === "news";
-      return true;
-    });
-  }, [feedItems, feedFilter]);
+    let items = feedItems;
+    
+    // Source filter
+    if (activeSource) {
+      items = items.filter(item => item.sourceName === activeSource);
+    }
+    
+    // Type filter
+    if (feedFilter !== "all") {
+      items = items.filter(item => {
+        const meta = getContentMeta(item.url);
+        if (feedFilter === "youtube") return meta.type === "youtube" || meta.type === "instagram";
+        if (feedFilter === "article") return meta.type === "article";
+        if (feedFilter === "news") return item.type === "news";
+        return true;
+      });
+    }
+    
+    // Sort
+    if (sortBy === "popular") {
+      items = [...items].sort((a, b) => {
+        const aViews = parseInt(a.engagement) || 0;
+        const bViews = parseInt(b.engagement) || 0;
+        return bViews - aViews;
+      });
+    }
+    
+    return items;
+  }, [feedItems, feedFilter, activeSource, dateFilter, sortBy]);
 
   const toggleSave = (idx: number) => {
     setSavedItems(prev => {
@@ -502,6 +540,9 @@ const CuriosityPage = () => {
         const newItems = append ? [...feedItems, ...items] : items;
         setFeedItems(newItems);
         localStorage.setItem("spark_feed_cache", JSON.stringify(newItems));
+        const now = new Date().toISOString();
+        setLastFetchTime(now);
+        localStorage.setItem("spark_last_fetch", now);
       }
     } catch (e: any) {
       toast.error("Couldn't refresh feed");
@@ -645,7 +686,7 @@ const CuriosityPage = () => {
             {activeTab === "feed" && (
               <motion.div key="feed-tab" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
 
-                {/* Followed sources strip */}
+                {/* Followed sources strip — tap to filter */}
                 {followedSources.length > 0 && (
                   <FadeIn delay={0.03}>
                     <div className="px-4 mb-3">
@@ -657,25 +698,32 @@ const CuriosityPage = () => {
                       <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1">
                         {followedSources.slice(0, 12).map((source, i) => {
                           const catMeta = SOURCE_CATEGORIES.find(c => c.id === source.category);
+                          const isActive = activeSource === source.name;
                           return (
-                            <motion.div
+                            <motion.button
                               key={source.name}
                               initial={{ opacity: 0, scale: 0.8 }}
                               animate={{ opacity: 1, scale: 1 }}
                               transition={{ delay: i * 0.03 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => setActiveSource(isActive ? null : source.name)}
                               className="flex flex-col items-center gap-1 shrink-0"
                             >
                               <div className="relative">
-                                <Avatar className="w-11 h-11 border-2" style={{ borderColor: `${catMeta?.color || '#58CC02'}50` }}>
+                                <Avatar className={`w-11 h-11 border-2 transition-all ${isActive ? "ring-2 ring-offset-2 ring-offset-background" : ""}`}
+                                  style={{ 
+                                    borderColor: isActive ? catMeta?.color || '#58CC02' : `${catMeta?.color || '#58CC02'}50`,
+                                    ...(isActive ? { ringColor: catMeta?.color } : {}),
+                                  }}>
                                   <AvatarImage src={getSourceAvatar(source)} alt={source.name} />
                                   <AvatarFallback className="text-[9px] font-black bg-card" style={{ color: catMeta?.color }}>
                                     {source.name.slice(0, 2)}
                                   </AvatarFallback>
                                 </Avatar>
-                                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-background bg-agni-green" />
+                                <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-background ${isActive ? "bg-agni-gold" : "bg-agni-green"}`} />
                               </div>
-                              <span className="text-[8px] font-bold text-muted-foreground text-center w-12 truncate">{source.name}</span>
-                            </motion.div>
+                              <span className={`text-[8px] font-bold text-center w-12 truncate ${isActive ? "text-foreground" : "text-muted-foreground"}`}>{source.name}</span>
+                            </motion.button>
                           );
                         })}
                         <motion.button
@@ -693,6 +741,33 @@ const CuriosityPage = () => {
                   </FadeIn>
                 )}
 
+                {/* Active source banner */}
+                <AnimatePresence>
+                  {activeSource && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="px-4 mb-3 overflow-hidden"
+                    >
+                      <div className="bg-agni-blue/10 border border-agni-blue/20 rounded-2xl px-3 py-2 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Filter size={11} className="text-agni-blue" />
+                          <span className="text-[10px] font-black text-agni-blue">
+                            Showing: {activeSource}
+                          </span>
+                          <span className="text-[9px] font-bold text-muted-foreground">
+                            ({filteredFeedItems.length} items)
+                          </span>
+                        </div>
+                        <button onClick={() => setActiveSource(null)} className="w-5 h-5 rounded-full bg-agni-blue/10 flex items-center justify-center">
+                          <X size={10} className="text-agni-blue" />
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 {/* FEED HEADER + FILTERS + REFRESH */}
                 {followedSources.length > 0 && (
                   <div className="px-4 mb-3">
@@ -700,23 +775,91 @@ const CuriosityPage = () => {
                       <div className="flex items-center gap-1.5">
                         <Globe size={12} className="text-agni-blue" />
                         <span className="text-[10px] font-black text-muted-foreground tracking-wider">YOUR FEED</span>
+                        {lastFetchTime && (
+                          <span className="text-[8px] font-bold text-muted-foreground/40 ml-1">
+                            • {(() => {
+                              const diff = Date.now() - new Date(lastFetchTime).getTime();
+                              const mins = Math.floor(diff / 60000);
+                              if (mins < 1) return "just now";
+                              if (mins < 60) return `${mins}m ago`;
+                              const hrs = Math.floor(mins / 60);
+                              if (hrs < 24) return `${hrs}h ago`;
+                              return `${Math.floor(hrs / 24)}d ago`;
+                            })()}
+                          </span>
+                        )}
                       </div>
-                      <motion.button
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => fetchFeed(false)}
-                        disabled={feedLoading}
-                        className="flex items-center gap-1 text-[9px] font-bold text-agni-blue bg-agni-blue/10 px-2.5 py-1.5 rounded-full"
-                      >
-                        {feedLoading ? <Loader2 size={10} className="animate-spin" /> : <RefreshCw size={10} />}
-                        {feedLoading ? "Loading..." : "Refresh"}
-                      </motion.button>
+                      <div className="flex items-center gap-1.5">
+                        <motion.button
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => setShowFilters(!showFilters)}
+                          className={`flex items-center gap-1 text-[9px] font-bold px-2 py-1.5 rounded-full transition-all ${
+                            showFilters ? "bg-agni-gold/15 text-agni-gold" : "bg-muted/20 text-muted-foreground"
+                          }`}
+                        >
+                          <Filter size={9} />
+                          Filters
+                        </motion.button>
+                        <motion.button
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => fetchFeed(false)}
+                          disabled={feedLoading}
+                          className="flex items-center gap-1 text-[9px] font-bold text-agni-blue bg-agni-blue/10 px-2.5 py-1.5 rounded-full"
+                        >
+                          {feedLoading ? <Loader2 size={10} className="animate-spin" /> : <RefreshCw size={10} />}
+                          {feedLoading ? "Loading..." : "Refresh"}
+                        </motion.button>
+                      </div>
                     </div>
+
+                    {/* Advanced filters */}
+                    <AnimatePresence>
+                      {showFilters && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden mb-2"
+                        >
+                          <div className="bg-card/50 border border-border/20 rounded-2xl p-3 space-y-2.5">
+                            {/* Sort */}
+                            <div>
+                              <span className="text-[8px] font-black text-muted-foreground uppercase tracking-wider">Sort by</span>
+                              <div className="flex gap-1.5 mt-1">
+                                {SORT_OPTIONS.map(s => (
+                                  <button key={s.id} onClick={() => setSortBy(s.id)}
+                                    className={`text-[9px] font-bold px-2.5 py-1 rounded-full transition-all ${
+                                      sortBy === s.id ? "bg-agni-blue/15 text-agni-blue border border-agni-blue/30" : "bg-muted/20 text-muted-foreground border border-transparent"
+                                    }`}
+                                  >{s.label}</button>
+                                ))}
+                              </div>
+                            </div>
+                            {/* Date */}
+                            <div>
+                              <span className="text-[8px] font-black text-muted-foreground uppercase tracking-wider">Time period</span>
+                              <div className="flex gap-1.5 mt-1">
+                                {DATE_FILTERS.map(d => (
+                                  <button key={d.id} onClick={() => setDateFilter(d.id)}
+                                    className={`text-[9px] font-bold px-2.5 py-1 rounded-full transition-all ${
+                                      dateFilter === d.id ? "bg-agni-orange/15 text-agni-orange border border-agni-orange/30" : "bg-muted/20 text-muted-foreground border border-transparent"
+                                    }`}
+                                  >{d.label}</button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
                     {/* Content type filters */}
                     <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
                       {FEED_FILTERS.map((f) => {
                         const Icon = f.icon;
                         const isActive = feedFilter === f.id;
-                        const count = f.id === "all" ? feedItems.length : feedItems.filter(item => {
+                        const baseItems = activeSource ? feedItems.filter(item => item.sourceName === activeSource) : feedItems;
+                        const count = f.id === "all" ? baseItems.length : baseItems.filter(item => {
                           const meta = getContentMeta(item.url);
                           if (f.id === "youtube") return meta.type === "youtube" || meta.type === "instagram";
                           if (f.id === "article") return meta.type === "article";
