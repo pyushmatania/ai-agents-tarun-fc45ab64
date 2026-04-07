@@ -334,54 +334,89 @@ const OnboardingPage = () => {
         {/* ═══════ STEP 3: VIBE ═══════ */}
         {step === 3 && (
           <motion.div key="vibe" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
-            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
+            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-agni-orange/15 to-transparent pointer-events-none" />
 
-            <div className="flex-1 relative z-10">
-              <div className="flex justify-center mb-3">
+            <div className="flex flex-col flex-1 min-h-0 relative z-10">
+              <div className="flex justify-center mb-3 shrink-0">
                 <Agni expression="excited" size={80} speech="How should I teach you? 🎨" animate />
               </div>
 
-              <h2 className="text-2xl font-black text-foreground text-center mb-1">My learning style is...</h2>
-              <p className="text-xs text-muted-foreground text-center mb-5">Pick what feels right</p>
+              <h2 className="text-2xl font-black text-foreground text-center mb-1 shrink-0">My learning style is...</h2>
+              <p className="text-xs text-muted-foreground text-center mb-4 shrink-0">Pick what feels right (scroll for more!)</p>
 
-              <div className="space-y-3">
-                {VIBES.map((vibe, i) => {
-                  const Icon = vibe.icon;
-                  return (
-                    <motion.button key={vibe.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.08 }}
-                      whileTap={{ scale: 0.97 }} onClick={() => setSelectedVibe(vibe.id)}
-                      className={`w-full p-4 rounded-2xl border-2 text-left flex items-center gap-4 transition-all ${
-                        selectedVibe === vibe.id ? "border-agni-green bg-agni-green/10 shadow-glow-green" : "border-border bg-card"
-                      }`}
-                    >
-                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${vibe.gradient} flex items-center justify-center shadow-lg`}>
-                        <span className="text-2xl">{vibe.emoji}</span>
+              <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
+                <div className="space-y-2.5">
+                  {VIBES.map((vibe, i) => {
+                    const Icon = vibe.icon;
+                    return (
+                      <motion.button key={vibe.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + i * 0.04 }}
+                        whileTap={{ scale: 0.97 }} onClick={() => setSelectedVibe(vibe.id)}
+                        className={`w-full p-3.5 rounded-2xl border-2 text-left flex items-center gap-3 transition-all ${
+                          selectedVibe === vibe.id ? "border-agni-green bg-agni-green/10 shadow-glow-green" : "border-border bg-card"
+                        }`}
+                      >
+                        <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${vibe.gradient} flex items-center justify-center shadow-lg shrink-0`}>
+                          <span className="text-xl">{vibe.emoji}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <span className="text-sm font-extrabold text-foreground block">{vibe.label}</span>
+                          <span className="text-[11px] text-muted-foreground">{vibe.desc}</span>
+                        </div>
+                        {selectedVibe === vibe.id && (
+                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-6 h-6 rounded-full bg-agni-green flex items-center justify-center shrink-0">
+                            <Check size={14} className="text-white" strokeWidth={3} />
+                          </motion.div>
+                        )}
+                      </motion.button>
+                    );
+                  })}
+
+                  {/* Custom style input */}
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
+                    className="w-full p-3.5 rounded-2xl border-2 border-dashed border-agni-purple/30 bg-agni-purple/5"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-agni-purple to-agni-pink flex items-center justify-center shadow-lg shrink-0">
+                        <Sparkles size={18} className="text-white" />
                       </div>
-                      <div className="flex-1">
-                        <span className="text-sm font-extrabold text-foreground block">{vibe.label}</span>
-                        <span className="text-xs text-muted-foreground">{vibe.desc}</span>
+                      <div className="flex-1 min-w-0">
+                        <input
+                          type="text"
+                          placeholder="Type your own style..."
+                          className="w-full bg-transparent text-sm font-extrabold text-foreground outline-none placeholder:text-muted-foreground/50"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && (e.target as HTMLInputElement).value.trim()) {
+                              setSelectedVibe((e.target as HTMLInputElement).value.trim());
+                              (e.target as HTMLInputElement).blur();
+                            }
+                          }}
+                          onBlur={(e) => {
+                            if (e.target.value.trim()) setSelectedVibe(e.target.value.trim());
+                          }}
+                        />
+                        <span className="text-[10px] text-muted-foreground">Press Enter to set</span>
                       </div>
-                      {selectedVibe === vibe.id && (
-                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-7 h-7 rounded-full bg-agni-green flex items-center justify-center">
-                          <Check size={16} className="text-white" strokeWidth={3} />
+                      {selectedVibe && !VIBES.find(v => v.id === selectedVibe) && (
+                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-6 h-6 rounded-full bg-agni-purple flex items-center justify-center shrink-0">
+                          <Check size={14} className="text-white" strokeWidth={3} />
                         </motion.div>
                       )}
-                    </motion.button>
-                  );
-                })}
+                    </div>
+                  </motion.div>
+                </div>
               </div>
 
               {/* Neural OS hint */}
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
-                className="mt-5 bg-agni-purple/5 border border-agni-purple/20 rounded-2xl px-4 py-3"
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+                className="bg-agni-purple/5 border border-agni-purple/20 rounded-2xl px-4 py-2.5 mb-3 shrink-0"
               >
-                <p className="text-[10px] text-agni-purple font-bold">💡 Neural OS adapts: If you pick "Fun & Memes", AGNI will use memes & jokes. Pick "Fast", get bullet points & code!</p>
+                <p className="text-[10px] text-agni-purple font-bold">💡 Neural OS adapts: Pick "Fun & Memes" → memes & jokes. "Socratic" → guided questions. "ELI5" → super simple. Or write your own!</p>
               </motion.div>
             </div>
 
-            <Button onClick={goNext} disabled={!selectedVibe} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none mt-3">
+            <Button onClick={goNext} disabled={!selectedVibe} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none shrink-0">
               CONTINUE <ArrowRight size={18} className="ml-2" />
             </Button>
           </motion.div>
