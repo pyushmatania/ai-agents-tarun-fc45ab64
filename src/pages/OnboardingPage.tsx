@@ -104,6 +104,8 @@ const OnboardingPage = () => {
   const [persona, setPersona] = useState<Partial<NeuralOSPersona>>({});
   const [search, setSearch] = useState("");
   const [activeSubFilter, setActiveSubFilter] = useState<string | null>(null);
+  const [smartSearchOpen, setSmartSearchOpen] = useState(false);
+  const [smartSearchQuery, setSmartSearchQuery] = useState("");
 
   // Steps: 0=splash, 1=name, 2=role, 3=mission, 4=vibe, 5=brain, 6=why-matters, 7+=categories, last=confirm
   const categoryIndex = step >= 7 ? step - 7 : -1;
