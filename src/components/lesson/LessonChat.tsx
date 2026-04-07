@@ -250,6 +250,29 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
   // Track used interests to rotate on re-tap
   const [usedInterests, setUsedInterests] = useState<Record<string, Set<string>>>({});
 
+  const persona = getPersona();
+  const agniExpr: AgniExpression = isLoading ? "thinking" : messages.length === 0 ? "teaching" : "happy";
+  const basePowerups = POWERUPS[activeMode] || POWERUPS.engineer;
+  const neuralPowerups = getNeuralSuggestions();
+
+  // Handle interest selection and send as prompt
+  const handleInterestSelect = (catId: string, item: string) => {
+    setSelectedInterests(prev => ({ ...prev, [catId]: item }));
+    const cat = interestDeck.find(c => c.id === catId);
+    const promptMap: Record<string, string> = {
+      shows: `Explain this using an analogy from "${item}" (the show/movie I love). Make it vivid and relatable!`,
+      sports: `Explain this using a sports analogy involving "${item}". Make it feel like a match commentary!`,
+      gaming: `Explain this like a game mechanic from "${item}". Use gaming language I'd understand!`,
+      music: `Explain this using a musical analogy with "${item}". Make it rhythmic and memorable!`,
+      news: `Explain this the way "${item}" would cover it. Match their style!`,
+      hobbies: `Explain this through the lens of "${item}" as a hobby. Connect it to something I do!`,
+      books: `Explain this using concepts or characters from "${item}". Make it literary!`,
+    };
+    const prompt = promptMap[catId] || `Explain this using "${item}" as an analogy.`;
+    SFX.powerup("pink");
+    handleSend(prompt);
+  };
+
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, isLoading]);
