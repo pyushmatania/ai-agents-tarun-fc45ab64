@@ -354,6 +354,7 @@ export function useGamification() {
   const lastSyncedXp = useRef(stats.xp);
   useEffect(() => {
     if (stats.xp === lastSyncedXp.current && lastSyncedXp.current !== 0) return;
+    const xpDelta = stats.xp - lastSyncedXp.current;
     lastSyncedXp.current = stats.xp;
 
     const syncToLeaderboard = async () => {
@@ -365,13 +366,14 @@ export function useGamification() {
 
       const { data: existing } = await supabase
         .from("leaderboard")
-        .select("id")
+        .select("id, weekly_xp")
         .eq("user_id", user.id)
         .maybeSingle();
 
       if (existing) {
         await supabase.from("leaderboard").update({
           xp: stats.xp,
+          weekly_xp: (existing.weekly_xp || 0) + Math.max(xpDelta, 0),
           level: stats.level,
           league: league.name,
           display_name: displayName,
@@ -380,6 +382,7 @@ export function useGamification() {
         await supabase.from("leaderboard").insert({
           user_id: user.id,
           xp: stats.xp,
+          weekly_xp: stats.xp,
           level: stats.level,
           league: league.name,
           display_name: displayName,
