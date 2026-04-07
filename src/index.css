@@ -171,11 +171,18 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Nunito', system-ui, sans-serif;
+    background-attachment: fixed;
+  }
+  :root body {
     background-image:
       radial-gradient(ellipse 80% 60% at 20% 100%, hsl(100 95% 40% / 0.06) 0%, transparent 60%),
       radial-gradient(ellipse 60% 50% at 90% 10%, hsl(199 92% 54% / 0.05) 0%, transparent 50%),
       radial-gradient(ellipse 70% 40% at 50% 50%, hsl(270 100% 75% / 0.03) 0%, transparent 50%);
-    background-attachment: fixed;
+  }
+  .light body {
+    background-image:
+      radial-gradient(ellipse 80% 60% at 20% 100%, hsl(100 95% 35% / 0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 90% 10%, hsl(199 80% 48% / 0.03) 0%, transparent 50%);
   }
   h1, h2, h3, h4 {
     font-family: 'Nunito', system-ui, sans-serif;
