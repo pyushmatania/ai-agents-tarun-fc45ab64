@@ -72,6 +72,7 @@ export default function SmartInputBar({
   const [currentMotive, setCurrentMotive] = useState(() => getTeachingSelection("mission"));
   const [currentVibe, setCurrentVibe] = useState(() => getTeachingSelection("vibe"));
   const [currentBrain, setCurrentBrain] = useState(() => getTeachingSelection("brain"));
+  const [selectedInterest, setSelectedInterest] = useState(() => localStorage.getItem("teaching_universe_vibe") || "");
 
   // Auto-resize textarea
   useEffect(() => {
@@ -110,42 +111,45 @@ export default function SmartInputBar({
     onSend(`${pu.emoji} ${pu.label}`, resolved);
   };
 
-  const handleInterestSend = (catId: string, item: string) => {
-    const promptMap: Record<string, string> = {
-      shows: `Explain this using an analogy from "${item}" (the show/movie I love).`,
-      sports: `Explain this using a sports analogy involving "${item}".`,
-      gaming: `Explain this like a game mechanic from "${item}".`,
-      music: `Explain this using a musical analogy with "${item}".`,
-      hobbies: `Explain this through the lens of "${item}" as a hobby.`,
-      books: `Explain this using concepts from "${item}".`,
-    };
-    SFX.powerup("pink");
+  // Interest select — just set as universe vibe, don't send
+  const handleInterestSelect = (catId: string, item: string) => {
+    SFX.select();
     setActivePanel("none");
-    // Show clean label like "🌍 Naruto", hide actual prompt
-    const catEmoji = interestCategories.find(c => c.id === catId)?.emoji || "🌍";
-    onSend(`${catEmoji} Teach me using ${item}`, promptMap[catId] || `Explain using "${item}" as an analogy.`);
+    // Set the interest as universe vibe so it becomes part of the recipe
+    setTeachingSelection("vibe", currentVibe); // keep current vibe
+    // Store selected interest as universe context
+    localStorage.setItem("teaching_universe_vibe", item);
+    window.dispatchEvent(new Event("storage"));
+    setSelectedInterest(item);
   };
 
-  // Get labels for active selections
-  const motiveInfo = MISSION_MODES.find(m => m.id === currentMotive);
-  const vibeInfo = TEACHING_VIBES.find(v => v.id === currentVibe);
+  // Get labels for active selections — check against defaults to know if truly active
+  const DEFAULT_MOTIVE = "explore";
+  const DEFAULT_VIBE = "fun";
+  const DEFAULT_BRAIN = "explorer";
+  
+  const motiveInfo = currentMotive && currentMotive !== DEFAULT_MOTIVE ? MISSION_MODES.find(m => m.id === currentMotive) : null;
+  const vibeInfo = currentVibe && currentVibe !== DEFAULT_VIBE ? TEACHING_VIBES.find(v => v.id === currentVibe) : null;
   const brainLevels = getBrainTrack() === "academic" ? BRAIN_LEVELS_ACADEMIC : BRAIN_LEVELS_SKILL;
-  const brainInfo = brainLevels.find(b => b.id === currentBrain);
+  const brainInfo = currentBrain && currentBrain !== DEFAULT_BRAIN ? brainLevels.find(b => b.id === currentBrain) : null;
 
-  // Check if any selection is active (not default)
-  const hasActiveSelections = motiveInfo || vibeInfo || brainInfo;
+  const hasActiveSelections = motiveInfo || vibeInfo || brainInfo || selectedInterest;
 
-  const clearSelection = (type: "motive" | "vibe" | "brain") => {
+  const clearSelection = (type: "motive" | "vibe" | "brain" | "interest") => {
     SFX.tap();
     if (type === "motive") {
-      setTeachingSelection("mission", "explore");
-      setCurrentMotive("explore");
+      setTeachingSelection("mission", DEFAULT_MOTIVE);
+      setCurrentMotive(DEFAULT_MOTIVE);
     } else if (type === "vibe") {
-      setTeachingSelection("vibe", "fun");
-      setCurrentVibe("fun");
+      setTeachingSelection("vibe", DEFAULT_VIBE);
+      setCurrentVibe(DEFAULT_VIBE);
     } else if (type === "brain") {
-      setTeachingSelection("brain", "explorer");
-      setCurrentBrain("explorer");
+      setTeachingSelection("brain", DEFAULT_BRAIN);
+      setCurrentBrain(DEFAULT_BRAIN);
+    } else if (type === "interest") {
+      localStorage.removeItem("teaching_universe_vibe");
+      window.dispatchEvent(new Event("storage"));
+      setSelectedInterest("");
     }
   };
 
@@ -364,7 +368,7 @@ export default function SmartInputBar({
                             <motion.button
                               key={item}
                               whileTap={{ scale: 0.93 }}
-                              onClick={() => handleInterestSend(cat.id, item)}
+                              onClick={() => handleInterestSelect(cat.id, item)}
                               disabled={isLoading}
                               className="shrink-0"
                             >
@@ -420,6 +424,15 @@ export default function SmartInputBar({
                   <span className="text-[8px] font-bold text-agni-purple/70">{brainInfo.label}</span>
                   <button onClick={() => clearSelection("brain")} className="ml-0.5 opacity-50 hover:opacity-100">
                     <X size={7} className="text-agni-purple" />
+                  </button>
+                </motion.div>
+              )}
+              {selectedInterest && (
+                <motion.div layout className="shrink-0 flex items-center gap-1 bg-agni-pink/8 border border-agni-pink/15 rounded-full px-2 py-0.5">
+                  <span className="text-[8px]">🌍</span>
+                  <span className="text-[8px] font-bold text-agni-pink/70">{selectedInterest}</span>
+                  <button onClick={() => clearSelection("interest")} className="ml-0.5 opacity-50 hover:opacity-100">
+                    <X size={7} className="text-agni-pink" />
                   </button>
                 </motion.div>
               )}

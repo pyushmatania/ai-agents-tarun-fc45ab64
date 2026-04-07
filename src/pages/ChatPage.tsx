@@ -64,8 +64,8 @@ export default function ChatPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
 
-  // Build teaching context from LIVE selections (not stale persona)
-  const teachingContext = useMemo(() => {
+  // Build teaching context LIVE on each send (not memoized — selections change without re-render)
+  const buildTeachingContext = () => {
     const identity = getTeachingLabel("identity");
     const mission = getTeachingLabel("mission");
     const vibe = getTeachingLabel("vibe");
@@ -84,7 +84,7 @@ export default function ChatPage() {
         ...(persona.sports || []),
       ].slice(0, 5).join(", ") || undefined,
     };
-  }, [persona]);
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -95,13 +95,14 @@ export default function ChatPage() {
   const handleSend = (text?: string, hiddenPrompt?: string) => {
     const msg = text || input.trim();
     if (!msg) return;
+    const ctx = buildTeachingContext();
     const opts = hiddenPrompt ? { hiddenPrompt, hideUserMessage: true } : undefined;
-    chat.sendMessage(msg, teachingContext, opts);
+    chat.sendMessage(msg, ctx, opts);
     setInput("");
   };
 
   const handleSuggestionClick = (suggestion: string) => {
-    chat.sendMessage(suggestion, teachingContext);
+    chat.sendMessage(suggestion, buildTeachingContext());
   };
 
   const handleModeChange = (mode: string) => {
