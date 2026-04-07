@@ -1,12 +1,13 @@
-import { Home, BookOpen, BarChart3, Sparkles, Map, Library, UserCircle } from "lucide-react";
+import { Home, BookOpen, Sparkles, Library, Map, UserCircle } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 
 const tabs = [
   { icon: Home, path: "/", label: "Home" },
   { icon: BookOpen, path: "/courses", label: "Learn" },
+  { icon: Library, path: "/sources", label: "Hub" },
   { icon: Sparkles, path: "/curiosity", label: "Spark", center: true },
-  { icon: BarChart3, path: "/progress", label: "Stats" },
+  { icon: Map, path: "/roadmap", label: "Path" },
   { icon: UserCircle, path: "/settings", label: "Profile" },
 ];
 
