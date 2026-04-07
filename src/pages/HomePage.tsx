@@ -11,6 +11,7 @@ import { useGamification } from "@/hooks/useGamification";
 import { useState, useEffect, useMemo } from "react";
 import { SFX } from "@/lib/sounds";
 import { getPersona } from "@/lib/neuralOS";
+import { supabase } from "@/integrations/supabase/client";
 
 const DAILY_TIPS = [
   { tip: "AI agents use a Perceive→Reason→Act loop — just like humans!", emoji: "🧠" },
@@ -51,6 +52,20 @@ const HomePage = () => {
   const [agniExpression, setAgniExpression] = useState<"default" | "happy" | "excited">("default");
   const [showProfile, setShowProfile] = useState(false);
   const [showInfoTooltip, setShowInfoTooltip] = useState(false);
+  const [leaderboard, setLeaderboard] = useState<{ display_name: string; xp: number; user_id: string }[]>([]);
+
+  // Fetch leaderboard
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      const { data } = await supabase
+        .from("leaderboard")
+        .select("display_name, xp, user_id")
+        .order("xp", { ascending: false })
+        .limit(10);
+      if (data) setLeaderboard(data);
+    };
+    fetchLeaderboard();
+  }, [stats.xp]);
   const persona = useMemo(() => getPersona(), []);
 
   const totalLessons = 22;
