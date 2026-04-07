@@ -41,6 +41,7 @@ const OnboardingPage = () => {
   const [categoryIndex, setCategoryIndex] = useState(0);
   const [search, setSearch] = useState("");
   const [customInput, setCustomInput] = useState("");
+  const progress = Math.round((step / TOTAL_STEPS) * 100);
 
   // Splash typewriter
   const tagline = "Master the future of intelligent automation";
