@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 // ── Constants ──
 const STORAGE_PREFIX = "adojo_";
@@ -348,6 +349,45 @@ export function useGamification() {
     if (stats.xp >= 300) return { name: "Bronze", emoji: "🥉", color: "text-agni-orange" };
     return { name: "Starter", emoji: "🌱", color: "text-agni-green" };
   }, [stats.xp]);
+
+  // Sync XP to leaderboard table
+  const lastSyncedXp = useRef(stats.xp);
+  useEffect(() => {
+    if (stats.xp === lastSyncedXp.current && lastSyncedXp.current !== 0) return;
+    lastSyncedXp.current = stats.xp;
+
+    const syncToLeaderboard = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const displayName = user.user_metadata?.full_name?.split(" ")[0] 
+        || localStorage.getItem("edu_user_name") || "Learner";
+
+      const { data: existing } = await supabase
+        .from("leaderboard")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase.from("leaderboard").update({
+          xp: stats.xp,
+          level: stats.level,
+          league: league.name,
+          display_name: displayName,
+        }).eq("user_id", user.id);
+      } else {
+        await supabase.from("leaderboard").insert({
+          user_id: user.id,
+          xp: stats.xp,
+          level: stats.level,
+          league: league.name,
+          display_name: displayName,
+        });
+      }
+    };
+    syncToLeaderboard();
+  }, [stats.xp, stats.level, league.name]);
 
   return {
     stats,
