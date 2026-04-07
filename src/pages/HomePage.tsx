@@ -38,6 +38,7 @@ const HomePage = () => {
   const displayName = user?.user_metadata?.full_name?.split(" ")[0] || storedName;
   const [activeMode, setActiveMode] = useState(localStorage.getItem("teaching_mode") || "engineer");
   const [agniExpression, setAgniExpression] = useState<"default" | "happy" | "excited">("default");
+  const [showProfile, setShowProfile] = useState(false);
 
   const totalLessons = 22;
   const overallProgress = Math.round((stats.done.length / totalLessons) * 100);
