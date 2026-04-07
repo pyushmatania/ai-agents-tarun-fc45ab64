@@ -233,17 +233,90 @@ export default function SmartInputBar({
                       <span>{pu.emoji}</span> {pu.label}
                     </motion.button>
                   ))}
-                  {/* Quiz button */}
+                  {/* Quiz button — opens difficulty picker */}
                   {isLearnTab && exchangeCount >= 1 && onQuizReady && (
                     <motion.button
                       whileTap={{ scale: 0.93 }}
-                      onClick={onQuizReady}
+                      onClick={() => togglePanel("quiz")}
                       disabled={isLoading}
                       className="text-[10px] font-black px-3 py-2 rounded-xl bg-gradient-to-r from-agni-green to-emerald-500 text-white shadow-md disabled:opacity-40 flex items-center gap-1"
                     >
                       <Zap size={10} /> Quiz Me!
                     </motion.button>
                   )}
+                </div>
+              </div>
+            )}
+
+            {/* Quiz difficulty picker */}
+            {activePanel === "quiz" && (
+              <div className="py-3">
+                <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">Pick Quiz Difficulty</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {QUIZ_DIFFICULTIES.map(q => (
+                    <motion.button
+                      key={q.id}
+                      whileTap={{ scale: 0.93 }}
+                      onClick={() => { SFX.powerup("green"); setActivePanel("none"); onQuizReady?.(q.id); }}
+                      disabled={isLoading}
+                      className={`text-[10px] font-black px-3 py-2 rounded-xl bg-gradient-to-r ${q.color} text-white shadow-md disabled:opacity-40 flex items-center gap-1`}
+                    >
+                      <span>{q.emoji}</span> {q.label}
+                    </motion.button>
+                  ))}
+                </div>
+                <p className="text-[8px] text-muted-foreground/50 mt-1.5">From ☀️ warm up to ☠️ impossible — choose your challenge</p>
+              </div>
+            )}
+
+            {/* Vibe panel */}
+            {activePanel === "vibe" && (
+              <div className="py-3">
+                <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">🎨 Teaching Vibe</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {TEACHING_VIBES.map(v => {
+                    const current = getTeachingSelection("vibe");
+                    return (
+                      <motion.button
+                        key={v.id}
+                        whileTap={{ scale: 0.93 }}
+                        onClick={() => { SFX.select(); setTeachingSelection("vibe", v.id); setActivePanel("none"); }}
+                        className={`text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all border ${
+                          current === v.id
+                            ? "bg-agni-blue/15 text-agni-blue border-agni-blue/40"
+                            : "bg-card text-muted-foreground border-border/30"
+                        }`}
+                      >
+                        <span>{v.emoji}</span> {v.label}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Brain level panel */}
+            {activePanel === "brain" && (
+              <div className="py-3">
+                <p className="text-[9px] font-black text-muted-foreground mb-2 uppercase tracking-wider">🧠 Brain Level</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {(getBrainTrack() === "academic" ? BRAIN_LEVELS_ACADEMIC : BRAIN_LEVELS_SKILL).map(b => {
+                    const current = getTeachingSelection("brain");
+                    return (
+                      <motion.button
+                        key={b.id}
+                        whileTap={{ scale: 0.93 }}
+                        onClick={() => { SFX.select(); setTeachingSelection("brain", b.id); setActivePanel("none"); }}
+                        className={`text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all border ${
+                          current === b.id
+                            ? "bg-agni-purple/15 text-agni-purple border-agni-purple/40"
+                            : "bg-card text-muted-foreground border-border/30"
+                        }`}
+                      >
+                        <span>{b.emoji}</span> {b.label}
+                      </motion.button>
+                    );
+                  })}
                 </div>
               </div>
             )}
