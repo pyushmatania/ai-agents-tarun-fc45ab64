@@ -131,7 +131,7 @@ const Agni = ({ expression = "default", size = 100, speech, animate = true, clas
 
   const currentExpr = activeExpr ?? expression;
   const displaySpeech = clickSpeech ?? speech;
-  const imageSrc = useAgniImage(currentExpr);
+  const imageSrc = EXPRESSION_IMAGES[currentExpr];
 
   const spawnParticles = useCallback((expr: AgniExpression) => {
     const emojis = PARTICLE_EMOJIS[expr];
