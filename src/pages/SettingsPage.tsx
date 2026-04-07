@@ -139,9 +139,25 @@ const SettingsPage = () => {
           <FadeIn delay={0.05}>
             <div className="bg-card rounded-2xl p-4 border border-border/40 mb-3 shadow-card">
               <div className="flex items-center gap-3 mb-4">
-                <motion.div whileHover={{ scale: 1.05 }} className="w-14 h-14 rounded-2xl bg-gradient-to-br from-agni-green/30 to-agni-purple/30 flex items-center justify-center text-2xl">
-                  🧑‍💻
-                </motion.div>
+                <div className="relative">
+                  <UserAvatar avatarUrl={avatarUrl} name={fullName} size="lg" onClick={() => user && fileInputRef.current?.click()} />
+                  {user && (
+                    <button onClick={() => fileInputRef.current?.click()}
+                      className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-agni-green flex items-center justify-center border-2 border-card">
+                      {uploading ? <Loader2 size={10} className="animate-spin text-white" /> : <Camera size={10} className="text-white" />}
+                    </button>
+                  )}
+                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const url = await uploadAvatar(file);
+                      if (url) toast.success("Profile photo updated!");
+                      else toast.error("Upload failed");
+                      e.target.value = "";
+                    }}
+                  />
+                </div>
                 <div className="flex-1">
                   <p className="font-black text-foreground text-sm">{fullName || "Your Name"}</p>
                   <p className="text-[10px] text-muted-foreground font-semibold">{role || "Learner"}</p>
