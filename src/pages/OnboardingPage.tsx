@@ -713,10 +713,12 @@ const OnboardingPage = () => {
               </motion.div>
             </div>
 
-            <Button onClick={goNext} disabled={!selectedRole || (selectedRole === "custom" && !customRole.trim())}
-              className="w-full h-14 rounded-full bg-[#7C5CBF] hover:bg-[#6A4DAF] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none mt-3">
-              Continue <ArrowRight size={18} className="ml-2" />
-            </Button>
+            <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#FADADD] via-[#FADADD]/95 to-transparent">
+              <Button onClick={goNext} disabled={!selectedRole || (selectedRole === "custom" && !customRole.trim())}
+                className="w-full h-14 rounded-full bg-[#7C5CBF] hover:bg-[#6A4DAF] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
+                Continue <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </div>
           </motion.div>
         )}
 
