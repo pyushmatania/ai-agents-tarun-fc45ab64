@@ -334,6 +334,7 @@ const KNOWN_IMAGES: Record<string, string> = {
   "PBKS": searchAvatar("Punjab Kings IPL"),
   "RR": searchAvatar("Rajasthan Royals IPL"),
   "ISL": searchAvatar("Indian Super League"),
+};
 
 /**
  * Get image URL for a suggestion item
