@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Zap, X, Brain, Flame, ChevronRight, UserCircle, Pencil } from "lucide-react";
+import { Send, Sparkles, Zap, X, Brain, Flame, ChevronRight, ChevronDown, UserCircle, Pencil } from "lucide-react";
 import Agni from "@/components/Agni";
 import type { AgniExpression } from "@/components/Agni";
 import { SFX } from "@/lib/sounds";
