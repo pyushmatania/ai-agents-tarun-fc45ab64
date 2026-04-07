@@ -99,13 +99,14 @@ export function useChat(tab: ChatTab) {
     }
   }, [user]);
 
-  const sendMessage = useCallback(async (content: string, extraContext?: Record<string, any>, options?: { hiddenPrompt?: string }) => {
+  const sendMessage = useCallback(async (content: string, extraContext?: Record<string, any>, options?: { hiddenPrompt?: string; hideUserMessage?: boolean }) => {
     if (!content.trim() || isLoading) return;
 
-    // Display text is what the user sees; hidden prompt is what goes to AI
     const displayText = content.trim();
     const actualPrompt = options?.hiddenPrompt || displayText;
+    const hideUser = options?.hideUserMessage || false;
 
+    // Only add user message bubble if not hidden
     const userMsg: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
@@ -114,8 +115,10 @@ export function useChat(tab: ChatTab) {
       created_at: new Date().toISOString(),
     };
 
-    setMessages(prev => [...prev, userMsg]);
-    persistMessage(userMsg);
+    if (!hideUser) {
+      setMessages(prev => [...prev, userMsg]);
+      persistMessage(userMsg);
+    }
     setIsLoading(true);
 
     const controller = new AbortController();
