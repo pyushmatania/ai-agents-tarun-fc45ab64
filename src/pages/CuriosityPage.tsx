@@ -613,7 +613,7 @@ const CuriosityPage = () => {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-background pb-24 relative overflow-hidden">
+      <div className="min-h-screen bg-background pb-24 relative overflow-x-hidden">
         <div className="max-w-md mx-auto relative z-10">
           {/* Top bar */}
           <FadeIn>

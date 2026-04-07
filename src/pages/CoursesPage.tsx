@@ -89,7 +89,7 @@ const CoursesPage = () => {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-background pb-24 relative overflow-hidden">
+      <div className="min-h-screen bg-background pb-24 relative overflow-x-hidden">
         {/* ===== Background decorations ===== */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           {/* S-curve path — more visible */}
