@@ -79,6 +79,7 @@ const HomePage = () => {
   const displayName = user?.user_metadata?.full_name?.split(" ")[0] || storedName;
   const [activeMode, setActiveMode] = useState(localStorage.getItem("teaching_mode") || "engineer");
   const [agniExpression, setAgniExpression] = useState<"default" | "happy" | "excited">("default");
+  const [modesOpen, setModesOpen] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showInfoTooltip, setShowInfoTooltip] = useState(false);
   const [leaderboard, setLeaderboard] = useState<{ display_name: string; xp: number; weekly_xp: number; user_id: string }[]>([]);
