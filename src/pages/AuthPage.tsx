@@ -334,6 +334,8 @@ const AuthPage = () => {
                 <span>Earn <span className="text-secondary font-bold">+50 XP</span> on signup!</span>
               </motion.div>
             )}
+            </>
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
