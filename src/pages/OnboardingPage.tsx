@@ -152,6 +152,7 @@ const OnboardingPage = () => {
   const [dir, setDir] = useState(1);
   const [name, setName] = useState("");
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [showAllRoles, setShowAllRoles] = useState(false);
   const [customRole, setCustomRole] = useState("");
   const [selectedVibe, setSelectedVibe] = useState<string | null>(null);
   const [selectedMission, setSelectedMission] = useState<string | null>(null);
@@ -665,7 +666,7 @@ const OnboardingPage = () => {
               </p>
 
               <div className="grid grid-cols-2 gap-2.5">
-                {ROLES.map((role, i) => (
+                {(showAllRoles ? ROLES : ROLES.slice(0, 10)).map((role, i) => (
                   <ColorPill
                     key={role.id}
                     emoji={role.emoji}
@@ -677,6 +678,16 @@ const OnboardingPage = () => {
                   />
                 ))}
               </div>
+
+              {!showAllRoles && ROLES.length > 10 && (
+                <motion.button
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+                  onClick={() => { SFX.pop(); setShowAllRoles(true); }}
+                  className="w-full mt-3 py-3 rounded-full bg-white/80 text-gray-700 font-bold text-sm flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all active:scale-95"
+                >
+                  Show {ROLES.length - 10} more roles ✨
+                </motion.button>
+              )}
 
               {/* Custom role */}
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
