@@ -520,49 +520,13 @@ const OnboardingPage = () => {
                       setSelectedVibe(saved.id);
                     }}
                   />
-                  {/* Universe Vibes section */}
-                  <div className="mt-4 mb-2">
-                    <p className="text-[10px] font-black text-agni-gold uppercase tracking-wider mb-2 px-1">🌍 OR TEACH THROUGH A UNIVERSE</p>
-                    <p className="text-[9px] text-muted-foreground mb-2 px-1">Pick a movie, anime, game, or character — AGNI teaches through that world!</p>
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                      {UNIVERSE_VIBE_CATEGORIES.map(cat => (
-                        <span key={cat.id} className="text-[8px] font-bold bg-agni-gold/10 text-agni-gold px-2 py-1 rounded-full border border-agni-gold/20">
-                          {cat.emoji} {cat.label}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        placeholder="e.g. Goku, Naruto, The Matrix, Iron Man..."
-                        value={universeVibeInput}
-                        onChange={(e) => setUniverseVibeInput(e.target.value)}
-                        className="flex-1 bg-card border border-agni-gold/30 rounded-xl px-3 py-2.5 text-xs font-bold text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-agni-gold/60"
-                      />
-                      {universeVibeInput.trim() && (
-                        <motion.button
-                          initial={{ scale: 0 }} animate={{ scale: 1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => { setUniverseVibe(universeVibeInput.trim()); }}
-                          className="px-3 rounded-xl bg-agni-gold text-white text-[10px] font-black shrink-0"
-                        >
-                          Set ✓
-                        </motion.button>
-                      )}
-                    </div>
-                    {universeVibeInput.trim() && (
-                      <p className="text-[9px] text-agni-gold/70 mt-1.5 px-1">
-                        🎬 AGNI will teach through the world of "<span className="font-bold">{universeVibeInput}</span>" — using characters, plot moments, and vocabulary from this universe!
-                      </p>
-                    )}
-                  </div>
                 </div>
               </div>
 
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
                 className="bg-agni-purple/5 border border-agni-purple/20 rounded-2xl px-4 py-2.5 mb-3 shrink-0"
               >
-                <p className="text-[10px] text-agni-purple font-bold">💡 Pick a style OR a universe — AGNI adapts everything. "Sensei" = Karate Kid energy. "Wizard" = spells & incantations. Or type "Goku" for Dragon Ball-style teaching!</p>
+                <p className="text-[10px] text-agni-purple font-bold">💡 Pick how AGNI talks to you. "Sensei" = Karate Kid energy. "Wizard" = spells & incantations. "Game Mode" = XP & boss battles!</p>
               </motion.div>
             </div>
 
