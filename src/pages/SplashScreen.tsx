@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import Agni from "@/components/Agni";
+import neuralLogo from "@/assets/neural-os-logo.png";
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -34,13 +35,13 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
         <div className="w-64 h-64 rounded-full bg-agni-green/10 blur-[80px]" />
       </div>
 
-      {/* AGNI mascot */}
+      {/* Neural-OS Logo */}
       <motion.div
         initial={{ scale: 0, rotate: -20 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
       >
-        <Agni expression="excited" size={140} />
+        <img src={neuralLogo} alt="Neural-OS" width={120} height={120} className="drop-shadow-[0_0_30px_hsl(var(--agni-green)/0.4)]" />
       </motion.div>
 
       {/* Wordmark typewriter */}
