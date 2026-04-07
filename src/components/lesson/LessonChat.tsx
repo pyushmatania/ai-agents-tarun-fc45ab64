@@ -354,7 +354,7 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
       })()}
 
       {/* Persona Modal */}
-      <MascotProfileModal isOpen={showPersonaModal} onClose={() => setShowPersonaModal(false)} />
+      <MascotProfileModal open={showPersonaModal} onClose={() => setShowPersonaModal(false)} />
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-2.5 px-1 pb-2 scrollbar-none">
