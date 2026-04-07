@@ -575,7 +575,6 @@ const OnboardingPage = () => {
                   />
                 </div>
               </div>
-              </div>
 
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
                 className="bg-agni-green/5 border border-agni-green/20 rounded-2xl px-4 py-2.5 mb-3 shrink-0"
