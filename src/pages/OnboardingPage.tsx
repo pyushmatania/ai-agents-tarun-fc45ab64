@@ -722,29 +722,29 @@ const OnboardingPage = () => {
                 </div>
               </div>
 
-              {/* Add custom — prominent card when typing something new */}
+              {/* Add custom — AI Smart Search when typing something new */}
               {showAddCustom && (
                 <motion.button
                   initial={{ opacity: 0, y: -8, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                  onClick={() => { toggleItem(search.trim()); setSearch(""); }}
-                  className="mb-2 shrink-0 w-full text-left overflow-hidden rounded-2xl border-2 border-dashed border-agni-gold/40 bg-gradient-to-r from-agni-gold/10 via-agni-orange/5 to-agni-pink/10 hover:border-agni-gold/60 transition-all"
+                  onClick={() => { setSmartSearchQuery(search.trim()); setSmartSearchOpen(true); }}
+                  className="mb-2 shrink-0 w-full text-left overflow-hidden rounded-2xl border-2 border-dashed border-agni-purple/40 bg-gradient-to-r from-agni-purple/10 via-agni-blue/5 to-agni-green/10 hover:border-agni-purple/60 transition-all"
                 >
                   <div className="flex items-center gap-3 px-4 py-3">
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-agni-gold to-agni-orange flex items-center justify-center shadow-lg shrink-0">
-                      <Sparkles size={16} className="text-white" />
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-agni-purple to-agni-blue flex items-center justify-center shadow-lg shrink-0">
+                      <Brain size={16} className="text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-extrabold text-foreground">
-                        Add "<span className="text-agni-gold">{search.trim()}</span>" as custom
+                        🔍 Search "<span className="text-agni-purple">{search.trim()}</span>" with AI
                       </p>
                       <p className="text-[9px] text-muted-foreground mt-0.5">
-                        Not in the list? No problem — tap to add it!
+                        AI will find the exact match across all categories
                       </p>
                     </div>
-                    <div className="shrink-0 bg-agni-gold/20 rounded-lg px-2 py-1 flex items-center gap-1">
-                      <span className="text-[9px] font-bold text-agni-gold">↵ Enter</span>
+                    <div className="shrink-0 bg-agni-purple/20 rounded-lg px-2 py-1 flex items-center gap-1">
+                      <span className="text-[9px] font-bold text-agni-purple">↵ Enter</span>
                     </div>
                   </div>
                 </motion.button>
