@@ -403,6 +403,14 @@ const CuriosityPage = () => {
       return cached ? JSON.parse(cached) : [];
     } catch { return []; }
   });
+  const [viewedItems, setViewedItems] = useState<number[]>(() => {
+    try {
+      const v = localStorage.getItem("spark_viewed");
+      return v ? JSON.parse(v) : [];
+    } catch { return []; }
+  });
+  const [exploreSearch, setExploreSearch] = useState("");
+  const [exploreFilter, setExploreFilter] = useState("all");
 
   const feedEndRef = useRef<HTMLDivElement>(null);
 
