@@ -372,32 +372,29 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
 
       {/* Persona summary chip row */}
       {(() => {
-        const chips: string[] = [];
-        if (persona.currentRole) chips.push(persona.currentRole);
-        if (persona.shows?.length) chips.push(...persona.shows);
-        if (persona.sports?.length) chips.push(...persona.sports);
-        if (persona.curious?.length) chips.push(...persona.curious);
-        if (persona.hobbies?.length) chips.push(...persona.hobbies);
-        if (persona.music?.length) chips.push(...persona.music);
-        if (persona.gaming?.length) chips.push(...persona.gaming);
-        if (persona.news?.length) chips.push(...persona.news);
-        if (persona.books?.length) chips.push(...persona.books);
+        const groups: { emoji: string; items: string[] }[] = [];
+        if (persona.currentRole) groups.push({ emoji: "💼", items: [persona.currentRole] });
+        if (persona.shows?.length) groups.push({ emoji: "🎬", items: persona.shows });
+        if (persona.sports?.length) groups.push({ emoji: "⚽", items: persona.sports });
+        if (persona.curious?.length) groups.push({ emoji: "🔍", items: persona.curious });
+        if (persona.hobbies?.length) groups.push({ emoji: "🎯", items: persona.hobbies });
+        if (persona.music?.length) groups.push({ emoji: "🎵", items: persona.music });
+        if (persona.gaming?.length) groups.push({ emoji: "🎮", items: persona.gaming });
+        if (persona.news?.length) groups.push({ emoji: "📰", items: persona.news });
+        if (persona.books?.length) groups.push({ emoji: "📚", items: persona.books });
 
-        return chips.length > 0 ? (
-          <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-1 mb-1.5 overflow-x-auto scrollbar-none">
+        return groups.length > 0 ? (
+          <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-1.5 mb-1.5 overflow-x-auto scrollbar-none">
             <motion.button whileTap={{ scale: 0.9 }} onClick={() => setShowPersonaModal(true)}
               className="shrink-0 flex items-center gap-1 text-[8px] font-black text-agni-purple bg-agni-purple/10 border border-agni-purple/20 px-2 py-1 rounded-full"
             >
               <Pencil size={8} /> Edit
             </motion.button>
-            {chips.slice(0, 4).map((chip, i) => (
-              <span key={i} className="shrink-0 text-[8px] font-bold text-muted-foreground bg-card border border-border/30 px-2 py-1 rounded-full">
-                {chip}
+            {groups.map((g, i) => (
+              <span key={i} className="shrink-0 text-[8px] font-bold text-muted-foreground bg-card border border-border/30 px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap">
+                <span>{g.emoji}</span>{g.items.join(", ")}
               </span>
             ))}
-            {chips.length > 4 && (
-              <span className="shrink-0 text-[8px] font-bold text-muted-foreground/60">+{chips.length - 4}</span>
-            )}
           </motion.div>
         ) : (
           <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} whileTap={{ scale: 0.95 }}
