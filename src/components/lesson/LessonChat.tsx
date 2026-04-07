@@ -112,7 +112,6 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
   const [activeMode, setActiveMode] = useState(initialMode);
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
   const [pressedBtn, setPressedBtn] = useState<string | null>(null);
-  const [showNeuralPowers, setShowNeuralPowers] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
