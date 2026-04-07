@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Search, Sparkles, Check, ArrowLeft, TrendingUp } from "lucide-react";
+import { X, Search, Sparkles, Check, ArrowLeft, TrendingUp, Brain } from "lucide-react";
 import { getPersona, savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona, getSubFilters, getSubFilterCount, POPULAR_PICKS } from "@/lib/neuralOS";
 import { InterestPill } from "./InterestPill";
 import Agni from "./Agni";
+import SmartInterestSearch from "./SmartInterestSearch";
 
 interface MascotProfileModalProps {
   open: boolean;
