@@ -131,17 +131,30 @@ const SourcesPage = () => {
   const { stats } = useGamification();
   const [activeZone, setActiveZone] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
-  const [newsLoading, setNewsLoading] = useState(true);
+  const [newsItems, setNewsItems] = useState<NewsItem[]>(() => {
+    try {
+      const cached = localStorage.getItem("hub_news_cache");
+      if (cached) return JSON.parse(cached);
+    } catch {}
+    return [];
+  });
+  const [newsLoading, setNewsLoading] = useState(() => {
+    try { return !localStorage.getItem("hub_news_cache"); } catch { return true; }
+  });
   const [activeNewsIdx, setActiveNewsIdx] = useState(0);
 
   useEffect(() => {
     const fetchNews = async () => {
-      setNewsLoading(true);
+      if (newsItems.length === 0) setNewsLoading(true);
       try {
         const { data, error } = await supabase.functions.invoke("ai-news", { body: {} });
         if (error) throw new Error(error.message);
-        setNewsItems(data?.items || []);
+        const items = data?.items || [];
+        if (items.length > 0) {
+          setNewsItems(items);
+          setActiveNewsIdx(0);
+          localStorage.setItem("hub_news_cache", JSON.stringify(items));
+        }
       } catch (e) { console.error("Failed to fetch news:", e); }
       setNewsLoading(false);
     };

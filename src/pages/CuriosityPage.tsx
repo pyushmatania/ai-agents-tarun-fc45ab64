@@ -39,10 +39,21 @@ const CuriosityPage = () => {
   const [sparkIdx, setSparkIdx] = useState(0);
   const [copied, setCopied] = useState(false);
 
+  // Load cached results for a category
+  const getCachedResults = (catId: string): any[] => {
+    try {
+      const cached = localStorage.getItem(`spark_cache_${catId}`);
+      if (cached) return JSON.parse(cached);
+    } catch {}
+    return [];
+  };
+
   const fetchCuriosity = async (cat: typeof CURIOSITY[0]) => {
     setActiveId(cat.id);
-    setResults([]);
     setError("");
+    // Show cached results immediately
+    const cached = getCachedResults(cat.id);
+    setResults(cached);
     setLoading(true);
     try {
       const { data, error: fnError } = await supabase.functions.invoke("ai-curiosity", {
@@ -50,10 +61,14 @@ const CuriosityPage = () => {
       });
       if (fnError) throw new Error(fnError.message);
       const items = data?.items || [];
-      if (items.length > 0) setResults(items);
-      else setError("No results found. Try again!");
+      if (items.length > 0) {
+        setResults(items);
+        localStorage.setItem(`spark_cache_${cat.id}`, JSON.stringify(items));
+      } else if (cached.length === 0) {
+        setError("No results found. Try again!");
+      }
     } catch (e: any) {
-      setError(e.message || "Failed to fetch. Try again!");
+      if (cached.length === 0) setError(e.message || "Failed to fetch. Try again!");
     }
     setLoading(false);
   };
