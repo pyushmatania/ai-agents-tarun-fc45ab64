@@ -119,7 +119,9 @@ export default function ChatPage() {
   };
 
   const handleSuggestionClick = (suggestion: string) => {
-    chat.sendMessage(suggestion, buildTeachingContext());
+    const ctx = buildTeachingContext();
+    const snapshot = buildSettingsSnapshot();
+    chat.sendMessage(suggestion, ctx, undefined, snapshot);
   };
 
   const handleModeChange = (mode: string) => {
@@ -222,38 +224,28 @@ export default function ChatPage() {
           <div className="space-y-1">
             {chat.messages.map((msg) => {
               const { text } = parseSuggestions(msg.content);
+              const snapshot = msg.metadata?.settingsSnapshot as { key: string; emoji: string; value: string }[] | undefined;
               return (
-                <ContentRenderer
-                  key={msg.id}
-                  content={text}
-                  isUser={msg.role === "user"}
-                  showActions={msg.role === "assistant" && !!text}
-                />
+                <div key={msg.id}>
+                  <ContentRenderer
+                    content={text}
+                    isUser={msg.role === "user"}
+                    showActions={msg.role === "assistant" && !!text}
+                  />
+                  {/* Settings blueprint stamp */}
+                  {msg.role === "assistant" && text && snapshot && snapshot.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1 mb-2 px-1">
+                      {snapshot.map((s) => (
+                        <span key={s.key} className="text-[8px] font-bold text-muted-foreground/40 bg-muted/10 rounded-lg px-1.5 py-0.5">
+                          {s.emoji} {s.value}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>
-        )}
-      </div>
-
-      {/* Smart Input Bar */}
-      <div className="sticky bottom-0">
-        <SmartInputBar
-          value={input}
-          onChange={setInput}
-          onSend={handleSend}
-          onStop={chat.stopStreaming}
-          isLoading={chat.isLoading}
-          isLearnTab={activeTab === "curriculum"}
-          suggestions={!chat.isLoading ? lastSuggestions : []}
-          onSuggestionClick={handleSuggestionClick}
-          placeholder={tabConfig.placeholder}
-          accentColor={tabConfig.color}
-          activeMode={activeMode}
-          onModeChange={handleModeChange}
-          exchangeCount={chat.messages.filter(m => m.role === "user").length}
-          hasMessages={chat.messages.length > 0}
-          onRecookLast={() => chat.regenerateLast(buildTeachingContext())}
-        />
       </div>
     </div>
   );
