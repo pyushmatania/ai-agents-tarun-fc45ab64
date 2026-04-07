@@ -327,8 +327,8 @@ const OnboardingPage = () => {
                 <Agni expression="thinking" size={80} speech="What brings you here? 🤔" animate />
               </div>
 
-              <h2 className="text-2xl font-black text-foreground text-center mb-1">I am a...</h2>
-              <p className="text-xs text-muted-foreground text-center mb-5">Pick what fits best</p>
+              <h2 className="text-2xl font-black text-foreground text-center mb-1">🪪 Who are you?</h2>
+              <p className="text-xs text-muted-foreground text-center mb-5">Your identity shapes how AGNI teaches — pick the world you live in</p>
 
               <div className="grid grid-cols-2 gap-2.5">
                 {ROLES.map((role, i) => {
