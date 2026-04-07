@@ -95,6 +95,7 @@ const OnboardingPage = () => {
   const [dir, setDir] = useState(1);
   const [name, setName] = useState("");
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [customRole, setCustomRole] = useState("");
   const [selectedVibe, setSelectedVibe] = useState<string | null>(null);
   const [persona, setPersona] = useState<Partial<NeuralOSPersona>>({});
   const [search, setSearch] = useState("");
@@ -164,13 +165,14 @@ const OnboardingPage = () => {
 
   const finish = () => {
     const role = ROLES.find(r => r.id === selectedRole);
+    const roleLabel = selectedRole === "custom" ? customRole.trim() : role?.label;
     savePersona({
       ...persona,
       name: name.trim(),
       goal: role?.goal || "Master AI agents",
       experience: role?.exp || "some experience",
       vibe: selectedVibe || "fun",
-      currentRole: role?.label,
+      currentRole: roleLabel,
       completedAt: new Date().toISOString(),
     });
     localStorage.setItem("edu_user_name", name.trim());
