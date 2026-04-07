@@ -82,7 +82,7 @@ export function useAvatar() {
         ...(persona.shows || []),
         ...(persona.sports || []),
         ...(persona.music || []),
-        ...(persona.games || []),
+        ...((persona as any).games || []),
       ].slice(0, 5);
 
       const { data, error } = await supabase.functions.invoke("ai-avatar", {
