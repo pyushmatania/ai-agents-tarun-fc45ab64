@@ -8,7 +8,7 @@ import {
   BookmarkPlus, ChevronUp, ChevronDown, Clock, Globe, Play,
   Youtube, Instagram, Newspaper, TrendingUp, Eye, Brain,
   BookOpen, MessageSquare, Lightbulb, ThumbsUp, ThumbsDown,
-  Share2, Bookmark, Filter, X
+  Share2, Bookmark, Filter, X, Search, History
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
