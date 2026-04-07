@@ -8,7 +8,7 @@ import {
   BookmarkPlus, ChevronUp, ChevronDown, Clock, Globe, Play,
   Youtube, Instagram, Newspaper, TrendingUp, Eye, Brain,
   BookOpen, MessageSquare, Lightbulb, ThumbsUp, ThumbsDown,
-  Share2, Bookmark, Filter, X
+  Share2, Bookmark, Filter, X, Search, History
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -403,6 +403,14 @@ const CuriosityPage = () => {
       return cached ? JSON.parse(cached) : [];
     } catch { return []; }
   });
+  const [viewedItems, setViewedItems] = useState<number[]>(() => {
+    try {
+      const v = localStorage.getItem("spark_viewed");
+      return v ? JSON.parse(v) : [];
+    } catch { return []; }
+  });
+  const [exploreSearch, setExploreSearch] = useState("");
+  const [exploreFilter, setExploreFilter] = useState("all");
 
   const feedEndRef = useRef<HTMLDivElement>(null);
 
@@ -441,6 +449,25 @@ const CuriosityPage = () => {
       return next;
     });
   };
+
+  const markViewed = (idx: number) => {
+    setViewedItems(prev => {
+      if (prev.includes(idx)) {
+        // Move to front
+        const next = [idx, ...prev.filter(i => i !== idx)].slice(0, 20);
+        localStorage.setItem("spark_viewed", JSON.stringify(next));
+        return next;
+      }
+      const next = [idx, ...prev].slice(0, 20);
+      localStorage.setItem("spark_viewed", JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const recentlyViewedItems = useMemo(() =>
+    viewedItems.map(i => feedItems[i]).filter(Boolean).slice(0, 8),
+    [viewedItems, feedItems]
+  );
 
   const getCachedResults = (catId: string): any[] => {
     try {
@@ -781,7 +808,7 @@ const CuriosityPage = () => {
                             className="rounded-2xl bg-card border-2 border-border/20 overflow-hidden"
                           >
                             {/* Thumbnail */}
-                            <a href={item.url} target="_blank" rel="noopener noreferrer" className="block">
+                            <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={() => markViewed(i)} className="block">
                               {meta.thumbnail ? (
                                 <div className="relative w-full h-44 bg-muted/10">
                                   <img src={meta.thumbnail} alt="" className="w-full h-full object-cover" />
@@ -873,7 +900,7 @@ const CuriosityPage = () => {
                           transition={{ delay: Math.min(i * 0.03, 0.3) }}
                           className="bg-card rounded-2xl border border-border/20 overflow-hidden relative"
                         >
-                          <a href={item.url} target="_blank" rel="noopener noreferrer"
+                          <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={() => markViewed(i)}
                             className="flex gap-3 p-3"
                           >
                             {/* Left: Thumbnail or icon */}
@@ -975,6 +1002,61 @@ const CuriosityPage = () => {
                       )}
                     </div>
                   </div>
+                )}
+
+                {/* ═══ RECENTLY VIEWED ═══ */}
+                {recentlyViewedItems.length > 0 && (
+                  <FadeIn delay={0.06}>
+                    <div className="px-4 mb-3 mt-2">
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <History size={11} className="text-agni-purple" />
+                        <span className="text-[9px] font-black text-muted-foreground tracking-wider">RECENTLY VIEWED</span>
+                        <span className="text-[8px] font-bold text-muted-foreground/50 ml-auto">{recentlyViewedItems.length} items</span>
+                      </div>
+                      <div className="flex gap-2.5 overflow-x-auto scrollbar-none pb-1">
+                        {recentlyViewedItems.map((item, j) => {
+                          const meta = getContentMeta(item.url);
+                          return (
+                            <motion.a
+                              key={j}
+                              href={item.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: j * 0.04 }}
+                              className="shrink-0 w-36 bg-card rounded-xl border border-border/20 overflow-hidden group"
+                            >
+                              {meta.thumbnail ? (
+                                <div className="w-full h-20 bg-muted/10 relative">
+                                  <img src={meta.thumbnail} alt="" className="w-full h-full object-cover" />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                                  {(meta.type === "youtube" || meta.type === "instagram") && (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                      <div className="w-7 h-7 rounded-full bg-white/80 flex items-center justify-center">
+                                        <Play size={10} className="text-black ml-0.5" fill="black" />
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="w-full h-16 flex items-center justify-center" style={{ background: `${meta.color}10` }}>
+                                  <meta.icon size={18} style={{ color: meta.color }} />
+                                </div>
+                              )}
+                              <div className="p-2">
+                                <p className="text-[9px] font-extrabold text-foreground line-clamp-2 leading-tight">{item.title}</p>
+                                <div className="flex items-center gap-1 mt-1">
+                                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: meta.color }} />
+                                  <span className="text-[7px] font-bold text-muted-foreground">{meta.label}</span>
+                                </div>
+                              </div>
+                            </motion.a>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </FadeIn>
                 )}
 
                 {/* Spark fact */}
@@ -1101,106 +1183,207 @@ const CuriosityPage = () => {
               </motion.div>
             )}
 
-            {/* ═══ EXPLORE TAB ═══ */}
+            {/* ═══ EXPLORE TAB — Redesigned ═══ */}
             {activeTab === "explore" && (
               <motion.div key="explore-tab" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }}>
-                <div className="px-4 space-y-2.5">
-                  {CURIOSITY.map((cat, i) => {
-                    const isActive = activeId === cat.id;
-                    return (
-                      <div key={cat.id}>
+                <div className="px-4">
+                  {/* Search bar */}
+                  <div className="relative mb-3">
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40" />
+                    <input
+                      type="text"
+                      placeholder="Search topics or categories..."
+                      value={exploreSearch}
+                      onChange={(e) => setExploreSearch(e.target.value)}
+                      className="w-full bg-card border border-border/30 rounded-xl pl-9 pr-4 py-2.5 text-[11px] font-bold text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-agni-green/40"
+                    />
+                  </div>
+
+                  {/* Filter chips */}
+                  <div className="flex gap-1.5 overflow-x-auto scrollbar-none mb-4">
+                    {[
+                      { id: "all", label: "Discover", color: "#58CC02" },
+                      { id: "saved", label: "Saved", color: "#FFC800" },
+                      { id: "trending", label: "Trending", color: "#FF4B91" },
+                      { id: "new", label: "New", color: "#1CB0F6" },
+                    ].map(chip => {
+                      const isChipActive = exploreFilter === chip.id;
+                      return (
                         <motion.button
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.05 }}
-                          whileTap={{ scale: 0.97 }}
-                          onClick={() => fetchCuriosity(cat)}
-                          className="w-full rounded-2xl p-3.5 text-left flex items-center gap-3 relative overflow-hidden border-2 transition-colors"
+                          key={chip.id}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => setExploreFilter(chip.id)}
+                          className="shrink-0 px-4 py-2 rounded-full text-[10px] font-black transition-all"
                           style={{
-                            borderColor: isActive ? `${cat.color}40` : 'hsl(var(--border) / 0.2)',
-                            background: isActive ? `${cat.color}08` : 'hsl(var(--card))',
+                            background: isChipActive ? chip.color : 'hsl(var(--card))',
+                            color: isChipActive ? '#fff' : 'hsl(var(--muted-foreground))',
+                            border: `1.5px solid ${isChipActive ? chip.color : 'hsl(var(--border) / 0.3)'}`,
                           }}
                         >
-                          <div
-                            className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
-                            style={{ background: `${cat.color}15` }}
-                          >
-                            {isActive && loading ? (
-                              <Loader2 size={18} className="animate-spin" style={{ color: cat.color }} />
-                            ) : cat.emoji}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[12px] font-black text-foreground">{cat.label}</p>
-                            <p className="text-[9px] text-muted-foreground">{cat.desc}</p>
-                          </div>
-                          <ChevronRight size={14} style={{ color: cat.color }} className="shrink-0 opacity-40" />
+                          {chip.label}
                         </motion.button>
+                      );
+                    })}
+                  </div>
 
-                        <AnimatePresence>
-                          {isActive && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: "auto" }}
-                              exit={{ opacity: 0, height: 0 }}
-                              className="overflow-hidden"
-                            >
-                              <div className="pt-2 space-y-1.5">
-                                {error && (
-                                  <div className="bg-agni-red/10 border border-agni-red/20 rounded-xl p-2.5">
-                                    <p className="text-[10px] text-agni-red font-semibold">{error}</p>
-                                    <button onClick={() => fetchCuriosity(cat)} className="mt-1 text-[9px] font-bold text-agni-green flex items-center gap-1">
-                                      <RefreshCw size={9} /> Retry
-                                    </button>
-                                  </div>
-                                )}
+                  {/* Category Cards — Job-listing style */}
+                  <div className="space-y-3">
+                    {CURIOSITY
+                      .filter(cat => !exploreSearch || cat.label.toLowerCase().includes(exploreSearch.toLowerCase()) || cat.desc.toLowerCase().includes(exploreSearch.toLowerCase()))
+                      .map((cat, i) => {
+                      const isActive = activeId === cat.id;
+                      const tags = cat.desc.split(/[,&]/).map(t => t.trim()).filter(Boolean);
+                      return (
+                        <motion.div
+                          key={cat.id}
+                          initial={{ opacity: 0, y: 15 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.06 }}
+                          className="rounded-2xl overflow-hidden border-2 transition-all"
+                          style={{ borderColor: isActive ? `${cat.color}60` : 'hsl(var(--border) / 0.15)' }}
+                        >
+                          {/* Card header */}
+                          <motion.button
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => fetchCuriosity(cat)}
+                            className="w-full text-left p-4 relative overflow-hidden"
+                            style={{ background: `hsl(var(--card))` }}
+                          >
+                            {/* Colored accent background */}
+                            <div className="absolute top-0 right-0 w-24 h-24 rounded-full opacity-10 -translate-y-1/2 translate-x-1/2" style={{ background: cat.color }} />
 
-                                {loading && !results.length && (
-                                  <div className="space-y-1.5">
-                                    {[1, 2, 3].map(j => (
-                                      <div key={j} className="h-14 rounded-xl bg-muted/10 animate-pulse" style={{ animationDelay: `${j * 100}ms` }} />
-                                    ))}
-                                  </div>
-                                )}
-
-                                {results.map((item: any, j: number) => (
-                                  <motion.div key={j}
-                                    initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: j * 0.04 }}
-                                    className="flex items-center gap-2 bg-card rounded-xl p-2.5 border border-border/15"
-                                  >
-                                    <a href={item.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 flex-1 min-w-0">
-                                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0"
-                                        style={{ background: `${cat.color}12` }}
-                                      >{typeIcons[item.type] || "🔗"}</div>
-                                      <div className="flex-1 min-w-0">
-                                        <p className="text-[10px] font-extrabold text-foreground truncate">{item.title}</p>
-                                        <p className="text-[8px] text-muted-foreground truncate">{item.desc}</p>
-                                      </div>
-                                    </a>
-                                    <motion.button
-                                      whileTap={{ scale: 0.8 }}
-                                      onClick={() => setLearnItem(item)}
-                                      className="shrink-0 w-7 h-7 rounded-lg bg-agni-purple/10 flex items-center justify-center"
-                                    >
-                                      <Brain size={11} className="text-agni-purple" />
-                                    </motion.button>
-                                    <a href={item.url} target="_blank" rel="noopener noreferrer" className="shrink-0">
-                                      <ExternalLink size={9} style={{ color: cat.color }} className="opacity-40" />
-                                    </a>
-                                  </motion.div>
-                                ))}
+                            <div className="flex items-start justify-between relative z-10">
+                              <div className="flex items-center gap-3">
+                                <div
+                                  className="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0 shadow-lg"
+                                  style={{ background: `${cat.color}20`, boxShadow: `0 4px 12px ${cat.color}15` }}
+                                >
+                                  {isActive && loading ? (
+                                    <Loader2 size={18} className="animate-spin" style={{ color: cat.color }} />
+                                  ) : cat.emoji}
+                                </div>
+                                <div>
+                                  <p className="text-[13px] font-black text-foreground">{cat.label}</p>
+                                  <p className="text-[9px] text-muted-foreground mt-0.5">{cat.desc}</p>
+                                </div>
                               </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    );
-                  })}
+                              <motion.div
+                                whileTap={{ scale: 0.85 }}
+                                className="flex items-center gap-1 rounded-full px-3 py-1.5 border-2 text-[9px] font-black"
+                                style={{ borderColor: `${cat.color}40`, color: cat.color }}
+                              >
+                                View <ExternalLink size={9} />
+                              </motion.div>
+                            </div>
+
+                            {/* Tags */}
+                            <div className="flex flex-wrap gap-1.5 mt-3 relative z-10">
+                              {tags.map((tag, ti) => (
+                                <span
+                                  key={ti}
+                                  className="text-[8px] font-bold px-2.5 py-1 rounded-full"
+                                  style={{ background: `${cat.color}12`, color: cat.color, border: `1px solid ${cat.color}20` }}
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </motion.button>
+
+                          {/* Bottom colored bar with meta */}
+                          <div className="px-4 py-2 flex items-center justify-between" style={{ background: `${cat.color}08` }}>
+                            <div className="flex items-center gap-1.5 text-[8px] font-bold text-muted-foreground">
+                              <Clock size={9} className="opacity-50" />
+                              Updated recently
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <motion.button
+                                whileTap={{ scale: 0.8 }}
+                                onClick={() => setLearnItem({ title: cat.label, desc: cat.desc, url: "" })}
+                                className="w-6 h-6 rounded-full flex items-center justify-center"
+                                style={{ background: `${cat.color}15` }}
+                              >
+                                <Brain size={10} style={{ color: cat.color }} />
+                              </motion.button>
+                              <motion.button
+                                whileTap={{ scale: 0.8 }}
+                                onClick={() => shareItem({ title: cat.label, desc: cat.desc })}
+                                className="w-6 h-6 rounded-full flex items-center justify-center bg-muted/20"
+                              >
+                                <Share2 size={10} className="text-muted-foreground/50" />
+                              </motion.button>
+                            </div>
+                          </div>
+
+                          {/* Expanded results */}
+                          <AnimatePresence>
+                            {isActive && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="px-4 pb-3 pt-1 space-y-2 border-t" style={{ borderColor: `${cat.color}15` }}>
+                                  {error && (
+                                    <div className="bg-agni-red/10 border border-agni-red/20 rounded-xl p-2.5">
+                                      <p className="text-[10px] text-agni-red font-semibold">{error}</p>
+                                      <button onClick={() => fetchCuriosity(cat)} className="mt-1 text-[9px] font-bold text-agni-green flex items-center gap-1">
+                                        <RefreshCw size={9} /> Retry
+                                      </button>
+                                    </div>
+                                  )}
+
+                                  {loading && !results.length && (
+                                    <div className="space-y-1.5">
+                                      {[1, 2, 3].map(j => (
+                                        <div key={j} className="h-14 rounded-xl bg-muted/10 animate-pulse" style={{ animationDelay: `${j * 100}ms` }} />
+                                      ))}
+                                    </div>
+                                  )}
+
+                                  {results.map((item: any, j: number) => (
+                                    <motion.div key={j}
+                                      initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
+                                      transition={{ delay: j * 0.04 }}
+                                      className="flex items-center gap-2 rounded-xl p-2.5 border"
+                                      style={{ background: `${cat.color}05`, borderColor: `${cat.color}15` }}
+                                    >
+                                      <a href={item.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 flex-1 min-w-0">
+                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0"
+                                          style={{ background: `${cat.color}15` }}
+                                        >{typeIcons[item.type] || "🔗"}</div>
+                                        <div className="flex-1 min-w-0">
+                                          <p className="text-[10px] font-extrabold text-foreground truncate">{item.title}</p>
+                                          <p className="text-[8px] text-muted-foreground truncate">{item.desc}</p>
+                                        </div>
+                                      </a>
+                                      <motion.button
+                                        whileTap={{ scale: 0.8 }}
+                                        onClick={() => setLearnItem(item)}
+                                        className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center"
+                                        style={{ background: `${cat.color}15` }}
+                                      >
+                                        <Brain size={11} style={{ color: cat.color }} />
+                                      </motion.button>
+                                      <a href={item.url} target="_blank" rel="noopener noreferrer" className="shrink-0">
+                                        <ExternalLink size={9} style={{ color: cat.color }} className="opacity-40" />
+                                      </a>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
 
                   <motion.button
                     whileTap={{ scale: 0.97 }}
                     onClick={() => navigate("/sources")}
-                    className="w-full bg-foreground text-background rounded-2xl py-3 text-[12px] font-black text-center mt-2"
+                    className="w-full bg-foreground text-background rounded-2xl py-3 text-[12px] font-black text-center mt-4"
                   >
                     📚 Browse Sources Hub
                   </motion.button>
