@@ -426,7 +426,7 @@ const SettingsPage = () => {
                           {SUGGESTION_CATEGORIES.map(cat => {
                             const items = (persona[cat.field] as string[]) || [];
                             return (
-                              <button key={cat.id} onClick={() => setActiveCatId(activeCatId === cat.id ? null : cat.id)}
+                              <button key={cat.id} onClick={() => { setActiveCatId(activeCatId === cat.id ? null : cat.id); setSettingsSubFilter(null); }}
                                 className={`px-2 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${
                                   activeCatId === cat.id
                                     ? "bg-agni-green/10 border-agni-green/30 text-agni-green"
