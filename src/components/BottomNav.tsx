@@ -1,6 +1,9 @@
 import { Home, BookOpen, Sparkles, Library, Map, UserCircle } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useMemo } from "react";
+import { useFollowedSources } from "@/hooks/useFollowedSources";
+import { sourceHasUpdate } from "@/lib/sources";
 
 const tabs = [
   { icon: Home, path: "/", label: "Home" },
@@ -14,6 +17,12 @@ const tabs = [
 const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { followed } = useFollowedSources();
+
+  const sparkBadgeCount = useMemo(
+    () => followed.filter(name => sourceHasUpdate(name)).length,
+    [followed]
+  );
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50">
@@ -64,7 +73,14 @@ const BottomNav = () => {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <tab.icon size={15} strokeWidth={isActive ? 2.5 : 1.8} />
+                <div className="relative">
+                  <tab.icon size={15} strokeWidth={isActive ? 2.5 : 1.8} />
+                  {tab.path === "/curiosity" && sparkBadgeCount > 0 && (
+                    <span className="absolute -top-1.5 -right-2.5 min-w-[14px] h-[14px] rounded-full bg-agni-orange text-[7px] font-black text-white flex items-center justify-center px-0.5 shadow-md">
+                      {sparkBadgeCount > 9 ? "9+" : sparkBadgeCount}
+                    </span>
+                  )}
+                </div>
                 <span className={`text-[7px] font-bold leading-none tracking-wide ${isActive ? "text-agni-green" : "text-muted-foreground"}`}>
                   {tab.label}
                 </span>
