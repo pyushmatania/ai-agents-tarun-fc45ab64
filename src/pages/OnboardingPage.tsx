@@ -79,14 +79,14 @@ const AGNI_HINTS: Record<string, { speech: string; expr: AgniExpression; hint: s
 };
 
 const CATEGORY_GRADIENTS = [
-  "from-[#FCE4EC] via-[#F8BBD0] to-[#F3E5F5]",
-  "from-[#E0F2FE] via-[#E8F4F8] to-[#E8EAF6]",
-  "from-[#E8F5E9] via-[#F0F4C3] to-[#FFF8E1]",
-  "from-[#FFF3E0] via-[#FFECD2] to-[#FFE0B2]",
-  "from-[#F0E6FA] via-[#F5E0F0] to-[#FADADD]",
-  "from-[#E1F5FE] via-[#E8EAF6] to-[#F3E5F5]",
-  "from-[#FFF8E1] via-[#FFE0B2] to-[#FCE4EC]",
-  "from-[#E8F5E9] via-[#E0F2FE] to-[#E8EAF6]",
+  "from-agni-pink/10 via-agni-purple/5 to-transparent",
+  "from-agni-blue/10 via-agni-blue/5 to-transparent",
+  "from-agni-green/10 via-agni-gold/5 to-transparent",
+  "from-agni-orange/10 via-agni-gold/5 to-transparent",
+  "from-agni-purple/10 via-agni-pink/5 to-transparent",
+  "from-agni-blue/10 via-agni-purple/5 to-transparent",
+  "from-agni-gold/10 via-agni-orange/5 to-transparent",
+  "from-agni-green/10 via-agni-blue/5 to-transparent",
 ];
 
 /* ── Colorful pill colors for options ── */
@@ -1131,7 +1131,7 @@ const OnboardingPage = () => {
           <motion.div key="whymatters" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-[#FFF8E1] via-[#FFE0B2] to-[#FADADD] pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-agni-gold/10 via-agni-orange/5 to-agni-pink/10 pointer-events-none" />
             
             {/* Floating emojis */}
             {["🔥", "⚡", "🧠", "🎯", "🚀", "✨"].map((emoji, i) => (
@@ -1152,32 +1152,32 @@ const OnboardingPage = () => {
               </motion.div>
 
               <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                className="text-2xl font-black text-gray-800 text-center mt-4 mb-2"
+                className="text-2xl font-black text-foreground text-center mt-4 mb-2"
               >
                 The more you share,<br />
                 <span className="text-agni-gold">the smarter I get</span> 🧠
               </motion.h2>
 
               <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-                className="text-sm text-gray-500 text-center mb-6 max-w-[300px]"
+                className="text-sm text-muted-foreground text-center mb-6 max-w-[300px]"
               >
-                Tell me your interests so <span className="text-agni-green font-bold">AGNI</span> can personalize <span className="font-bold text-gray-800">every lesson, quiz & analogy</span> just for you.
+                Tell me your interests so <span className="text-agni-green font-bold">AGNI</span> can personalize <span className="font-bold text-foreground">every lesson, quiz & analogy</span> just for you.
               </motion.p>
 
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
                 className="w-full space-y-2.5 mb-6"
               >
                 {[
-                  { emoji: "🥷", text: "Love Naruto? Multi-agent = Shadow Clone Jutsu — each clone does a different task!", color: "border-[#F0805E]/30 bg-[#F0805E]/10" },
-                  { emoji: "🏏", text: "Cricket fan? RAG = Dhoni reading the pitch before pulling the right data!", color: "border-[#1CB0F6]/30 bg-[#1CB0F6]/10" },
-                  { emoji: "🦸", text: "Marvel fan? Agents = Avengers team — each with a unique superpower!", color: "border-[#7C5CBF]/30 bg-[#7C5CBF]/10" },
-                  { emoji: "🎮", text: "Gamer? Brain levels work like DBZ — Sprout is Kid Goku, Demon Mode is Ultra Instinct!", color: "border-[#58CC02]/30 bg-[#58CC02]/10" },
+                  { emoji: "🥷", text: "Love Naruto? Multi-agent = Shadow Clone Jutsu — each clone does a different task!", color: "border-agni-orange/30 bg-agni-orange/10" },
+                  { emoji: "🏏", text: "Cricket fan? RAG = Dhoni reading the pitch before pulling the right data!", color: "border-agni-blue/30 bg-agni-blue/10" },
+                  { emoji: "🦸", text: "Marvel fan? Agents = Avengers team — each with a unique superpower!", color: "border-agni-purple/30 bg-agni-purple/10" },
+                  { emoji: "🎮", text: "Gamer? Brain levels work like DBZ — Sprout is Kid Goku, Demon Mode is Ultra Instinct!", color: "border-agni-green/30 bg-agni-green/10" },
                 ].map((ex, i) => (
                   <motion.div key={i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.8 + i * 0.12 }}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl border bg-white/40 ${ex.color}`}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl border bg-card/60 ${ex.color}`}
                   >
                     <span className="text-2xl shrink-0">{ex.emoji}</span>
-                    <p className="text-xs font-bold text-gray-700 leading-snug">{ex.text}</p>
+                    <p className="text-xs font-bold text-foreground/80 leading-snug">{ex.text}</p>
                   </motion.div>
                 ))}
               </motion.div>
@@ -1190,11 +1190,11 @@ const OnboardingPage = () => {
               </motion.div>
             </div>
 
-            <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#FADADD] via-[#FADADD]/95 to-transparent">
+            <div className="sticky bottom-0 pt-3 pb-2 z-20">
               <Button onClick={goNext} className="w-full h-14 rounded-full bg-[#58CC02] hover:bg-[#4CAD02] text-white font-extrabold text-base shadow-lg">
                 LET'S DO THIS 🔥 <ArrowRight size={18} className="ml-2" />
               </Button>
-              <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">Skip all → set up later in Settings</button>
+              <button onClick={skipAll} className="w-full text-center mt-2 text-[11px] font-bold text-muted-foreground hover:text-foreground transition-colors">Skip all → set up later in Settings</button>
             </div>
           </motion.div>
         )}
