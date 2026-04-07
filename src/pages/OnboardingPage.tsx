@@ -207,7 +207,7 @@ const OnboardingPage = () => {
             </motion.div>
 
             <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="text-5xl font-black text-foreground text-center mb-2 relative z-10">
-              Agent<span className="text-agni-green">Dojo</span>
+              Neural<span className="text-agni-green">-OS</span>
             </motion.h1>
 
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="text-base text-muted-foreground text-center font-semibold mb-3 relative z-10">
