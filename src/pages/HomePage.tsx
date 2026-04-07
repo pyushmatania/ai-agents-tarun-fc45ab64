@@ -1,6 +1,6 @@
 import BottomNav from "@/components/BottomNav";
 import PageTransition, { StaggerContainer, StaggerItem, FadeIn } from "@/components/PageTransition";
-import { ArrowRight, Zap, Clock, BookOpen, Flame, Lightbulb, Rocket, Brain, Heart, Diamond, User } from "lucide-react";
+import { ArrowRight, Zap, Clock, BookOpen, Flame, Lightbulb, Rocket, Brain, Heart, Diamond, User, Info } from "lucide-react";
 import MascotProfileModal from "@/components/MascotProfileModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
