@@ -1,6 +1,7 @@
 import BottomNav from "@/components/BottomNav";
 import PageTransition, { StaggerContainer, StaggerItem, FadeIn } from "@/components/PageTransition";
 import { ArrowRight, Zap, Clock, BookOpen, Flame, Lightbulb, Rocket, Brain, Heart, Diamond, User } from "lucide-react";
+import MascotProfileModal from "@/components/MascotProfileModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -37,6 +38,7 @@ const HomePage = () => {
   const displayName = user?.user_metadata?.full_name?.split(" ")[0] || storedName;
   const [activeMode, setActiveMode] = useState(localStorage.getItem("teaching_mode") || "engineer");
   const [agniExpression, setAgniExpression] = useState<"default" | "happy" | "excited">("default");
+  const [showProfile, setShowProfile] = useState(false);
 
   const totalLessons = 22;
   const overallProgress = Math.round((stats.done.length / totalLessons) * 100);
@@ -111,7 +113,7 @@ const HomePage = () => {
                       transition={{ duration: 1.2, delay: 0.3 }}
                     />
                   </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="absolute inset-0 flex items-center justify-center" onDoubleClick={() => setShowProfile(true)}>
                     <Agni expression={agniExpression} size={90} speech={agniSpeech} interactive />
                   </div>
                 </div>
@@ -284,6 +286,7 @@ const HomePage = () => {
           )}
         </div>
         <BottomNav />
+        <MascotProfileModal open={showProfile} onClose={() => setShowProfile(false)} />
       </div>
     </PageTransition>
   );
