@@ -450,6 +450,25 @@ const CuriosityPage = () => {
     });
   };
 
+  const markViewed = (idx: number) => {
+    setViewedItems(prev => {
+      if (prev.includes(idx)) {
+        // Move to front
+        const next = [idx, ...prev.filter(i => i !== idx)].slice(0, 20);
+        localStorage.setItem("spark_viewed", JSON.stringify(next));
+        return next;
+      }
+      const next = [idx, ...prev].slice(0, 20);
+      localStorage.setItem("spark_viewed", JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const recentlyViewedItems = useMemo(() =>
+    viewedItems.map(i => feedItems[i]).filter(Boolean).slice(0, 8),
+    [viewedItems, feedItems]
+  );
+
   const getCachedResults = (catId: string): any[] => {
     try {
       const cached = localStorage.getItem(`spark_cache_${catId}`);
