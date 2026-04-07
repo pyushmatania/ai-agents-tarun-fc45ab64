@@ -134,6 +134,19 @@ const SettingsPage = () => {
                   <p className="font-black text-foreground text-sm">{fullName || "Your Name"}</p>
                   <p className="text-[10px] text-muted-foreground font-semibold">{role || "Learner"}</p>
                   {user && <p className="text-[10px] text-muted-foreground">{user.email}</p>}
+                  {(() => {
+                    try {
+                      const ctx = JSON.parse(localStorage.getItem("user_context") || "{}");
+                      const tags = [ctx.age_range, ctx.education, ctx.location, ctx.work_experience].filter(Boolean);
+                      return tags.length > 0 ? (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {tags.map((t: string, i: number) => (
+                            <span key={i} className="text-[8px] font-bold bg-agni-purple/10 text-agni-purple px-1.5 py-0.5 rounded-full">{t}</span>
+                          ))}
+                        </div>
+                      ) : null;
+                    } catch { return null; }
+                  })()}
                 </div>
               </div>
 

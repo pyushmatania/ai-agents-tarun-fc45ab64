@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,8 +18,11 @@ import type { AgniExpression } from "@/components/Agni";
 import { motion, AnimatePresence } from "framer-motion";
 import { savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona, getSubFilters, getSubFilterCount, POPULAR_PICKS } from "@/lib/neuralOS";
 import { TrendingUp, Crown } from "lucide-react";
-import { MISSION_MODES, BRAIN_LEVELS, IDENTITIES, BRAIN_LEVELS_ACADEMIC, BRAIN_LEVELS_SKILL, TEACHING_VIBES, UNIVERSE_VIBE_CATEGORIES, setTeachingSelection, saveCustomOption, getCustomOptions, setUniverseVibe, setBrainTrack } from "@/lib/teachingConfig";
+import { MISSION_MODES, BRAIN_LEVELS, IDENTITIES, BRAIN_LEVELS_ACADEMIC, BRAIN_LEVELS_SKILL, TEACHING_VIBES, setTeachingSelection, saveCustomOption, getCustomOptions, setBrainTrack } from "@/lib/teachingConfig";
 import CustomOptionInput from "@/components/CustomOptionInput";
+import { MISSION_FOLLOWUPS, AGE_RANGES, GENDERS, EDUCATION_LEVELS, EXPERIENCE_LEVELS } from "@/lib/missionFollowups";
+import { getUserContextLocal } from "@/hooks/useUserContext";
+import { MapPin } from "lucide-react";
 
 /* ── ROLES now powered by IDENTITIES from teachingConfig ── */
 const ROLES = IDENTITIES.map(id => ({
@@ -64,7 +67,7 @@ const CATEGORY_GRADIENTS = [
   "from-[#FF86D8] to-[#CE82FF]",
 ];
 
-const TOTAL_STEPS = 7 + SUGGESTION_CATEGORIES.length + 1; // splash, name, role, mission, vibe, brain, why-matters, categories..., confirm
+const TOTAL_STEPS = 10 + SUGGESTION_CATEGORIES.length + 1; // splash, name, aboutYou, role, lifeContext, mission, missionFollowup, vibe, brain, why-matters, categories..., confirm
 
 const slideVariants = {
   enter: (dir: number) => ({ x: dir > 0 ? 300 : -300, opacity: 0 }),
@@ -93,13 +96,21 @@ const OnboardingPage = () => {
   const [smartSearchOpen, setSmartSearchOpen] = useState(false);
   const [smartSearchQuery, setSmartSearchQuery] = useState("");
   const [brainTrack, setBrainTrackState] = useState<"skill" | "academic">("skill");
-  const [universeVibeInput, setUniverseVibeInput] = useState("");
+  // Personal details
+  const [ageRange, setAgeRange] = useState("");
+  const [gender, setGender] = useState("");
+  const [education, setEducation] = useState("");
+  const [location, setLocation] = useState("");
+  const [workExperience, setWorkExperience] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  // Mission follow-up
+  const [missionFollowup, setMissionFollowup] = useState<Record<string, string>>({});
 
-  // Steps: 0=splash, 1=name, 2=role, 3=mission, 4=vibe, 5=brain, 6=why-matters, 7+=categories, last=confirm
-  const categoryIndex = step >= 7 ? step - 7 : -1;
+  // Steps: 0=splash, 1=name, 2=aboutYou, 3=role, 4=lifeContext, 5=mission, 6=missionFollowup, 7=vibe, 8=brain, 9=why-matters, 10+=categories, last=confirm
+  const categoryIndex = step >= 10 ? step - 10 : -1;
   const activeCategory = categoryIndex >= 0 && categoryIndex < SUGGESTION_CATEGORIES.length
     ? SUGGESTION_CATEGORIES[categoryIndex] : null;
-  const isConfirmStep = step === 7 + SUGGESTION_CATEGORIES.length;
+  const isConfirmStep = step === 10 + SUGGESTION_CATEGORIES.length;
 
   const currentItems = activeCategory
     ? ((persona[activeCategory.field] as string[]) || [])
@@ -119,7 +130,15 @@ const OnboardingPage = () => {
   const goNext = () => { setDir(1); setStep(s => s + 1); setSearch(""); setActiveSubFilter(null); };
   const goBack = () => { setDir(-1); setStep(s => Math.max(0, s - 1)); setSearch(""); setActiveSubFilter(null); };
 
-  const toggleItem = (item: string) => {
+  // Auto-skip mission followup step if no questions for selected mission
+  useEffect(() => {
+    if (step === 6 && (!selectedMission || !MISSION_FOLLOWUPS[selectedMission])) {
+      setDir(1);
+      setStep(7);
+    }
+  }, [step, selectedMission]);
+
+
     if (!activeCategory) return;
     const field = activeCategory.field as keyof NeuralOSPersona;
     const current = (persona[field] as string[]) || [];
@@ -189,6 +208,22 @@ const OnboardingPage = () => {
     localStorage.setItem("edu_user_name", name.trim());
     localStorage.setItem("edu_user_role", selectedRole || "student");
     localStorage.setItem("edu_onboarded", "true");
+    // Save user context to localStorage (syncs to DB via hook when logged in)
+    const userCtx = {
+      age_range: ageRange,
+      gender,
+      education,
+      location,
+      work_experience: workExperience,
+      job_title: jobTitle,
+      mission_followup: missionFollowup,
+      teaching_identity: selectedRole || "",
+      teaching_mission: selectedMission || "",
+      teaching_vibe: selectedVibe || "",
+      teaching_brain: selectedBrain || "",
+      brain_track: brainTrack,
+    };
+    localStorage.setItem("user_context", JSON.stringify(userCtx));
     navigate("/");
   };
 
@@ -315,8 +350,66 @@ const OnboardingPage = () => {
           </motion.div>
         )}
 
-        {/* ═══════ STEP 2: ROLE (expanded) ═══════ */}
+        {/* ═══════ STEP 2: ABOUT YOU (age/gender) ═══════ */}
         {step === 2 && (
+          <motion.div key="aboutyou" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-agni-pink/15 to-transparent pointer-events-none" />
+
+            <div className="flex-1 flex flex-col items-center justify-center relative z-10">
+              <Agni expression="happy" size={100} speech={`Nice to meet you, ${name}! 🤝`} animate />
+
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="w-full mt-6">
+                <h2 className="text-2xl font-black text-foreground text-center mb-1">Tell me about yourself</h2>
+                <p className="text-xs text-muted-foreground text-center mb-6">This helps AGNI pick the right examples & language</p>
+
+                <div className="space-y-4">
+                  {/* Age Range */}
+                  <div>
+                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2">🎂 Age Range</label>
+                    <div className="flex flex-wrap gap-2">
+                      {AGE_RANGES.map(age => (
+                        <motion.button key={age} whileTap={{ scale: 0.95 }} onClick={() => setAgeRange(age)}
+                          className={`px-3.5 py-2 rounded-xl text-xs font-bold border-2 transition-all ${
+                            ageRange === age ? "border-agni-green bg-agni-green/10 text-agni-green shadow-glow-green" : "border-border bg-card text-muted-foreground"
+                          }`}
+                        >
+                          {age}
+                        </motion.button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Gender */}
+                  <div>
+                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2">👤 Gender</label>
+                    <div className="flex flex-wrap gap-2">
+                      {GENDERS.map(g => (
+                        <motion.button key={g} whileTap={{ scale: 0.95 }} onClick={() => setGender(g)}
+                          className={`px-3.5 py-2 rounded-xl text-xs font-bold border-2 transition-all ${
+                            gender === g ? "border-agni-green bg-agni-green/10 text-agni-green shadow-glow-green" : "border-border bg-card text-muted-foreground"
+                          }`}
+                        >
+                          {g}
+                        </motion.button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-2xl border-2 border-border text-sm font-bold">Skip</Button>
+              <Button onClick={goNext} disabled={!ageRange && !gender} className="flex-1 h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none">
+                CONTINUE <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {step === 3 && (
           <motion.div key="role" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
@@ -383,8 +476,78 @@ const OnboardingPage = () => {
           </motion.div>
         )}
 
-        {/* ═══════ STEP 3: MISSION MODE ═══════ */}
-        {step === 3 && (
+        {/* ═══════ STEP 4: LIFE CONTEXT (education/location/work) ═══════ */}
+        {step === 4 && (
+          <motion.div key="lifecontext" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-agni-blue/15 to-transparent pointer-events-none" />
+
+            <div className="flex flex-col flex-1 min-h-0 relative z-10">
+              <div className="flex justify-center mb-3 shrink-0">
+                <Agni expression="thinking" size={80} speech="Tell me more! 📋" animate />
+              </div>
+
+              <h2 className="text-2xl font-black text-foreground text-center mb-1 shrink-0">📋 Your Background</h2>
+              <p className="text-xs text-muted-foreground text-center mb-4 shrink-0">Helps AGNI tailor examples to your world</p>
+
+              <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
+                <div className="space-y-4">
+                  {/* Education */}
+                  <div>
+                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2">🎓 Education</label>
+                    <div className="flex flex-wrap gap-2">
+                      {EDUCATION_LEVELS.map(edu => (
+                        <motion.button key={edu} whileTap={{ scale: 0.95 }} onClick={() => setEducation(edu)}
+                          className={`px-3 py-2 rounded-xl text-[11px] font-bold border-2 transition-all ${
+                            education === edu ? "border-agni-green bg-agni-green/10 text-agni-green" : "border-border bg-card text-muted-foreground"
+                          }`}
+                        >{edu}</motion.button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Location */}
+                  <div>
+                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2"><MapPin size={10} className="inline" /> Location</label>
+                    <Input type="text" placeholder="e.g. Mumbai, New York, London..." value={location} onChange={(e) => setLocation(e.target.value)}
+                      className="h-12 rounded-xl bg-card border-2 border-border text-sm font-bold focus:border-agni-green" />
+                  </div>
+
+                  {/* Work Experience */}
+                  <div>
+                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2">💼 Experience Level</label>
+                    <div className="flex flex-wrap gap-2">
+                      {EXPERIENCE_LEVELS.map(exp => (
+                        <motion.button key={exp} whileTap={{ scale: 0.95 }} onClick={() => setWorkExperience(exp)}
+                          className={`px-3 py-2 rounded-xl text-[11px] font-bold border-2 transition-all ${
+                            workExperience === exp ? "border-agni-green bg-agni-green/10 text-agni-green" : "border-border bg-card text-muted-foreground"
+                          }`}
+                        >{exp}</motion.button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Job Title */}
+                  <div>
+                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2">🏷️ Current Role / Title</label>
+                    <Input type="text" placeholder="e.g. Software Engineer, Student, Freelancer..." value={jobTitle} onChange={(e) => setJobTitle(e.target.value)}
+                      className="h-12 rounded-xl bg-card border-2 border-border text-sm font-bold focus:border-agni-green" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 shrink-0">
+              <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-2xl border-2 border-border text-sm font-bold">Skip</Button>
+              <Button onClick={goNext} className="flex-1 h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d">
+                CONTINUE <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {step === 5 && (
           <motion.div key="mission" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
@@ -442,8 +605,65 @@ const OnboardingPage = () => {
           </motion.div>
         )}
 
-        {/* ═══════ STEP 4: VIBE ═══════ */}
-        {step === 4 && (
+        {/* ═══════ STEP 6: MISSION FOLLOW-UP ═══════ */}
+        {step === 6 && selectedMission && MISSION_FOLLOWUPS[selectedMission] && (
+          <motion.div key="missionfollowup" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-agni-gold/15 to-transparent pointer-events-none" />
+
+            <div className="flex flex-col flex-1 min-h-0 relative z-10">
+              <div className="flex justify-center mb-3 shrink-0">
+                <Agni expression="excited" size={80} speech="Let me understand your goal better! 🎯" animate />
+              </div>
+
+              <h2 className="text-xl font-black text-foreground text-center mb-1 shrink-0">
+                {MISSION_MODES.find(m => m.id === selectedMission)?.emoji} Deep Dive
+              </h2>
+              <p className="text-xs text-muted-foreground text-center mb-4 shrink-0">
+                A few quick questions to personalize your {MISSION_MODES.find(m => m.id === selectedMission)?.label} journey
+              </p>
+
+              <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
+                <div className="space-y-4">
+                  {MISSION_FOLLOWUPS[selectedMission].map((q, i) => (
+                    <motion.div key={q.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.08 }}>
+                      <label className="text-[11px] font-extrabold text-foreground block mb-2">{q.label}</label>
+                      {q.type === "text" ? (
+                        <Input
+                          type="text"
+                          placeholder={q.placeholder}
+                          value={missionFollowup[q.id] || ""}
+                          onChange={(e) => setMissionFollowup(prev => ({ ...prev, [q.id]: e.target.value }))}
+                          className="h-12 rounded-xl bg-card border-2 border-border text-sm font-bold focus:border-agni-green"
+                        />
+                      ) : (
+                        <div className="flex flex-wrap gap-2">
+                          {q.options?.map(opt => (
+                            <motion.button key={opt} whileTap={{ scale: 0.95 }} onClick={() => setMissionFollowup(prev => ({ ...prev, [q.id]: opt }))}
+                              className={`px-3 py-2 rounded-xl text-[11px] font-bold border-2 transition-all ${
+                                missionFollowup[q.id] === opt ? "border-agni-green bg-agni-green/10 text-agni-green" : "border-border bg-card text-muted-foreground"
+                              }`}
+                            >{opt}</motion.button>
+                          ))}
+                        </div>
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 shrink-0">
+              <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-2xl border-2 border-border text-sm font-bold">Skip</Button>
+              <Button onClick={goNext} className="flex-1 h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d">
+                CONTINUE <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {step === 7 && (
           <motion.div key="vibe" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
@@ -493,49 +713,13 @@ const OnboardingPage = () => {
                       setSelectedVibe(saved.id);
                     }}
                   />
-                  {/* Universe Vibes section */}
-                  <div className="mt-4 mb-2">
-                    <p className="text-[10px] font-black text-agni-gold uppercase tracking-wider mb-2 px-1">🌍 OR TEACH THROUGH A UNIVERSE</p>
-                    <p className="text-[9px] text-muted-foreground mb-2 px-1">Pick a movie, anime, game, or character — AGNI teaches through that world!</p>
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                      {UNIVERSE_VIBE_CATEGORIES.map(cat => (
-                        <span key={cat.id} className="text-[8px] font-bold bg-agni-gold/10 text-agni-gold px-2 py-1 rounded-full border border-agni-gold/20">
-                          {cat.emoji} {cat.label}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        placeholder="e.g. Goku, Naruto, The Matrix, Iron Man..."
-                        value={universeVibeInput}
-                        onChange={(e) => setUniverseVibeInput(e.target.value)}
-                        className="flex-1 bg-card border border-agni-gold/30 rounded-xl px-3 py-2.5 text-xs font-bold text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-agni-gold/60"
-                      />
-                      {universeVibeInput.trim() && (
-                        <motion.button
-                          initial={{ scale: 0 }} animate={{ scale: 1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => { setUniverseVibe(universeVibeInput.trim()); }}
-                          className="px-3 rounded-xl bg-agni-gold text-white text-[10px] font-black shrink-0"
-                        >
-                          Set ✓
-                        </motion.button>
-                      )}
-                    </div>
-                    {universeVibeInput.trim() && (
-                      <p className="text-[9px] text-agni-gold/70 mt-1.5 px-1">
-                        🎬 AGNI will teach through the world of "<span className="font-bold">{universeVibeInput}</span>" — using characters, plot moments, and vocabulary from this universe!
-                      </p>
-                    )}
-                  </div>
                 </div>
               </div>
 
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
                 className="bg-agni-purple/5 border border-agni-purple/20 rounded-2xl px-4 py-2.5 mb-3 shrink-0"
               >
-                <p className="text-[10px] text-agni-purple font-bold">💡 Pick a style OR a universe — AGNI adapts everything. "Sensei" = Karate Kid energy. "Wizard" = spells & incantations. Or type "Goku" for Dragon Ball-style teaching!</p>
+                <p className="text-[10px] text-agni-purple font-bold">💡 Pick how AGNI talks to you. "Sensei" = Karate Kid energy. "Wizard" = spells & incantations. "Game Mode" = XP & boss battles!</p>
               </motion.div>
             </div>
 
@@ -545,8 +729,8 @@ const OnboardingPage = () => {
           </motion.div>
         )}
 
-        {/* ═══════ STEP 5: BRAIN LEVEL (dual track) ═══════ */}
-        {step === 5 && (
+        {/* ═══════ STEP 8: BRAIN LEVEL (dual track) ═══════ */}
+        {step === 8 && (
           <motion.div key="brain" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
@@ -630,8 +814,8 @@ const OnboardingPage = () => {
           </motion.div>
         )}
 
-        {/* ═══════ STEP 6: WHY THIS MATTERS — ATTENTION HOOK ═══════ */}
-        {step === 6 && (
+        {/* ═══════ STEP 9: WHY THIS MATTERS — ATTENTION HOOK ═══════ */}
+        {step === 9 && (
           <motion.div key="whymatters" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
