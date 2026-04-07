@@ -304,11 +304,11 @@ const OnboardingPage = () => {
 
   const catHint = activeCategory ? AGNI_HINTS[activeCategory.id] : null;
 
-  /* ── Colorful Option Pill Component ── */
+  /* ── Pastel Card Component (matches screenshot style) ── */
   const ColorPill = ({ emoji, label, desc, selected, onClick, index, color }: {
     emoji: string; label: string; desc: string; selected: boolean; onClick: () => void; index: number; color?: string;
   }) => {
-    const colorIdx = index % PILL_COLORS.length;
+    const pastel = PASTEL_CARD_COLORS[index % PASTEL_CARD_COLORS.length];
     return (
       <motion.button
         initial={{ opacity: 0, scale: 0.8, y: 15 }}
@@ -316,20 +316,20 @@ const OnboardingPage = () => {
         transition={{ delay: 0.05 + index * 0.04, type: "spring", stiffness: 300, damping: 20 }}
         whileTap={{ scale: 0.92 }}
         onClick={() => { SFX.select(); onClick(); }}
-        className={`relative px-4 py-3 rounded-2xl border-2 text-left transition-all overflow-hidden ${
-          selected ? PILL_SELECTED_COLORS[colorIdx] : PILL_COLORS[colorIdx]
+        className={`relative px-3 py-4 rounded-3xl border-2 text-left transition-all overflow-hidden ${pastel.bg} ${pastel.border} ${
+          selected ? "ring-2 ring-offset-1 ring-[#58CC02] shadow-lg scale-[1.02]" : "hover:shadow-md"
         }`}
       >
         {selected && (
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-agni-green flex items-center justify-center z-10">
-            <Check size={12} className="text-white" strokeWidth={3} />
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#58CC02] flex items-center justify-center z-10 shadow-md">
+            <Check size={13} className="text-white" strokeWidth={3} />
           </motion.div>
         )}
-        <div className="flex items-center gap-2.5">
-          <span className="text-2xl">{emoji}</span>
-          <div className="min-w-0">
-            <span className="text-xs font-extrabold block leading-tight">{label}</span>
-            <span className="text-[9px] opacity-70 leading-tight block">{desc}</span>
+        <div className="flex items-start gap-2.5">
+          <span className="text-3xl mt-0.5">{emoji}</span>
+          <div className="min-w-0 flex-1">
+            <span className={`text-sm font-extrabold block leading-tight ${pastel.text}`}>{label}</span>
+            <span className="text-[10px] text-gray-600 leading-tight block mt-0.5">{desc}</span>
           </div>
         </div>
       </motion.button>
