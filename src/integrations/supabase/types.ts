@@ -44,6 +44,42 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_interests: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          image_url: string | null
+          metadata: Json | null
+          name: string
+          sub_category: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          metadata?: Json | null
+          name: string
+          sub_category?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          metadata?: Json | null
+          name?: string
+          sub_category?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       leaderboard: {
         Row: {
           created_at: string
