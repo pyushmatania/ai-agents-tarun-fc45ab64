@@ -414,6 +414,22 @@ const SettingsPage = () => {
                               {v.emoji} {v.label}
                             </button>
                           ))}
+                          {/* Custom vibe input */}
+                          <div className="w-full mt-1">
+                            <input
+                              type="text"
+                              placeholder="✨ Type your own..."
+                              className="w-full bg-muted/20 border border-dashed border-agni-orange/25 rounded-xl px-2.5 py-1.5 text-[10px] font-bold text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-agni-orange/50"
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" && (e.target as HTMLInputElement).value.trim()) {
+                                  const val = (e.target as HTMLInputElement).value.trim();
+                                  const updated = savePersona({ vibe: val });
+                                  setPersonaState(updated);
+                                  (e.target as HTMLInputElement).value = "";
+                                }
+                              }}
+                            />
+                          </div>
                         </div>
                       </div>
 
