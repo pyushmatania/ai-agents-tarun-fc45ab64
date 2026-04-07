@@ -40,7 +40,7 @@ serve(async (req) => {
       hard: `Difficulty: HARD. Use precise technical language. Questions should test deep understanding, edge cases, and ability to apply concepts. Wrong MCQ options should be very plausible (common misconceptions). Fill-in answers can be specific technical terms or patterns.`,
     };
 
-    const systemPrompt = `You are a quiz generator for the AgentDojo AI learning platform. Based on the conversation between a tutor and student about "${lessonTitle}" (topic: ${lessonTopic}), generate exactly 3 quiz questions that test what was actually discussed.
+    const systemPrompt = `You are a quiz generator for the Neural-OS AI learning platform. Based on the conversation between a tutor and student about "${lessonTitle}" (topic: ${lessonTopic}), generate exactly 3 quiz questions that test what was actually discussed.
 
 ${difficultyGuide[difficulty]}
 

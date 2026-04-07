@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    /* AgentDojo Dark Theme — Duolingo meets Cyberpunk */
+    /* Neural-OS Dark Theme */
     --background: 195 30% 11%;        /* #131F24 */
     --foreground: 200 20% 92%;        /* Light text */
 
@@ -46,7 +46,7 @@
     --sidebar-border: 197 16% 27%;
     --sidebar-ring: 100 95% 40%;
 
-    /* AgentDojo Semantic Tokens */
+    /* Neural-OS Semantic Tokens */
     --agni-green: 100 95% 40%;        /* #58CC02 */
     --agni-green-dark: 100 100% 31%;  /* #459E00 */
     --agni-green-light: 90 78% 49%;   /* #89E219 */
