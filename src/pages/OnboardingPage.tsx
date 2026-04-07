@@ -147,13 +147,22 @@ const OnboardingPage = () => {
   // Search filters suggestions AND allows adding custom via Enter
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && search.trim() && activeCategory) {
-      const field = activeCategory.field as keyof NeuralOSPersona;
-      const current = (persona[field] as string[]) || [];
-      if (!current.includes(search.trim())) {
-        setPersona({ ...persona, [field]: [...current, search.trim()] });
-      }
-      setSearch("");
+      // Open smart AI search instead of directly adding
+      setSmartSearchQuery(search.trim());
+      setSmartSearchOpen(true);
     }
+  };
+
+  const handleSmartSearchSelect = (item: { name: string; category: string; subCategory: string }) => {
+    // Find the right category to add to
+    const targetCat = SUGGESTION_CATEGORIES.find(c => c.id === item.category) || activeCategory;
+    if (!targetCat) return;
+    const field = targetCat.field as keyof NeuralOSPersona;
+    const current = (persona[field] as string[]) || [];
+    if (!current.includes(item.name)) {
+      setPersona({ ...persona, [field]: [...current, item.name] });
+    }
+    setSearch("");
   };
 
   const subFilters = activeCategory ? getSubFilters(activeCategory) : [];
