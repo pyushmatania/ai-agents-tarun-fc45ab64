@@ -10,14 +10,14 @@ import { SFX } from "@/lib/sounds";
 const EXPRESSIONS: AgniExpression[] = ["default", "happy", "excited", "thinking", "teaching", "celebrating"];
 
 const EXPR_SOUNDS: Record<AgniExpression, () => void> = {
-  default: () => SFX.tap(),
-  happy: () => SFX.powerup("green"),
-  excited: () => SFX.powerup("orange"),
-  thinking: () => SFX.powerup("purple"),
-  teaching: () => SFX.powerup("blue"),
-  celebrating: () => SFX.powerup("gold"),
-  sad: () => SFX.powerup("pink"),
-  sleeping: () => SFX.tap(),
+  default: () => { SFX.tap(); navigator.vibrate?.([15]); },
+  happy: () => { SFX.powerup("green"); navigator.vibrate?.([20, 30, 20]); },
+  excited: () => { SFX.powerup("orange"); navigator.vibrate?.([10, 10, 10, 10, 30]); },
+  thinking: () => { SFX.powerup("purple"); navigator.vibrate?.([40]); },
+  teaching: () => { SFX.powerup("blue"); navigator.vibrate?.([15, 20, 15]); },
+  celebrating: () => { SFX.powerup("gold"); navigator.vibrate?.([10, 10, 10, 10, 10, 10, 40]); },
+  sad: () => { SFX.powerup("pink"); navigator.vibrate?.([50]); },
+  sleeping: () => { SFX.tap(); navigator.vibrate?.([60]); },
 };
 
 interface HeaderProps {
