@@ -456,11 +456,17 @@ const HomePage = () => {
           {/* Leaderboard Widget */}
           <FadeIn delay={0.58}>
             <div className="bg-card rounded-2xl p-3.5 mb-4 border border-border/40 shadow-card">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-7 h-7 rounded-xl bg-agni-gold flex items-center justify-center">
-                  <Trophy size={13} className="text-white" />
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-xl bg-agni-gold flex items-center justify-center">
+                    <Trophy size={13} className="text-white" />
+                  </div>
+                  <span className="text-[10px] font-extrabold text-foreground">Leaderboard</span>
                 </div>
-                <span className="text-[10px] font-extrabold text-foreground">Leaderboard</span>
+                <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate("/leaderboard")}
+                  className="text-[9px] font-black text-agni-gold bg-agni-gold/15 px-2.5 py-1 rounded-full flex items-center gap-0.5">
+                  View All <ArrowRight size={10} />
+                </motion.button>
               </div>
               {/* Tabs */}
               <div className="flex gap-1 mb-3">
