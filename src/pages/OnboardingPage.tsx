@@ -79,14 +79,14 @@ const AGNI_HINTS: Record<string, { speech: string; expr: AgniExpression; hint: s
 };
 
 const CATEGORY_GRADIENTS = [
-  "from-[#FF4B4B] to-[#FF86D8]",
-  "from-[#1CB0F6] to-[#CE82FF]",
-  "from-[#58CC02] to-[#1CB0F6]",
-  "from-[#FFC800] to-[#FF9600]",
-  "from-[#CE82FF] to-[#FF4B4B]",
-  "from-[#FF9600] to-[#FFC800]",
-  "from-[#1CB0F6] to-[#58CC02]",
-  "from-[#FF86D8] to-[#CE82FF]",
+  "from-[#FCE4EC] via-[#F8BBD0] to-[#F3E5F5]",
+  "from-[#E0F2FE] via-[#E8F4F8] to-[#E8EAF6]",
+  "from-[#E8F5E9] via-[#F0F4C3] to-[#FFF8E1]",
+  "from-[#FFF3E0] via-[#FFECD2] to-[#FFE0B2]",
+  "from-[#F0E6FA] via-[#F5E0F0] to-[#FADADD]",
+  "from-[#E1F5FE] via-[#E8EAF6] to-[#F3E5F5]",
+  "from-[#FFF8E1] via-[#FFE0B2] to-[#FCE4EC]",
+  "from-[#E8F5E9] via-[#E0F2FE] to-[#E8EAF6]",
 ];
 
 /* ── Colorful pill colors for options ── */
@@ -544,7 +544,7 @@ const OnboardingPage = () => {
           <motion.div key="name" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
-            <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.name.bg} pointer-events-none`} />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#E0F2FE] via-[#E8F4F8] to-[#F0E6FA] pointer-events-none" />
 
             <div className="flex-1 flex flex-col items-center justify-center relative z-10">
               <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200, damping: 12 }}>
@@ -552,94 +552,101 @@ const OnboardingPage = () => {
               </motion.div>
 
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="w-full mt-6">
-                <h2 className="text-3xl font-black text-foreground text-center mb-1">What should I call you?</h2>
-                <p className="text-sm text-muted-foreground text-center mb-6">I'm <span className="text-agni-green font-bold">AGNI 🔥</span>, your AI teaching buddy!</p>
+                <h2 className="text-3xl font-black text-gray-800 text-center mb-1">What should I call you?</h2>
+                <p className="text-sm text-gray-500 text-center mb-6">I'm <span className="text-agni-green font-bold">AGNI 🔥</span>, your AI teaching buddy!</p>
                 <Input type="text" placeholder="Enter your name..." value={name} onChange={(e) => setName(e.target.value)}
-                  className="h-14 rounded-2xl bg-card border-2 border-border text-lg font-bold text-center focus:border-agni-green" autoFocus
+                  className="h-14 rounded-2xl bg-white/80 border-2 border-white/50 text-lg font-bold text-center text-gray-800 focus:border-agni-green shadow-sm" autoFocus
                 />
               </motion.div>
 
               {/* Fun preview */}
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: name.trim() ? 1 : 0 }} transition={{ delay: 0.5 }}
-                className="mt-6 bg-card/60 backdrop-blur border border-agni-green/20 rounded-2xl p-3 w-full max-w-[300px]"
+                className="mt-6 bg-white/60 backdrop-blur border border-white/50 rounded-2xl p-3 w-full max-w-[300px] shadow-sm"
               >
                 <div className="flex items-center gap-2 mb-1.5">
-                  <Sparkles size={12} className="text-agni-gold" />
-                  <span className="text-[9px] font-black text-agni-gold uppercase tracking-wider">How AGNI will talk to you</span>
+                  <Sparkles size={12} className="text-[#D4A853]" />
+                  <span className="text-[9px] font-black text-[#D4A853] uppercase tracking-wider">How AGNI will talk to you</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground italic">
+                <p className="text-[11px] text-gray-600 italic">
                   "Yo <span className="text-agni-green font-bold">{name || "..."}</span>! Think of an AI agent like Naruto's shadow clone jutsu 🥷 — multiple copies doing different tasks simultaneously!"
                 </p>
               </motion.div>
             </div>
 
-            <Button onClick={goNext} disabled={!name.trim()} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none">
-              CONTINUE <ArrowRight size={18} className="ml-2" />
-            </Button>
+            <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#F0E6FA] via-[#F0E6FA]/95 to-transparent">
+              <Button onClick={goNext} disabled={!name.trim()} className="w-full h-14 rounded-full bg-[#1CB0F6] hover:bg-[#1A9FE0] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
+                CONTINUE <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </div>
           </motion.div>
         )}
 
         {/* ═══════ STEP 2: ABOUT YOU (age/gender) ═══════ */}
         {step === 2 && (
           <motion.div key="aboutyou" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
-            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
+            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
-            <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.aboutYou.bg} pointer-events-none`} />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#FCE4EC] via-[#F8E8D0] to-[#FFF3E0] pointer-events-none" />
 
-            <div className="flex-1 flex flex-col items-center justify-center relative z-10">
-              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200, damping: 12 }}>
+            <div className="flex-1 overflow-y-auto scrollbar-none relative z-10">
+              <div className="flex justify-center mb-2">
+                <div className="bg-white/70 backdrop-blur-sm rounded-full px-4 py-1.5 shadow-sm border border-white/50">
+                  <span className="text-xs font-bold text-gray-600">Tell me about you! 🎯</span>
+                </div>
+              </div>
+              <div className="flex justify-center mb-3">
                 <Agni expression="happy" size={100} speech={`Nice to meet you, ${name}! 🤝`} animate />
-              </motion.div>
+              </div>
 
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="w-full mt-4">
-                <h2 className="text-2xl font-black text-foreground text-center mb-1">Tell me about yourself</h2>
-                <p className="text-xs text-muted-foreground text-center mb-5">So I can pick the right examples & language 🎯</p>
+              <h2 className="text-2xl font-black text-gray-800 text-center mb-0.5">Tell me about yourself</h2>
+              <p className="text-xs text-gray-500 text-center mb-5">So I can pick the right examples & language 🎯</p>
 
-                <div className="space-y-5">
-                  {/* Age — colorful pills */}
-                  <div>
-                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2.5">🎂 How old are you?</label>
-                    <div className="flex flex-wrap gap-2">
-                      {AGE_RANGES.map((age, i) => (
-                        <motion.button key={age} whileTap={{ scale: 0.92 }}
-                          initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 + i * 0.05 }}
-                          onClick={() => { SFX.pop(); setAgeRange(age); }}
-                          className={`px-4 py-2.5 rounded-2xl text-xs font-bold border-2 transition-all ${
-                            ageRange === age ? PILL_SELECTED_COLORS[i % PILL_SELECTED_COLORS.length] : PILL_COLORS[i % PILL_COLORS.length]
-                          }`}
-                        >
-                          {age}
-                        </motion.button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Gender — colorful pills */}
-                  <div>
-                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2.5">👤 Gender</label>
-                    <div className="flex flex-wrap gap-2">
-                      {GENDERS.map((g, i) => (
-                        <motion.button key={g} whileTap={{ scale: 0.92 }}
-                          initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 + i * 0.05 }}
-                          onClick={() => { SFX.pop(); setGender(g); }}
-                          className={`px-4 py-2.5 rounded-2xl text-xs font-bold border-2 transition-all ${
-                            gender === g ? PILL_SELECTED_COLORS[(i + 3) % PILL_SELECTED_COLORS.length] : PILL_COLORS[(i + 3) % PILL_COLORS.length]
-                          }`}
-                        >
-                          {g}
-                        </motion.button>
-                      ))}
-                    </div>
+              <div className="space-y-5">
+                {/* Age — colorful pills */}
+                <div>
+                  <label className="text-[10px] font-extrabold text-gray-600 uppercase tracking-wider block mb-2.5">🎂 How old are you?</label>
+                  <div className="flex flex-wrap gap-2">
+                    {AGE_RANGES.map((age, i) => (
+                      <motion.button key={age} whileTap={{ scale: 0.92 }}
+                        initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 + i * 0.05 }}
+                        onClick={() => { SFX.pop(); setAgeRange(age); }}
+                        className={`px-4 py-2.5 rounded-2xl text-xs font-bold border-2 transition-all ${
+                          ageRange === age ? PILL_SELECTED_COLORS[i % PILL_SELECTED_COLORS.length] : PILL_COLORS[i % PILL_COLORS.length]
+                        }`}
+                      >
+                        {age}
+                      </motion.button>
+                    ))}
                   </div>
                 </div>
-              </motion.div>
+
+                {/* Gender — colorful pills */}
+                <div>
+                  <label className="text-[10px] font-extrabold text-gray-600 uppercase tracking-wider block mb-2.5">👤 Gender</label>
+                  <div className="flex flex-wrap gap-2">
+                    {GENDERS.map((g, i) => (
+                      <motion.button key={g} whileTap={{ scale: 0.92 }}
+                        initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 + i * 0.05 }}
+                        onClick={() => { SFX.pop(); setGender(g); }}
+                        className={`px-4 py-2.5 rounded-2xl text-xs font-bold border-2 transition-all ${
+                          gender === g ? PILL_SELECTED_COLORS[(i + 3) % PILL_SELECTED_COLORS.length] : PILL_COLORS[(i + 3) % PILL_COLORS.length]
+                        }`}
+                      >
+                        {g}
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="flex gap-3">
-              <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-2xl border-2 border-border text-sm font-bold">Skip</Button>
-              <Button onClick={goNext} disabled={!ageRange && !gender} className="flex-1 h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none">
-                CONTINUE <ArrowRight size={18} className="ml-2" />
-              </Button>
+            <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#FFF3E0] via-[#FFF3E0]/95 to-transparent">
+              <div className="flex gap-3">
+                <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-full bg-white/80 border-2 border-white/50 text-gray-700 text-sm font-bold shadow-sm">Skip</Button>
+                <Button onClick={goNext} disabled={!ageRange && !gender} className="flex-1 h-14 rounded-full bg-[#F0805E] hover:bg-[#E06E4E] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
+                  CONTINUE <ArrowRight size={18} className="ml-2" />
+                </Button>
+              </div>
             </div>
           </motion.div>
         )}
@@ -727,21 +734,26 @@ const OnboardingPage = () => {
           <motion.div key="lifecontext" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
-            <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.background.bg} pointer-events-none`} />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#E8F5E9] via-[#E0F2FE] to-[#E8EAF6] pointer-events-none" />
 
             <div className="flex flex-col flex-1 min-h-0 relative z-10">
+              <div className="flex justify-center mb-2">
+                <div className="bg-white/70 backdrop-blur-sm rounded-full px-4 py-1.5 shadow-sm border border-white/50">
+                  <span className="text-xs font-bold text-gray-600">Tell me more about you! 📋</span>
+                </div>
+              </div>
               <div className="flex justify-center mb-3 shrink-0">
-                <Agni expression="thinking" size={80} speech="Tell me more about you! 📋" animate />
+                <Agni expression="thinking" size={80} animate />
               </div>
 
-              <h2 className="text-2xl font-black text-foreground text-center mb-1 shrink-0">📋 Your Background</h2>
-              <p className="text-xs text-muted-foreground text-center mb-4 shrink-0">Helps AGNI tailor examples to your world</p>
+              <h2 className="text-2xl font-black text-gray-800 text-center mb-0.5 shrink-0">📋 Your Background</h2>
+              <p className="text-xs text-gray-500 text-center mb-4 shrink-0">Helps AGNI tailor examples to your world</p>
 
               <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
                 <div className="space-y-4">
                   {/* Education */}
                   <div>
-                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2">🎓 Education</label>
+                    <label className="text-[10px] font-extrabold text-gray-600 uppercase tracking-wider block mb-2">🎓 Education</label>
                     <div className="flex flex-wrap gap-2">
                       {EDUCATION_LEVELS.map((edu, i) => (
                         <motion.button key={edu} whileTap={{ scale: 0.92 }}
@@ -757,14 +769,14 @@ const OnboardingPage = () => {
 
                   {/* Location */}
                   <div>
-                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2"><MapPin size={10} className="inline" /> Location</label>
+                    <label className="text-[10px] font-extrabold text-gray-600 uppercase tracking-wider block mb-2"><MapPin size={10} className="inline" /> Location</label>
                     <Input type="text" placeholder="e.g. Mumbai, New York, London..." value={location} onChange={(e) => setLocation(e.target.value)}
-                      className="h-12 rounded-xl bg-card border-2 border-border text-sm font-bold focus:border-agni-green" />
+                      className="h-12 rounded-xl bg-white/80 border-2 border-white/50 text-sm font-bold text-gray-800 focus:border-agni-green shadow-sm" />
                   </div>
 
                   {/* Experience */}
                   <div>
-                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2">💼 Experience Level</label>
+                    <label className="text-[10px] font-extrabold text-gray-600 uppercase tracking-wider block mb-2">💼 Experience Level</label>
                     <div className="flex flex-wrap gap-2">
                       {EXPERIENCE_LEVELS.map((exp, i) => (
                         <motion.button key={exp} whileTap={{ scale: 0.92 }}
@@ -780,19 +792,21 @@ const OnboardingPage = () => {
 
                   {/* Job Title */}
                   <div>
-                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2">🏷️ Current Role / Title</label>
+                    <label className="text-[10px] font-extrabold text-gray-600 uppercase tracking-wider block mb-2">🏷️ Current Role / Title</label>
                     <Input type="text" placeholder="e.g. Software Engineer, Student, Freelancer..." value={jobTitle} onChange={(e) => setJobTitle(e.target.value)}
-                      className="h-12 rounded-xl bg-card border-2 border-border text-sm font-bold focus:border-agni-green" />
+                      className="h-12 rounded-xl bg-white/80 border-2 border-white/50 text-sm font-bold text-gray-800 focus:border-agni-green shadow-sm" />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-3 shrink-0">
-              <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-2xl border-2 border-border text-sm font-bold">Skip</Button>
-              <Button onClick={goNext} className="flex-1 h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d">
-                CONTINUE <ArrowRight size={18} className="ml-2" />
-              </Button>
+            <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#E8EAF6] via-[#E8EAF6]/95 to-transparent">
+              <div className="flex gap-3">
+                <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-full bg-white/80 border-2 border-white/50 text-gray-700 text-sm font-bold shadow-sm">Skip</Button>
+                <Button onClick={goNext} className="flex-1 h-14 rounded-full bg-[#58CC02] hover:bg-[#4CAD02] text-white font-extrabold text-base shadow-lg">
+                  CONTINUE <ArrowRight size={18} className="ml-2" />
+                </Button>
+              </div>
             </div>
           </motion.div>
         )}
@@ -847,10 +861,12 @@ const OnboardingPage = () => {
               </div>
             </div>
 
-            <Button onClick={goNext} disabled={!selectedMission}
-              className="w-full h-14 rounded-full bg-[#D4A853] hover:bg-[#C49A48] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none shrink-0">
-              Continue <ArrowRight size={18} className="ml-2" />
-            </Button>
+            <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#FFE0B2] via-[#FFE0B2]/95 to-transparent">
+              <Button onClick={goNext} disabled={!selectedMission}
+                className="w-full h-14 rounded-full bg-[#D4A853] hover:bg-[#C49A48] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
+                Continue <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </div>
           </motion.div>
         )}
 
@@ -859,17 +875,22 @@ const OnboardingPage = () => {
           <motion.div key="missionfollowup" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
-            <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.missionFollowup.bg} pointer-events-none`} />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#FFF8E1] via-[#F0F4C3] to-[#E8F5E9] pointer-events-none" />
 
             <div className="flex flex-col flex-1 min-h-0 relative z-10">
+              <div className="flex justify-center mb-2">
+                <div className="bg-white/70 backdrop-blur-sm rounded-full px-4 py-1.5 shadow-sm border border-white/50">
+                  <span className="text-xs font-bold text-gray-600">Let me understand you better! 🎯</span>
+                </div>
+              </div>
               <div className="flex justify-center mb-3 shrink-0">
-                <Agni expression="excited" size={80} speech="Let me understand you better! 🎯" animate />
+                <Agni expression="excited" size={80} animate />
               </div>
 
-              <h2 className="text-xl font-black text-foreground text-center mb-1 shrink-0">
+              <h2 className="text-xl font-black text-gray-800 text-center mb-1 shrink-0">
                 {MISSION_MODES.find(m => m.id === selectedMission)?.emoji} Deep Dive
               </h2>
-              <p className="text-xs text-muted-foreground text-center mb-4 shrink-0">
+              <p className="text-xs text-gray-500 text-center mb-4 shrink-0">
                 Quick Q's to personalize your {MISSION_MODES.find(m => m.id === selectedMission)?.label} journey
               </p>
 
@@ -877,13 +898,13 @@ const OnboardingPage = () => {
                 <div className="space-y-4">
                   {MISSION_FOLLOWUPS[selectedMission].map((q, i) => (
                     <motion.div key={q.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.08 }}>
-                      <label className="text-[11px] font-extrabold text-foreground block mb-2">{q.label}</label>
+                      <label className="text-[11px] font-extrabold text-gray-700 block mb-2">{q.label}</label>
                       {q.type === "text" ? (
                         <Input
                           type="text" placeholder={q.placeholder}
                           value={missionFollowup[q.id] || ""}
                           onChange={(e) => setMissionFollowup(prev => ({ ...prev, [q.id]: e.target.value }))}
-                          className="h-12 rounded-xl bg-card border-2 border-border text-sm font-bold focus:border-agni-green"
+                          className="h-12 rounded-xl bg-white/80 border-2 border-white/50 text-sm font-bold text-gray-800 focus:border-agni-green shadow-sm"
                         />
                       ) : (
                         <div className="flex flex-wrap gap-2">
@@ -903,11 +924,13 @@ const OnboardingPage = () => {
               </div>
             </div>
 
-            <div className="flex gap-3 shrink-0">
-              <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-2xl border-2 border-border text-sm font-bold">Skip</Button>
-              <Button onClick={goNext} className="flex-1 h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d">
-                CONTINUE <ArrowRight size={18} className="ml-2" />
-              </Button>
+            <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#E8F5E9] via-[#E8F5E9]/95 to-transparent">
+              <div className="flex gap-3">
+                <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-full bg-white/80 border-2 border-white/50 text-gray-700 text-sm font-bold shadow-sm">Skip</Button>
+                <Button onClick={goNext} className="flex-1 h-14 rounded-full bg-[#58CC02] hover:bg-[#4CAD02] text-white font-extrabold text-base shadow-lg">
+                  CONTINUE <ArrowRight size={18} className="ml-2" />
+                </Button>
+              </div>
             </div>
           </motion.div>
         )}
@@ -968,10 +991,12 @@ const OnboardingPage = () => {
               </motion.div>
             </div>
 
-            <Button onClick={goNext} disabled={!selectedVibe}
-              className="w-full h-14 rounded-full bg-[#E91E63] hover:bg-[#C2185B] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none shrink-0">
-              Continue <ArrowRight size={18} className="ml-2" />
-            </Button>
+            <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#F3E5F5] via-[#F3E5F5]/95 to-transparent">
+              <Button onClick={goNext} disabled={!selectedVibe}
+                className="w-full h-14 rounded-full bg-[#E91E63] hover:bg-[#C2185B] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
+                Continue <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </div>
           </motion.div>
         )}
 
@@ -1052,10 +1077,12 @@ const OnboardingPage = () => {
               </motion.div>
             </div>
 
-            <Button onClick={goNext} disabled={!selectedBrain}
-              className="w-full h-14 rounded-full bg-[#3F51B5] hover:bg-[#303F9F] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none shrink-0">
-              Continue <ArrowRight size={18} className="ml-2" />
-            </Button>
+            <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#E1F5FE] via-[#E1F5FE]/95 to-transparent">
+              <Button onClick={goNext} disabled={!selectedBrain}
+                className="w-full h-14 rounded-full bg-[#3F51B5] hover:bg-[#303F9F] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
+                Continue <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </div>
           </motion.div>
         )}
 
@@ -1064,7 +1091,7 @@ const OnboardingPage = () => {
           <motion.div key="whymatters" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
-            <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.whyMatters.bg} pointer-events-none`} />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#FFF8E1] via-[#FFE0B2] to-[#FADADD] pointer-events-none" />
             
             {/* Floating emojis */}
             {["🔥", "⚡", "🧠", "🎯", "🚀", "✨"].map((emoji, i) => (
@@ -1085,32 +1112,32 @@ const OnboardingPage = () => {
               </motion.div>
 
               <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                className="text-2xl font-black text-foreground text-center mt-4 mb-2"
+                className="text-2xl font-black text-gray-800 text-center mt-4 mb-2"
               >
                 The more you share,<br />
                 <span className="text-agni-gold">the smarter I get</span> 🧠
               </motion.h2>
 
               <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-                className="text-sm text-muted-foreground text-center mb-6 max-w-[300px]"
+                className="text-sm text-gray-500 text-center mb-6 max-w-[300px]"
               >
-                Tell me your interests so <span className="text-agni-green font-bold">AGNI</span> can personalize <span className="font-bold text-foreground">every lesson, quiz & analogy</span> just for you.
+                Tell me your interests so <span className="text-agni-green font-bold">AGNI</span> can personalize <span className="font-bold text-gray-800">every lesson, quiz & analogy</span> just for you.
               </motion.p>
 
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
                 className="w-full space-y-2.5 mb-6"
               >
                 {[
-                  { emoji: "🥷", text: "Love Naruto? Multi-agent = Shadow Clone Jutsu — each clone does a different task!", color: "border-agni-orange/30 bg-agni-orange/5" },
-                  { emoji: "🏏", text: "Cricket fan? RAG = Dhoni reading the pitch before pulling the right data!", color: "border-agni-blue/30 bg-agni-blue/5" },
-                  { emoji: "🦸", text: "Marvel fan? Agents = Avengers team — each with a unique superpower!", color: "border-agni-purple/30 bg-agni-purple/5" },
-                  { emoji: "🎮", text: "Gamer? Brain levels work like DBZ — Sprout is Kid Goku, Demon Mode is Ultra Instinct!", color: "border-agni-green/30 bg-agni-green/5" },
+                  { emoji: "🥷", text: "Love Naruto? Multi-agent = Shadow Clone Jutsu — each clone does a different task!", color: "border-[#F0805E]/30 bg-[#F0805E]/10" },
+                  { emoji: "🏏", text: "Cricket fan? RAG = Dhoni reading the pitch before pulling the right data!", color: "border-[#1CB0F6]/30 bg-[#1CB0F6]/10" },
+                  { emoji: "🦸", text: "Marvel fan? Agents = Avengers team — each with a unique superpower!", color: "border-[#7C5CBF]/30 bg-[#7C5CBF]/10" },
+                  { emoji: "🎮", text: "Gamer? Brain levels work like DBZ — Sprout is Kid Goku, Demon Mode is Ultra Instinct!", color: "border-[#58CC02]/30 bg-[#58CC02]/10" },
                 ].map((ex, i) => (
                   <motion.div key={i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.8 + i * 0.12 }}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl border ${ex.color}`}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl border bg-white/40 ${ex.color}`}
                   >
                     <span className="text-2xl shrink-0">{ex.emoji}</span>
-                    <p className="text-xs font-bold text-foreground leading-snug">{ex.text}</p>
+                    <p className="text-xs font-bold text-gray-700 leading-snug">{ex.text}</p>
                   </motion.div>
                 ))}
               </motion.div>
@@ -1123,9 +1150,11 @@ const OnboardingPage = () => {
               </motion.div>
             </div>
 
-            <Button onClick={goNext} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d mt-4">
-              LET'S DO THIS 🔥 <ArrowRight size={18} className="ml-2" />
-            </Button>
+            <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#FADADD] via-[#FADADD]/95 to-transparent">
+              <Button onClick={goNext} className="w-full h-14 rounded-full bg-[#58CC02] hover:bg-[#4CAD02] text-white font-extrabold text-base shadow-lg">
+                LET'S DO THIS 🔥 <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </div>
           </motion.div>
         )}
 
@@ -1134,7 +1163,7 @@ const OnboardingPage = () => {
           <motion.div key={`cat-${categoryIndex}`} custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-5 pt-16 pb-4 flex flex-col min-h-screen h-screen"
           >
-            <div className={`absolute inset-0 bg-gradient-to-b ${CATEGORY_GRADIENTS[categoryIndex % CATEGORY_GRADIENTS.length]} opacity-[0.07] pointer-events-none`} />
+            <div className={`absolute inset-0 bg-gradient-to-b ${CATEGORY_GRADIENTS[categoryIndex % CATEGORY_GRADIENTS.length]} pointer-events-none`} />
 
             <div className="relative z-10 flex flex-col flex-1 min-h-0">
               {/* Header with mascot */}
@@ -1379,7 +1408,7 @@ const OnboardingPage = () => {
           <motion.div key="confirm" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-agni-green/20 via-agni-blue/10 to-agni-purple/5 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#E8F5E9] via-[#E0F2FE] to-[#F0E6FA] pointer-events-none" />
 
             {/* Celebration particles */}
             {["🎉", "🎊", "🏆", "🔥", "⚡", "✨"].map((emoji, i) => (
@@ -1400,30 +1429,30 @@ const OnboardingPage = () => {
                 <Agni expression="celebrating" size={110} speech={`You're amazing, ${name}! 🎉`} animate />
               </div>
 
-              <h2 className="text-2xl font-black text-foreground text-center mb-1">You're all set! 🚀</h2>
-              <p className="text-sm text-muted-foreground text-center mb-5">Here's your Neural OS profile • {totalSelected} interests</p>
+              <h2 className="text-2xl font-black text-gray-800 text-center mb-1">You're all set! 🚀</h2>
+              <p className="text-sm text-gray-500 text-center mb-5">Here's your Neural OS profile • {totalSelected} interests</p>
 
               <div className="space-y-3 mb-6">
-                <div className="bg-card border border-border rounded-2xl p-4">
-                  <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2">Profile</span>
+                <div className="bg-white/70 backdrop-blur border border-white/50 rounded-2xl p-4 shadow-sm">
+                  <span className="text-[9px] font-extrabold text-gray-500 uppercase tracking-wider block mb-2">Profile</span>
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-agni-green to-agni-blue flex items-center justify-center text-2xl shadow-lg">
                       {ROLES.find(r => r.id === selectedRole)?.emoji || "✨"}
                     </div>
                     <div>
-                      <p className="text-base font-extrabold text-foreground">{name}</p>
-                      <p className="text-xs text-muted-foreground">{ROLES.find(r => r.id === selectedRole)?.label} • {VIBES.find(v => v.id === selectedVibe)?.label}</p>
+                      <p className="text-base font-extrabold text-gray-800">{name}</p>
+                      <p className="text-xs text-gray-500">{ROLES.find(r => r.id === selectedRole)?.label} • {VIBES.find(v => v.id === selectedVibe)?.label}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-agni-purple/5 border border-agni-purple/20 rounded-2xl p-4">
+                <div className="bg-[#7C5CBF]/10 border border-[#7C5CBF]/20 rounded-2xl p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <Brain size={14} className="text-agni-purple" />
-                    <span className="text-[9px] font-extrabold text-agni-purple uppercase tracking-wider">Neural OS Activated</span>
+                    <Brain size={14} className="text-[#7C5CBF]" />
+                    <span className="text-[9px] font-extrabold text-[#7C5CBF] uppercase tracking-wider">Neural OS Activated</span>
                   </div>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">
-                    AGNI will use your interests to create <span className="text-agni-gold font-bold">personalized analogies</span> in every lesson! 🧠✨
+                  <p className="text-[11px] text-gray-600 leading-relaxed">
+                    AGNI will use your interests to create <span className="text-[#D4A853] font-bold">personalized analogies</span> in every lesson! 🧠✨
                   </p>
                 </div>
 
@@ -1431,11 +1460,11 @@ const OnboardingPage = () => {
                   const items = (persona[cat.field] as string[]) || [];
                   if (items.length === 0) return null;
                   return (
-                    <div key={cat.id} className="bg-card border border-border rounded-2xl p-4">
+                    <div key={cat.id} className="bg-white/70 backdrop-blur border border-white/50 rounded-2xl p-4 shadow-sm">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-lg">{cat.emoji}</span>
-                        <span className="text-xs font-extrabold text-foreground">{cat.label}</span>
-                        <span className="text-[10px] text-muted-foreground ml-auto">{items.length}</span>
+                        <span className="text-xs font-extrabold text-gray-800">{cat.label}</span>
+                        <span className="text-[10px] text-gray-500 ml-auto">{items.length}</span>
                       </div>
                       <div className="flex flex-wrap gap-1.5">
                         {items.map((item, idx) => (
@@ -1456,11 +1485,11 @@ const OnboardingPage = () => {
               </div>
             </div>
 
-            <div className="shrink-0 space-y-3 relative z-10">
-              <Button onClick={finish} className="w-full h-14 rounded-2xl bg-gradient-to-r from-agni-green to-agni-blue text-white font-extrabold text-lg shadow-btn-3d btn-3d">
+            <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#F0E6FA] via-[#F0E6FA]/95 to-transparent space-y-3">
+              <Button onClick={finish} className="w-full h-14 rounded-full bg-gradient-to-r from-[#58CC02] to-[#1CB0F6] text-white font-extrabold text-lg shadow-lg">
                 <Sparkles size={20} className="mr-2" /> ACTIVATE AGNI 🔥
               </Button>
-              <p className="text-[11px] text-muted-foreground text-center">You can change these anytime in Settings</p>
+              <p className="text-[11px] text-gray-500 text-center">You can change these anytime in Settings</p>
             </div>
           </motion.div>
         )}
