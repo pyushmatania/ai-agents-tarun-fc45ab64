@@ -45,6 +45,9 @@ const SettingsPage = () => {
   // Personal details state
   const [detailsExpanded, setDetailsExpanded] = useState(false);
   const [identityExpanded, setIdentityExpanded] = useState(false);
+  const [motiveExpanded, setMotiveExpanded] = useState(false);
+  const [vibeExpanded, setVibeExpanded] = useState(false);
+  const [brainExpanded, setBrainExpanded] = useState(false);
 
   // Neural OS state
   const [persona, setPersonaState] = useState<NeuralOSPersona>(getPersona());
