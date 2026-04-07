@@ -342,8 +342,8 @@ const OnboardingPage = () => {
           </motion.div>
         )}
 
-        {/* ═══════ STEP 2: ROLE (expanded) ═══════ */}
-        {step === 2 && (
+        {/* ═══════ STEP 3: ROLE (expanded) ═══════ */}
+        {step === 3 && (
           <motion.div key="role" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
@@ -410,8 +410,8 @@ const OnboardingPage = () => {
           </motion.div>
         )}
 
-        {/* ═══════ STEP 3: MISSION MODE ═══════ */}
-        {step === 3 && (
+        {/* ═══════ STEP 5: MISSION MODE ═══════ */}
+        {step === 5 && (
           <motion.div key="mission" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
@@ -469,8 +469,8 @@ const OnboardingPage = () => {
           </motion.div>
         )}
 
-        {/* ═══════ STEP 4: VIBE ═══════ */}
-        {step === 4 && (
+        {/* ═══════ STEP 7: VIBE ═══════ */}
+        {step === 7 && (
           <motion.div key="vibe" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
@@ -536,8 +536,8 @@ const OnboardingPage = () => {
           </motion.div>
         )}
 
-        {/* ═══════ STEP 5: BRAIN LEVEL (dual track) ═══════ */}
-        {step === 5 && (
+        {/* ═══════ STEP 8: BRAIN LEVEL (dual track) ═══════ */}
+        {step === 8 && (
           <motion.div key="brain" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
@@ -621,8 +621,8 @@ const OnboardingPage = () => {
           </motion.div>
         )}
 
-        {/* ═══════ STEP 6: WHY THIS MATTERS — ATTENTION HOOK ═══════ */}
-        {step === 6 && (
+        {/* ═══════ STEP 9: WHY THIS MATTERS — ATTENTION HOOK ═══════ */}
+        {step === 9 && (
           <motion.div key="whymatters" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
