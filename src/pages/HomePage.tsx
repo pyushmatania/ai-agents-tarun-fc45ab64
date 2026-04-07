@@ -1,6 +1,6 @@
 import BottomNav from "@/components/BottomNav";
 import PageTransition, { StaggerContainer, StaggerItem, FadeIn } from "@/components/PageTransition";
-import { ArrowRight, Zap, Clock, BookOpen, Flame, Lightbulb, Rocket, Brain, Heart, Diamond, User, Info } from "lucide-react";
+import { ArrowRight, Zap, Clock, BookOpen, Flame, Lightbulb, Rocket, Brain, Heart, Diamond, User, Info, Trophy, Target, Shield, Crown, Map, Sparkles } from "lucide-react";
 import MascotProfileModal from "@/components/MascotProfileModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -8,8 +8,9 @@ import { motion } from "framer-motion";
 import Agni from "@/components/Agni";
 import DailyQuests from "@/components/DailyQuests";
 import { useGamification } from "@/hooks/useGamification";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { SFX } from "@/lib/sounds";
+import { getPersona } from "@/lib/neuralOS";
 
 const DAILY_TIPS = [
   { tip: "AI agents use a Perceive→Reason→Act loop — just like humans!", emoji: "🧠" },
