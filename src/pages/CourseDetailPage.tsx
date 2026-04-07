@@ -238,14 +238,18 @@ const CourseDetailPage = () => {
   const handleSend = (text?: string, hiddenPrompt?: string) => {
     const msg = text || input.trim();
     if (!msg || isLoading) return;
-    const displayMsg: Message = { role: "user", content: msg };
-    const aiMsg: Message = { role: "user", content: hiddenPrompt || msg };
-    const updatedDisplay = [...messages, displayMsg];
-    setMessages(updatedDisplay);
-    setInput("");
-    // Send with hidden prompt to AI but display clean text
-    const updatedForAI = [...messages, aiMsg];
-    sendToAI(updatedForAI);
+    const actualPrompt = hiddenPrompt || msg;
+    // If hidden prompt exists, don't show user message — just send to AI
+    if (hiddenPrompt) {
+      setInput("");
+      const updatedForAI = [...messages, { role: "user" as const, content: actualPrompt }];
+      sendToAI(updatedForAI);
+    } else {
+      const userMsg: Message = { role: "user", content: msg };
+      setMessages(prev => [...prev, userMsg]);
+      setInput("");
+      sendToAI([...messages, userMsg]);
+    }
   };
 
   const handleStop = () => {
