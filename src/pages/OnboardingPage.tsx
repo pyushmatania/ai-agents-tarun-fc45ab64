@@ -474,8 +474,7 @@ const OnboardingPage = () => {
 
               <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
                 <div className="space-y-2.5">
-                  {VIBES.map((vibe, i) => {
-                    const Icon = vibe.icon;
+                  {[...VIBES.map(v => ({ ...v, color: v.gradient })), ...customVibes].map((vibe, i) => {
                     return (
                       <motion.button key={vibe.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + i * 0.04 }}
                         whileTap={{ scale: 0.97 }} onClick={() => setSelectedVibe(vibe.id)}
@@ -483,7 +482,7 @@ const OnboardingPage = () => {
                           selectedVibe === vibe.id ? "border-agni-green bg-agni-green/10 shadow-glow-green" : "border-border bg-card"
                         }`}
                       >
-                        <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${vibe.gradient} flex items-center justify-center shadow-lg shrink-0`}>
+                        <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${vibe.color} flex items-center justify-center shadow-lg shrink-0`}>
                           <span className="text-xl">{vibe.emoji}</span>
                         </div>
                         <div className="flex-1 min-w-0">
@@ -499,38 +498,16 @@ const OnboardingPage = () => {
                     );
                   })}
 
-                  {/* Custom style input */}
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
-                    className="w-full p-3.5 rounded-2xl border-2 border-dashed border-agni-purple/30 bg-agni-purple/5"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-agni-purple to-agni-pink flex items-center justify-center shadow-lg shrink-0">
-                        <Sparkles size={18} className="text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <input
-                          type="text"
-                          placeholder="Type your own style..."
-                          className="w-full bg-transparent text-sm font-extrabold text-foreground outline-none placeholder:text-muted-foreground/50"
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" && (e.target as HTMLInputElement).value.trim()) {
-                              setSelectedVibe((e.target as HTMLInputElement).value.trim());
-                              (e.target as HTMLInputElement).blur();
-                            }
-                          }}
-                          onBlur={(e) => {
-                            if (e.target.value.trim()) setSelectedVibe(e.target.value.trim());
-                          }}
-                        />
-                        <span className="text-[10px] text-muted-foreground">Press Enter to set</span>
-                      </div>
-                      {selectedVibe && !VIBES.find(v => v.id === selectedVibe) && (
-                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-6 h-6 rounded-full bg-agni-purple flex items-center justify-center shrink-0">
-                          <Check size={14} className="text-white" strokeWidth={3} />
-                        </motion.div>
-                      )}
-                    </div>
-                  </motion.div>
+                  {/* Custom vibe creator */}
+                  <CustomOptionInput
+                    categoryId="vibe"
+                    categoryLabel="Teaching Vibe"
+                    onSave={(opt) => {
+                      const saved = saveCustomOption("vibe", opt);
+                      setCustomVibes(prev => [...prev, saved]);
+                      setSelectedVibe(saved.id);
+                    }}
+                  />
                 </div>
               </div>
 
