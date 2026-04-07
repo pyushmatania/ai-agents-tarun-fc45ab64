@@ -940,6 +940,7 @@ const CuriosityPage = () => {
                                 className="p-1.5 rounded-full text-muted-foreground/40">
                                 <Share2 size={11} />
                               </motion.button>
+                            </div>
                             {/* 🧠 AI Learn Button */}
                             <motion.button
                               whileTap={{ scale: 0.9 }}
