@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ArrowLeft, CheckCircle2, Timer, Brain, Loader2,
+  ArrowLeft, CheckCircle2, Timer, Brain, Loader2, X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getActiveModelLabel, getAIConfig } from "@/lib/aiConfig";
@@ -342,7 +342,7 @@ const CourseDetailPage = () => {
         <div className="flex items-center justify-between px-4 py-3">
           <button onClick={() => { clearInterval(timerRef.current); navigate("/courses"); }}
             className="w-10 h-10 rounded-2xl bg-muted/20 flex items-center justify-center">
-            <ArrowLeft size={18} className="text-foreground" />
+            <X size={18} className="text-foreground" />
           </button>
 
           <div className="text-center flex-1 px-3">

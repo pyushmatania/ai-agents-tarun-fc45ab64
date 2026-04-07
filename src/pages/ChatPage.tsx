@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, Loader2, Brain, Sparkles, Trash2,
-  GraduationCap
+  GraduationCap, X
 } from "lucide-react";
 import { useChat, type ChatTab } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
@@ -127,8 +127,8 @@ export default function ChatPage() {
       {/* Header */}
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/10">
         <div className="flex items-center justify-between px-4 py-3">
-          <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-2xl bg-muted/20 flex items-center justify-center hover:bg-muted/30 transition-colors">
-            <ArrowLeft size={18} className="text-foreground" />
+          <button onClick={() => navigate("/")} className="w-10 h-10 rounded-2xl bg-muted/20 flex items-center justify-center hover:bg-muted/30 transition-colors">
+            <X size={18} className="text-foreground" />
           </button>
 
           {/* Tab switcher */}
