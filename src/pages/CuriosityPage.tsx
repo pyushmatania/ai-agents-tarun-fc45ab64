@@ -540,6 +540,9 @@ const CuriosityPage = () => {
         const newItems = append ? [...feedItems, ...items] : items;
         setFeedItems(newItems);
         localStorage.setItem("spark_feed_cache", JSON.stringify(newItems));
+        const now = new Date().toISOString();
+        setLastFetchTime(now);
+        localStorage.setItem("spark_last_fetch", now);
       }
     } catch (e: any) {
       toast.error("Couldn't refresh feed");
