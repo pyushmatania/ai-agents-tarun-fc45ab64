@@ -8,22 +8,25 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { LogOut, Moon, Sun, ChevronRight, Shield, Bell, Loader2, LogIn, Brain, Key, Check, Eye, EyeOff, Zap, Diamond, Heart, Flame, Trash2, Sparkles, X, Plus, Search, TrendingUp } from "lucide-react";
+import { LogOut, Moon, Sun, ChevronRight, Shield, Bell, Loader2, LogIn, Brain, Key, Check, Eye, EyeOff, Zap, Diamond, Heart, Flame, Trash2, Sparkles, X, Plus, Search, TrendingUp, User, MapPin, Briefcase, GraduationCap, Target } from "lucide-react";
 import { InterestPill } from "@/components/InterestPill";
 import { motion, AnimatePresence } from "framer-motion";
 import { BUILT_IN_MODELS, BYOK_PROVIDERS, getAIConfig, saveAIConfig, type AIConfig } from "@/lib/aiConfig";
-import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection, getAllOptions, saveCustomOption, getCustomOptions } from "@/lib/teachingConfig";
+import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection, getAllOptions, saveCustomOption, getCustomOptions, IDENTITIES, MISSION_MODES } from "@/lib/teachingConfig";
 import CustomOptionInput from "@/components/CustomOptionInput";
 import { getPersona, savePersona, SUGGESTION_CATEGORIES, getSubFilters, getSubFilterCount, POPULAR_PICKS, type NeuralOSPersona } from "@/lib/neuralOS";
 import Agni from "@/components/Agni";
 import StatsSection from "@/components/StatsSection";
 import { useGamification } from "@/hooks/useGamification";
 import { SFX } from "@/lib/sounds";
+import { useUserContext } from "@/hooks/useUserContext";
+import { AGE_RANGES, GENDERS, EDUCATION_LEVELS, EXPERIENCE_LEVELS, MISSION_FOLLOWUPS } from "@/lib/missionFollowups";
 
 const SettingsPage = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { stats, league } = useGamification();
+  const { ctx, updateContext, loaded: ctxLoaded } = useUserContext();
   const [fullName, setFullName] = useState(localStorage.getItem("edu_user_name") || "");
   const [role, setRole] = useState(localStorage.getItem("edu_user_role") || "");
   const [saving, setSaving] = useState(false);
@@ -33,6 +36,10 @@ const SettingsPage = () => {
   const [aiConfig, setAiConfig] = useState<AIConfig>(getAIConfig());
   const [showApiKey, setShowApiKey] = useState(false);
   const [aiExpanded, setAiExpanded] = useState(false);
+
+  // Personal details state
+  const [detailsExpanded, setDetailsExpanded] = useState(false);
+  const [identityExpanded, setIdentityExpanded] = useState(false);
 
   // Neural OS state
   const [persona, setPersonaState] = useState<NeuralOSPersona>(getPersona());
@@ -185,6 +192,189 @@ const SettingsPage = () => {
                   </Button>
                 </motion.div>
               </div>
+            </div>
+          </FadeIn>
+
+          {/* Identity Card */}
+          <FadeIn delay={0.07}>
+            <div className="bg-card rounded-2xl border border-border/40 mb-3 shadow-card overflow-hidden">
+              <motion.button
+                whileTap={{ scale: 0.99 }}
+                onClick={() => setIdentityExpanded(!identityExpanded)}
+                className="flex items-center justify-between w-full p-3.5"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-agni-purple flex items-center justify-center shadow-md">
+                    <Target size={16} className="text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-extrabold text-foreground text-xs">Identity</p>
+                    <p className="text-[10px] text-muted-foreground font-semibold">
+                      {ctx.teaching_identity ? (IDENTITIES.find(i => i.id === ctx.teaching_identity)?.emoji || "🧑") + " " + (IDENTITIES.find(i => i.id === ctx.teaching_identity)?.label || ctx.teaching_identity) : "Not set"}
+                    </p>
+                  </div>
+                </div>
+                <motion.div animate={{ rotate: identityExpanded ? 90 : 0 }}>
+                  <ChevronRight size={14} className="text-muted-foreground" />
+                </motion.div>
+              </motion.button>
+              <AnimatePresence>
+                {identityExpanded && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                    <div className="px-3.5 pb-3.5">
+                      <p className="text-micro text-muted-foreground mb-2">WHO ARE YOU? — Drives metaphors & examples</p>
+                      <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto scrollbar-none">
+                        {IDENTITIES.map(id => (
+                          <button key={id.id} onClick={() => {
+                            updateContext({ teaching_identity: id.id });
+                            setTeachingSelection("identity", id.id);
+                            localStorage.setItem("edu_user_role", id.label);
+                            setRole(id.label);
+                          }}
+                            className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${
+                              ctx.teaching_identity === id.id
+                                ? "bg-agni-purple/10 border-agni-purple/30 text-agni-purple"
+                                : "bg-muted/30 border-border/40 text-muted-foreground"
+                            }`}
+                          >
+                            {id.emoji} {id.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </FadeIn>
+
+          {/* Personal Details Card */}
+          <FadeIn delay={0.09}>
+            <div className="bg-card rounded-2xl border border-border/40 mb-3 shadow-card overflow-hidden">
+              <motion.button
+                whileTap={{ scale: 0.99 }}
+                onClick={() => setDetailsExpanded(!detailsExpanded)}
+                className="flex items-center justify-between w-full p-3.5"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-md"
+                    style={{ background: "linear-gradient(135deg, #1CB0F6, #58CC02)" }}>
+                    <User size={16} className="text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-extrabold text-foreground text-xs">Personal Details</p>
+                    <p className="text-[10px] text-muted-foreground font-semibold">
+                      {[ctx.age_range, ctx.education, ctx.location].filter(Boolean).join(" • ") || "Not set yet"}
+                    </p>
+                  </div>
+                </div>
+                <motion.div animate={{ rotate: detailsExpanded ? 90 : 0 }}>
+                  <ChevronRight size={14} className="text-muted-foreground" />
+                </motion.div>
+              </motion.button>
+              <AnimatePresence>
+                {detailsExpanded && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                    <div className="px-3.5 pb-3.5 space-y-3">
+                      {/* Age Range */}
+                      <div>
+                        <p className="text-micro text-muted-foreground mb-1.5">AGE RANGE</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {AGE_RANGES.map(a => (
+                            <button key={a} onClick={() => updateContext({ age_range: a })}
+                              className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${
+                                ctx.age_range === a ? "bg-agni-blue/10 border-agni-blue/30 text-agni-blue" : "bg-muted/30 border-border/40 text-muted-foreground"
+                              }`}>{a}</button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Gender */}
+                      <div>
+                        <p className="text-micro text-muted-foreground mb-1.5">GENDER</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {GENDERS.map(g => (
+                            <button key={g} onClick={() => updateContext({ gender: g })}
+                              className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${
+                                ctx.gender === g ? "bg-agni-pink/10 border-agni-pink/30 text-agni-pink" : "bg-muted/30 border-border/40 text-muted-foreground"
+                              }`}>{g}</button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Education */}
+                      <div>
+                        <p className="text-micro text-muted-foreground mb-1.5">EDUCATION</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {EDUCATION_LEVELS.map(e => (
+                            <button key={e} onClick={() => updateContext({ education: e })}
+                              className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${
+                                ctx.education === e ? "bg-agni-green/10 border-agni-green/30 text-agni-green" : "bg-muted/30 border-border/40 text-muted-foreground"
+                              }`}>{e}</button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Location */}
+                      <div>
+                        <p className="text-micro text-muted-foreground mb-1.5 flex items-center gap-1"><MapPin size={9} /> LOCATION</p>
+                        <Input value={ctx.location} onChange={e => updateContext({ location: e.target.value })}
+                          placeholder="e.g. Bangalore, India"
+                          className="h-9 rounded-xl bg-muted/50 border-border/40 text-foreground text-[11px]" />
+                      </div>
+
+                      {/* Work Experience */}
+                      <div>
+                        <p className="text-micro text-muted-foreground mb-1.5 flex items-center gap-1"><Briefcase size={9} /> WORK EXPERIENCE</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {EXPERIENCE_LEVELS.map(e => (
+                            <button key={e} onClick={() => updateContext({ work_experience: e })}
+                              className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${
+                                ctx.work_experience === e ? "bg-agni-orange/10 border-agni-orange/30 text-agni-orange" : "bg-muted/30 border-border/40 text-muted-foreground"
+                              }`}>{e}</button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Job Title */}
+                      <div>
+                        <p className="text-micro text-muted-foreground mb-1.5">JOB TITLE</p>
+                        <Input value={ctx.job_title} onChange={e => updateContext({ job_title: e.target.value })}
+                          placeholder="e.g. Software Engineer, Student"
+                          className="h-9 rounded-xl bg-muted/50 border-border/40 text-foreground text-[11px]" />
+                      </div>
+
+                      {/* Mission Follow-up (dynamic based on selected mission) */}
+                      {ctx.teaching_mission && MISSION_FOLLOWUPS[ctx.teaching_mission] && (
+                        <div>
+                          <p className="text-micro text-muted-foreground mb-1.5">📋 MISSION DETAILS ({(MISSION_MODES.find(m => m.id === ctx.teaching_mission)?.label || ctx.teaching_mission).toUpperCase()})</p>
+                          <div className="space-y-2">
+                            {MISSION_FOLLOWUPS[ctx.teaching_mission].map(q => (
+                              <div key={q.id}>
+                                <p className="text-[10px] font-bold text-foreground/80 mb-1">{q.label}</p>
+                                {q.type === "select" && q.options ? (
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {q.options.map(opt => (
+                                      <button key={opt} onClick={() => updateContext({ mission_followup: { ...ctx.mission_followup, [q.id]: opt } })}
+                                        className={`px-2 py-1 rounded-lg text-[9px] font-extrabold border transition-all ${
+                                          ctx.mission_followup[q.id] === opt ? "bg-agni-gold/10 border-agni-gold/30 text-agni-gold" : "bg-muted/30 border-border/40 text-muted-foreground"
+                                        }`}>{opt}</button>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <Input value={ctx.mission_followup[q.id] || ""} onChange={e => updateContext({ mission_followup: { ...ctx.mission_followup, [q.id]: e.target.value } })}
+                                    placeholder={q.placeholder}
+                                    className="h-8 rounded-lg bg-muted/50 border-border/40 text-foreground text-[10px]" />
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </FadeIn>
 
