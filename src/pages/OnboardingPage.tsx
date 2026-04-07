@@ -13,6 +13,7 @@ import Agni from "@/components/Agni";
 import { getSuggestionImage, getPillColor } from "@/lib/suggestionImages";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { InterestPill } from "@/components/InterestPill";
+import SmartInterestSearch from "@/components/SmartInterestSearch";
 import type { AgniExpression } from "@/components/Agni";
 import { motion, AnimatePresence } from "framer-motion";
 import { savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona, getSubFilters, getSubFilterCount, POPULAR_PICKS } from "@/lib/neuralOS";

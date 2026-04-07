@@ -1204,7 +1204,6 @@ const CuriosityPage = () => {
                     {[
                       { id: "all", label: "Discover", color: "#58CC02" },
                       { id: "saved", label: "Saved", color: "#FFC800" },
-                      { id: "trending", label: "Trending", color: "#FF4B91" },
                       { id: "new", label: "New", color: "#1CB0F6" },
                     ].map(chip => {
                       const isChipActive = exploreFilter === chip.id;
