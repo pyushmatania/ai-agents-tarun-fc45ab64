@@ -702,14 +702,26 @@ const OnboardingPage = () => {
                         <span className="text-[10px] text-muted-foreground ml-auto">{items.length}</span>
                       </div>
                       <div className="flex flex-wrap gap-1.5">
-                        {items.map((item) => (
-                          <span key={item} className="bg-agni-green/10 text-agni-green text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-                            {item}
-                            <button onClick={() => removeItem(cat.field as string, item)} className="hover:text-agni-red transition-colors">
-                              <X size={10} />
-                            </button>
-                          </span>
-                        ))}
+                        {items.map((item, idx) => {
+                          const pillColor = getPillColor(cat.id, idx);
+                          const imageUrl = getSuggestionImage(item, cat.id);
+                          return (
+                            <span key={item} className="flex items-center gap-1 rounded-full px-1 py-0.5 pr-2"
+                              style={{ background: `${pillColor}20`, border: `1.5px solid ${pillColor}40` }}
+                            >
+                              <Avatar className="w-5 h-5">
+                                <AvatarImage src={imageUrl} alt={item} loading="lazy" />
+                                <AvatarFallback className="text-[8px]" style={{ background: `${pillColor}30`, color: pillColor }}>
+                                  {item.slice(0, 1)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="text-[10px] font-bold" style={{ color: pillColor }}>{item}</span>
+                              <button onClick={() => removeItem(cat.field as string, item)} className="hover:text-agni-red transition-colors ml-0.5">
+                                <X size={10} style={{ color: pillColor }} />
+                              </button>
+                            </span>
+                          );
+                        })}
                       </div>
                     </div>
                   );
