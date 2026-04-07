@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import PageTransition, { FadeIn } from "@/components/PageTransition";
-import { ArrowRight, RefreshCw, Loader2, Sparkles, Zap, Copy, Check, Diamond, User, Heart, Flame } from "lucide-react";
+import { ArrowRight, RefreshCw, Loader2, Sparkles, Zap, Copy, Check, Diamond, User, Heart, Flame, ExternalLink } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,11 +24,6 @@ const SPARK_FACTS = [
 ];
 
 const typeIcons: Record<string, string> = { tool: "🔧", repo: "📦", article: "📰", video: "🎬", news: "📡" };
-
-const getSCurveX = (index: number): number => {
-  const pattern = [30, 80, 130, 80];
-  return pattern[index % pattern.length];
-};
 
 const CuriosityPage = () => {
   const { user } = useAuth();
@@ -74,53 +69,18 @@ const CuriosityPage = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background pb-24 relative overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute inset-0 opacity-[0.05]" style={{
-            backgroundImage: "radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px)",
-            backgroundSize: "32px 32px",
-          }} />
-          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-[500px] h-[250px] rounded-full opacity-[0.15]"
+        {/* Subtle background */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full opacity-[0.1]"
             style={{ background: "radial-gradient(ellipse, #CE82FF, transparent 70%)" }}
           />
-          {/* S-curve path */}
-          <svg className="absolute top-[360px] left-1/2 -translate-x-1/2 w-[300px] h-[800px] opacity-[0.08]" viewBox="0 0 300 800">
-            <path d="M150 0 Q20 100 150 200 Q280 300 150 400 Q20 500 150 600 Q280 700 150 800" fill="none" stroke="currentColor" strokeWidth="40" className="text-foreground" />
-          </svg>
-          {/* Floating orbs */}
-          {[
-            { x: "10%", y: "8%", size: 70, color: "hsla(270,100%,75%,0.18)" },
-            { x: "82%", y: "20%", size: 55, color: "hsla(33,100%,50%,0.15)" },
-            { x: "5%", y: "50%", size: 65, color: "hsla(100,95%,40%,0.15)" },
-            { x: "88%", y: "65%", size: 50, color: "hsla(323,100%,76%,0.15)" },
-            { x: "20%", y: "80%", size: 60, color: "hsla(199,92%,54%,0.12)" },
-          ].map((orb, i) => (
-            <motion.div
-              key={i}
-              className="absolute rounded-full pointer-events-none"
-              style={{ left: orb.x, top: orb.y, width: orb.size, height: orb.size, background: orb.color }}
-              animate={{ y: [0, -15, 0, 10, 0], opacity: [0.15, 0.3, 0.15] }}
-              transition={{ duration: 8 + i * 2, repeat: Infinity, delay: i, ease: "easeInOut" }}
-            />
-          ))}
-          {/* Hexagons */}
-          <svg className="absolute top-[120px] right-[8%] w-14 h-14 opacity-[0.06]" viewBox="0 0 100 100">
-            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="none" stroke="#CE82FF" strokeWidth="2" />
-          </svg>
-          <svg className="absolute top-[500px] left-[5%] w-10 h-10 opacity-[0.05]" viewBox="0 0 100 100">
-            <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="none" stroke="#FF9600" strokeWidth="2" />
-          </svg>
-          {/* Diagonal accents */}
-          <div className="absolute top-[250px] -left-10 w-[200px] h-[2px] rotate-[30deg] opacity-[0.12]"
-            style={{ background: "linear-gradient(90deg, transparent, #CE82FF, transparent)" }}
-          />
-          <div className="absolute top-[600px] -right-10 w-[180px] h-[2px] -rotate-[25deg] opacity-[0.12]"
-            style={{ background: "linear-gradient(90deg, transparent, #58CC02, transparent)" }}
+          <div className="absolute bottom-[40%] -right-20 w-[250px] h-[250px] rounded-full opacity-[0.06]"
+            style={{ background: "radial-gradient(circle, #FF4B91, transparent 70%)" }}
           />
         </div>
 
         <div className="max-w-md mx-auto relative z-10">
-          {/* Top bar — matches Learn page style */}
+          {/* Top bar */}
           <FadeIn>
             <div className="px-4 pt-4 pb-2 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
@@ -135,7 +95,7 @@ const CuriosityPage = () => {
               </div>
               <h1 className="text-sm font-black text-foreground">Spark</h1>
               <div className="flex items-center gap-1.5">
-                <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate("/settings")} className="w-7 h-7 rounded-xl bg-card flex items-center justify-center border border-border/50 hover:border-primary/30 transition-colors">
+                <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate("/settings")} className="w-7 h-7 rounded-xl bg-card flex items-center justify-center border border-border/50">
                   <User size={12} className="text-muted-foreground" />
                 </motion.button>
                 <div className="flex items-center gap-1 bg-agni-pink/15 rounded-full px-2 py-1">
@@ -146,15 +106,13 @@ const CuriosityPage = () => {
             </div>
           </FadeIn>
 
-          {/* Hero banner — Duolingo style */}
+          {/* Hero banner */}
           <FadeIn delay={0.05}>
             <div className="mx-4 bg-agni-purple rounded-3xl p-4 shadow-lg mb-4 relative overflow-hidden"
               style={{ boxShadow: "0 4px 0 0 #A855F7" }}
             >
               <div className="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-white/5" />
               <div className="absolute -right-2 bottom-0 w-14 h-14 rounded-full bg-white/5" />
-              <div className="absolute left-[30%] -bottom-6 w-24 h-24 rounded-full bg-white/[0.03]" />
-
               <div className="flex items-center gap-3 relative z-10">
                 <Agni expression={loading ? "thinking" : results.length > 0 ? "excited" : "happy"} size={50} animate={true} />
                 <div className="flex-1">
@@ -166,7 +124,7 @@ const CuriosityPage = () => {
             </div>
           </FadeIn>
 
-          {/* Quick Spark Fact card */}
+          {/* Spark Fact card */}
           <FadeIn delay={0.1}>
             <div className="mx-4 bg-card rounded-2xl p-3.5 border-2 border-agni-gold/20 shadow-card mb-4 relative overflow-hidden">
               <motion.div
@@ -184,18 +142,12 @@ const CuriosityPage = () => {
                 >
                   <Zap size={14} className="text-white" />
                 </motion.div>
-                <div>
-                  <h4 className="text-[9px] font-black text-agni-gold tracking-wider">SPARK FACT</h4>
-                </div>
+                <h4 className="text-[9px] font-black text-agni-gold tracking-wider">SPARK FACT</h4>
                 <div className="ml-auto flex gap-1">
                   <motion.button whileTap={{ scale: 0.85 }} onClick={handleCopyFact} className="w-7 h-7 rounded-xl bg-muted/50 flex items-center justify-center">
                     {copied ? <Check size={10} className="text-agni-green" /> : <Copy size={10} className="text-muted-foreground" />}
                   </motion.button>
-                  <motion.button
-                    whileTap={{ scale: 0.85, rotate: 180 }}
-                    onClick={() => setSparkIdx((sparkIdx + 1) % SPARK_FACTS.length)}
-                    className="w-7 h-7 rounded-xl bg-muted/50 flex items-center justify-center"
-                  >
+                  <motion.button whileTap={{ scale: 0.85, rotate: 180 }} onClick={() => setSparkIdx((sparkIdx + 1) % SPARK_FACTS.length)} className="w-7 h-7 rounded-xl bg-muted/50 flex items-center justify-center">
                     <RefreshCw size={10} className="text-muted-foreground" />
                   </motion.button>
                 </div>
@@ -214,105 +166,71 @@ const CuriosityPage = () => {
             </div>
           </FadeIn>
 
-          {/* Categories on a winding S-curve path — like Learn page */}
-          <div className="px-4 relative">
-            {/* SVG connector lines */}
-            <svg className="absolute top-0 left-4 right-4 h-full pointer-events-none" style={{ width: "calc(100% - 32px)" }}>
-              {CURIOSITY.map((_, i) => {
-                if (i === 0) return null;
-                const x1 = getSCurveX(i - 1) + 28;
-                const y1 = (i - 1) * 160 + 45;
-                const x2 = getSCurveX(i) + 28;
-                const y2 = i * 160 + 45;
-                const midY = (y1 + y2) / 2;
-                return (
-                  <path
-                    key={i}
-                    d={`M${x1},${y1} C${x1},${midY} ${x2},${midY} ${x2},${y2}`}
-                    fill="none"
-                    stroke={CURIOSITY[i].color}
-                    strokeWidth="3"
-                    strokeDasharray="6 6"
-                    opacity={0.25}
-                  />
-                );
-              })}
-            </svg>
-
-            <div className="relative" style={{ paddingBottom: 20 }}>
-              {CURIOSITY.map((cat, i) => {
-                const xOffset = getSCurveX(i);
-                const isActive = activeId === cat.id;
-
-                return (
-                  <motion.div
-                    key={cat.id}
-                    initial={{ opacity: 0, scale: 0.5, y: 30 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ delay: 0.2 + i * 0.1, type: "spring", stiffness: 200 }}
-                    className="relative"
-                    style={{ height: isActive ? "auto" : 160, minHeight: 160, paddingLeft: xOffset }}
+          {/* Discovery Categories — Full-width cards */}
+          <div className="px-4 space-y-3">
+            <p className="text-[10px] font-black text-muted-foreground tracking-wider">EXPLORE DIMENSIONS</p>
+            {CURIOSITY.map((cat, i) => {
+              const isActive = activeId === cat.id;
+              return (
+                <motion.div
+                  key={cat.id}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 + i * 0.06 }}
+                >
+                  {/* Category card */}
+                  <motion.button
+                    whileTap={{ scale: 0.97, y: 2 }}
+                    onClick={() => fetchCuriosity(cat)}
+                    className="w-full bg-card rounded-2xl p-4 border-2 text-left relative overflow-hidden transition-all"
+                    style={{
+                      borderColor: isActive ? cat.color : "hsl(var(--border) / 0.3)",
+                      boxShadow: isActive
+                        ? `0 4px 0 0 ${cat.color}60`
+                        : "0 3px 0 0 hsl(var(--border) / 0.15)",
+                    }}
                   >
-                    {/* Node button */}
-                    <motion.button
-                      whileTap={{ scale: 0.9, y: 3 }}
-                      onClick={() => fetchCuriosity(cat)}
-                      className="relative flex flex-col items-center"
-                      style={{ width: 100 }}
-                    >
-                      {/* Glow */}
+                    <div className="absolute -right-4 -top-4 w-16 h-16 rounded-full opacity-[0.08]"
+                      style={{ background: cat.color }}
+                    />
+                    <div className="flex items-center gap-3 relative z-10">
                       <motion.div
-                        className="absolute -inset-3 rounded-full"
-                        style={{ background: `radial-gradient(circle, ${cat.color}30, transparent 70%)` }}
-                        animate={isActive ? { opacity: [0.3, 0.6, 0.3] } : { opacity: 0 }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      />
-
-                      {/* Circle */}
-                      <motion.div
-                        className="w-[60px] h-[60px] rounded-full flex items-center justify-center relative z-10 border-[3px]"
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0"
                         style={{
-                          background: isActive
-                            ? cat.color
-                            : `linear-gradient(135deg, ${cat.color}25, ${cat.color}10)`,
-                          borderColor: isActive ? cat.color : `${cat.color}50`,
-                          boxShadow: isActive
-                            ? `0 6px 0 0 ${cat.color}80, 0 8px 20px ${cat.color}40`
-                            : `0 4px 0 0 ${cat.color}40`,
+                          background: isActive ? cat.color : `${cat.color}18`,
+                          boxShadow: isActive ? `0 3px 0 0 ${cat.color}80` : "none",
                         }}
-                        animate={isActive && !loading ? { y: [0, -3, 0] } : {}}
-                        transition={{ duration: 1.5, repeat: Infinity }}
+                        animate={isActive && loading ? { rotate: [0, 5, -5, 0] } : {}}
+                        transition={{ duration: 0.5, repeat: Infinity }}
                       >
                         {isActive && loading ? (
-                          <Loader2 size={22} className="animate-spin text-white" />
+                          <Loader2 size={20} className="animate-spin text-white" />
                         ) : (
-                          <span className="text-2xl">{cat.emoji}</span>
+                          cat.emoji
                         )}
                       </motion.div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12px] font-black" style={{ color: isActive ? cat.color : "hsl(var(--foreground))" }}>
+                          {cat.label}
+                        </p>
+                        <p className="text-[9px] text-muted-foreground font-semibold">{cat.desc}</p>
+                      </div>
+                      <ArrowRight size={16} className="text-muted-foreground/40 shrink-0" />
+                    </div>
+                  </motion.button>
 
-                      {/* Label */}
-                      <span className="text-[10px] font-black mt-1.5" style={{ color: isActive ? cat.color : "hsl(var(--foreground))" }}>
-                        {cat.label}
-                      </span>
-                      <span className="text-[8px] font-semibold text-muted-foreground text-center leading-tight mt-0.5 max-w-[90px]">
-                        {cat.desc}
-                      </span>
-                    </motion.button>
-
-                    {/* Results panel */}
-                    <AnimatePresence>
-                      {isActive && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.3 }}
-                          className="overflow-hidden w-full mt-3"
-                          style={{ paddingLeft: 0, marginLeft: -xOffset }}
-                        >
-                          {/* Error */}
+                  {/* Results */}
+                  <AnimatePresence>
+                    {isActive && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="pt-2 space-y-1.5">
                           {error && (
-                            <div className="bg-agni-red/10 border-2 border-agni-red/20 rounded-2xl p-3 mb-2">
+                            <div className="bg-agni-red/10 border-2 border-agni-red/20 rounded-2xl p-3">
                               <p className="text-[11px] text-agni-red font-semibold">{error}</p>
                               <button onClick={() => fetchCuriosity(cat)} className="mt-1.5 text-[10px] font-extrabold text-agni-green flex items-center gap-1">
                                 <RefreshCw size={10} /> Try again
@@ -320,80 +238,66 @@ const CuriosityPage = () => {
                             </div>
                           )}
 
-                          {/* Loading skeletons */}
                           {loading && (
                             <div className="space-y-2">
                               {[1, 2, 3].map(j => (
-                                <div key={j} className="h-16 rounded-2xl bg-muted/20 animate-pulse" style={{ animationDelay: `${j * 200}ms` }} />
+                                <div key={j} className="h-14 rounded-xl bg-muted/20 animate-pulse" style={{ animationDelay: `${j * 150}ms` }} />
                               ))}
                             </div>
                           )}
 
-                          {/* Results */}
                           {!loading && results.length > 0 && (
-                            <div className="space-y-2">
-                              {/* Category banner */}
-                              <div
-                                className="rounded-2xl p-3 relative overflow-hidden"
-                                style={{ background: cat.color, boxShadow: `0 4px 0 0 ${cat.color}80` }}
+                            <>
+                              {/* Category result banner */}
+                              <div className="rounded-2xl p-3 relative overflow-hidden"
+                                style={{ background: cat.color, boxShadow: `0 3px 0 0 ${cat.color}80` }}
                               >
-                                <div className="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-white/10" />
+                                <div className="absolute -right-3 -top-3 w-14 h-14 rounded-full bg-white/10" />
                                 <div className="flex items-center gap-2 relative z-10">
-                                  <span className="text-xl">{cat.emoji}</span>
+                                  <span className="text-lg">{cat.emoji}</span>
                                   <div>
-                                    <h4 className="text-white font-black text-xs">{cat.label}</h4>
-                                    <p className="text-white/60 text-[9px] font-bold">{results.length} discoveries</p>
+                                    <h4 className="text-white font-black text-[11px]">{cat.label} Discoveries</h4>
+                                    <p className="text-white/60 text-[8px] font-bold">{results.length} items found</p>
                                   </div>
                                 </div>
                               </div>
 
-                              {results.map((r: any, ri: number) => (
+                              {/* Result items */}
+                              {results.map((item: any, j: number) => (
                                 <motion.a
-                                  key={ri}
-                                  initial={{ opacity: 0, x: -10 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  transition={{ delay: ri * 0.06 }}
-                                  href={r.url || "#"}
+                                  key={j}
+                                  href={item.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="flex items-center gap-2.5 bg-card rounded-2xl p-3 border-2 border-border/30 hover:border-border transition-all group"
-                                  style={{ borderLeftColor: `${cat.color}40`, borderLeftWidth: 3 }}
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: j * 0.06 }}
+                                  className="flex items-center gap-2.5 bg-card rounded-xl p-2.5 border border-border/30 hover:border-border/60 transition-all active:scale-[0.98]"
                                 >
-                                  <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm shrink-0 shadow-md"
-                                    style={{ background: `${cat.color}20`, border: `2px solid ${cat.color}25` }}>
-                                    {typeIcons[r.type] || "📄"}
+                                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0"
+                                    style={{ background: `${cat.color}15` }}
+                                  >
+                                    {typeIcons[item.type] || "🔗"}
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <span className="text-[11px] font-extrabold text-foreground block truncate">{r.title}</span>
-                                    <p className="text-[9px] text-muted-foreground truncate font-semibold">{r.desc || ""}</p>
+                                    <p className="text-[11px] font-extrabold text-foreground truncate">{item.title}</p>
+                                    <p className="text-[8px] text-muted-foreground truncate">{item.desc}</p>
                                   </div>
-                                  <ArrowRight size={10} className="text-muted-foreground shrink-0" />
+                                  <ExternalLink size={10} className="text-muted-foreground/40 shrink-0" />
                                 </motion.a>
                               ))}
-
-                              <motion.button
-                                whileTap={{ scale: 0.97 }}
-                                onClick={() => fetchCuriosity(cat)}
-                                className="flex items-center gap-1 text-[10px] font-extrabold rounded-2xl px-3 py-2.5 w-full justify-center border-2"
-                                style={{
-                                  color: cat.color,
-                                  background: `${cat.color}10`,
-                                  borderColor: `${cat.color}25`,
-                                }}
-                              >
-                                <RefreshCw size={10} /> Discover more
-                              </motion.button>
-                            </div>
+                            </>
                           )}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                );
-              })}
-            </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
+
         <BottomNav />
       </div>
     </PageTransition>
