@@ -348,7 +348,7 @@ const HomePage = () => {
                   <p className="text-[9px] font-black text-muted-foreground uppercase tracking-wider mb-1.5 px-0.5">
                     {cat.emoji} {cat.category}
                   </p>
-                  <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1" style={{ scrollSnapType: "x mandatory" }}>
+                  <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-none -mx-1 px-1" style={{ scrollSnapType: "x mandatory" }}>
                     {cat.modes.map((mode) => (
                       <motion.button
                         key={mode.id}
