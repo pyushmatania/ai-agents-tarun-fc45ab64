@@ -458,7 +458,7 @@ const HomePage = () => {
                   <Trophy size={13} className="text-white" />
                 </div>
                 <span className="text-[10px] font-extrabold text-foreground">Leaderboard</span>
-                <span className="ml-auto text-[8px] font-bold text-muted-foreground">All Time</span>
+                <span className="ml-auto text-[8px] font-bold text-muted-foreground">This Week · Resets Mon</span>
               </div>
               <div className="space-y-1.5">
                 {leaderboard.length > 0 ? (
@@ -472,7 +472,7 @@ const HomePage = () => {
                         <span className={`text-[11px] font-extrabold flex-1 ${isYou ? "text-agni-green" : "text-foreground"}`}>
                           {player.display_name} {isYou && <span className="text-[8px] font-bold text-agni-green/70">(You)</span>}
                         </span>
-                        <span className="text-[10px] font-black text-agni-gold">{player.xp.toLocaleString()} XP</span>
+                        <span className="text-[10px] font-black text-agni-gold">{player.weekly_xp.toLocaleString()} XP</span>
                       </div>
                     );
                   })
