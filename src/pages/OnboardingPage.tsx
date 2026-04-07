@@ -1408,7 +1408,7 @@ const OnboardingPage = () => {
           <motion.div key="confirm" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-agni-green/20 via-agni-blue/10 to-agni-purple/5 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#E8F5E9] via-[#E0F2FE] to-[#F0E6FA] pointer-events-none" />
 
             {/* Celebration particles */}
             {["🎉", "🎊", "🏆", "🔥", "⚡", "✨"].map((emoji, i) => (
@@ -1429,30 +1429,30 @@ const OnboardingPage = () => {
                 <Agni expression="celebrating" size={110} speech={`You're amazing, ${name}! 🎉`} animate />
               </div>
 
-              <h2 className="text-2xl font-black text-foreground text-center mb-1">You're all set! 🚀</h2>
-              <p className="text-sm text-muted-foreground text-center mb-5">Here's your Neural OS profile • {totalSelected} interests</p>
+              <h2 className="text-2xl font-black text-gray-800 text-center mb-1">You're all set! 🚀</h2>
+              <p className="text-sm text-gray-500 text-center mb-5">Here's your Neural OS profile • {totalSelected} interests</p>
 
               <div className="space-y-3 mb-6">
-                <div className="bg-card border border-border rounded-2xl p-4">
-                  <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2">Profile</span>
+                <div className="bg-white/70 backdrop-blur border border-white/50 rounded-2xl p-4 shadow-sm">
+                  <span className="text-[9px] font-extrabold text-gray-500 uppercase tracking-wider block mb-2">Profile</span>
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-agni-green to-agni-blue flex items-center justify-center text-2xl shadow-lg">
                       {ROLES.find(r => r.id === selectedRole)?.emoji || "✨"}
                     </div>
                     <div>
-                      <p className="text-base font-extrabold text-foreground">{name}</p>
-                      <p className="text-xs text-muted-foreground">{ROLES.find(r => r.id === selectedRole)?.label} • {VIBES.find(v => v.id === selectedVibe)?.label}</p>
+                      <p className="text-base font-extrabold text-gray-800">{name}</p>
+                      <p className="text-xs text-gray-500">{ROLES.find(r => r.id === selectedRole)?.label} • {VIBES.find(v => v.id === selectedVibe)?.label}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-agni-purple/5 border border-agni-purple/20 rounded-2xl p-4">
+                <div className="bg-[#7C5CBF]/10 border border-[#7C5CBF]/20 rounded-2xl p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <Brain size={14} className="text-agni-purple" />
-                    <span className="text-[9px] font-extrabold text-agni-purple uppercase tracking-wider">Neural OS Activated</span>
+                    <Brain size={14} className="text-[#7C5CBF]" />
+                    <span className="text-[9px] font-extrabold text-[#7C5CBF] uppercase tracking-wider">Neural OS Activated</span>
                   </div>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">
-                    AGNI will use your interests to create <span className="text-agni-gold font-bold">personalized analogies</span> in every lesson! 🧠✨
+                  <p className="text-[11px] text-gray-600 leading-relaxed">
+                    AGNI will use your interests to create <span className="text-[#D4A853] font-bold">personalized analogies</span> in every lesson! 🧠✨
                   </p>
                 </div>
 
@@ -1460,11 +1460,11 @@ const OnboardingPage = () => {
                   const items = (persona[cat.field] as string[]) || [];
                   if (items.length === 0) return null;
                   return (
-                    <div key={cat.id} className="bg-card border border-border rounded-2xl p-4">
+                    <div key={cat.id} className="bg-white/70 backdrop-blur border border-white/50 rounded-2xl p-4 shadow-sm">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-lg">{cat.emoji}</span>
-                        <span className="text-xs font-extrabold text-foreground">{cat.label}</span>
-                        <span className="text-[10px] text-muted-foreground ml-auto">{items.length}</span>
+                        <span className="text-xs font-extrabold text-gray-800">{cat.label}</span>
+                        <span className="text-[10px] text-gray-500 ml-auto">{items.length}</span>
                       </div>
                       <div className="flex flex-wrap gap-1.5">
                         {items.map((item, idx) => (
@@ -1485,11 +1485,11 @@ const OnboardingPage = () => {
               </div>
             </div>
 
-            <div className="shrink-0 space-y-3 relative z-10">
-              <Button onClick={finish} className="w-full h-14 rounded-2xl bg-gradient-to-r from-agni-green to-agni-blue text-white font-extrabold text-lg shadow-btn-3d btn-3d">
+            <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#F0E6FA] via-[#F0E6FA]/95 to-transparent space-y-3">
+              <Button onClick={finish} className="w-full h-14 rounded-full bg-gradient-to-r from-[#58CC02] to-[#1CB0F6] text-white font-extrabold text-lg shadow-lg">
                 <Sparkles size={20} className="mr-2" /> ACTIVATE AGNI 🔥
               </Button>
-              <p className="text-[11px] text-muted-foreground text-center">You can change these anytime in Settings</p>
+              <p className="text-[11px] text-gray-500 text-center">You can change these anytime in Settings</p>
             </div>
           </motion.div>
         )}
