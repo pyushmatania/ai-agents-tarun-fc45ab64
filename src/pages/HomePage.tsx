@@ -101,7 +101,7 @@ const HomePage = () => {
 
           {/* AGNI Hero Section */}
           <FadeIn delay={0.1}>
-            <motion.div className="relative rounded-3xl mb-4 overflow-hidden bg-gradient-card-accent border border-border/40 shadow-card">
+            <motion.div className="relative rounded-3xl mb-4 overflow-visible bg-gradient-card-accent border border-border/40 shadow-card">
               {/* Info button */}
               <motion.button
                 whileTap={{ scale: 0.9 }}
