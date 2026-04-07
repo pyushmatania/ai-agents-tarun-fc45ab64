@@ -15,7 +15,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { InterestPill } from "@/components/InterestPill";
 import type { AgniExpression } from "@/components/Agni";
 import { motion, AnimatePresence } from "framer-motion";
-import { savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona, getSubFilters, getSubFilterCount } from "@/lib/neuralOS";
+import { savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona, getSubFilters, getSubFilterCount, POPULAR_PICKS } from "@/lib/neuralOS";
+import { TrendingUp, Crown } from "lucide-react";
 
 /* ── EXPANDED ROLES ── */
 const ROLES = [
