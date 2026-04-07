@@ -143,6 +143,9 @@ function AILearnModal({ item, onClose }: { item: any; onClose: () => void }) {
                 <p className="text-[8px] text-muted-foreground">Powered by AGNI × NotebookLM</p>
               </div>
             </div>
+            <motion.button whileTap={{ scale: 0.9 }} onClick={() => shareItem(item)} className="w-7 h-7 rounded-full bg-muted/30 flex items-center justify-center">
+              <Share2 size={14} className="text-muted-foreground" />
+            </motion.button>
             <motion.button whileTap={{ scale: 0.9 }} onClick={onClose} className="w-7 h-7 rounded-full bg-muted/30 flex items-center justify-center">
               <X size={14} className="text-muted-foreground" />
             </motion.button>
