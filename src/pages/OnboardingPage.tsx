@@ -200,6 +200,22 @@ const OnboardingPage = () => {
     localStorage.setItem("edu_user_name", name.trim());
     localStorage.setItem("edu_user_role", selectedRole || "student");
     localStorage.setItem("edu_onboarded", "true");
+    // Save user context to localStorage (syncs to DB via hook when logged in)
+    const userCtx = {
+      age_range: ageRange,
+      gender,
+      education,
+      location,
+      work_experience: workExperience,
+      job_title: jobTitle,
+      mission_followup: missionFollowup,
+      teaching_identity: selectedRole || "",
+      teaching_mission: selectedMission || "",
+      teaching_vibe: selectedVibe || "",
+      teaching_brain: selectedBrain || "",
+      brain_track: brainTrack,
+    };
+    localStorage.setItem("user_context", JSON.stringify(userCtx));
     navigate("/");
   };
 
