@@ -331,49 +331,56 @@ const HomePage = () => {
             </div>
           </FadeIn>
 
-          {/* Teaching Modes — Minimal Chips */}
+          {/* Teaching Modes — Collapsible Minimal Chips */}
           <FadeIn delay={0.35}>
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-2.5">
-                <h4 className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Learning Mode</h4>
-                <span className="text-[9px] font-bold text-muted-foreground/60">
-                  {TEACHING_MODES.find(m => m.id === activeMode)?.emoji} {TEACHING_MODES.find(m => m.id === activeMode)?.label}
-                </span>
-              </div>
-              {TEACHING_MODE_CATEGORIES.map((cat) => (
-                <div key={cat.category} className="mb-2">
-                  <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1 px-0.5">
-                    {cat.emoji} {cat.category}
-                  </p>
-                  <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1">
-                    {cat.modes.map((mode) => {
-                      const isSelected = activeMode === mode.id;
-                      return (
-                        <motion.button
-                          key={mode.id}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => {
-                            setActiveMode(mode.id);
-                            localStorage.setItem("teaching_mode", mode.id);
-                            window.dispatchEvent(new Event("storage"));
-                            SFX.tap();
-                            toast(`${mode.emoji} ${mode.label}`, { description: mode.desc, duration: 1500 });
-                          }}
-                          className={`shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold flex items-center gap-1 transition-all ${
-                            isSelected
-                              ? "bg-agni-green/15 text-agni-green border border-agni-green/30"
-                              : "bg-muted/30 text-muted-foreground border border-transparent hover:bg-muted/50"
-                          }`}
-                        >
-                          <span className="text-xs">{mode.emoji}</span>
-                          <span>{mode.label}</span>
-                        </motion.button>
-                      );
-                    })}
+            <Collapsible open={modesOpen} onOpenChange={setModesOpen} className="mb-4">
+              <CollapsibleTrigger asChild>
+                <button className="w-full flex items-center justify-between mb-2.5 group">
+                  <h4 className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Learning Mode</h4>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[9px] font-bold text-muted-foreground/60">
+                      {TEACHING_MODES.find(m => m.id === activeMode)?.emoji} {TEACHING_MODES.find(m => m.id === activeMode)?.label}
+                    </span>
+                    <ChevronDown className={`w-3 h-3 text-muted-foreground/50 transition-transform duration-200 ${modesOpen ? "rotate-180" : ""}`} />
                   </div>
-                </div>
-              ))}
-            </div>
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                {TEACHING_MODE_CATEGORIES.map((cat) => (
+                  <div key={cat.category} className="mb-2">
+                    <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1 px-0.5">
+                      {cat.emoji} {cat.category}
+                    </p>
+                    <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1">
+                      {cat.modes.map((mode) => {
+                        const isSelected = activeMode === mode.id;
+                        return (
+                          <motion.button
+                            key={mode.id}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => {
+                              setActiveMode(mode.id);
+                              localStorage.setItem("teaching_mode", mode.id);
+                              window.dispatchEvent(new Event("storage"));
+                              SFX.tap();
+                              toast(`${mode.emoji} ${mode.label}`, { description: mode.desc, duration: 1500 });
+                            }}
+                            className={`shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold flex items-center gap-1 transition-all ${
+                              isSelected
+                                ? "bg-agni-green/15 text-agni-green border border-agni-green/30"
+                                : "bg-muted/30 text-muted-foreground border border-transparent hover:bg-muted/50"
+                            }`}
+                          >
+                            <span className="text-xs">{mode.emoji}</span>
+                            <span>{mode.label}</span>
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
           </FadeIn>
 
           {/* Daily Tip */}
