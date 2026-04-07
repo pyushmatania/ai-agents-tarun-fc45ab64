@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import Agni from "@/components/Agni";
-import neuralLogo from "@/assets/neural-os-logo.png";
+import neuralLogo from "@/assets/neural-os-cinematic.png";
 
 interface SplashScreenProps {
   onComplete: () => void;
