@@ -90,11 +90,21 @@ export default function ChatPage() {
     };
   };
 
+  // Scroll to bottom on new messages
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
     }
   }, [chat.messages]);
+
+  // Scroll to bottom on mount and tab switch
+  useEffect(() => {
+    setTimeout(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "auto" });
+      }
+    }, 100);
+  }, [activeTab, chat.isLoadingHistory]);
 
   // Build a snapshot of current settings for the blueprint stamp
   const buildSettingsSnapshot = () => {
