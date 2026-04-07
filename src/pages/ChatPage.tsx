@@ -138,7 +138,7 @@ export default function ChatPage() {
   const tabConfig = TAB_CONFIG[activeTab];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-[100dvh] bg-background flex flex-col">
       {/* Header */}
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/10">
         <div className="flex items-center justify-between px-4 py-3">
