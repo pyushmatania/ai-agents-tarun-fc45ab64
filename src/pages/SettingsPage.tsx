@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { LogOut, Moon, Sun, ChevronRight, Shield, Bell, Loader2, LogIn, Brain, Key, Check, Eye, EyeOff, Zap, Diamond, Heart, Flame, Trash2, Sparkles, X, Plus, Search } from "lucide-react";
+import { LogOut, Moon, Sun, ChevronRight, Shield, Bell, Loader2, LogIn, Brain, Key, Check, Eye, EyeOff, Zap, Diamond, Heart, Flame, Trash2, Sparkles, X, Plus, Search, TrendingUp } from "lucide-react";
 import { InterestPill } from "@/components/InterestPill";
 import { motion, AnimatePresence } from "framer-motion";
 import { BUILT_IN_MODELS, BYOK_PROVIDERS, getAIConfig, saveAIConfig, type AIConfig } from "@/lib/aiConfig";
@@ -632,6 +632,36 @@ const SettingsPage = () => {
                                 >
                                   ✨ Add "{neuralSearch.trim()}" — press Enter
                                 </button>
+                              )}
+
+                              {/* 🔥 Popular Picks */}
+                              {!neuralSearch && !settingsSubFilter && POPULAR_PICKS[cat.id]?.length > 0 && (
+                                <div>
+                                  <div className="flex items-center gap-1 mb-1.5">
+                                    <TrendingUp size={10} className="text-agni-orange" />
+                                    <span className="text-[8px] font-black text-agni-orange uppercase tracking-wider">Popular Picks</span>
+                                  </div>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {POPULAR_PICKS[cat.id].filter(name => cat.suggestions.some(s => s.name === name)).map((name, idx) => {
+                                      const suggestion = cat.suggestions.find(s => s.name === name);
+                                      return (
+                                        <motion.div key={name} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: idx * 0.03 }}
+                                          className="relative"
+                                        >
+                                          <InterestPill
+                                            name={name}
+                                            emoji={suggestion?.emoji}
+                                            categoryId={cat.id}
+                                            index={idx}
+                                            selected={selected.includes(name)}
+                                            onClick={() => toggleItem(name)}
+                                          />
+                                          <span className="absolute -top-1 -right-1 text-[6px]">🔥</span>
+                                        </motion.div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
                               )}
 
                               {/* Suggestions — colorful pills */}

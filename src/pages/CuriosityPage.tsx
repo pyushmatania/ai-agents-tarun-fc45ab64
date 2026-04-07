@@ -64,10 +64,24 @@ function getContentMeta(url: string): { type: "youtube" | "instagram" | "article
 
 const TABS = [
   { id: "feed", label: "Feed", icon: TrendingUp },
+  { id: "saved", label: "Saved", icon: Bookmark },
   { id: "explore", label: "Explore", icon: Sparkles },
 ] as const;
 
-/** AI Learn Modal — NotebookLM-style content breakdown */
+/** Share a feed item via native share or clipboard */
+async function shareItem(item: { title: string; desc?: string; url?: string }) {
+  const text = `${item.title}${item.desc ? `\n${item.desc}` : ""}${item.url ? `\n${item.url}` : ""}`;
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: item.title, text: item.desc || "", url: item.url || "" });
+      return;
+    } catch {}
+  }
+  await navigator.clipboard.writeText(text);
+  toast.success("Link copied to clipboard! 📋");
+}
+
+
 function AILearnModal({ item, onClose }: { item: any; onClose: () => void }) {
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<any>(null);
@@ -129,6 +143,9 @@ function AILearnModal({ item, onClose }: { item: any; onClose: () => void }) {
                 <p className="text-[8px] text-muted-foreground">Powered by AGNI × NotebookLM</p>
               </div>
             </div>
+            <motion.button whileTap={{ scale: 0.9 }} onClick={() => shareItem(item)} className="w-7 h-7 rounded-full bg-muted/30 flex items-center justify-center">
+              <Share2 size={14} className="text-muted-foreground" />
+            </motion.button>
             <motion.button whileTap={{ scale: 0.9 }} onClick={onClose} className="w-7 h-7 rounded-full bg-muted/30 flex items-center justify-center">
               <X size={14} className="text-muted-foreground" />
             </motion.button>
@@ -357,7 +374,7 @@ const CuriosityPage = () => {
   const storedName = localStorage.getItem("edu_user_name") || "Learner";
   const displayName = user?.user_metadata?.full_name?.split(" ")[0] || storedName;
 
-  const [activeTab, setActiveTab] = useState<"feed" | "explore">("feed");
+  const [activeTab, setActiveTab] = useState<"feed" | "saved" | "explore">("feed");
   const [activeId, setActiveId] = useState<string | null>(null);
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -827,6 +844,10 @@ const CuriosityPage = () => {
                                     className={`flex items-center gap-1 text-[9px] font-bold rounded-full px-2 py-1 ${isSaved ? "bg-agni-gold/15 text-agni-gold" : "text-muted-foreground"}`}>
                                     <Bookmark size={10} className={isSaved ? "fill-agni-gold" : ""} /> {isSaved ? "Saved" : "Save"}
                                   </motion.button>
+                                  <motion.button whileTap={{ scale: 0.8 }} onClick={() => shareItem(item)}
+                                    className="flex items-center gap-1 text-[9px] font-bold rounded-full px-2 py-1 text-muted-foreground">
+                                    <Share2 size={10} /> Share
+                                  </motion.button>
                                 </div>
                                 {/* 🧠 AI Learn Button */}
                                 <motion.button
@@ -915,6 +936,10 @@ const CuriosityPage = () => {
                                 className={`p-1.5 rounded-full ${isSaved ? "text-agni-gold" : "text-muted-foreground/40"}`}>
                                 <Bookmark size={11} className={isSaved ? "fill-agni-gold" : ""} />
                               </motion.button>
+                              <motion.button whileTap={{ scale: 0.8 }} onClick={() => shareItem(item)}
+                                className="p-1.5 rounded-full text-muted-foreground/40">
+                                <Share2 size={11} />
+                              </motion.button>
                             </div>
                             {/* 🧠 AI Learn Button */}
                             <motion.button
@@ -986,6 +1011,93 @@ const CuriosityPage = () => {
                     </div>
                   </div>
                 </FadeIn>
+              </motion.div>
+            )}
+
+            {/* ═══ SAVED TAB ═══ */}
+            {activeTab === "saved" && (
+              <motion.div key="saved-tab" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
+                <div className="px-4">
+                  <div className="flex items-center gap-1.5 mb-3">
+                    <Bookmark size={12} className="text-agni-gold" />
+                    <span className="text-[10px] font-black text-muted-foreground tracking-wider">SAVED ITEMS</span>
+                    <span className="text-[8px] font-bold text-muted-foreground/50 ml-auto">{savedItems.size} saved</span>
+                  </div>
+
+                  {savedItems.size === 0 ? (
+                    <div className="text-center py-12">
+                      <Bookmark size={32} className="text-muted-foreground/20 mx-auto mb-3" />
+                      <p className="text-sm font-black text-foreground/60">No saved items yet</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">Tap the bookmark icon on any feed item to save it here</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2.5">
+                      {feedItems.filter((_, i) => savedItems.has(i)).map((item, j) => {
+                        const originalIdx = feedItems.indexOf(item);
+                        const meta = getContentMeta(item.url);
+                        const source = ALL_SOURCES.find(s => s.name === item.sourceName) || { name: item.sourceName || "AI News", url: "", desc: "", tags: [], category: "blog" };
+                        const catMeta = SOURCE_CATEGORIES.find(c => c.id === source.category);
+                        return (
+                          <motion.div
+                            key={j}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: j * 0.05 }}
+                            className="bg-card rounded-2xl border border-agni-gold/20 overflow-hidden relative"
+                          >
+                            <a href={item.url} target="_blank" rel="noopener noreferrer" className="flex gap-3 p-3">
+                              <div className="shrink-0">
+                                {meta.thumbnail ? (
+                                  <div className="w-20 h-16 rounded-xl overflow-hidden relative bg-muted/10">
+                                    <img src={meta.thumbnail} alt="" className="w-full h-full object-cover" />
+                                    {(meta.type === "youtube" || meta.type === "instagram") && (
+                                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                        <div className="w-7 h-7 rounded-full bg-white/90 flex items-center justify-center">
+                                          <Play size={11} className="text-black ml-0.5" fill="black" />
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div className="w-14 h-14 rounded-xl flex items-center justify-center" style={{ background: `${meta.color}15` }}>
+                                    <meta.icon size={18} style={{ color: meta.color }} />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <Avatar className="w-4 h-4 border border-border/20">
+                                    <AvatarImage src={getSourceAvatar(source)} alt="" />
+                                    <AvatarFallback className="text-[5px] bg-muted">{source.name.slice(0, 1)}</AvatarFallback>
+                                  </Avatar>
+                                  <span className="text-[8px] font-bold text-muted-foreground truncate">{item.sourceName}</span>
+                                </div>
+                                <h4 className="text-[11px] font-extrabold text-foreground leading-tight line-clamp-2">{item.title}</h4>
+                              </div>
+                            </a>
+                            <div className="flex items-center justify-between px-3 pb-2 pt-0">
+                              <div className="flex items-center gap-1.5">
+                                <motion.button whileTap={{ scale: 0.8 }} onClick={() => toggleSave(originalIdx)}
+                                  className="p-1.5 rounded-full text-agni-gold">
+                                  <Bookmark size={11} className="fill-agni-gold" />
+                                </motion.button>
+                                <motion.button whileTap={{ scale: 0.8 }} onClick={() => shareItem(item)}
+                                  className="p-1.5 rounded-full text-muted-foreground/40">
+                                  <Share2 size={11} />
+                                </motion.button>
+                              </div>
+                              <motion.button whileTap={{ scale: 0.9 }} onClick={() => setLearnItem(item)}
+                                className="flex items-center gap-1 text-agni-purple text-[8px] font-black px-2 py-1 rounded-full bg-agni-purple/10">
+                                <Brain size={9} /> AI Notes
+                              </motion.button>
+                            </div>
+                            <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full bg-agni-gold" />
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               </motion.div>
             )}
 
