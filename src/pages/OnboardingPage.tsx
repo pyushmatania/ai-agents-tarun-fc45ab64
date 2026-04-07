@@ -18,7 +18,7 @@ import type { AgniExpression } from "@/components/Agni";
 import { motion, AnimatePresence } from "framer-motion";
 import { savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona, getSubFilters, getSubFilterCount, POPULAR_PICKS } from "@/lib/neuralOS";
 import { TrendingUp, Crown } from "lucide-react";
-import { MISSION_MODES, BRAIN_LEVELS, IDENTITIES, BRAIN_LEVELS_ACADEMIC, BRAIN_LEVELS_SKILL, UNIVERSE_VIBE_CATEGORIES, setTeachingSelection, saveCustomOption, getCustomOptions, setUniverseVibe, setBrainTrack } from "@/lib/teachingConfig";
+import { MISSION_MODES, BRAIN_LEVELS, IDENTITIES, BRAIN_LEVELS_ACADEMIC, BRAIN_LEVELS_SKILL, TEACHING_VIBES, UNIVERSE_VIBE_CATEGORIES, setTeachingSelection, saveCustomOption, getCustomOptions, setUniverseVibe, setBrainTrack } from "@/lib/teachingConfig";
 import CustomOptionInput from "@/components/CustomOptionInput";
 
 /* ── ROLES now powered by IDENTITIES from teachingConfig ── */
