@@ -141,11 +141,13 @@ const SourcesPage = () => {
   const [newsLoading, setNewsLoading] = useState(() => {
     try { return !localStorage.getItem("hub_news_cache"); } catch { return true; }
   });
+  const [newsRefreshing, setNewsRefreshing] = useState(false);
   const [activeNewsIdx, setActiveNewsIdx] = useState(0);
 
   useEffect(() => {
     const fetchNews = async () => {
       if (newsItems.length === 0) setNewsLoading(true);
+      else setNewsRefreshing(true);
       try {
         const { data, error } = await supabase.functions.invoke("ai-news", { body: {} });
         if (error) throw new Error(error.message);
@@ -157,6 +159,7 @@ const SourcesPage = () => {
         }
       } catch (e) { console.error("Failed to fetch news:", e); }
       setNewsLoading(false);
+      setNewsRefreshing(false);
     };
     fetchNews();
   }, []);
@@ -227,7 +230,7 @@ const SourcesPage = () => {
                   <div className="flex items-center gap-1.5">
                     <TrendingUp size={13} className="text-agni-red" />
                     <span className="text-[11px] font-black text-foreground">AI Headlines</span>
-                    <span className="text-[8px] font-bold text-white bg-agni-red px-1.5 py-0.5 rounded-full animate-pulse">LIVE</span>
+                    <span className="text-[8px] font-bold text-white bg-agni-red px-1.5 py-0.5 rounded-full animate-pulse">{newsRefreshing ? "UPDATING" : "LIVE"}</span>
                   </div>
                   <button onClick={() => window.location.reload()} className="text-[9px] font-bold text-muted-foreground flex items-center gap-1">
                     <RefreshCw size={9} /> Refresh
