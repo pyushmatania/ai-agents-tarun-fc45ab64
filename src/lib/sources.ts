@@ -12,6 +12,66 @@ export interface Source {
   category: string;
   trustScore?: number;
   emoji?: string;
+  avatarUrl?: string;
+}
+
+/**
+ * Get a real avatar URL for a source using unavatar.io
+ * Falls back to UI Avatars for sources without handles
+ */
+export function getSourceAvatar(source: Source): string {
+  // If explicitly set, use it
+  if (source.avatarUrl) return source.avatarUrl;
+
+  const handle = source.handle?.replace("@", "");
+
+  switch (source.category) {
+    case "x":
+      if (handle) return `https://unavatar.io/twitter/${handle}`;
+      break;
+    case "youtube":
+      // Use YouTube channel name from URL
+      const ytMatch = source.url.match(/@([^/]+)/);
+      if (ytMatch) return `https://unavatar.io/youtube/${ytMatch[1]}`;
+      break;
+    case "github":
+      // Extract org/user from GitHub URL
+      const ghMatch = source.url.match(/github\.com\/([^/]+)/);
+      if (ghMatch) return `https://unavatar.io/github/${ghMatch[1]}`;
+      break;
+    case "reddit":
+      return `https://www.redditstatic.com/avatars/defaults/v2/avatar_default_1.png`;
+    case "instagram":
+      const igHandle = source.name.replace("@", "");
+      return `https://unavatar.io/instagram/${igHandle}`;
+    default:
+      break;
+  }
+
+  // Try domain-based avatar for websites
+  try {
+    const domain = new URL(source.url).hostname;
+    return `https://unavatar.io/${domain}`;
+  } catch {
+    // Fallback to initials
+    const initials = source.name.split(" ").map(w => w[0]).join("").slice(0, 2);
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=1A2C32&color=58CC02&size=64&bold=true`;
+  }
+}
+
+/**
+ * Simulates "has new updates" based on a deterministic hash of the source name + current date
+ * In production this would come from RSS/API polling
+ */
+export function sourceHasUpdate(sourceName: string): boolean {
+  const today = new Date().toISOString().slice(0, 10);
+  let hash = 0;
+  const str = sourceName + today;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0;
+  }
+  // ~25% of sources show as "new" each day
+  return Math.abs(hash) % 4 === 0;
 }
 
 export const SOURCE_CATEGORIES = [
