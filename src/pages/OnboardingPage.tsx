@@ -85,6 +85,22 @@ const slideVariants = {
   exit: (dir: number) => ({ x: dir > 0 ? -300 : 300, opacity: 0 }),
 };
 
+/** Extract unique sub-filter tags from a category's suggestions */
+function getSubFilters(cat: typeof SUGGESTION_CATEGORIES[0]): string[] {
+  const tagMap: Record<string, number> = {};
+  cat.suggestions.forEach(s => {
+    const tag = s.tag || "";
+    if (tag) {
+      // Normalize: use the broader group tag (e.g. "Cricket" from "Cricket", "Anime" from "Anime sci-fi")
+      const key = tag.split(" ")[0]; // simplify
+      tagMap[key] = (tagMap[key] || 0) + 1;
+    }
+  });
+  // Only show sub-filters if there are 3+ distinct groups with 2+ items
+  const groups = Object.entries(tagMap).filter(([, c]) => c >= 2).map(([k]) => k);
+  return groups.length >= 3 ? groups.slice(0, 8) : [];
+}
+
 const OnboardingPage = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
@@ -94,6 +110,7 @@ const OnboardingPage = () => {
   const [selectedVibe, setSelectedVibe] = useState<string | null>(null);
   const [persona, setPersona] = useState<Partial<NeuralOSPersona>>({});
   const [search, setSearch] = useState("");
+  const [activeSubFilter, setActiveSubFilter] = useState<string | null>(null);
 
   const categoryIndex = step >= 5 ? step - 5 : -1;
   const activeCategory = categoryIndex >= 0 && categoryIndex < SUGGESTION_CATEGORIES.length
@@ -115,8 +132,8 @@ const OnboardingPage = () => {
 
   const progress = Math.round((step / (TOTAL_STEPS - 1)) * 100);
 
-  const goNext = () => { setDir(1); setStep(s => s + 1); setSearch(""); };
-  const goBack = () => { setDir(-1); setStep(s => Math.max(0, s - 1)); setSearch(""); };
+  const goNext = () => { setDir(1); setStep(s => s + 1); setSearch(""); setActiveSubFilter(null); };
+  const goBack = () => { setDir(-1); setStep(s => Math.max(0, s - 1)); setSearch(""); setActiveSubFilter(null); };
 
   const toggleItem = (item: string) => {
     if (!activeCategory) return;
@@ -143,11 +160,14 @@ const OnboardingPage = () => {
     }
   };
 
+  const subFilters = activeCategory ? getSubFilters(activeCategory) : [];
+
   const filtered = activeCategory
-    ? activeCategory.suggestions.filter(s =>
-        s.name.toLowerCase().includes(search.toLowerCase()) ||
-        (s.tag && s.tag.toLowerCase().includes(search.toLowerCase()))
-      )
+    ? activeCategory.suggestions.filter(s => {
+        const matchSearch = !search || s.name.toLowerCase().includes(search.toLowerCase()) || (s.tag && s.tag.toLowerCase().includes(search.toLowerCase()));
+        const matchSub = !activeSubFilter || (s.tag && s.tag.toLowerCase().startsWith(activeSubFilter.toLowerCase()));
+        return matchSearch && matchSub;
+      })
     : [];
 
   // Show "add as custom" option when search doesn't match any suggestion
@@ -557,10 +577,14 @@ const OnboardingPage = () => {
                     className="w-full bg-transparent pl-10 pr-20 py-3 text-sm font-medium outline-none placeholder:text-muted-foreground/50"
                   />
                   {!search.trim() && (
-                    <div className="absolute right-2 flex items-center gap-1 bg-agni-purple/10 border border-agni-purple/20 rounded-lg px-2 py-1 pointer-events-none">
+                    <motion.div
+                      animate={{ y: [0, -3, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      className="absolute right-2 flex items-center gap-1 bg-agni-purple/10 border border-agni-purple/20 rounded-lg px-2 py-1 pointer-events-none"
+                    >
                       <Sparkles size={10} className="text-agni-purple" />
                       <span className="text-[8px] font-bold text-agni-purple whitespace-nowrap">+ Custom</span>
-                    </div>
+                    </motion.div>
                   )}
                 </div>
               </div>
@@ -591,6 +615,40 @@ const OnboardingPage = () => {
                     </div>
                   </div>
                 </motion.button>
+              )}
+
+              {/* Sub-filter chips */}
+              {subFilters.length > 0 && !search && (
+                <div className="flex gap-1.5 overflow-x-auto scrollbar-none mb-2 shrink-0 -mx-1 px-1">
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setActiveSubFilter(null)}
+                    className={`shrink-0 text-[9px] font-extrabold px-3 py-1.5 rounded-full transition-all ${
+                      !activeSubFilter
+                        ? "bg-agni-green text-white shadow-md"
+                        : "bg-card border border-border/40 text-muted-foreground"
+                    }`}
+                  >
+                    All
+                  </motion.button>
+                  {subFilters.map((tag, i) => (
+                    <motion.button
+                      key={tag}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: i * 0.03 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setActiveSubFilter(activeSubFilter === tag ? null : tag)}
+                      className={`shrink-0 text-[9px] font-extrabold px-3 py-1.5 rounded-full transition-all ${
+                        activeSubFilter === tag
+                          ? "bg-agni-blue text-white shadow-md"
+                          : "bg-card border border-border/40 text-muted-foreground"
+                      }`}
+                    >
+                      {tag}
+                    </motion.button>
+                  ))}
+                </div>
               )}
 
               {/* Suggestions — Colorful Pills */}
