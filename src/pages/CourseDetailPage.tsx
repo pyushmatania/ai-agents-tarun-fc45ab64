@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { getActiveModelLabel, getAIConfig } from "@/lib/aiConfig";
 import { useGamification } from "@/hooks/useGamification";
 import { getPersona } from "@/lib/neuralOS";
-import { getTeachingLabel, getUniverseVibe } from "@/lib/teachingConfig";
+import { getTeachingLabel, getUniverseVibe, getQuizDifficultyPrompt } from "@/lib/teachingConfig";
 import QuizCard from "@/components/lesson/QuizCard";
 import type { QuizQuestion } from "@/components/lesson/QuizCard";
 import LessonComplete from "@/components/lesson/LessonComplete";
@@ -76,6 +76,7 @@ const CourseDetailPage = () => {
   const [correctCount, setCorrectCount] = useState(0);
   const [timer, setTimer] = useState(0);
   const [showQuizConfirm, setShowQuizConfirm] = useState(false);
+  const [quizDifficulty, setQuizDifficulty] = useState("medium");
   const [countdown, setCountdown] = useState<number | null>(null);
   const timerRef = useRef<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -262,7 +263,7 @@ const CourseDetailPage = () => {
       const resp = await fetch(`${SUPABASE_URL}/functions/v1/ai-quiz`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${SUPABASE_KEY}` },
-        body: JSON.stringify({ conversation: messages, lessonTitle: lesson?.t, lessonTopic: lesson?.topic, teachingMode: activeMode }),
+        body: JSON.stringify({ conversation: messages, lessonTitle: lesson?.t, lessonTopic: lesson?.topic, teachingMode: activeMode, difficultyPrompt: getQuizDifficultyPrompt(quizDifficulty) }),
       });
       if (!resp.ok) throw new Error("Quiz generation failed");
       const data = await resp.json();
@@ -453,7 +454,7 @@ const CourseDetailPage = () => {
             accentColor="#58CC02"
             lessonTitle={lesson.t}
             exchangeCount={exchangeCount}
-            onQuizReady={() => setShowQuizConfirm(true)}
+            onQuizReady={(difficulty) => { setQuizDifficulty(difficulty || "medium"); setShowQuizConfirm(true); }}
             onModeChange={handleModeChange}
             activeMode={activeMode}
           />
