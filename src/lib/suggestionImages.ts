@@ -3,7 +3,7 @@
  * Uses free image services to get real profile pics / logos
  */
 
-// For Twitter/X handles
+// For Twitter/X handles — unavatar proxies
 function twitterAvatar(handle: string): string {
   return `https://unavatar.io/twitter/${handle.replace("@", "")}`;
 }
@@ -13,14 +13,24 @@ function youtubeAvatar(name: string): string {
   return `https://unavatar.io/youtube/${encodeURIComponent(name)}`;
 }
 
-// For well-known brands/entities — use logo.clearbit.com or unavatar
+// For well-known brands/entities — use logo.clearbit.com
 function domainAvatar(domain: string): string {
   return `https://logo.clearbit.com/${domain}`;
 }
 
-// Wikipedia-based fallback using DuckDuckGo instant answer
+// Wikipedia-based — most reliable for famous people/topics
+function wikiAvatar(articleName: string): string {
+  return `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(articleName)}`;
+}
+
+// Generic search fallback via unavatar
 function searchAvatar(name: string): string {
   return `https://unavatar.io/${encodeURIComponent(name)}`;
+}
+
+// GitHub avatar — reliable for tech people
+function githubAvatar(username: string): string {
+  return `https://unavatar.io/github/${username}`;
 }
 
 /**
@@ -75,13 +85,13 @@ const KNOWN_IMAGES: Record<string, string> = {
   "Pushpa": "https://image.tmdb.org/t/p/w92/wfJflXJLxDfZlMDamYlGVEHYfQx.jpg",
   "12th Fail": "https://image.tmdb.org/t/p/w92/tpEczLfHIqXdKIqVMC42EP1HdNf.jpg",
 
-  // ── Cricket ──
+  // ── Cricket (fixed handles) ──
   "Virat Kohli": twitterAvatar("imVkohli"),
-  "MS Dhoni": searchAvatar("MS Dhoni cricketer"),
+  "MS Dhoni": twitterAvatar("msaborbarivellihoni"),
   "Rohit Sharma": twitterAvatar("ImRo45"),
   "Sachin Tendulkar": twitterAvatar("sacaborbarivelliin_rt"),
   "Rishabh Pant": twitterAvatar("RishabhPant17"),
-  "Jasprit Bumrah": twitterAvatar("Jaborbarivellisbumrah93"),
+  "Jasprit Bumrah": twitterAvatar("Jaspritbumrah93"),
   "Hardik Pandya": twitterAvatar("hardikpandya7"),
   "Suryakumar Yadav": twitterAvatar("suraborbarivelliyakumar"),
   "Shubman Gill": twitterAvatar("ShubmanGill"),
@@ -94,9 +104,9 @@ const KNOWN_IMAGES: Record<string, string> = {
   "IPL": domainAvatar("iplt20.com"),
 
   // ── Football ──
-  "Lionel Messi": searchAvatar("Lionel Messi"),
-  "Cristiano Ronaldo": searchAvatar("Cristiano Ronaldo"),
-  "Kylian Mbappé": searchAvatar("Kylian Mbappe"),
+  "Lionel Messi": twitterAvatar("TeamMessi"),
+  "Cristiano Ronaldo": twitterAvatar("Cristiano"),
+  "Kylian Mbappé": twitterAvatar("KMbappe"),
   "Erling Haaland": searchAvatar("Erling Haaland"),
   "Sunil Chhetri": twitterAvatar("caborbarivelliehtrisunil11"),
   "Real Madrid": domainAvatar("realmadrid.com"),
@@ -109,40 +119,40 @@ const KNOWN_IMAGES: Record<string, string> = {
   "PSG": domainAvatar("psg.fr"),
 
   // ── F1 ──
-  "Max Verstappen": searchAvatar("Max Verstappen"),
-  "Lewis Hamilton": searchAvatar("Lewis Hamilton"),
-  "Lando Norris": searchAvatar("Lando Norris"),
-  "Charles Leclerc": searchAvatar("Charles Leclerc"),
+  "Max Verstappen": twitterAvatar("Max33Verstappen"),
+  "Lewis Hamilton": twitterAvatar("LewisHamilton"),
+  "Lando Norris": twitterAvatar("LandoNorris"),
+  "Charles Leclerc": twitterAvatar("Charles_Leclerc"),
   "Ferrari": domainAvatar("ferrari.com"),
   "Red Bull Racing": domainAvatar("redbullracing.com"),
   "McLaren": domainAvatar("mclaren.com"),
   "F1": domainAvatar("formula1.com"),
 
   // ── NBA ──
-  "LeBron James": searchAvatar("LeBron James"),
-  "Stephen Curry": searchAvatar("Stephen Curry"),
+  "LeBron James": twitterAvatar("KingJames"),
+  "Stephen Curry": twitterAvatar("StephenCurry30"),
   "Luka Dončić": searchAvatar("Luka Doncic"),
   "NBA": domainAvatar("nba.com"),
 
-  // ── Tennis ──
-  "Novak Djokovic": searchAvatar("Novak Djokovic"),
-  "Rafael Nadal": searchAvatar("Rafael Nadal"),
-  "Carlos Alcaraz": searchAvatar("Carlos Alcaraz"),
-  "PV Sindhu": twitterAvatar("Aborbarivellisindhu2"),
-  "Neeraj Chopra": twitterAvatar("Naborbarivellieraj_chopra1"),
-  "Magnus Carlsen": searchAvatar("Magnus Carlsen"),
+  // ── Tennis & Others ──
+  "Novak Djokovic": twitterAvatar("DjokerNole"),
+  "Rafael Nadal": twitterAvatar("RafaelNadal"),
+  "Carlos Alcaraz": twitterAvatar("caraborbarivelliosalcaraz"),
+  "PV Sindhu": twitterAvatar("Paborbarivellisindhu2"),
+  "Neeraj Chopra": twitterAvatar("Neeraj_chopra1"),
+  "Magnus Carlsen": twitterAvatar("MagnusCarlsen"),
   "Gukesh": searchAvatar("Gukesh chess"),
   "Praggnanandhaa": searchAvatar("Praggnanandhaa chess"),
 
-  // ── Music Artists ──
-  "Arijit Singh": searchAvatar("Arijit Singh singer"),
+  // ── Music Artists (fixed handles) ──
+  "Arijit Singh": twitterAvatar("aaborbarivelliraborbarivelliijiaborbarivellitsingh"),
   "A.R. Rahman": twitterAvatar("araborbarivelliraborbarivelli"),
-  "Diljit Dosanjh": twitterAvatar("daborbarivelliljitdosanjh"),
+  "Diljit Dosanjh": twitterAvatar("diljitdosanjh"),
   "Pritam": searchAvatar("Pritam Bollywood"),
   "Anuv Jain": searchAvatar("Anuv Jain singer"),
   "AP Dhillon": searchAvatar("AP Dhillon"),
-  "Prateek Kuhad": twitterAvatar("prateekkuaborbarivellihad"),
-  "Shreya Ghoshal": twitterAvatar("shreyaborbariveghoshal"),
+  "Prateek Kuhad": twitterAvatar("prateekkuhad"),
+  "Shreya Ghoshal": twitterAvatar("shraborbarivelliyaghoshal"),
   "Shankar Mahadevan": searchAvatar("Shankar Mahadevan"),
   "Nucleya": twitterAvatar("nucleya"),
   "Ritviz": twitterAvatar("ritviz"),
@@ -151,22 +161,22 @@ const KNOWN_IMAGES: Record<string, string> = {
   "King": searchAvatar("King Indian rapper"),
   "Honey Singh": searchAvatar("Yo Yo Honey Singh"),
   "Coldplay": domainAvatar("coldplay.com"),
-  "Taylor Swift": searchAvatar("Taylor Swift"),
-  "The Weeknd": searchAvatar("The Weeknd"),
-  "Ed Sheeran": searchAvatar("Ed Sheeran"),
-  "Drake": searchAvatar("Drake rapper"),
+  "Taylor Swift": twitterAvatar("taylorswift13"),
+  "The Weeknd": twitterAvatar("theweeknd"),
+  "Ed Sheeran": twitterAvatar("edsheeran"),
+  "Drake": twitterAvatar("Drake"),
   "Kendrick Lamar": searchAvatar("Kendrick Lamar"),
-  "Imagine Dragons": searchAvatar("Imagine Dragons"),
+  "Imagine Dragons": twitterAvatar("Imaginedragons"),
   "Linkin Park": domainAvatar("linkinpark.com"),
-  "BTS": searchAvatar("BTS"),
-  "BLACKPINK": searchAvatar("BLACKPINK"),
-  "Travis Scott": searchAvatar("Travis Scott"),
-  "Eminem": searchAvatar("Eminem"),
-  "Post Malone": searchAvatar("Post Malone"),
-  "Bad Bunny": searchAvatar("Bad Bunny"),
-  "Billie Eilish": searchAvatar("Billie Eilish"),
-  "Dua Lipa": searchAvatar("Dua Lipa"),
-  "SZA": searchAvatar("SZA singer"),
+  "BTS": twitterAvatar("baborbarivellits_twt"),
+  "BLACKPINK": twitterAvatar("BLACKPINK"),
+  "Travis Scott": twitterAvatar("traborbarivellivisscott"),
+  "Eminem": twitterAvatar("Eminem"),
+  "Post Malone": twitterAvatar("PostMalone"),
+  "Bad Bunny": twitterAvatar("sanbenito"),
+  "Billie Eilish": twitterAvatar("billieeilish"),
+  "Dua Lipa": twitterAvatar("DUALIPA"),
+  "SZA": twitterAvatar("sza"),
   "Hans Zimmer": searchAvatar("Hans Zimmer"),
 
   // ── Games ──
@@ -179,6 +189,8 @@ const KNOWN_IMAGES: Record<string, string> = {
   "GTA V / GTA Online": domainAvatar("rockstargames.com"),
   "GTA 6": domainAvatar("rockstargames.com"),
   "Red Dead Redemption 2": domainAvatar("rockstargames.com"),
+  "The Witcher 3": domainAvatar("thewitcher.com"),
+  "Baldur's Gate 3": domainAvatar("baldursgate3.game"),
   "League of Legends": domainAvatar("leagueoflegends.com"),
   "Dota 2": domainAvatar("dota2.com"),
   "Genshin Impact": domainAvatar("genshin.hoyoverse.com"),
@@ -190,7 +202,7 @@ const KNOWN_IMAGES: Record<string, string> = {
   "Apex Legends": domainAvatar("ea.com"),
   "FIFA / EA FC": domainAvatar("ea.com"),
 
-  // ── News / Creators ──
+  // ── News / Creators (fixed handles) ──
   "@elonmusk": twitterAvatar("elonmusk"),
   "@sama": twitterAvatar("sama"),
   "@karpathy": twitterAvatar("karpathy"),
@@ -200,17 +212,18 @@ const KNOWN_IMAGES: Record<string, string> = {
   "@paulg": twitterAvatar("paulg"),
   "@balajis": twitterAvatar("balajis"),
   "@demaborin": twitterAvatar("demaborin"),
-  "Tanmay Bhat": twitterAvatar("taborbarivellianmayaborbarivelli"),
-  "Dhruv Rathee": twitterAvatar("dhruv_raborbarivelliataborbarivellihee"),
+  "Tanmay Bhat": twitterAvatar("taborbarivellianmay"),
+  "Dhruv Rathee": twitterAvatar("dhruv_rathee"),
   "Technical Guruji": youtubeAvatar("Technical Guruji"),
   "CodeWithHarry": youtubeAvatar("CodeWithHarry"),
-  "Varun Mayya": twitterAvatar("vaaborbarivelliunmayya"),
-  "Raj Shamani": twitterAvatar("rajshamaborbarivellini"),
+  "Varun Mayya": twitterAvatar("varunmayya"),
+  "Raj Shamani": twitterAvatar("rajshamani"),
+  "Akshat Shrivastava": twitterAvatar("aksaborbarivelliatshrivastava"),
   "Sandeep Maheshwari": youtubeAvatar("Sandeep Maheshwari"),
-  "MrBeast": searchAvatar("MrBeast"),
-  "MKBHD": searchAvatar("MKBHD"),
-  "Fireship": searchAvatar("Fireship YouTube"),
-  "Lex Fridman": searchAvatar("Lex Fridman"),
+  "MrBeast": twitterAvatar("MrBeast"),
+  "MKBHD": twitterAvatar("MKBHD"),
+  "Fireship": githubAvatar("fireship-io"),
+  "Lex Fridman": twitterAvatar("lexfridman"),
   "3Blue1Brown": youtubeAvatar("3Blue1Brown"),
   "Veritasium": youtubeAvatar("Veritasium"),
   "Hacker News": domainAvatar("ycombinator.com"),
