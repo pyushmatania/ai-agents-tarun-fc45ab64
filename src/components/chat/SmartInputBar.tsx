@@ -3,10 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Send, Plus, X, Sparkles, Brain, Zap, ChevronRight,
   GraduationCap, Flame, Mic, Search, Image, Paperclip,
-  StopCircle, ChevronDown, Pencil,
+  StopCircle, ChevronDown, Pencil, Lightbulb,
 } from "lucide-react";
 import { getPersona } from "@/lib/neuralOS";
-import { getTeachingLabel, TEACHING_CATEGORIES, getAllOptions } from "@/lib/teachingConfig";
+import { getTeachingLabel, getTeachingSelection, TEACHING_CATEGORIES, getAllOptions, getActiveExplainStyles } from "@/lib/teachingConfig";
 import { InterestPill } from "@/components/InterestPill";
 import { SFX } from "@/lib/sounds";
 
@@ -37,37 +37,6 @@ interface SmartInputBarProps {
   onModeChange?: (mode: string) => void;
   activeMode?: string;
 }
-
-// ── Power-up configs per mode ──
-const MODE_POWERUPS: Record<string, PowerUp[]> = {
-  engineer: [
-    { id: "e1", label: "Show Code", emoji: "💻", prompt: "Show me a code example for this concept.", color: "from-blue-500 to-cyan-500" },
-    { id: "e2", label: "Real Example", emoji: "🏗️", prompt: "Give me a real-world production example.", color: "from-green-500 to-emerald-500" },
-    { id: "e3", label: "Deep Dive", emoji: "🔬", prompt: "Go deeper into the technical details.", color: "from-purple-500 to-violet-500" },
-  ],
-  founder: [
-    { id: "f1", label: "Business Case", emoji: "💰", prompt: "What's the business case / ROI for this?", color: "from-yellow-500 to-amber-500" },
-    { id: "f2", label: "Build What?", emoji: "🚀", prompt: "What products or startups could I build with this?", color: "from-green-500 to-emerald-500" },
-    { id: "f3", label: "Strategy", emoji: "♟️", prompt: "Go deeper into the strategic implications.", color: "from-purple-500 to-violet-500" },
-  ],
-  hacker: [
-    { id: "h1", label: "Just Code", emoji: "⌨️", prompt: "Just show me the code, skip the theory.", color: "from-green-500 to-emerald-500" },
-    { id: "h2", label: "Quick Start", emoji: "🏃", prompt: "How do I get started with this RIGHT NOW?", color: "from-orange-500 to-red-500" },
-    { id: "h3", label: "Advanced", emoji: "🧠", prompt: "Go deeper, show me advanced patterns.", color: "from-purple-500 to-violet-500" },
-  ],
-  class5: [
-    { id: "s1", label: "Simpler!", emoji: "🧸", prompt: "Explain that in even simpler terms, like I'm 5.", color: "from-green-500 to-emerald-500" },
-    { id: "s2", label: "Fun Example", emoji: "🎮", prompt: "__INTEREST_DECK_FUN__", color: "from-blue-500 to-cyan-500" },
-    { id: "s3", label: "Story Time", emoji: "📖", prompt: "__INTEREST_DECK_STORY__", color: "from-purple-500 to-violet-500" },
-  ],
-};
-
-// Fallback for any mode
-const DEFAULT_POWERUPS: PowerUp[] = [
-  { id: "d1", label: "Explain", emoji: "💡", prompt: "Explain this concept clearly.", color: "from-blue-500 to-cyan-500" },
-  { id: "d2", label: "Example", emoji: "🏗️", prompt: "Give me a real-world example.", color: "from-green-500 to-emerald-500" },
-  { id: "d3", label: "Deeper", emoji: "🔬", prompt: "Go deeper into this topic.", color: "from-purple-500 to-violet-500" },
-];
 
 // Interest-based prompt resolver
 function resolveInterestPrompt(prompt: string): string {
