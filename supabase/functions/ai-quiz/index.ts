@@ -12,7 +12,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { conversation, lessonTitle, lessonTopic, teachingMode } = await req.json();
+    const { conversation, lessonTitle, lessonTopic, teachingMode, difficultyPrompt } = await req.json();
 
     if (!conversation || !Array.isArray(conversation) || conversation.length === 0) {
       return new Response(JSON.stringify({ error: "conversation is required" }), {
@@ -23,26 +23,24 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Map teaching mode to difficulty
-    const DIFFICULTY_MAP: Record<string, string> = {
-      class5: "easy",
-      founder: "medium",
-      engineer: "hard",
-      hacker: "hard",
-      crazy: "hard",
-      semiconductor: "hard",
-    };
-    const difficulty = DIFFICULTY_MAP[teachingMode] || "medium";
-
-    const difficultyGuide: Record<string, string> = {
-      easy: `Difficulty: EASY. Use simple language a child can understand. Questions should test basic recall and simple concepts. Wrong MCQ options should be obviously wrong. Fill-in answers should be single common words.`,
-      medium: `Difficulty: MEDIUM. Use clear professional language. Questions should test understanding and application. Wrong MCQ options should be plausible. Fill-in answers can be 1-2 word technical terms.`,
-      hard: `Difficulty: HARD. Use precise technical language. Questions should test deep understanding, edge cases, and ability to apply concepts. Wrong MCQ options should be very plausible (common misconceptions). Fill-in answers can be specific technical terms or patterns.`,
-    };
+    // Use client-provided difficulty prompt or fall back to mode-based mapping
+    let difficultyText = difficultyPrompt || "";
+    if (!difficultyText) {
+      const DIFFICULTY_MAP: Record<string, string> = {
+        class5: "easy", founder: "medium", engineer: "hard", hacker: "hard",
+      };
+      const difficulty = DIFFICULTY_MAP[teachingMode] || "medium";
+      const difficultyGuide: Record<string, string> = {
+        easy: `Difficulty: EASY. Use simple language a child can understand. Questions should test basic recall and simple concepts.`,
+        medium: `Difficulty: MEDIUM. Use clear professional language. Questions should test understanding and application.`,
+        hard: `Difficulty: HARD. Use precise technical language. Questions should test deep understanding, edge cases.`,
+      };
+      difficultyText = difficultyGuide[difficulty];
+    }
 
     const systemPrompt = `You are a quiz generator for the Neural-OS AI learning platform. Based on the conversation between a tutor and student about "${lessonTitle}" (topic: ${lessonTopic}), generate exactly 3 quiz questions that test what was actually discussed.
 
-${difficultyGuide[difficulty]}
+${difficultyText}
 
 Return a JSON array with exactly 3 objects. Each object MUST have these fields:
 - "type": one of "mcq", "truefalse", or "fillin"
