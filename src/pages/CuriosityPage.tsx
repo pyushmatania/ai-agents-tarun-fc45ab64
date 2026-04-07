@@ -900,7 +900,7 @@ const CuriosityPage = () => {
                           transition={{ delay: Math.min(i * 0.03, 0.3) }}
                           className="bg-card rounded-2xl border border-border/20 overflow-hidden relative"
                         >
-                          <a href={item.url} target="_blank" rel="noopener noreferrer"
+                          <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={() => markViewed(i)}
                             className="flex gap-3 p-3"
                           >
                             {/* Left: Thumbnail or icon */}
