@@ -145,6 +145,67 @@ const slideVariants = {
   center: { x: 0, opacity: 1 },
   exit: (dir: number) => ({ x: dir > 0 ? -300 : 300, opacity: 0 }),
 };
+/* ── Organic Blob Card (outside component to avoid re-mount flicker) ── */
+const ColorPill = ({ emoji, label, desc, selected, onClick, index }: {
+  emoji: string; label: string; desc: string; selected: boolean; onClick: () => void; index: number;
+}) => {
+  const blob = BLOB_STYLES[index % BLOB_STYLES.length];
+  return (
+    <motion.button
+      initial={{ opacity: 0, scale: 0.8, y: 15 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ delay: 0.05 + index * 0.04, type: "spring", stiffness: 300, damping: 20 }}
+      whileTap={{ scale: 0.92 }}
+      onClick={() => { SFX.select(); onClick(); }}
+      className={`relative px-3.5 py-3.5 ${blob.radius} text-left transition-all overflow-hidden ${blob.bg} ${
+        selected ? "ring-[3px] ring-[#58CC02] shadow-[0_0_20px_rgba(88,204,2,0.3)] scale-[1.03]" : "shadow-sm hover:shadow-md"
+      }`}
+    >
+      {selected && (
+        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#58CC02] flex items-center justify-center z-10 shadow-md">
+          <Check size={13} className="text-white" strokeWidth={3} />
+        </motion.div>
+      )}
+      <div className="flex items-center gap-2.5">
+        <span className="text-3xl">{emoji}</span>
+        <div className="min-w-0 flex-1">
+          <span className={`text-[13px] font-extrabold block leading-tight ${blob.text}`}>{label}</span>
+          <span className={`text-[9px] leading-tight block mt-0.5 ${blob.text} opacity-70`}>{desc}</span>
+        </div>
+      </div>
+    </motion.button>
+  );
+};
+
+/* ── Blob List Option (outside component to avoid re-mount flicker) ── */
+const ColorListOption = ({ emoji, label, desc, selected, onClick, index }: {
+  emoji: string; label: string; desc: string; selected: boolean; onClick: () => void; index: number;
+}) => {
+  const blob = BLOB_STYLES[index % BLOB_STYLES.length];
+  return (
+    <motion.button
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: 0.05 + index * 0.04 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={() => { SFX.select(); onClick(); }}
+      className={`w-full p-3.5 ${blob.radius} text-left flex items-center gap-3 transition-all ${blob.bg} ${
+        selected ? "ring-[3px] ring-[#58CC02] shadow-[0_0_20px_rgba(88,204,2,0.3)] scale-[1.02]" : "shadow-sm hover:shadow-md"
+      }`}
+    >
+      <span className="text-3xl shrink-0">{emoji}</span>
+      <div className="flex-1 min-w-0">
+        <span className={`text-[13px] font-extrabold block ${blob.text}`}>{label}</span>
+        <span className={`text-[10px] block mt-0.5 ${blob.text} opacity-70`}>{desc}</span>
+      </div>
+      {selected && (
+        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-6 h-6 rounded-full bg-[#58CC02] flex items-center justify-center shrink-0 shadow-md">
+          <Check size={14} className="text-white" strokeWidth={3} />
+        </motion.div>
+      )}
+    </motion.button>
+  );
+};
 
 const OnboardingPage = () => {
   const navigate = useNavigate();
@@ -314,70 +375,6 @@ const OnboardingPage = () => {
   };
 
   const catHint = activeCategory ? AGNI_HINTS[activeCategory.id] : null;
-
-  /* ── Organic Blob Card (matches reference screenshot) ── */
-  const ColorPill = ({ emoji, label, desc, selected, onClick, index, color }: {
-    emoji: string; label: string; desc: string; selected: boolean; onClick: () => void; index: number; color?: string;
-  }) => {
-    const blob = BLOB_STYLES[index % BLOB_STYLES.length];
-    return (
-      <motion.button
-        initial={{ opacity: 0, scale: 0.8, y: 15 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ delay: 0.05 + index * 0.04, type: "spring", stiffness: 300, damping: 20 }}
-        whileTap={{ scale: 0.92 }}
-        onClick={() => { SFX.select(); onClick(); }}
-        className={`relative px-3.5 py-3.5 ${blob.radius} text-left transition-all overflow-hidden ${blob.bg} ${
-          selected ? "ring-[3px] ring-[#58CC02] shadow-[0_0_20px_rgba(88,204,2,0.3)] scale-[1.03]" : "shadow-sm hover:shadow-md"
-        }`}
-      >
-        {selected && (
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#58CC02] flex items-center justify-center z-10 shadow-md">
-            <Check size={13} className="text-white" strokeWidth={3} />
-          </motion.div>
-        )}
-        <div className="flex items-center gap-2.5">
-          <span className="text-3xl">{emoji}</span>
-          <div className="min-w-0 flex-1">
-            <span className={`text-[13px] font-extrabold block leading-tight ${blob.text}`}>{label}</span>
-            <span className={`text-[9px] leading-tight block mt-0.5 ${blob.text} opacity-70`}>{desc}</span>
-          </div>
-        </div>
-      </motion.button>
-    );
-  };
-
-  /* ── Colorful List Option Component ── */
-  const ColorListOption = ({ emoji, label, desc, selected, onClick, index, color }: {
-    emoji: string; label: string; desc: string; selected: boolean; onClick: () => void; index: number; color?: string;
-  }) => {
-    const colorIdx = index % PILL_COLORS.length;
-    return (
-      <motion.button
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.05 + index * 0.04 }}
-        whileTap={{ scale: 0.97 }}
-        onClick={() => { SFX.select(); onClick(); }}
-        className={`w-full p-3.5 rounded-2xl border-2 text-left flex items-center gap-3 transition-all ${
-          selected ? PILL_SELECTED_COLORS[colorIdx] : `border-border/50 bg-card/80 hover:${PILL_COLORS[colorIdx]}`
-        }`}
-      >
-        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color || "from-agni-green to-agni-blue"} flex items-center justify-center shadow-lg shrink-0`}>
-          <span className="text-2xl">{emoji}</span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <span className="text-sm font-extrabold text-foreground block">{label}</span>
-          <span className="text-[10px] text-muted-foreground">{desc}</span>
-        </div>
-        {selected && (
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-6 h-6 rounded-full bg-agni-green flex items-center justify-center shrink-0">
-            <Check size={14} className="text-white" strokeWidth={3} />
-          </motion.div>
-        )}
-      </motion.button>
-    );
-  };
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -793,26 +790,31 @@ const OnboardingPage = () => {
 
         {/* ═══════ STEP 5: MISSION MODE (Choose your quest!) ═══════ */}
         {step === 5 && (
-          <motion.div key="mission" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+           <motion.div key="mission" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
-            <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.mission.bg} pointer-events-none`} />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#FFF3E0] via-[#FFECD2] to-[#FFE0B2] pointer-events-none" />
 
             <div className="flex flex-col flex-1 min-h-0 relative z-10">
+              <div className="flex justify-center mb-2">
+                <div className="bg-white/70 backdrop-blur-sm rounded-full px-4 py-1.5 shadow-sm border border-white/50">
+                  <span className="text-xs font-bold text-gray-600">Pick your mission scroll! 📜</span>
+                </div>
+              </div>
               <div className="flex justify-center mb-2 shrink-0">
-                <Agni expression="excited" size={80} speech="Pick your mission scroll! 📜" animate />
+                <Agni expression="excited" size={80} animate />
               </div>
 
-              <h2 className="text-2xl font-black text-foreground text-center mb-0.5 shrink-0">🎯 Choose Your Quest</h2>
-              <p className="text-xs text-muted-foreground text-center mb-1 shrink-0">
-                <span className="text-agni-gold font-bold">Like Naruto picking a mission from the scroll wall! 🥷</span>
+              <h2 className="text-2xl font-black text-gray-800 text-center mb-0.5 shrink-0">🎯 Choose Your Quest</h2>
+              <p className="text-xs text-center mb-1 shrink-0">
+                <span className="text-[#D4A853] font-bold">Like Naruto picking a mission from the scroll wall! 🥷</span>
               </p>
-              <p className="text-[10px] text-muted-foreground/70 text-center mb-3 shrink-0">Why are you learning AI agents?</p>
+              <p className="text-[10px] text-gray-500 text-center mb-3 shrink-0">Why are you learning AI agents?</p>
 
               <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
-                <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2.5">
                   {[...MISSION_MODES, ...customMissions].map((m, i) => (
-                    <ColorListOption
+                    <ColorPill
                       key={m.id}
                       emoji={m.emoji}
                       label={m.label}
@@ -820,25 +822,25 @@ const OnboardingPage = () => {
                       selected={selectedMission === m.id}
                       onClick={() => setSelectedMission(m.id)}
                       index={i}
-                      color={m.color}
                     />
                   ))}
-
-                  <CustomOptionInput
-                    categoryId="mission"
-                    categoryLabel="Mission"
-                    onSave={(opt) => {
-                      const saved = saveCustomOption("mission", opt);
-                      setCustomMissions(prev => [...prev, saved]);
-                      setSelectedMission(saved.id);
-                    }}
-                  />
                 </div>
+
+                <CustomOptionInput
+                  categoryId="mission"
+                  categoryLabel="Mission"
+                  onSave={(opt) => {
+                    const saved = saveCustomOption("mission", opt);
+                    setCustomMissions(prev => [...prev, saved]);
+                    setSelectedMission(saved.id);
+                  }}
+                />
               </div>
             </div>
 
-            <Button onClick={goNext} disabled={!selectedMission} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none shrink-0">
-              CONTINUE <ArrowRight size={18} className="ml-2" />
+            <Button onClick={goNext} disabled={!selectedMission}
+              className="w-full h-14 rounded-full bg-[#D4A853] hover:bg-[#C49A48] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none shrink-0">
+              Continue <ArrowRight size={18} className="ml-2" />
             </Button>
           </motion.div>
         )}
@@ -906,23 +908,28 @@ const OnboardingPage = () => {
           <motion.div key="vibe" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
-            <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.vibe.bg} pointer-events-none`} />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#FCE4EC] via-[#F8BBD0] to-[#F3E5F5] pointer-events-none" />
 
             <div className="flex flex-col flex-1 min-h-0 relative z-10">
+              <div className="flex justify-center mb-2">
+                <div className="bg-white/70 backdrop-blur-sm rounded-full px-4 py-1.5 shadow-sm border border-white/50">
+                  <span className="text-xs font-bold text-gray-600">Pick your teaching DJ! 🎧</span>
+                </div>
+              </div>
               <div className="flex justify-center mb-2 shrink-0">
-                <Agni expression="celebrating" size={80} speech="Pick your teaching DJ! 🎧" animate />
+                <Agni expression="celebrating" size={80} animate />
               </div>
 
-              <h2 className="text-2xl font-black text-foreground text-center mb-0.5 shrink-0">🎨 Set Your Vibe</h2>
-              <p className="text-xs text-muted-foreground text-center mb-1 shrink-0">
-                <span className="text-agni-orange font-bold">Like picking a DJ for your learning playlist! 🎵</span>
+              <h2 className="text-2xl font-black text-gray-800 text-center mb-0.5 shrink-0">🎨 Set Your Vibe</h2>
+              <p className="text-xs text-center mb-1 shrink-0">
+                <span className="text-[#E91E63] font-bold">Like picking a DJ for your learning playlist! 🎵</span>
               </p>
-              <p className="text-[10px] text-muted-foreground/70 text-center mb-3 shrink-0">How should AGNI talk to you?</p>
+              <p className="text-[10px] text-gray-500 text-center mb-3 shrink-0">How should AGNI talk to you?</p>
 
               <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
-                <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2.5">
                   {[...VIBES.map(v => ({ ...v, color: v.gradient })), ...customVibes].map((vibe, i) => (
-                    <ColorListOption
+                    <ColorPill
                       key={vibe.id}
                       emoji={vibe.emoji}
                       label={vibe.label}
@@ -930,31 +937,31 @@ const OnboardingPage = () => {
                       selected={selectedVibe === vibe.id}
                       onClick={() => setSelectedVibe(vibe.id)}
                       index={i}
-                      color={vibe.color}
                     />
                   ))}
-
-                  <CustomOptionInput
-                    categoryId="vibe"
-                    categoryLabel="Teaching Vibe"
-                    onSave={(opt) => {
-                      const saved = saveCustomOption("vibe", opt);
-                      setCustomVibes(prev => [...prev, saved]);
-                      setSelectedVibe(saved.id);
-                    }}
-                  />
                 </div>
+
+                <CustomOptionInput
+                  categoryId="vibe"
+                  categoryLabel="Teaching Vibe"
+                  onSave={(opt) => {
+                    const saved = saveCustomOption("vibe", opt);
+                    setCustomVibes(prev => [...prev, saved]);
+                    setSelectedVibe(saved.id);
+                  }}
+                />
               </div>
 
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-                className="bg-agni-purple/5 border border-agni-purple/20 rounded-2xl px-4 py-2.5 mb-3 shrink-0"
+                className="bg-white/50 border border-[#E91E63]/20 rounded-2xl px-4 py-2.5 mb-3 shrink-0"
               >
-                <p className="text-[10px] text-agni-purple font-bold">💡 "Sensei" = Mr. Miyagi energy 🥋 • "Wizard" = Dumbledore dropping knowledge 🧙 • "Game Mode" = Level up like Goku! 🎮</p>
+                <p className="text-[10px] text-[#880E4F] font-bold">💡 "Sensei" = Mr. Miyagi energy 🥋 • "Wizard" = Dumbledore dropping knowledge 🧙 • "Game Mode" = Level up like Goku! 🎮</p>
               </motion.div>
             </div>
 
-            <Button onClick={goNext} disabled={!selectedVibe} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none shrink-0">
-              CONTINUE <ArrowRight size={18} className="ml-2" />
+            <Button onClick={goNext} disabled={!selectedVibe}
+              className="w-full h-14 rounded-full bg-[#E91E63] hover:bg-[#C2185B] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none shrink-0">
+              Continue <ArrowRight size={18} className="ml-2" />
             </Button>
           </motion.div>
         )}
@@ -964,30 +971,35 @@ const OnboardingPage = () => {
           <motion.div key="brain" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
-            <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.brain.bg} pointer-events-none`} />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#E8EAF6] via-[#C5CAE9] to-[#E1F5FE] pointer-events-none" />
 
             <div className="flex flex-col flex-1 min-h-0 relative z-10">
+              <div className="flex justify-center mb-2">
+                <div className="bg-white/70 backdrop-blur-sm rounded-full px-4 py-1.5 shadow-sm border border-white/50">
+                  <span className="text-xs font-bold text-gray-600">What's your power level? 💪</span>
+                </div>
+              </div>
               <div className="flex justify-center mb-2 shrink-0">
-                <Agni expression="teaching" size={80} speech="What's your power level? 💪" animate />
+                <Agni expression="teaching" size={80} animate />
               </div>
 
-              <h2 className="text-2xl font-black text-foreground text-center mb-0.5 shrink-0">🧠 Power Level</h2>
-              <p className="text-xs text-muted-foreground text-center mb-1 shrink-0">
-                <span className="text-agni-blue font-bold">Like Dragon Ball Z — what's your current form? 🔥</span>
+              <h2 className="text-2xl font-black text-gray-800 text-center mb-0.5 shrink-0">🧠 Power Level</h2>
+              <p className="text-xs text-center mb-1 shrink-0">
+                <span className="text-[#3F51B5] font-bold">Like Dragon Ball Z — what's your current form? 🔥</span>
               </p>
-              <p className="text-[10px] text-muted-foreground/70 text-center mb-3 shrink-0">How deep do you want to dive?</p>
+              <p className="text-[10px] text-gray-500 text-center mb-3 shrink-0">How deep do you want to dive?</p>
 
               {/* Track toggle */}
-              <div className="flex gap-1.5 bg-card/60 border border-border/30 rounded-2xl p-1 mb-3 shrink-0">
+              <div className="flex gap-1.5 bg-white/60 border border-white/50 rounded-full p-1 mb-3 shrink-0">
                 {(["skill", "academic"] as const).map(track => (
                   <motion.button
                     key={track}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => { SFX.tap(); setBrainTrackState(track); setBrainTrack(track); }}
-                    className={`flex-1 py-2 rounded-xl text-[11px] font-black transition-all relative ${brainTrack === track ? "text-white" : "text-muted-foreground"}`}
+                    className={`flex-1 py-2.5 rounded-full text-[11px] font-black transition-all relative ${brainTrack === track ? "text-white" : "text-gray-500"}`}
                   >
                     {brainTrack === track && (
-                      <motion.div layoutId="brain-track-bg" className="absolute inset-0 bg-gradient-to-r from-agni-purple to-agni-pink rounded-xl" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
+                      <motion.div layoutId="brain-track-bg" className="absolute inset-0 bg-[#3F51B5] rounded-full" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
                     )}
                     <span className="relative z-10">{track === "skill" ? "⚡ Skill Track" : "🎓 Academic Track"}</span>
                   </motion.button>
@@ -995,9 +1007,9 @@ const OnboardingPage = () => {
               </div>
 
               <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
-                <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2.5">
                   {[...(brainTrack === "skill" ? BRAIN_LEVELS_SKILL : BRAIN_LEVELS_ACADEMIC), ...customBrains].map((b, i) => (
-                    <ColorListOption
+                    <ColorPill
                       key={b.id}
                       emoji={b.emoji}
                       label={b.label}
@@ -1005,26 +1017,25 @@ const OnboardingPage = () => {
                       selected={selectedBrain === b.id}
                       onClick={() => setSelectedBrain(b.id)}
                       index={i}
-                      color={b.color}
                     />
                   ))}
-
-                  <CustomOptionInput
-                    categoryId="brain"
-                    categoryLabel="Brain Level"
-                    onSave={(opt) => {
-                      const saved = saveCustomOption("brain", opt);
-                      setCustomBrains(prev => [...prev, saved]);
-                      setSelectedBrain(saved.id);
-                    }}
-                  />
                 </div>
+
+                <CustomOptionInput
+                  categoryId="brain"
+                  categoryLabel="Brain Level"
+                  onSave={(opt) => {
+                    const saved = saveCustomOption("brain", opt);
+                    setCustomBrains(prev => [...prev, saved]);
+                    setSelectedBrain(saved.id);
+                  }}
+                />
               </div>
 
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
-                className="bg-agni-green/5 border border-agni-green/20 rounded-2xl px-4 py-2.5 mb-3 shrink-0"
+                className="bg-white/50 border border-[#3F51B5]/20 rounded-2xl px-4 py-2.5 mb-3 shrink-0"
               >
-                <p className="text-[10px] text-agni-green font-bold">
+                <p className="text-[10px] text-[#1A237E] font-bold">
                   {brainTrack === "skill"
                     ? "💡 \"Sprout\" 🌱 = Goku as a kid • \"Pro\" ⚡ = Super Saiyan • \"Demon Mode\" 👹 = Ultra Instinct, no mercy!"
                     : "💡 \"Class 5\" 👶 = Kid Goku • \"College Senior\" 🎓 = Cell Saga • \"PhD\" 🧠 = Beerus-level power!"}
@@ -1032,8 +1043,9 @@ const OnboardingPage = () => {
               </motion.div>
             </div>
 
-            <Button onClick={goNext} disabled={!selectedBrain} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none shrink-0">
-              CONTINUE <ArrowRight size={18} className="ml-2" />
+            <Button onClick={goNext} disabled={!selectedBrain}
+              className="w-full h-14 rounded-full bg-[#3F51B5] hover:bg-[#303F9F] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none shrink-0">
+              Continue <ArrowRight size={18} className="ml-2" />
             </Button>
           </motion.div>
         )}
