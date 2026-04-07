@@ -468,7 +468,77 @@ const OnboardingPage = () => {
           </motion.div>
         )}
 
-        {/* ═══════ STEP 5: MISSION MODE ═══════ */}
+        {/* ═══════ STEP 4: LIFE CONTEXT (education/location/work) ═══════ */}
+        {step === 4 && (
+          <motion.div key="lifecontext" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
+            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-agni-blue/15 to-transparent pointer-events-none" />
+
+            <div className="flex flex-col flex-1 min-h-0 relative z-10">
+              <div className="flex justify-center mb-3 shrink-0">
+                <Agni expression="thinking" size={80} speech="Tell me more! 📋" animate />
+              </div>
+
+              <h2 className="text-2xl font-black text-foreground text-center mb-1 shrink-0">📋 Your Background</h2>
+              <p className="text-xs text-muted-foreground text-center mb-4 shrink-0">Helps AGNI tailor examples to your world</p>
+
+              <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
+                <div className="space-y-4">
+                  {/* Education */}
+                  <div>
+                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2">🎓 Education</label>
+                    <div className="flex flex-wrap gap-2">
+                      {EDUCATION_LEVELS.map(edu => (
+                        <motion.button key={edu} whileTap={{ scale: 0.95 }} onClick={() => setEducation(edu)}
+                          className={`px-3 py-2 rounded-xl text-[11px] font-bold border-2 transition-all ${
+                            education === edu ? "border-agni-green bg-agni-green/10 text-agni-green" : "border-border bg-card text-muted-foreground"
+                          }`}
+                        >{edu}</motion.button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Location */}
+                  <div>
+                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2"><MapPin size={10} className="inline" /> Location</label>
+                    <Input type="text" placeholder="e.g. Mumbai, New York, London..." value={location} onChange={(e) => setLocation(e.target.value)}
+                      className="h-12 rounded-xl bg-card border-2 border-border text-sm font-bold focus:border-agni-green" />
+                  </div>
+
+                  {/* Work Experience */}
+                  <div>
+                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2">💼 Experience Level</label>
+                    <div className="flex flex-wrap gap-2">
+                      {EXPERIENCE_LEVELS.map(exp => (
+                        <motion.button key={exp} whileTap={{ scale: 0.95 }} onClick={() => setWorkExperience(exp)}
+                          className={`px-3 py-2 rounded-xl text-[11px] font-bold border-2 transition-all ${
+                            workExperience === exp ? "border-agni-green bg-agni-green/10 text-agni-green" : "border-border bg-card text-muted-foreground"
+                          }`}
+                        >{exp}</motion.button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Job Title */}
+                  <div>
+                    <label className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider block mb-2">🏷️ Current Role / Title</label>
+                    <Input type="text" placeholder="e.g. Software Engineer, Student, Freelancer..." value={jobTitle} onChange={(e) => setJobTitle(e.target.value)}
+                      className="h-12 rounded-xl bg-card border-2 border-border text-sm font-bold focus:border-agni-green" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 shrink-0">
+              <Button onClick={goNext} variant="outline" className="flex-1 h-14 rounded-2xl border-2 border-border text-sm font-bold">Skip</Button>
+              <Button onClick={goNext} className="flex-1 h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d">
+                CONTINUE <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
         {step === 5 && (
           <motion.div key="mission" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
