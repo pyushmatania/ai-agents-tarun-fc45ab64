@@ -302,57 +302,62 @@ const HomePage = () => {
             </div>
           </FadeIn>
 
-          {/* Teaching Modes — Collapsible Minimal Chips */}
+          {/* Teaching Mode — 3 Categories */}
           <FadeIn delay={0.35}>
             <Collapsible open={modesOpen} onOpenChange={setModesOpen} className="mb-4">
               <CollapsibleTrigger asChild>
                 <button className="w-full flex items-center justify-between mb-2.5 group">
-                  <h4 className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Learning Mode</h4>
+                  <h4 className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Learning Config</h4>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] font-bold text-muted-foreground/60">
-                      {TEACHING_MODES.find(m => m.id === activeMode)?.emoji} {TEACHING_MODES.find(m => m.id === activeMode)?.label}
-                    </span>
+                    {TEACHING_CATEGORIES.map(cat => {
+                      const val = getTeachingSelection(cat.id);
+                      const opt = cat.options.find((o: any) => o.id === val);
+                      return opt ? (
+                        <span key={cat.id} className="text-[8px] font-bold text-muted-foreground/60">{opt.emoji}</span>
+                      ) : null;
+                    })}
                     <ChevronDown className={`w-3 h-3 text-muted-foreground/50 transition-transform duration-200 ${modesOpen ? "rotate-180" : ""}`} />
                   </div>
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-                {TEACHING_MODE_CATEGORIES.map((cat) => (
-                  <div key={cat.category} className="mb-2">
-                    <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1 px-0.5">
-                      {cat.emoji} {cat.category}
-                    </p>
-                    <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1">
-                      {cat.modes.map((mode) => {
-                        const isSelected = activeMode === mode.id;
-                        return (
-                          <motion.button
-                            key={mode.id}
-                            whileTap={{ scale: 0.93 }}
-                            whileHover={{ scale: 1.05 }}
-                            animate={isSelected ? { scale: [1, 1.1, 1], transition: { duration: 0.3 } } : {}}
-                            layout
-                            onClick={() => {
-                              setActiveMode(mode.id);
-                              localStorage.setItem("teaching_mode", mode.id);
-                              window.dispatchEvent(new Event("storage"));
-                              SFX.tap();
-                              toast(`${mode.emoji} ${mode.label}`, { description: mode.desc, duration: 1500 });
-                            }}
-                            className={`shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold flex items-center gap-1 transition-colors duration-200 ${
-                              isSelected
-                                ? "bg-agni-green/15 text-agni-green border border-agni-green/30 shadow-[0_0_8px_hsl(var(--agni-green)/0.2)]"
-                                : "bg-muted/30 text-muted-foreground border border-transparent hover:bg-muted/50"
-                            }`}
-                          >
-                            <span className="text-xs">{mode.emoji}</span>
-                            <span>{mode.label}</span>
-                          </motion.button>
-                        );
-                      })}
+                {TEACHING_CATEGORIES.map((cat) => {
+                  const currentVal = getTeachingSelection(cat.id);
+                  return (
+                    <div key={cat.id} className="mb-3">
+                      <p className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest mb-1.5 px-0.5">
+                        {cat.label}
+                      </p>
+                      <p className="text-[7px] text-muted-foreground/40 mb-1 px-0.5">{cat.desc}</p>
+                      <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1 flex-wrap">
+                        {cat.options.map((opt: any) => {
+                          const isSelected = currentVal === opt.id;
+                          return (
+                            <motion.button
+                              key={opt.id}
+                              whileTap={{ scale: 0.93 }}
+                              onClick={() => {
+                                setTeachingSelection(cat.id, opt.id);
+                                setActiveMode(opt.id);
+                                localStorage.setItem("teaching_mode", opt.id);
+                                SFX.tap();
+                                toast(`${opt.emoji} ${opt.label}`, { description: opt.desc, duration: 1500 });
+                              }}
+                              className={`shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold flex items-center gap-1 transition-colors duration-200 ${
+                                isSelected
+                                  ? "bg-agni-green/15 text-agni-green border border-agni-green/30 shadow-[0_0_8px_hsl(var(--agni-green)/0.2)]"
+                                  : "bg-muted/30 text-muted-foreground border border-transparent hover:bg-muted/50"
+                              }`}
+                            >
+                              <span className="text-xs">{opt.emoji}</span>
+                              <span>{opt.label}</span>
+                            </motion.button>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 {/* Custom mode input */}
                 <div className="mt-1">
                   <div className="flex items-center gap-1.5">
