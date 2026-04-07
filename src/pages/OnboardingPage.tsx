@@ -32,20 +32,14 @@ const ROLES = IDENTITIES.map(id => ({
   icon: Brain, // fallback icon
 }));
 
-const VIBES = [
-  { id: "fun", label: "Fun & Memes", emoji: "😂", desc: "Make me LOL while learning", icon: Heart, gradient: "from-pink-500 to-rose-400" },
-  { id: "story", label: "Story-driven", emoji: "📖", desc: "Tales & analogies", icon: BookOpen, gradient: "from-purple-500 to-violet-400" },
-  { id: "serious", label: "Deep & Serious", emoji: "🧠", desc: "No fluff, pure knowledge", icon: Brain, gradient: "from-blue-500 to-cyan-400" },
-  { id: "fast", label: "Fast & Practical", emoji: "⚡", desc: "Ship it now!", icon: Zap, gradient: "from-amber-500 to-yellow-400" },
-  { id: "visual", label: "Visual & Diagrams", emoji: "🎨", desc: "Show me, don't tell me", icon: Palette, gradient: "from-teal-500 to-emerald-400" },
-  { id: "socratic", label: "Socratic / Q&A", emoji: "🤔", desc: "Guide me with questions", icon: Lightbulb, gradient: "from-orange-500 to-amber-400" },
-  { id: "gamified", label: "Gamified & Challenges", emoji: "🎮", desc: "XP, quests & leaderboards", icon: Gamepad2, gradient: "from-indigo-500 to-blue-400" },
-  { id: "handson", label: "Hands-on Builder", emoji: "🔧", desc: "Learn by building projects", icon: Wrench, gradient: "from-lime-500 to-green-400" },
-  { id: "eli5", label: "ELI5 / Simple", emoji: "🍼", desc: "Explain like I'm 5", icon: Star, gradient: "from-sky-400 to-blue-300" },
-  { id: "academic", label: "Academic & Research", emoji: "📚", desc: "Papers, citations & depth", icon: GraduationCap, gradient: "from-slate-500 to-gray-400" },
-  { id: "debate", label: "Debate & Challenge Me", emoji: "🥊", desc: "Push back on my ideas", icon: Shield, gradient: "from-red-500 to-pink-400" },
-  { id: "podcast", label: "Podcast / Conversational", emoji: "🎙️", desc: "Like chatting with a friend", icon: MessageCircle, gradient: "from-violet-500 to-fuchsia-400" },
-];
+const VIBES = TEACHING_VIBES.map(v => ({
+  id: v.id,
+  label: v.label,
+  emoji: v.emoji,
+  desc: v.desc,
+  icon: Heart,
+  gradient: v.color,
+}));
 
 /* ── AGNI HINTS — shown on each category screen ── */
 const AGNI_HINTS: Record<string, { speech: string; expr: AgniExpression; hint: string }> = {
