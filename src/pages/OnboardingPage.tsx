@@ -143,7 +143,14 @@ const TOTAL_STEPS = 10 + SUGGESTION_CATEGORIES.length + 1;
 const slideVariants = {
   enter: (dir: number) => ({ x: dir > 0 ? 260 : -260, opacity: 0, scale: 0.92 }),
   center: { x: 0, opacity: 1, scale: 1 },
-  exit: (dir: number) => ({ x: dir > 0 ? -300 : 300, opacity: 0 }),
+  exit: (dir: number) => ({ x: dir > 0 ? -260 : 260, opacity: 0, scale: 0.92 }),
+};
+
+const stepTransition = {
+  type: "spring" as const,
+  stiffness: 300,
+  damping: 26,
+  mass: 0.8,
 };
 /* ── Organic Blob Card (outside component to avoid re-mount flicker) ── */
 const ColorPill = ({ emoji, label, desc, selected, onClick, index }: {
