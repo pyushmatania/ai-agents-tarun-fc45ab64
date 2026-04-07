@@ -13,7 +13,7 @@ import { LogOut, Moon, Sun, ChevronRight, Shield, Bell, Loader2, LogIn, Brain, K
 import { InterestPill } from "@/components/InterestPill";
 import { motion, AnimatePresence } from "framer-motion";
 import { BUILT_IN_MODELS, BYOK_PROVIDERS, getAIConfig, saveAIConfig, type AIConfig } from "@/lib/aiConfig";
-import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection, getAllOptions, saveCustomOption, getCustomOptions, IDENTITIES, MISSION_MODES, getAllExplainStyles, getActiveExplainStyleIds, setActiveExplainStyleIds, saveCustomExplainStyle, removeCustomExplainStyle, type ExplainStyle } from "@/lib/teachingConfig";
+import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection, getAllOptions, saveCustomOption, getCustomOptions, IDENTITIES, MISSION_MODES, TEACHING_VIBES, BRAIN_LEVELS_SKILL, BRAIN_LEVELS_ACADEMIC, getAllExplainStyles, getActiveExplainStyleIds, setActiveExplainStyleIds, saveCustomExplainStyle, removeCustomExplainStyle, type ExplainStyle } from "@/lib/teachingConfig";
 import CustomOptionInput from "@/components/CustomOptionInput";
 import { getPersona, savePersona, SUGGESTION_CATEGORIES, getSubFilters, getSubFilterCount, POPULAR_PICKS, type NeuralOSPersona } from "@/lib/neuralOS";
 import Agni from "@/components/Agni";
