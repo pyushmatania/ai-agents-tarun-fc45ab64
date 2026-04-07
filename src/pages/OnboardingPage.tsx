@@ -25,6 +25,15 @@ const ROLES = [
   { id: "marketer", label: "Marketer", emoji: "📢", desc: "Growth with AI", goal: "Use AI for marketing", exp: "beginner", icon: Target },
   { id: "freelancer", label: "Freelancer", emoji: "🌍", desc: "AI superpowers", goal: "Freelance with AI tools", exp: "some experience", icon: Globe },
   { id: "data", label: "Data / ML", emoji: "📈", desc: "Models & pipelines", goal: "Build ML pipelines", exp: "engineer", icon: Wrench },
+  { id: "content", label: "Content Creator", emoji: "🎬", desc: "AI-powered content", goal: "Create content with AI", exp: "some experience", icon: Film },
+  { id: "teacher", label: "Teacher / Educator", emoji: "📚", desc: "Teach smarter with AI", goal: "Enhance teaching with AI", exp: "beginner", icon: BookOpen },
+  { id: "consultant", label: "Consultant", emoji: "💼", desc: "AI advisory & strategy", goal: "Consult on AI strategy", exp: "some experience", icon: Briefcase },
+  { id: "productdesigner", label: "Product Designer", emoji: "🖌️", desc: "Design AI products", goal: "Design AI-first products", exp: "some experience", icon: Palette },
+  { id: "dataanalyst", label: "Data Analyst", emoji: "📊", desc: "Insights from data", goal: "Analyze data with AI", exp: "some experience", icon: Target },
+  { id: "office", label: "Office / Operations", emoji: "🏢", desc: "Automate workflows", goal: "Automate office tasks with AI", exp: "beginner", icon: Globe },
+  { id: "sales", label: "Sales / BizDev", emoji: "🤝", desc: "Close deals with AI", goal: "Use AI in sales pipeline", exp: "beginner", icon: Trophy },
+  { id: "writer", label: "Writer / Journalist", emoji: "✍️", desc: "AI-assisted writing", goal: "Write better with AI", exp: "beginner", icon: Newspaper },
+  { id: "hobbyist", label: "Hobbyist / Tinkerer", emoji: "🛠️", desc: "Build for fun", goal: "Experiment with AI for fun", exp: "beginner", icon: Wrench },
   { id: "curious", label: "Just Curious", emoji: "✨", desc: "Here for fun!", goal: "Explore for fun", exp: "beginner", icon: Star },
 ];
 
