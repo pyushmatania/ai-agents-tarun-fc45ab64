@@ -77,19 +77,31 @@ const POWERUPS: Record<string, PowerUp[]> = {
   ],
 };
 
-// Neural OS powered suggestions based on persona
+// Interest Deck — group persona interests by category for dropdown selection
+interface InterestCategory {
+  id: string;
+  emoji: string;
+  label: string;
+  items: string[];
+}
+
+function getInterestDeck(): InterestCategory[] {
+  const p = getPersona();
+  const cats: InterestCategory[] = [];
+  if (p.shows?.length) cats.push({ id: "shows", emoji: "🎬", label: "Shows", items: p.shows });
+  if (p.sports?.length) cats.push({ id: "sports", emoji: "⚽", label: "Sports", items: p.sports });
+  if (p.gaming?.length) cats.push({ id: "gaming", emoji: "🎮", label: "Gaming", items: p.gaming });
+  if (p.music?.length) cats.push({ id: "music", emoji: "🎵", label: "Music", items: p.music });
+  if (p.news?.length) cats.push({ id: "news", emoji: "📰", label: "News", items: p.news });
+  if (p.hobbies?.length) cats.push({ id: "hobbies", emoji: "🎯", label: "Hobbies", items: p.hobbies });
+  if (p.books?.length) cats.push({ id: "books", emoji: "📚", label: "Books", items: p.books });
+  return cats;
+}
+
+// Neural OS powered suggestions based on persona (legacy — now also used for role)
 function getNeuralSuggestions(): PowerUp[] {
   const p = getPersona();
   const extras: PowerUp[] = [];
-  if (p.shows && p.shows.length > 0) {
-    extras.push({ id: "nos-shows", label: `${p.shows[0]} analogy`, emoji: "🎬", prompt: `Explain this using an analogy from "${p.shows[0]}" (the show/movie I love).`, color: "bg-[hsl(323,100%,76%)]", shadowColor: "shadow-[0_4px_0_0_hsl(323,100%,60%)]", soundColor: "pink" });
-  }
-  if (p.sports && p.sports.length > 0) {
-    extras.push({ id: "nos-sports", label: `${p.sports[0]} style`, emoji: "⚽", prompt: `Explain this using a sports analogy involving "${p.sports[0]}".`, color: "bg-[hsl(46,100%,49%)]", shadowColor: "shadow-[0_4px_0_0_hsl(44,100%,38%)]", soundColor: "gold" });
-  }
-  if (p.gaming && p.gaming.length > 0) {
-    extras.push({ id: "nos-gaming", label: `${p.gaming[0]} metaphor`, emoji: "🎮", prompt: `Explain this like a game mechanic from "${p.gaming[0]}".`, color: "bg-[hsl(270,100%,75%)]", shadowColor: "shadow-[0_4px_0_0_hsl(270,80%,60%)]", soundColor: "purple" });
-  }
   if (p.currentRole) {
     extras.push({ id: "nos-role", label: "My Job", emoji: "💼", prompt: `How would this apply to my work as a ${p.currentRole}? Give me a practical example I can use tomorrow.`, color: "bg-[hsl(33,100%,50%)]", shadowColor: "shadow-[0_4px_0_0_hsl(33,100%,38%)]", soundColor: "orange" });
   }
