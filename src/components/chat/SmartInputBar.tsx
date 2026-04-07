@@ -137,7 +137,8 @@ export default function SmartInputBar({
   const motiveInfo = currentMotive && currentMotive !== DEFAULT_MOTIVE ? MISSION_MODES.find(m => m.id === currentMotive) : null;
   const vibeInfo = currentVibe && currentVibe !== DEFAULT_VIBE ? TEACHING_VIBES.find(v => v.id === currentVibe) : null;
   const brainLevels = getBrainTrack() === "academic" ? BRAIN_LEVELS_ACADEMIC : BRAIN_LEVELS_SKILL;
-  const brainInfo = currentBrain && currentBrain !== DEFAULT_BRAIN ? brainLevels.find(b => b.id === currentBrain) : null;
+  const allBrainLevelsForChat = [...BRAIN_LEVELS_SKILL, ...BRAIN_LEVELS_ACADEMIC.filter(a => !BRAIN_LEVELS_SKILL.some(s => s.id === a.id))];
+  const brainInfo = currentBrain && currentBrain !== DEFAULT_BRAIN ? allBrainLevelsForChat.find(b => b.id === currentBrain) : null;
 
   const hasActiveSelections = motiveInfo || vibeInfo || brainInfo || selectedInterest;
 
@@ -353,8 +354,8 @@ export default function SmartInputBar({
                   <p className="text-[9px] font-black text-muted-foreground uppercase tracking-wider">🧠 Brain Level — How deep?</p>
                   <button onClick={() => setActivePanel("none")} className="w-5 h-5 rounded-full bg-muted/30 flex items-center justify-center"><X size={10} className="text-muted-foreground" /></button>
                 </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {brainLevels.map(b => (
+                <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto scrollbar-none">
+                  {allBrainLevelsForChat.map(b => (
                     <motion.button
                       key={b.id}
                       whileTap={{ scale: 0.93 }}
