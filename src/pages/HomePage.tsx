@@ -56,8 +56,21 @@ const HomePage = () => {
   const totalLessons = 22;
   const overallProgress = Math.round((stats.done.length / totalLessons) * 100);
   const todayTip = DAILY_TIPS[new Date().getDay() % DAILY_TIPS.length];
+  const todayQuote = MOTIVATIONAL_QUOTES[new Date().getDate() % MOTIVATIONAL_QUOTES.length];
   const greeting = new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening";
   const dailyProgress = (Math.min(stats.dailyXp, stats.dailyGoal) / stats.dailyGoal) * 100;
+  const personaItemCount = useMemo(() => {
+    let c = 0;
+    if (persona.shows?.length) c += persona.shows.length;
+    if (persona.sports?.length) c += persona.sports.length;
+    if (persona.music?.length) c += persona.music.length;
+    if (persona.gaming?.length) c += persona.gaming.length;
+    if (persona.hobbies?.length) c += persona.hobbies.length;
+    if (persona.curious?.length) c += persona.curious.length;
+    if (persona.news?.length) c += persona.news.length;
+    if (persona.books?.length) c += persona.books.length;
+    return c;
+  }, [persona]);
 
   const storedRole = localStorage.getItem("edu_user_role");
   const roleLabel = storedRole ? TEACHING_MODES.find(m => m.id === storedRole)?.label || storedRole : null;
