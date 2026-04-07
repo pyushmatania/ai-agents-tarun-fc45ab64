@@ -32,6 +32,15 @@ const BottomNav = () => {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50">
       <div className="max-w-md mx-auto px-3 pb-2">
+        {/* Active learning mode indicator */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`mx-auto mb-1.5 w-fit flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r ${modeInfo.color} shadow-lg border border-white/10`}
+        >
+          <span className="text-xs">{modeInfo.emoji}</span>
+          <span className="text-[9px] font-black text-white">{modeInfo.label}</span>
+        </motion.div>
         <motion.div
           initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
