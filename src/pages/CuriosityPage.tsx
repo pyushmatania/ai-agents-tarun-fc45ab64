@@ -38,7 +38,7 @@ const CuriosityPage = () => {
   const [error, setError] = useState("");
   const [sparkIdx, setSparkIdx] = useState(0);
   const [copied, setCopied] = useState(false);
-
+  const [refreshing, setRefreshing] = useState(false);
   // Load cached results for a category
   const getCachedResults = (catId: string): any[] => {
     try {
@@ -51,9 +51,9 @@ const CuriosityPage = () => {
   const fetchCuriosity = async (cat: typeof CURIOSITY[0]) => {
     setActiveId(cat.id);
     setError("");
-    // Show cached results immediately
     const cached = getCachedResults(cat.id);
     setResults(cached);
+    if (cached.length > 0) setRefreshing(true);
     setLoading(true);
     try {
       const { data, error: fnError } = await supabase.functions.invoke("ai-curiosity", {
@@ -71,6 +71,7 @@ const CuriosityPage = () => {
       if (cached.length === 0) setError(e.message || "Failed to fetch. Try again!");
     }
     setLoading(false);
+    setRefreshing(false);
   };
 
   const handleCopyFact = () => {
@@ -245,7 +246,7 @@ const CuriosityPage = () => {
                             </div>
                           )}
 
-                          {!loading && results.length > 0 && (
+                          {results.length > 0 && (
                             <>
                               <div className="rounded-2xl p-3 relative overflow-hidden"
                                 style={{ background: cat.gradient, boxShadow: `0 3px 0 0 ${cat.shadow}` }}
@@ -257,7 +258,13 @@ const CuriosityPage = () => {
                                     <h4 className="text-white font-black text-[11px]">{cat.label} Discoveries</h4>
                                     <p className="text-white/60 text-[8px] font-bold">{results.length} items found by AI</p>
                                   </div>
-                                  <Star size={14} className="ml-auto text-white/30" />
+                                  {refreshing ? (
+                                    <span className="ml-auto text-[8px] font-bold text-white/80 bg-white/20 px-1.5 py-0.5 rounded-full animate-pulse flex items-center gap-1">
+                                      <Loader2 size={8} className="animate-spin" /> Updating
+                                    </span>
+                                  ) : (
+                                    <Star size={14} className="ml-auto text-white/30" />
+                                  )}
                                 </div>
                               </div>
 
