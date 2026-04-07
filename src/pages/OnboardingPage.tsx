@@ -112,6 +112,22 @@ const PILL_SELECTED_COLORS = [
   "bg-agni-green/30 border-agni-green text-agni-green shadow-glow-green",
 ];
 
+/* ── Pastel card colors for avatar/identity grid (matches screenshot) ── */
+const PASTEL_CARD_COLORS = [
+  { bg: "bg-[#C8F7C5]/70", border: "border-[#7ED957]", text: "text-[#2D8C2D]" },
+  { bg: "bg-[#E8D5F5]/70", border: "border-[#C291E2]", text: "text-[#8B3FCF]" },
+  { bg: "bg-[#D0EAFF]/70", border: "border-[#7CB8E8]", text: "text-[#2878B5]" },
+  { bg: "bg-[#FFF3C4]/70", border: "border-[#E8C84A]", text: "text-[#B8860B]" },
+  { bg: "bg-[#FFD6D6]/70", border: "border-[#F28B82]", text: "text-[#CC3333]" },
+  { bg: "bg-[#FFD6EC]/70", border: "border-[#F28BC8]", text: "text-[#CC3399]" },
+  { bg: "bg-[#FFE0C2]/70", border: "border-[#E8A54A]", text: "text-[#CC6600]" },
+  { bg: "bg-[#D6F5E0]/70", border: "border-[#7ED9A0]", text: "text-[#2D8C50]" },
+  { bg: "bg-[#E0D6F5]/70", border: "border-[#A091E2]", text: "text-[#5B3FCF]" },
+  { bg: "bg-[#D6EBF5]/70", border: "border-[#7CBAE8]", text: "text-[#2878B5]" },
+  { bg: "bg-[#F5E6D6]/70", border: "border-[#D9A97E]", text: "text-[#8C5B2D]" },
+  { bg: "bg-[#F5D6E6]/70", border: "border-[#E282B5]", text: "text-[#B5286E]" },
+];
+
 const TOTAL_STEPS = 10 + SUGGESTION_CATEGORIES.length + 1;
 
 const slideVariants = {
@@ -288,11 +304,11 @@ const OnboardingPage = () => {
 
   const catHint = activeCategory ? AGNI_HINTS[activeCategory.id] : null;
 
-  /* ── Colorful Option Pill Component ── */
+  /* ── Pastel Card Component (matches screenshot style) ── */
   const ColorPill = ({ emoji, label, desc, selected, onClick, index, color }: {
     emoji: string; label: string; desc: string; selected: boolean; onClick: () => void; index: number; color?: string;
   }) => {
-    const colorIdx = index % PILL_COLORS.length;
+    const pastel = PASTEL_CARD_COLORS[index % PASTEL_CARD_COLORS.length];
     return (
       <motion.button
         initial={{ opacity: 0, scale: 0.8, y: 15 }}
@@ -300,20 +316,20 @@ const OnboardingPage = () => {
         transition={{ delay: 0.05 + index * 0.04, type: "spring", stiffness: 300, damping: 20 }}
         whileTap={{ scale: 0.92 }}
         onClick={() => { SFX.select(); onClick(); }}
-        className={`relative px-4 py-3 rounded-2xl border-2 text-left transition-all overflow-hidden ${
-          selected ? PILL_SELECTED_COLORS[colorIdx] : PILL_COLORS[colorIdx]
+        className={`relative px-3 py-4 rounded-3xl border-2 text-left transition-all overflow-hidden ${pastel.bg} ${pastel.border} ${
+          selected ? "ring-2 ring-offset-1 ring-[#58CC02] shadow-lg scale-[1.02]" : "hover:shadow-md"
         }`}
       >
         {selected && (
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-agni-green flex items-center justify-center z-10">
-            <Check size={12} className="text-white" strokeWidth={3} />
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#58CC02] flex items-center justify-center z-10 shadow-md">
+            <Check size={13} className="text-white" strokeWidth={3} />
           </motion.div>
         )}
-        <div className="flex items-center gap-2.5">
-          <span className="text-2xl">{emoji}</span>
-          <div className="min-w-0">
-            <span className="text-xs font-extrabold block leading-tight">{label}</span>
-            <span className="text-[9px] opacity-70 leading-tight block">{desc}</span>
+        <div className="flex items-start gap-2.5">
+          <span className="text-3xl mt-0.5">{emoji}</span>
+          <div className="min-w-0 flex-1">
+            <span className={`text-sm font-extrabold block leading-tight ${pastel.text}`}>{label}</span>
+            <span className="text-[10px] text-gray-600 leading-tight block mt-0.5">{desc}</span>
           </div>
         </div>
       </motion.button>
@@ -618,18 +634,23 @@ const OnboardingPage = () => {
           <motion.div key="role" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
-            <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.identity.bg} pointer-events-none`} />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#F0E6FA] via-[#F5E0F0] to-[#FADADD] pointer-events-none" />
 
             <div className="flex-1 relative z-10 overflow-y-auto scrollbar-none">
+              <div className="flex justify-center mb-2">
+                <div className="bg-white/70 backdrop-blur-sm rounded-full px-4 py-1.5 shadow-sm border border-white/50">
+                  <span className="text-xs font-bold text-gray-600">Choose your character! 🎭</span>
+                </div>
+              </div>
               <div className="flex justify-center mb-3">
-                <Agni expression="thinking" size={80} speech="Choose your character! 🎭" animate />
+                <Agni expression="thinking" size={90} animate />
               </div>
 
-              <h2 className="text-2xl font-black text-foreground text-center mb-0.5">🎭 Pick Your Avatar</h2>
-              <p className="text-xs text-muted-foreground text-center mb-1">
-                <span className="text-agni-purple font-bold">Like choosing a character in a game!</span>
+              <h2 className="text-2xl font-black text-gray-800 text-center mb-0.5">🎭 Pick Your Avatar</h2>
+              <p className="text-xs text-center mb-1">
+                <span className="text-[#8B3FCF] font-bold">Like choosing a character in a game!</span>
               </p>
-              <p className="text-[10px] text-muted-foreground/70 text-center mb-4">
+              <p className="text-[10px] text-gray-500 text-center mb-4">
                 Your identity shapes how AGNI teaches — pick the world you live in
               </p>
 
