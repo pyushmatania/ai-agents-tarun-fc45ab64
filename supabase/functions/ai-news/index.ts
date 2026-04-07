@@ -46,9 +46,29 @@ serve(async (req) => {
 
     const data = await response.json();
     const text = data.choices?.[0]?.message?.content || "[]";
-    const cleaned = text.replace(/```json|```/g, "").trim();
+    let cleaned = text.replace(/```json|```/g, "").trim();
     const match = cleaned.match(/\[[\s\S]*\]/);
-    const items = match ? JSON.parse(match[0]) : [];
+    if (!match) {
+      return new Response(JSON.stringify({ items: [] }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    let jsonStr = match[0];
+    // Remove control characters that break JSON.parse
+    jsonStr = jsonStr.replace(/[\x00-\x1F\x7F]/g, (ch) => {
+      if (ch === '\n' || ch === '\r' || ch === '\t') return ch;
+      return '';
+    });
+    // Fix common LLM JSON issues
+    jsonStr = jsonStr.replace(/,\s*]/g, "]").replace(/,\s*}/g, "}");
+    let items: any[];
+    try {
+      items = JSON.parse(jsonStr);
+    } catch {
+      // Last resort: try to fix escaped characters
+      jsonStr = jsonStr.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+      items = JSON.parse(jsonStr);
+    }
 
     return new Response(JSON.stringify({ items }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
