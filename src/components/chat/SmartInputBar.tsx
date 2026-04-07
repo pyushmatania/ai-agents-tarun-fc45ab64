@@ -427,6 +427,15 @@ export default function SmartInputBar({
                   </button>
                 </motion.div>
               )}
+              {selectedInterest && (
+                <motion.div layout className="shrink-0 flex items-center gap-1 bg-agni-pink/8 border border-agni-pink/15 rounded-full px-2 py-0.5">
+                  <span className="text-[8px]">🌍</span>
+                  <span className="text-[8px] font-bold text-agni-pink/70">{selectedInterest}</span>
+                  <button onClick={() => clearSelection("interest")} className="ml-0.5 opacity-50 hover:opacity-100">
+                    <X size={7} className="text-agni-pink" />
+                  </button>
+                </motion.div>
+              )}
             </div>
           </motion.div>
         )}
