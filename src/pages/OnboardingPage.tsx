@@ -152,6 +152,7 @@ const OnboardingPage = () => {
   const [dir, setDir] = useState(1);
   const [name, setName] = useState("");
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [showAllRoles, setShowAllRoles] = useState(false);
   const [customRole, setCustomRole] = useState("");
   const [selectedVibe, setSelectedVibe] = useState<string | null>(null);
   const [selectedMission, setSelectedMission] = useState<string | null>(null);
