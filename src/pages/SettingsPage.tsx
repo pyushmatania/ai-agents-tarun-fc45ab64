@@ -24,18 +24,6 @@ import { useUserContext } from "@/hooks/useUserContext";
 import { AGE_RANGES, GENDERS, EDUCATION_LEVELS, EXPERIENCE_LEVELS, MISSION_FOLLOWUPS } from "@/lib/missionFollowups";
 import { useAvatar } from "@/hooks/useAvatar";
 import UserAvatar from "@/components/UserAvatar";
-import { InterestPill } from "@/components/InterestPill";
-import { motion, AnimatePresence } from "framer-motion";
-import { BUILT_IN_MODELS, BYOK_PROVIDERS, getAIConfig, saveAIConfig, type AIConfig } from "@/lib/aiConfig";
-import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection, getAllOptions, saveCustomOption, getCustomOptions, IDENTITIES, MISSION_MODES } from "@/lib/teachingConfig";
-import CustomOptionInput from "@/components/CustomOptionInput";
-import { getPersona, savePersona, SUGGESTION_CATEGORIES, getSubFilters, getSubFilterCount, POPULAR_PICKS, type NeuralOSPersona } from "@/lib/neuralOS";
-import Agni from "@/components/Agni";
-import StatsSection from "@/components/StatsSection";
-import { useGamification } from "@/hooks/useGamification";
-import { SFX } from "@/lib/sounds";
-import { useUserContext } from "@/hooks/useUserContext";
-import { AGE_RANGES, GENDERS, EDUCATION_LEVELS, EXPERIENCE_LEVELS, MISSION_FOLLOWUPS } from "@/lib/missionFollowups";
 
 const SettingsPage = () => {
   const { user, signOut } = useAuth();
