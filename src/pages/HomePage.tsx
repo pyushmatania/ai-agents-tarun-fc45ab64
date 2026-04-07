@@ -113,7 +113,7 @@ const HomePage = () => {
                       transition={{ duration: 1.2, delay: 0.3 }}
                     />
                   </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="absolute inset-0 flex items-center justify-center" onDoubleClick={() => setShowProfile(true)}>
                     <Agni expression={agniExpression} size={90} speech={agniSpeech} interactive />
                   </div>
                 </div>
