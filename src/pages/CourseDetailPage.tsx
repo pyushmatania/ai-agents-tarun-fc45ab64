@@ -1,11 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import PageTransition from "@/components/PageTransition";
-import { ChevronLeft, CheckCircle2, Send, StickyNote, Timer } from "lucide-react";
+import { ChevronLeft, CheckCircle2, Send, StickyNote, Timer, Brain as BrainIcon } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getAIConfig, getActiveModelLabel } from "@/lib/aiConfig";
-import { Brain } from "lucide-react";
+import { Brain, Sparkles } from "lucide-react";
+import { buildPersonalizedPrompt, generateSmartOptions, buildOpeningPrompt, hasPersona, detectComprehension, updateComprehension, buildRemediationPrompt } from "@/lib/neuralOS";
+import MascotProfileModal from "@/components/MascotProfileModal";
+import PracticalQuizModal from "@/components/PracticalQuizModal";
+import BotIllustration from "@/components/illustrations/BotIllustration";
 
 const ALL_LESSONS: Record<string, { t: string; xp: number; topic: string }> = {
   f1:{t:"What is an AI Agent?",xp:50,topic:"what AI agents are — Perceive-Reason-Act-Learn loop, how they differ from chatbots, ReAct pattern, core components: LLM + Tools + Memory + Planning + Autonomy Loop"},
@@ -42,7 +46,7 @@ const MODES = [
   {id:"semi",label:"🏭 Semi",prompt:"Through semiconductor manufacturing / HCL-Foxconn OSAT lens."},
 ];
 
-const SYS = "You are AGENT SENSEI, an elite AI Agents tutor teaching someone at HCL's Founder's Office (semiconductor OSAT plant). Be passionate, use Indian examples. Keep under 250 words. End with a question to check understanding.";
+const SYS_BASE = "You are AGNI, an elite AI Agents tutor. Be passionate, use Indian examples (HCL, Tata, Flipkart, cricket, Bollywood). Keep under 250 words. End with a question to check understanding.";
 
 type Msg = { role: "user" | "assistant"; text: string };
 
@@ -56,17 +60,23 @@ const CourseDetailPage = () => {
   const [note, setNote] = useState("");
   const [showNote, setShowNote] = useState(false);
   const [timer, setTimer] = useState(0);
+  const [showProfile, setShowProfile] = useState(false);
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [smartOptions, setSmartOptions] = useState(generateSmartOptions(""));
   const chatEnd = useRef<HTMLDivElement>(null);
   const timerRef = useRef<any>(null);
 
   const lesson = id ? ALL_LESSONS[id] : null;
   const done: string[] = JSON.parse(localStorage.getItem("adojo_done") || "[]");
   const isDone = id ? done.includes(id) : false;
+  const personaActive = hasPersona();
 
   const callAI = async (apiMessages: { role: string; content: string }[]) => {
     const config = getAIConfig();
+    // 🧠 NEURAL OS — inject personalized system prompt
+    const personalizedSys = buildPersonalizedPrompt(SYS_BASE);
     const body: any = {
-      system: SYS,
+      system: personalizedSys,
       messages: apiMessages,
     };
     if (config.mode === "byok" && config.byokApiKey) {
@@ -86,13 +96,17 @@ const CourseDetailPage = () => {
     setNote(JSON.parse(localStorage.getItem("adojo_notes") || "{}")[id!] || "");
     timerRef.current = setInterval(() => setTimer(t => t + 1), 1000);
 
+    // 🌱 UTSARGA — refresh smart options based on persona + lesson
+    setSmartOptions(generateSmartOptions(lesson.topic));
+
     setMsgs([{ role: "assistant", text: "⏳ Loading lesson..." }]);
     setLoading(true);
     const mObj = MODES.find(m => m.id === mode) || MODES[1];
 
-    callAI([
-      { role: "user", content: `Teach me about: ${lesson.topic}\n\nStyle: ${mObj.prompt}\n\nBe engaging. Use examples. End with a question.` }
-    ])
+    // 🎬 VIDYA — personalized opening prompt
+    const openingPrompt = buildOpeningPrompt(lesson.topic, mObj.prompt);
+
+    callAI([{ role: "user", content: openingPrompt }])
     .then(text => {
       setMsgs([{ role: "assistant", text: text || `Welcome to **${lesson.t}**!\n\nThis covers: ${lesson.topic}\n\nSend me a message to start learning!` }]);
       setLoading(false);
@@ -117,9 +131,26 @@ const CourseDetailPage = () => {
     setMsgs(newMsgs);
     setLoading(true);
 
+    // 🧠 NEURAL OS — detect comprehension signal from the user's message
+    const signal = detectComprehension(userMsg);
+    if (signal !== "neutral") {
+      updateComprehension(signal);
+      // Refresh smart options so confused users see "even simpler" etc
+      if (lesson) setSmartOptions(generateSmartOptions(lesson.topic));
+    }
+
     const mObj = MODES.find(m => m.id === mode) || MODES[1];
     const apiMsgs = newMsgs.slice(-6).map(m => ({ role: m.role, content: m.text }));
-    apiMsgs.push({ role: "user", content: `[Context: ${lesson!.topic}. Style: ${mObj.prompt}. Under 250 words. End with question.]` });
+
+    // 🆕 If confused: inject remediation directive
+    if (signal === "confused") {
+      apiMsgs.push({
+        role: "user",
+        content: `[NEURAL OS ALERT: Student is confused. Take them BACK TO BASICS. Use the simplest possible analogy. Switch to a totally different angle. Use one of their interests if available. Be kind and patient. End with: "Did that land better? Want me to break it down even more?"]`
+      });
+    } else {
+      apiMsgs.push({ role: "user", content: `[Context: ${lesson!.topic}. Style: ${mObj.prompt}. Under 250 words. End with a comprehension check question like "does that click?" or "1-5 how clear is this?"]` });
+    }
 
     try {
       const text = await callAI(apiMsgs);
@@ -174,7 +205,26 @@ const CourseDetailPage = () => {
               </span>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            {/* 🧠 Tap mascot to open profile */}
+            <button
+              onClick={() => setShowProfile(true)}
+              className="relative w-9 h-9 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center hover:scale-105 transition-transform"
+              title="My Persona"
+            >
+              <BotIllustration size={28} />
+              {personaActive && (
+                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-card" />
+              )}
+            </button>
+            {/* 🎯 Practical Quiz */}
+            <button
+              onClick={() => setShowQuiz(true)}
+              className="w-9 h-9 rounded-full bg-purple-500/10 border-2 border-purple-500/30 flex items-center justify-center hover:scale-105 transition-transform"
+              title="Practical Quiz"
+            >
+              <BrainIcon size={14} className="text-purple-500" />
+            </button>
             <button onClick={() => setShowNote(!showNote)} className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
               <StickyNote size={14} className="text-foreground" />
             </button>
@@ -235,13 +285,35 @@ const CourseDetailPage = () => {
         </div>
       </div>
 
-      {/* Quick actions */}
-      <div className="px-4 py-1.5 bg-muted/30 border-t border-border shrink-0 overflow-x-auto">
-        <div className="max-w-md mx-auto flex gap-1.5">
-          {["Explain simpler", "Give me code", "Real example", "Quiz me", "What can I build?", "Connect to HCL", "Deep dive"].map(q => (
-            <button key={q} onClick={() => sendMsg(q)}
-              className="shrink-0 px-3 py-1 rounded-full text-xs bg-card border border-border text-muted-foreground hover:text-foreground transition-colors">{q}</button>
-          ))}
+      {/* 🌱 UTSARGA — Smart Options (dynamic, persona-aware) */}
+      <div className="px-4 py-2 bg-muted/30 border-t border-border shrink-0">
+        <div className="max-w-md mx-auto">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <Sparkles size={10} className="text-primary" />
+            <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">
+              {personaActive ? "Smart options for you" : "Quick actions"}
+            </span>
+            {!personaActive && (
+              <button
+                onClick={() => setShowProfile(true)}
+                className="ml-auto text-[9px] text-primary font-bold underline"
+              >
+                Personalize →
+              </button>
+            )}
+          </div>
+          <div className="flex gap-1.5 overflow-x-auto -mx-1 px-1">
+            {smartOptions.map((opt, i) => (
+              <button
+                key={i}
+                onClick={() => sendMsg(opt.prompt)}
+                className="shrink-0 px-3 py-1.5 rounded-full text-xs bg-card border border-border hover:border-primary hover:bg-primary/5 transition-all flex items-center gap-1"
+              >
+                <span>{opt.emoji}</span>
+                <span className="font-semibold text-foreground">{opt.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -258,6 +330,33 @@ const CourseDetailPage = () => {
           </button>
         </div>
       </div>
+
+      {/* 🧠 Neural OS Profile Modal */}
+      <MascotProfileModal
+        open={showProfile}
+        onClose={() => {
+          setShowProfile(false);
+          // Refresh smart options when persona changes
+          if (lesson) setSmartOptions(generateSmartOptions(lesson.topic));
+        }}
+      />
+
+      {/* 🎯 Practical Quiz Modal */}
+      {lesson && (
+        <PracticalQuizModal
+          open={showQuiz}
+          onClose={() => setShowQuiz(false)}
+          lessonTopic={lesson.topic}
+          lessonInfo={lesson.topic}
+          lessonTitle={lesson.t}
+          onComplete={(score, total) => {
+            const earned = Math.round((lesson.xp || 50) * (score / total));
+            const xp = parseInt(localStorage.getItem("adojo_xp") || "0") + earned;
+            localStorage.setItem("adojo_xp", String(xp));
+            toast.success(`+${earned} XP — ${score}/${total} correct! 🎉`);
+          }}
+        />
+      )}
     </div>
     </PageTransition>
   );
