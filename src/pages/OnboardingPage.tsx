@@ -288,6 +288,22 @@ const OnboardingPage = () => {
   };
   const goBack = () => { SFX.tap(); setDir(-1); setStep(s => Math.max(0, s - 1)); setSearch(""); setActiveSubFilter(null); };
 
+  const skipAll = () => {
+    SFX.celebration();
+    localStorage.setItem("edu_user_name", name.trim() || "Learner");
+    localStorage.setItem("edu_onboarded", "true");
+    localStorage.setItem("edu_user_role", selectedRole || "student");
+    const userCtx = {
+      teaching_identity: selectedRole || "",
+      teaching_mission: selectedMission || "",
+      teaching_vibe: selectedVibe || "",
+      teaching_brain: selectedBrain || "",
+      brain_track: brainTrack,
+    };
+    localStorage.setItem("user_context", JSON.stringify(userCtx));
+    navigate("/");
+  };
+
   // Auto-skip mission followup step if no questions
   useEffect(() => {
     if (step === 6 && (!selectedMission || !MISSION_FOLLOWUPS[selectedMission])) {
