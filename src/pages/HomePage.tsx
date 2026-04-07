@@ -52,20 +52,29 @@ const HomePage = () => {
   const [agniExpression, setAgniExpression] = useState<"default" | "happy" | "excited">("default");
   const [showProfile, setShowProfile] = useState(false);
   const [showInfoTooltip, setShowInfoTooltip] = useState(false);
-  const [leaderboard, setLeaderboard] = useState<{ display_name: string; xp: number; user_id: string }[]>([]);
+  const [leaderboard, setLeaderboard] = useState<{ display_name: string; xp: number; weekly_xp: number; user_id: string }[]>([]);
 
-  // Fetch leaderboard
+  // Fetch leaderboard + realtime subscription
   useEffect(() => {
     const fetchLeaderboard = async () => {
       const { data } = await supabase
         .from("leaderboard")
-        .select("display_name, xp, user_id")
-        .order("xp", { ascending: false })
+        .select("display_name, xp, weekly_xp, user_id")
+        .order("weekly_xp", { ascending: false })
         .limit(10);
-      if (data) setLeaderboard(data);
+      if (data) setLeaderboard(data as any);
     };
     fetchLeaderboard();
-  }, [stats.xp]);
+
+    const channel = supabase
+      .channel("leaderboard-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "leaderboard" }, () => {
+        fetchLeaderboard();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
   const persona = useMemo(() => getPersona(), []);
 
   const totalLessons = 22;
