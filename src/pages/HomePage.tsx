@@ -280,10 +280,12 @@ const HomePage = () => {
 
           {/* Daily Tip */}
           <FadeIn delay={0.4}>
-            <div className="bg-card border border-agni-green/20 rounded-2xl p-3.5 mb-4 relative overflow-hidden">
+            <div className="bg-card border border-agni-green/20 rounded-2xl p-3.5 mb-4 relative overflow-visible">
               <div className="absolute top-0 right-0 w-20 h-20 bg-agni-green/5 rounded-full -mr-6 -mt-6" />
               <div className="flex items-start gap-3">
-                <Agni expression="teaching" size={65} animate={false} />
+                <div className="shrink-0 w-[65px] h-[65px] flex items-center justify-center overflow-visible">
+                  <Agni expression="teaching" size={60} animate={false} />
+                </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 mb-1">
                     <Lightbulb size={10} className="text-agni-gold" />
