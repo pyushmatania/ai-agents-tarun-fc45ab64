@@ -415,7 +415,7 @@ const OnboardingPage = () => {
 
               <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
                 <div className="space-y-2.5">
-                  {MISSION_MODES.map((m, i) => (
+                  {[...MISSION_MODES, ...customMissions].map((m, i) => (
                     <motion.button key={m.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + i * 0.04 }}
                       whileTap={{ scale: 0.97 }} onClick={() => setSelectedMission(m.id)}
                       className={`w-full p-3.5 rounded-2xl border-2 text-left flex items-center gap-3 transition-all ${
@@ -436,6 +436,17 @@ const OnboardingPage = () => {
                       )}
                     </motion.button>
                   ))}
+
+                  {/* Custom mission creator */}
+                  <CustomOptionInput
+                    categoryId="mission"
+                    categoryLabel="Mission"
+                    onSave={(opt) => {
+                      const saved = saveCustomOption("mission", opt);
+                      setCustomMissions(prev => [...prev, saved]);
+                      setSelectedMission(saved.id);
+                    }}
+                  />
                 </div>
               </div>
             </div>
