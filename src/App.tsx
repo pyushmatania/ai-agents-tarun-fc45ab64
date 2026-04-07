@@ -4,7 +4,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useState, useCallback } from "react";
-import { AnimatePresence } from "framer-motion";
 import SplashScreen from "./pages/SplashScreen";
 import HomePage from "./pages/HomePage";
 import CoursesPage from "./pages/CoursesPage";
