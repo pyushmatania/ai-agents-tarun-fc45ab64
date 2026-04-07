@@ -246,6 +246,28 @@ export default function ChatPage() {
               );
             })}
           </div>
+        )}
+      </div>
+
+      {/* Smart Input Bar */}
+      <div className="sticky bottom-0">
+        <SmartInputBar
+          value={input}
+          onChange={setInput}
+          onSend={handleSend}
+          onStop={chat.stopStreaming}
+          isLoading={chat.isLoading}
+          isLearnTab={activeTab === "curriculum"}
+          suggestions={!chat.isLoading ? lastSuggestions : []}
+          onSuggestionClick={handleSuggestionClick}
+          placeholder={tabConfig.placeholder}
+          accentColor={tabConfig.color}
+          activeMode={activeMode}
+          onModeChange={handleModeChange}
+          exchangeCount={chat.messages.filter(m => m.role === "user").length}
+          hasMessages={chat.messages.length > 0}
+          onRecookLast={() => chat.regenerateLast(buildTeachingContext())}
+        />
       </div>
     </div>
   );
