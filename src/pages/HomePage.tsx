@@ -1,6 +1,7 @@
 import BottomNav from "@/components/BottomNav";
 import PageTransition, { StaggerContainer, StaggerItem, FadeIn } from "@/components/PageTransition";
-import { ArrowRight, Zap, Clock, BookOpen, Flame, Lightbulb, Rocket, Brain, Heart, Diamond, User, Info, Trophy, Target, Shield, Crown, Map, Sparkles } from "lucide-react";
+import { ArrowRight, Zap, Clock, BookOpen, Flame, Lightbulb, Rocket, Brain, Heart, Diamond, User, Info, Trophy, Target, Shield, Crown, Map, Sparkles, ChevronDown } from "lucide-react";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import MascotProfileModal from "@/components/MascotProfileModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
