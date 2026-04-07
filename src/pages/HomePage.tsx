@@ -31,16 +31,27 @@ const TEACHING_MODES = [
   { id: "semiconductor", label: "Chip", emoji: "🏭", desc: "HCL context", color: "bg-agni-orange" },
 ];
 
+const MOTIVATIONAL_QUOTES = [
+  { quote: "The best way to predict the future is to build it.", author: "Alan Kay" },
+  { quote: "AI is the new electricity.", author: "Andrew Ng" },
+  { quote: "Stay hungry, stay foolish.", author: "Steve Jobs" },
+  { quote: "The only limit is your imagination.", author: "AGNI" },
+  { quote: "Every expert was once a beginner.", author: "Helen Hayes" },
+  { quote: "Code is poetry, AI is magic.", author: "Neural-OS" },
+  { quote: "Ship fast, learn faster.", author: "Unknown" },
+];
+
 const HomePage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { stats, dailyQuests, streakDays, league } = useGamification();
+  const { stats, dailyQuests, streakDays, league, achievements, unlockedAchievements } = useGamification();
   const storedName = localStorage.getItem("edu_user_name") || "Learner";
   const displayName = user?.user_metadata?.full_name?.split(" ")[0] || storedName;
   const [activeMode, setActiveMode] = useState(localStorage.getItem("teaching_mode") || "engineer");
   const [agniExpression, setAgniExpression] = useState<"default" | "happy" | "excited">("default");
   const [showProfile, setShowProfile] = useState(false);
   const [showInfoTooltip, setShowInfoTooltip] = useState(false);
+  const persona = useMemo(() => getPersona(), []);
 
   const totalLessons = 22;
   const overallProgress = Math.round((stats.done.length / totalLessons) * 100);
