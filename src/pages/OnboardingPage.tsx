@@ -1077,10 +1077,12 @@ const OnboardingPage = () => {
               </motion.div>
             </div>
 
-            <Button onClick={goNext} disabled={!selectedBrain}
-              className="w-full h-14 rounded-full bg-[#3F51B5] hover:bg-[#303F9F] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none shrink-0">
-              Continue <ArrowRight size={18} className="ml-2" />
-            </Button>
+            <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#E1F5FE] via-[#E1F5FE]/95 to-transparent">
+              <Button onClick={goNext} disabled={!selectedBrain}
+                className="w-full h-14 rounded-full bg-[#3F51B5] hover:bg-[#303F9F] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
+                Continue <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </div>
           </motion.div>
         )}
 
