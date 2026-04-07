@@ -203,27 +203,7 @@ export default function SmartInputBar({
             transition={{ duration: 0.2 }}
             className="overflow-hidden px-4"
           >
-            {/* Tools panel (General chat) */}
-            {activePanel === "tools" && (
-              <div className="py-3 flex gap-2">
-                {[
-                  { icon: Image, label: "Image", color: "#CE82FF" },
-                  { icon: Paperclip, label: "File", color: "#58CC02" },
-                  { icon: Mic, label: "Voice", color: "#FF6B6B" },
-                  { icon: Search, label: "Search", color: "#4DA6FF" },
-                ].map(t => (
-                  <motion.button
-                    key={t.label}
-                    whileTap={{ scale: 0.9 }}
-                    className="flex flex-col items-center gap-1 px-4 py-2.5 rounded-2xl bg-card border border-border/20"
-                    onClick={() => { setActivePanel("none"); }}
-                  >
-                    <t.icon size={18} style={{ color: t.color }} />
-                    <span className="text-[9px] font-bold text-muted-foreground">{t.label}</span>
-                  </motion.button>
-                ))}
-              </div>
-            )}
+            {/* Tools panel removed — + opens motive on both tabs */}
 
             {/* Motive panel (replaces Teaching Mode) */}
             {activePanel === "motive" && (
