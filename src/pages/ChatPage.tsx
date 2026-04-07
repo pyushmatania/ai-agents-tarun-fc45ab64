@@ -89,10 +89,10 @@ export default function ChatPage() {
 
   // Build teaching context
   const teachingContext = useMemo(() => ({
-    identity: persona.role || undefined,
-    mission: persona.mission || undefined,
+    identity: persona.currentRole || undefined,
+    mission: persona.goal || undefined,
     vibe: persona.vibe || undefined,
-    level: persona.brain || undefined,
+    level: persona.experience || undefined,
     interests: [
       ...(persona.shows || []),
       ...(persona.music || []),
