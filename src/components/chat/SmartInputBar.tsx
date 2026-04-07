@@ -230,6 +230,15 @@ export default function SmartInputBar({
                   <button onClick={() => setActivePanel("none")} className="w-5 h-5 rounded-full bg-muted/30 flex items-center justify-center"><X size={10} className="text-muted-foreground" /></button>
                 </div>
                 <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto scrollbar-none">
+                  <motion.button
+                    whileTap={{ scale: 0.93 }}
+                    onClick={() => { SFX.tap(); setTeachingSelection("mission", ""); setCurrentMotive(""); setActivePanel("none"); }}
+                    className={`text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all border ${
+                      !currentMotive ? "bg-red-500/15 text-red-400 border-red-500/40" : "bg-card text-muted-foreground border-border/30 hover:border-border/60"
+                    }`}
+                  >
+                    <span>🚫</span> None
+                  </motion.button>
                   {MISSION_MODES.map(m => (
                     <motion.button
                       key={m.id}
@@ -320,6 +329,15 @@ export default function SmartInputBar({
                   <button onClick={() => setActivePanel("none")} className="w-5 h-5 rounded-full bg-muted/30 flex items-center justify-center"><X size={10} className="text-muted-foreground" /></button>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
+                  <motion.button
+                    whileTap={{ scale: 0.93 }}
+                    onClick={() => { SFX.tap(); setTeachingSelection("vibe", ""); setCurrentVibe(""); setActivePanel("none"); }}
+                    className={`text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all border ${
+                      !currentVibe ? "bg-red-500/15 text-red-400 border-red-500/40" : "bg-card text-muted-foreground border-border/30"
+                    }`}
+                  >
+                    <span>🚫</span> None
+                  </motion.button>
                   {TEACHING_VIBES.map(v => (
                     <motion.button
                       key={v.id}
@@ -352,6 +370,15 @@ export default function SmartInputBar({
                   <button onClick={() => setActivePanel("none")} className="w-5 h-5 rounded-full bg-muted/30 flex items-center justify-center"><X size={10} className="text-muted-foreground" /></button>
                 </div>
                 <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto scrollbar-none">
+                  <motion.button
+                    whileTap={{ scale: 0.93 }}
+                    onClick={() => { SFX.tap(); setTeachingSelection("brain", ""); setCurrentBrain(""); setActivePanel("none"); }}
+                    className={`text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all border ${
+                      !currentBrain ? "bg-red-500/15 text-red-400 border-red-500/40" : "bg-card text-muted-foreground border-border/30"
+                    }`}
+                  >
+                    <span>🚫</span> None
+                  </motion.button>
                   {allBrainLevelsForChat.map(b => (
                     <motion.button
                       key={b.id}

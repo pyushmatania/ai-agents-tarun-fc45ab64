@@ -330,6 +330,22 @@ const HomePage = () => {
                       </p>
                       <p className="text-[7px] text-muted-foreground/40 mb-1 px-0.5">{cat.desc}</p>
                       <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1 flex-wrap">
+                        <motion.button
+                          whileTap={{ scale: 0.93 }}
+                          onClick={() => {
+                            setTeachingSelection(cat.id, "");
+                            SFX.tap();
+                            toast("🚫 None", { description: `${cat.label} cleared`, duration: 1500 });
+                          }}
+                          className={`shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold flex items-center gap-1 transition-colors duration-200 ${
+                            !currentVal
+                              ? "bg-red-500/15 text-red-400 border border-red-500/30"
+                              : "bg-muted/30 text-muted-foreground border border-transparent hover:bg-muted/50"
+                          }`}
+                        >
+                          <span className="text-xs">🚫</span>
+                          <span>None</span>
+                        </motion.button>
                         {getAllOptions(cat.id).map((opt: any) => {
                           const isSelected = currentVal === opt.id;
                           return (
