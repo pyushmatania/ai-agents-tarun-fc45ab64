@@ -99,13 +99,14 @@ export function useChat(tab: ChatTab) {
     }
   }, [user]);
 
-  const sendMessage = useCallback(async (content: string, extraContext?: Record<string, any>, options?: { hiddenPrompt?: string }) => {
+  const sendMessage = useCallback(async (content: string, extraContext?: Record<string, any>, options?: { hiddenPrompt?: string; hideUserMessage?: boolean }) => {
     if (!content.trim() || isLoading) return;
 
-    // Display text is what the user sees; hidden prompt is what goes to AI
     const displayText = content.trim();
     const actualPrompt = options?.hiddenPrompt || displayText;
+    const hideUser = options?.hideUserMessage || false;
 
+    // Only add user message bubble if not hidden
     const userMsg: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
@@ -114,8 +115,10 @@ export function useChat(tab: ChatTab) {
       created_at: new Date().toISOString(),
     };
 
-    setMessages(prev => [...prev, userMsg]);
-    persistMessage(userMsg);
+    if (!hideUser) {
+      setMessages(prev => [...prev, userMsg]);
+      persistMessage(userMsg);
+    }
     setIsLoading(true);
 
     const controller = new AbortController();
@@ -134,11 +137,10 @@ export function useChat(tab: ChatTab) {
     }]);
 
     try {
-      const allMessages = [...messages, userMsg].map((m, i, arr) => ({
-        role: m.role,
-        // For the last user message, use the actual prompt (which may differ from display)
-        content: i === arr.length - 1 && m.role === "user" ? actualPrompt : m.content,
-      }));
+      // Build message history for AI
+      const historyMessages = messages.map(m => ({ role: m.role, content: m.content }));
+      // Always include the actual prompt as a user message for AI, even if hidden from UI
+      const allMessages = [...historyMessages, { role: "user" as const, content: actualPrompt }];
 
       const edgeFunction = tab === "curriculum" ? "ai-tutor" : "ai-chat";
       const body: any = tab === "curriculum"
