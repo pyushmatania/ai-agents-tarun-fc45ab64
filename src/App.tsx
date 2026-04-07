@@ -15,6 +15,7 @@ import CuriosityPage from "./pages/CuriosityPage";
 import SourcesPage from "./pages/SourcesPage";
 import RoadmapPage from "./pages/RoadmapPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
+import ChatPage from "./pages/ChatPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => {
             <Route path="/roadmap" element={<OnboardedRoute><RoadmapPage /></OnboardedRoute>} />
             <Route path="/leaderboard" element={<OnboardedRoute><LeaderboardPage /></OnboardedRoute>} />
             <Route path="/settings" element={<OnboardedRoute><SettingsPage /></OnboardedRoute>} />
+            <Route path="/chat" element={<OnboardedRoute><ChatPage /></OnboardedRoute>} />
             <Route path="/course/:id" element={<OnboardedRoute><CourseDetailPage /></OnboardedRoute>} />
             <Route path="/mega-prompt" element={<OnboardedRoute><MegaPromptPage /></OnboardedRoute>} />
             <Route path="*" element={<NotFound />} />
