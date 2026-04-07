@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Send, Plus, X, Sparkles, Brain, Zap,
   GraduationCap, StopCircle, Palette, Target,
+  Image, Paperclip, Mic, Search,
 } from "lucide-react";
 import { getPersona } from "@/lib/neuralOS";
 import { getTeachingLabel, getTeachingSelection, setTeachingSelection, MISSION_MODES, TEACHING_VIBES, BRAIN_LEVELS_SKILL, BRAIN_LEVELS_ACADEMIC, getBrainTrack, QUIZ_DIFFICULTIES, getActiveExplainStyles, type QuizDifficulty } from "@/lib/teachingConfig";
@@ -58,7 +59,7 @@ function resolveInterestPrompt(prompt: string): string {
     : `Pick the BEST from: ${list} — tell a dramatic story explaining this concept!`;
 }
 
-type Panel = "none" | "motive" | "powerups" | "interests" | "vibe" | "brain" | "quiz";
+type Panel = "none" | "motive" | "powerups" | "interests" | "vibe" | "brain" | "quiz" | "attachments";
 
 export default function SmartInputBar({
   value, onChange, onSend, onStop, isLoading, isLearnTab,
@@ -202,7 +203,28 @@ export default function SmartInputBar({
             transition={{ duration: 0.2 }}
             className="overflow-hidden px-4"
           >
-            {/* Tools panel removed — + opens motive on both tabs */}
+            {/* Attachments panel (Image, File, Voice, Search) */}
+            {activePanel === "attachments" && (
+              <div className="py-3 flex gap-2">
+                {[
+                  { icon: Image, label: "Image", color: "#CE82FF" },
+                  { icon: Paperclip, label: "File", color: "#58CC02" },
+                  { icon: Mic, label: "Voice", color: "#FF6B6B" },
+                  { icon: Search, label: "Search", color: "#4DA6FF" },
+                ].map(t => (
+                  <motion.button
+                    key={t.label}
+                    whileTap={{ scale: 0.9 }}
+                    className="flex flex-col items-center gap-1 px-4 py-2.5 rounded-2xl bg-card border border-border/20"
+                    onClick={() => { setActivePanel("none"); }}
+                  >
+                    <t.icon size={18} style={{ color: t.color }} />
+                    <span className="text-[9px] font-bold text-muted-foreground">{t.label}</span>
+                  </motion.button>
+                ))}
+              </div>
+            )}
+
 
             {/* Motive panel (replaces Teaching Mode) */}
             {activePanel === "motive" && (
@@ -456,20 +478,17 @@ export default function SmartInputBar({
       <div className="px-4 py-3 pb-6">
         {/* Action chips row — scrollable */}
         <div className="flex items-center gap-1.5 mb-2 overflow-x-auto scrollbar-none">
-          {/* + button — opens motive panel on both tabs */}
+          {/* Motive button */}
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => togglePanel("motive")}
-            className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+            className={`shrink-0 h-7 px-2.5 rounded-full flex items-center gap-1 text-[9px] font-black transition-all ${
               activePanel === "motive"
-                ? "bg-primary/20 rotate-45"
-                : "bg-muted/30"
+                ? "bg-agni-orange/15 text-agni-orange"
+                : "bg-muted/20 text-muted-foreground"
             }`}
           >
-            {activePanel === "motive"
-              ? <X size={12} style={{ color: accentColor }} />
-              : <Plus size={12} className="text-muted-foreground" />
-            }
+            <Target size={10} /> Motive
           </motion.button>
 
           {/* Actions button (one-time powerups) */}
@@ -537,6 +556,21 @@ export default function SmartInputBar({
 
         {/* Textarea + send */}
         <div className="flex items-end gap-2">
+          {/* + attachment button */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => togglePanel("attachments")}
+            className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+              activePanel === "attachments"
+                ? "bg-primary/20 rotate-45"
+                : "bg-muted/30"
+            }`}
+          >
+            {activePanel === "attachments"
+              ? <X size={14} style={{ color: accentColor }} />
+              : <Plus size={14} className="text-muted-foreground" />
+            }
+          </motion.button>
           <div className="flex-1 relative">
             <textarea
               ref={inputRef}
