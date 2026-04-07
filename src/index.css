@@ -168,16 +168,27 @@
   * {
     @apply border-border;
   }
-  html, body {
-    overflow-x: hidden;
-    overscroll-behavior: none;
+  html {
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   body {
+    min-height: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: auto;
     @apply bg-background text-foreground antialiased;
     font-family: 'Nunito', system-ui, sans-serif;
     background-attachment: fixed;
+    -webkit-overflow-scrolling: touch;
     -webkit-text-size-adjust: 100%;
     touch-action: pan-y;
+  }
+  #root {
+    min-height: 100vh;
   }
   :root body {
     background-image:
@@ -272,10 +283,21 @@
 
 /* Android viewport fix — use dvh to account for browser chrome */
 @supports (height: 100dvh) {
+  body,
+  #root {
+    min-height: 100dvh;
+  }
   .min-h-screen {
     min-height: 100dvh !important;
   }
   .h-screen {
     height: 100dvh !important;
+  }
+}
+
+@media (pointer: coarse) {
+  body {
+    background-attachment: scroll;
+    touch-action: auto;
   }
 }
