@@ -81,10 +81,10 @@ export default function ChatPage() {
     }
   }, [chat.messages]);
 
-  const handleSend = (text?: string) => {
+  const handleSend = (text?: string, hiddenPrompt?: string) => {
     const msg = text || input.trim();
     if (!msg) return;
-    chat.sendMessage(msg, teachingContext);
+    chat.sendMessage(msg, teachingContext, hiddenPrompt ? { hiddenPrompt } : undefined);
     setInput("");
   };
 
