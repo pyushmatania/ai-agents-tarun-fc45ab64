@@ -270,9 +270,12 @@
   }
 }
 
-/* Android viewport fix — dvh not supported everywhere, fallback to vh */
-@supports (min-height: 100dvh) {
-  .min-h-\[100dvh\] {
-    min-height: 100dvh;
+/* Android viewport fix — use dvh to account for browser chrome */
+@supports (height: 100dvh) {
+  .min-h-screen {
+    min-height: 100dvh !important;
+  }
+  .h-screen {
+    height: 100dvh !important;
   }
 }
