@@ -95,13 +95,14 @@ export default function ChatPage() {
   const handleSend = (text?: string, hiddenPrompt?: string) => {
     const msg = text || input.trim();
     if (!msg) return;
+    const ctx = buildTeachingContext();
     const opts = hiddenPrompt ? { hiddenPrompt, hideUserMessage: true } : undefined;
-    chat.sendMessage(msg, teachingContext, opts);
+    chat.sendMessage(msg, ctx, opts);
     setInput("");
   };
 
   const handleSuggestionClick = (suggestion: string) => {
-    chat.sendMessage(suggestion, teachingContext);
+    chat.sendMessage(suggestion, buildTeachingContext());
   };
 
   const handleModeChange = (mode: string) => {
