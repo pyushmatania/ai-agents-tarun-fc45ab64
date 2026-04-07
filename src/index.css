@@ -269,3 +269,10 @@
     font-size: 10px;
   }
 }
+
+/* Android viewport fix — dvh not supported everywhere, fallback to vh */
+@supports (min-height: 100dvh) {
+  .min-h-\[100dvh\] {
+    min-height: 100dvh;
+  }
+}
