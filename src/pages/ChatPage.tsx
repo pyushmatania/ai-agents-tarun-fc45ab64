@@ -8,7 +8,7 @@ import {
 import { useChat, type ChatTab, type ChatMessage } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
 import { getPersona } from "@/lib/neuralOS";
-import BottomNav from "@/components/BottomNav";
+
 import ContentRenderer from "@/components/chat/ContentRenderer";
 import SuggestionBar from "@/components/chat/SuggestionBar";
 import ChatToolbar from "@/components/chat/ChatToolbar";
