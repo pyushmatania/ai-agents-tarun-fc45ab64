@@ -118,12 +118,15 @@ export default function SmartInputBar({
   const handleInterestSelect = (catId: string, item: string) => {
     SFX.select();
     setActivePanel("none");
-    // Set the interest as universe vibe so it becomes part of the recipe
-    setTeachingSelection("vibe", currentVibe); // keep current vibe
-    // Store selected interest as universe context
+    setTeachingSelection("vibe", currentVibe);
     localStorage.setItem("teaching_universe_vibe", item);
     window.dispatchEvent(new Event("storage"));
     setSelectedInterest(item);
+    if (hasMessages && !value.trim() && onRecookLast) setTimeout(() => onRecookLast(), 100);
+  };
+
+  const maybeRecook = () => {
+    if (hasMessages && !value.trim() && onRecookLast) setTimeout(() => onRecookLast(), 100);
   };
 
   // Get labels for active selections — check against defaults to know if truly active
