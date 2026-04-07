@@ -384,15 +384,18 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
                 </div>
               )}
               <div>
-                {msg.role === "assistant" && i === 0 && persona.completedAt && (
-                  <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-                    className="flex items-center gap-1 mb-1"
-                  >
-                    <span className="text-[8px] font-black text-agni-purple bg-agni-purple/10 px-2 py-0.5 rounded-full">
-                      ✨ Personalized for you
-                    </span>
-                  </motion.div>
-                )}
+                {msg.role === "assistant" && i === 0 && persona.completedAt && (() => {
+                  const items: string[] = [];
+                  if (persona.currentRole) items.push(persona.currentRole);
+                  if (persona.shows?.length) items.push(persona.shows[0]);
+                  if (persona.sports?.length) items.push(persona.sports[0]);
+                  if (persona.curious?.length) items.push(persona.curious[0]);
+                  if (persona.hobbies?.length) items.push(persona.hobbies[0]);
+                  if (persona.music?.length) items.push(persona.music[0]);
+                  return (
+                    <PersonaBadge items={items} />
+                  );
+                })()}
                 <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-[12.5px] leading-[1.6] font-semibold ${
                   msg.role === "user"
                     ? "bg-agni-green text-white rounded-br-sm shadow-[0_2px_0_0_hsl(100,100%,31%)]"
