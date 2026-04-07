@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Sparkles, Loader2, X, Check, Brain, ArrowRight, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,7 +54,7 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
   useEffect(() => {
     if (open) {
       setLiveQuery(query);
-      setTimeout(() => inputRef.current?.focus(), 100);
+      setTimeout(() => inputRef.current?.focus(), 150);
     }
   }, [query, open]);
 
@@ -98,18 +99,30 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
     }
   }, [open]);
 
-  // Manual search: only triggered by pressing send/enter
+  // Debounced autocomplete: search as user types (500ms delay)
+  useEffect(() => {
+    if (!open) return;
+    const trimmed = liveQuery.trim();
+    if (!trimmed || trimmed.length < 2) return;
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      doSearch(trimmed);
+    }, 500);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [liveQuery, open, doSearch]);
+
+  // Manual search: force re-search on send/enter
   const handleManualSearch = useCallback(() => {
     const trimmed = liveQuery.trim();
     if (trimmed) {
-      // Force re-search even if same query
       lastSearchedQuery.current = "";
       doSearch(trimmed);
-    } else if (results) {
-      // Blank query + press send → keep showing last results (iterate)
-      // Do nothing, results stay visible
     }
-  }, [liveQuery, doSearch, results]);
+  }, [liveQuery, doSearch]);
 
   const handleSelect = (r: AIResult) => {
     onSelect({
@@ -139,16 +152,17 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
 
   const catMeta = CATEGORY_MAP[currentCategory] || CATEGORY_MAP.curious;
 
-  return (
+  const content = (
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[200] bg-background flex flex-col"
+        className="fixed inset-0 z-[9999] bg-background flex flex-col"
+        style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }}
       >
         {/* Top bar */}
-        <div className="flex items-center gap-3 px-4 pt-3 pb-2 border-b border-border bg-card">
+        <div className="flex items-center gap-3 px-4 pt-3 pb-2 border-b border-border bg-card shrink-0">
           <button onClick={onClose} className="w-9 h-9 rounded-full bg-muted/60 flex items-center justify-center shrink-0">
             <X size={16} className="text-foreground" />
           </button>
@@ -178,19 +192,19 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
         </div>
 
         {/* Category badge */}
-        <div className="px-4 pt-2 pb-1 flex items-center gap-2">
+        <div className="px-4 pt-2 pb-1 flex items-center gap-2 shrink-0">
           <span className="text-[9px] font-black px-2.5 py-1 rounded-full" style={{ background: `${catMeta.color}20`, color: catMeta.color }}>
             {catMeta.emoji} {catMeta.label}
           </span>
           {liveQuery.trim() && (
             <span className="text-[9px] text-muted-foreground">
-              {loading ? "Searching with AI..." : results ? `${results.results.length} result${results.results.length !== 1 ? "s" : ""}` : "Type to search"}
+              {loading ? "Searching with AI..." : results ? `${results.results.length} result${results.results.length !== 1 ? "s" : ""}` : "Start typing to search"}
             </span>
           )}
         </div>
 
         {/* Content — full scrollable area */}
-        <div className="flex-1 overflow-y-auto px-4 pb-24 scrollbar-none">
+        <div className="flex-1 overflow-y-auto px-4 pb-24 scrollbar-none overscroll-contain">
           {/* Loading state */}
           {loading && !results && (
             <div className="flex flex-col items-center justify-center py-16">
@@ -210,7 +224,7 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
               </div>
               <p className="text-sm font-bold text-foreground mb-1">Smart AI Search</p>
               <p className="text-[11px] text-muted-foreground max-w-[240px]">
-                Start typing and press Enter or the send button to search — AI handles typos and partial names
+                Start typing to auto-search — AI handles typos, partial names, and predictions
               </p>
             </div>
           )}
@@ -361,6 +375,9 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
       </motion.div>
     </AnimatePresence>
   );
+
+  // Use portal to render at document.body level, escaping any parent z-index/overflow constraints
+  return createPortal(content, document.body);
 };
 
 export default SmartInterestSearch;
