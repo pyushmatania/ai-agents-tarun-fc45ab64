@@ -1,10 +1,24 @@
-import { Bell, Settings, Flame, Sparkles } from "lucide-react";
+import { Bell, Settings, Flame, Sparkles, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useState } from "react";
-import BotIllustration from "./illustrations/BotIllustration";
+import { useState, useCallback, useRef } from "react";
+import Agni, { AgniExpression } from "./Agni";
 import MascotProfileModal from "./MascotProfileModal";
 import { hasPersona } from "@/lib/neuralOS";
+import { SFX } from "@/lib/sounds";
+
+const EXPRESSIONS: AgniExpression[] = ["default", "happy", "excited", "thinking", "teaching", "celebrating"];
+
+const EXPR_SOUNDS: Record<AgniExpression, () => void> = {
+  default: () => SFX.tap(),
+  happy: () => SFX.powerup("green"),
+  excited: () => SFX.powerup("orange"),
+  thinking: () => SFX.powerup("purple"),
+  teaching: () => SFX.powerup("blue"),
+  celebrating: () => SFX.powerup("gold"),
+  sad: () => SFX.powerup("pink"),
+  sleeping: () => SFX.tap(),
+};
 
 interface HeaderProps {
   name: string;
@@ -18,6 +32,24 @@ const Header = ({ name, progress }: HeaderProps) => {
   const level = Math.floor(xp / 100) + 1;
   const personaActive = hasPersona();
 
+  const [exprIndex, setExprIndex] = useState(0);
+  const [currentExpr, setCurrentExpr] = useState<AgniExpression>("default");
+  const resetTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  const handleMascotTap = useCallback(() => {
+    const nextIdx = (exprIndex + 1) % EXPRESSIONS.length;
+    const nextExpr = EXPRESSIONS[nextIdx];
+    setExprIndex(nextIdx);
+    setCurrentExpr(nextExpr);
+    EXPR_SOUNDS[nextExpr]();
+
+    if (resetTimer.current) clearTimeout(resetTimer.current);
+    resetTimer.current = setTimeout(() => {
+      setCurrentExpr("default");
+      setExprIndex(0);
+    }, 4000);
+  }, [exprIndex]);
+
   return (
     <>
       <motion.div
@@ -27,15 +59,14 @@ const Header = ({ name, progress }: HeaderProps) => {
         className="flex items-center justify-between mb-4"
       >
         <div className="flex items-center gap-2.5">
-          {/* 🧠 Tap mascot to open Neural OS profile */}
-          <motion.button
-            whileTap={{ scale: 0.92 }}
-            onClick={() => setShowProfile(true)}
-            className="relative"
-            title="My Persona — tap to edit"
+          {/* 🧠 Tap mascot to cycle expressions */}
+          <div
+            onClick={handleMascotTap}
+            className="relative cursor-pointer"
+            title="Tap me!"
           >
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center ring-2 ring-primary/30 hover:ring-primary/60 transition-all">
-              <BotIllustration size={36} />
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center ring-2 ring-primary/30 overflow-hidden">
+              <Agni expression={currentExpr} size={40} animate={true} />
             </div>
             <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-primary text-[7px] font-bold text-white flex items-center justify-center border-2 border-background">
               {level}
@@ -45,7 +76,7 @@ const Header = ({ name, progress }: HeaderProps) => {
                 <Sparkles size={6} className="text-white" />
               </div>
             )}
-          </motion.button>
+          </div>
           <div>
             <h2 className="text-sm font-bold text-foreground leading-tight">Hello, {name}</h2>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -59,6 +90,14 @@ const Header = ({ name, progress }: HeaderProps) => {
           </div>
         </div>
         <div className="flex items-center gap-1.5">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => navigate("/settings")}
+            className="w-8 h-8 rounded-xl glass flex items-center justify-center border border-border/50 hover:border-primary/30 transition-colors"
+            title="Profile"
+          >
+            <User size={14} className="text-muted-foreground" />
+          </motion.button>
           <motion.button
             whileTap={{ scale: 0.9 }}
             className="w-8 h-8 rounded-xl glass flex items-center justify-center border border-border/50 hover:border-primary/30 transition-colors relative"

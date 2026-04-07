@@ -1,6 +1,6 @@
 import BottomNav from "@/components/BottomNav";
 import PageTransition, { FadeIn, StaggerContainer, StaggerItem } from "@/components/PageTransition";
-import { Trophy, Target, Flame, Zap, Calendar, BookOpen, Star, Award, Lock, Heart, Diamond, Shield, Crown, TrendingUp, ChevronRight } from "lucide-react";
+import { Trophy, Target, Flame, Zap, Calendar, BookOpen, Star, Award, Lock, Heart, Diamond, Shield, Crown, TrendingUp, ChevronRight, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
