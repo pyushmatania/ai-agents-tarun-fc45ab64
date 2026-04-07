@@ -71,6 +71,18 @@ export const clearPersona = () => {
   localStorage.removeItem(PERSONA_KEY);
 };
 
+/** Popular picks per category — items most commonly selected, shown at top with trending badge */
+export const POPULAR_PICKS: Record<string, string[]> = {
+  shows: ["Naruto", "Breaking Bad", "Money Heist", "Scam 1992", "Attack on Titan", "3 Idiots"],
+  sports: ["Virat Kohli", "MS Dhoni", "Cricket", "F1", "Lionel Messi", "Football"],
+  music: ["Arijit Singh", "Coldplay", "A.R. Rahman", "The Weeknd", "AP Dhillon", "Linkin Park"],
+  gaming: ["Valorant", "GTA V / GTA Online", "Minecraft", "BGMI", "Elden Ring", "CS2"],
+  news: ["@elonmusk", "@karpathy", "Tanmay Bhat", "Fireship", "@sama", "Lex Fridman"],
+  hobbies: ["Photography", "Cooking", "Travel", "Fitness", "Reading", "Gardening"],
+  books: ["Atomic Habits", "Rich Dad Poor Dad", "Zero to One", "Sapiens", "The Alchemist", "Deep Work"],
+  curious: ["How do AI agents work?", "Build my first chatbot", "Can AI replace my job?", "What is RAG?"],
+};
+
 /** Extract unique sub-filter tags from a category's suggestions — shared across onboarding & settings */
 export function getSubFilters(cat: SuggestionCategory): string[] {
   const tagMap: Record<string, number> = {};

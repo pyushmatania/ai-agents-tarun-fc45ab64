@@ -15,7 +15,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { InterestPill } from "@/components/InterestPill";
 import type { AgniExpression } from "@/components/Agni";
 import { motion, AnimatePresence } from "framer-motion";
-import { savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona, getSubFilters, getSubFilterCount } from "@/lib/neuralOS";
+import { savePersona, SUGGESTION_CATEGORIES, NeuralOSPersona, getSubFilters, getSubFilterCount, POPULAR_PICKS } from "@/lib/neuralOS";
+import { TrendingUp, Crown } from "lucide-react";
 
 /* ── EXPANDED ROLES ── */
 const ROLES = [
@@ -697,6 +698,55 @@ const OnboardingPage = () => {
                     </motion.button>
                   )}
                 </div>
+              )}
+
+              {/* 🔥 Popular Picks Section */}
+              {!search && !activeSubFilter && POPULAR_PICKS[activeCategory.id] && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="mb-2 shrink-0"
+                >
+                  <div className="flex items-center gap-1.5 mb-1.5 px-1">
+                    <TrendingUp size={11} className="text-agni-orange" />
+                    <span className="text-[9px] font-black text-agni-orange uppercase tracking-wider">Popular Picks</span>
+                    <Crown size={9} className="text-agni-gold" />
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(POPULAR_PICKS[activeCategory.id] || []).map((itemName, i) => {
+                      const suggestion = activeCategory.suggestions.find(s => s.name === itemName);
+                      return (
+                        <motion.div
+                          key={itemName}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.25 + i * 0.04 }}
+                          className="relative"
+                        >
+                          <InterestPill
+                            name={itemName}
+                            emoji={suggestion?.emoji}
+                            categoryId={activeCategory.id}
+                            index={i}
+                            selected={currentItems.includes(itemName)}
+                            onClick={() => toggleItem(itemName)}
+                          />
+                          {!currentItems.includes(itemName) && (
+                            <motion.div
+                              animate={{ scale: [1, 1.2, 1] }}
+                              transition={{ duration: 1.5, repeat: Infinity }}
+                              className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-agni-orange flex items-center justify-center shadow-md z-10"
+                            >
+                              <TrendingUp size={8} className="text-white" />
+                            </motion.div>
+                          )}
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                  <div className="h-px bg-border/20 mt-2" />
+                </motion.div>
               )}
 
               {/* Suggestions — Colorful Pills */}

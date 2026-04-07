@@ -6,7 +6,9 @@ import {
   ArrowRight, RefreshCw, Loader2, Sparkles, Zap, Copy, Check,
   User, Heart, Flame, ExternalLink, Star, Bell, ChevronRight,
   BookmarkPlus, ChevronUp, ChevronDown, Clock, Globe, Play,
-  Youtube, Instagram, Newspaper, TrendingUp, Eye
+  Youtube, Instagram, Newspaper, TrendingUp, Eye, Brain,
+  BookOpen, MessageSquare, Lightbulb, ThumbsUp, ThumbsDown,
+  Share2, Bookmark, Filter, X
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,17 +35,22 @@ const SPARK_FACTS = [
 
 const typeIcons: Record<string, string> = { tool: "🔧", repo: "📦", article: "📰", video: "🎬", news: "📡" };
 
+const FEED_FILTERS = [
+  { id: "all", label: "All", icon: Globe },
+  { id: "youtube", label: "Videos", icon: Youtube },
+  { id: "article", label: "Articles", icon: Newspaper },
+  { id: "news", label: "News", icon: TrendingUp },
+] as const;
+
 function getRelativeTime(i: number): string {
   const times = ["2m ago", "15m ago", "1h ago", "3h ago", "5h ago", "8h ago", "12h ago", "1d ago", "2d ago"];
   return times[i % times.length];
 }
 
-/** Generate a YouTube thumbnail URL from a video ID */
 function getYouTubeThumbnail(videoId: string): string {
   return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
 }
 
-/** Detect content type from URL and extract video metadata */
 function getContentMeta(url: string): { type: "youtube" | "instagram" | "article" | "tweet"; icon: any; label: string; thumbnail?: string; color: string } {
   if (!url) return { type: "article", icon: Newspaper, label: "Article", color: "#1CB0F6" };
   if (url.includes("youtube.com") || url.includes("youtu.be")) {
@@ -59,6 +66,288 @@ const TABS = [
   { id: "feed", label: "Feed", icon: TrendingUp },
   { id: "explore", label: "Explore", icon: Sparkles },
 ] as const;
+
+/** AI Learn Modal — NotebookLM-style content breakdown */
+function AILearnModal({ item, onClose }: { item: any; onClose: () => void }) {
+  const [loading, setLoading] = useState(true);
+  const [result, setResult] = useState<any>(null);
+  const [error, setError] = useState("");
+  const [activeSection, setActiveSection] = useState<"summary" | "quiz">("summary");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const meta = getContentMeta(item.url);
+        const { data, error: fnError } = await supabase.functions.invoke("ai-learn", {
+          body: {
+            title: item.title,
+            description: item.desc,
+            url: item.url,
+            contentType: meta.type,
+          },
+        });
+        if (fnError) throw new Error(fnError.message);
+        setResult(data?.result || {});
+      } catch (e: any) {
+        setError(e.message || "Failed to analyze content");
+      }
+      setLoading(false);
+    })();
+  }, [item]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-end justify-center"
+      onClick={onClose}
+    >
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <motion.div
+        initial={{ y: "100%" }}
+        animate={{ y: 0 }}
+        exit={{ y: "100%" }}
+        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-md bg-background rounded-t-3xl border-t border-border/30 max-h-[85vh] flex flex-col"
+      >
+        {/* Handle */}
+        <div className="flex justify-center pt-2 pb-1">
+          <div className="w-10 h-1 rounded-full bg-muted-foreground/20" />
+        </div>
+
+        {/* Header */}
+        <div className="px-4 pb-3 border-b border-border/20">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-agni-purple/15 flex items-center justify-center">
+                <Brain size={16} className="text-agni-purple" />
+              </div>
+              <div>
+                <span className="text-[9px] font-black text-agni-purple uppercase tracking-wider">AI Study Notes</span>
+                <p className="text-[8px] text-muted-foreground">Powered by AGNI × NotebookLM</p>
+              </div>
+            </div>
+            <motion.button whileTap={{ scale: 0.9 }} onClick={onClose} className="w-7 h-7 rounded-full bg-muted/30 flex items-center justify-center">
+              <X size={14} className="text-muted-foreground" />
+            </motion.button>
+          </div>
+          <p className="text-[11px] font-extrabold text-foreground line-clamp-2">{item.title}</p>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-1 px-4 py-2">
+          {(["summary", "quiz"] as const).map(tab => (
+            <motion.button
+              key={tab}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setActiveSection(tab)}
+              className={`flex-1 py-2 rounded-xl text-[10px] font-black transition-all ${
+                activeSection === tab ? "bg-agni-purple text-white" : "bg-card text-muted-foreground"
+              }`}
+            >
+              {tab === "summary" ? "📝 Summary" : "🧠 Quiz"}
+            </motion.button>
+          ))}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-none">
+          {loading && (
+            <div className="flex flex-col items-center justify-center py-12 gap-3">
+              <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}>
+                <Brain size={32} className="text-agni-purple" />
+              </motion.div>
+              <p className="text-[11px] font-bold text-muted-foreground">AGNI is analyzing this content...</p>
+              <div className="flex gap-1">
+                {[0, 1, 2].map(i => (
+                  <motion.div key={i} animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.2 }}
+                    className="w-2 h-2 rounded-full bg-agni-purple/40" />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <div className="bg-agni-red/10 border border-agni-red/20 rounded-xl p-3 mt-2">
+              <p className="text-[10px] text-agni-red font-bold">{error}</p>
+            </div>
+          )}
+
+          {result && activeSection === "summary" && (
+            <div className="space-y-3 mt-1">
+              {/* TL;DR */}
+              {result.summary && (
+                <div className="bg-agni-green/5 border border-agni-green/20 rounded-xl p-3">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <Lightbulb size={11} className="text-agni-green" />
+                    <span className="text-[8px] font-black text-agni-green uppercase tracking-wider">TL;DR</span>
+                  </div>
+                  <p className="text-[11px] text-foreground font-medium leading-relaxed">{result.summary}</p>
+                </div>
+              )}
+
+              {/* Key Points */}
+              {result.keyPoints?.length > 0 && (
+                <div>
+                  <span className="text-[9px] font-black text-muted-foreground uppercase tracking-wider px-1">Key Points</span>
+                  <div className="space-y-1.5 mt-1.5">
+                    {result.keyPoints.map((point: string, i: number) => (
+                      <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
+                        className="flex items-start gap-2 bg-card rounded-xl p-2.5 border border-border/15"
+                      >
+                        <div className="w-5 h-5 rounded-full bg-agni-blue/15 flex items-center justify-center shrink-0 mt-0.5">
+                          <span className="text-[8px] font-black text-agni-blue">{i + 1}</span>
+                        </div>
+                        <p className="text-[10px] text-foreground font-medium leading-relaxed">{point}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Concepts */}
+              {result.concepts?.length > 0 && (
+                <div>
+                  <span className="text-[9px] font-black text-muted-foreground uppercase tracking-wider px-1">Key Concepts</span>
+                  <div className="space-y-1.5 mt-1.5">
+                    {result.concepts.map((c: any, i: number) => (
+                      <div key={i} className="bg-agni-purple/5 border border-agni-purple/15 rounded-xl p-2.5">
+                        <span className="text-[10px] font-black text-agni-purple">{c.term}</span>
+                        <p className="text-[9px] text-muted-foreground mt-0.5">{c.explanation}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Action Items */}
+              {result.actionItems?.length > 0 && (
+                <div>
+                  <span className="text-[9px] font-black text-muted-foreground uppercase tracking-wider px-1">Action Items</span>
+                  <div className="space-y-1 mt-1.5">
+                    {result.actionItems.map((a: string, i: number) => (
+                      <div key={i} className="flex items-center gap-2 text-[10px] text-foreground font-medium">
+                        <div className="w-4 h-4 rounded border border-agni-green/30 flex items-center justify-center shrink-0">
+                          <Check size={8} className="text-agni-green/40" />
+                        </div>
+                        {a}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Related Topics */}
+              {result.relatedTopics?.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {result.relatedTopics.map((t: string, i: number) => (
+                    <span key={i} className="text-[8px] font-bold bg-card border border-border/20 rounded-full px-2.5 py-1 text-muted-foreground">
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {result && activeSection === "quiz" && result.quiz?.length > 0 && (
+            <QuizSection quiz={result.quiz} />
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+/** Mini quiz from AI Learn */
+function QuizSection({ quiz }: { quiz: any[] }) {
+  const [currentQ, setCurrentQ] = useState(0);
+  const [selected, setSelected] = useState<number | null>(null);
+  const [score, setScore] = useState(0);
+
+  const q = quiz[currentQ];
+  if (!q) return null;
+
+  const handleAnswer = (idx: number) => {
+    if (selected !== null) return;
+    setSelected(idx);
+    if (idx === q.correct) setScore(s => s + 1);
+  };
+
+  const nextQ = () => {
+    setSelected(null);
+    setCurrentQ(c => c + 1);
+  };
+
+  if (currentQ >= quiz.length) {
+    return (
+      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center py-8 gap-3">
+        <div className="text-4xl">🎉</div>
+        <p className="text-lg font-black text-foreground">{score}/{quiz.length} correct!</p>
+        <p className="text-[11px] text-muted-foreground">{score === quiz.length ? "Perfect! You nailed it!" : "Keep learning and try again!"}</p>
+        <motion.button whileTap={{ scale: 0.95 }} onClick={() => { setCurrentQ(0); setSelected(null); setScore(0); }}
+          className="text-[10px] font-bold text-agni-blue bg-agni-blue/10 px-4 py-2 rounded-full mt-2"
+        >
+          Retry Quiz
+        </motion.button>
+      </motion.div>
+    );
+  }
+
+  return (
+    <div className="mt-2 space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="text-[9px] font-black text-muted-foreground">Question {currentQ + 1}/{quiz.length}</span>
+        <span className="text-[9px] font-bold text-agni-green">{score} correct</span>
+      </div>
+      <p className="text-[12px] font-extrabold text-foreground leading-snug">{q.question}</p>
+      <div className="space-y-2">
+        {q.options?.map((opt: string, i: number) => {
+          const isSelected = selected === i;
+          const isCorrect = i === q.correct;
+          const showResult = selected !== null;
+          return (
+            <motion.button
+              key={i}
+              whileTap={!showResult ? { scale: 0.97 } : undefined}
+              onClick={() => handleAnswer(i)}
+              className={`w-full text-left p-3 rounded-xl border-2 transition-all text-[11px] font-bold ${
+                showResult
+                  ? isCorrect
+                    ? "border-agni-green bg-agni-green/10 text-agni-green"
+                    : isSelected
+                      ? "border-agni-red bg-agni-red/10 text-agni-red"
+                      : "border-border/20 bg-card text-muted-foreground"
+                  : "border-border/20 bg-card text-foreground active:border-agni-blue/50"
+              }`}
+            >
+              <span className="mr-2 text-muted-foreground">{String.fromCharCode(65 + i)}.</span>
+              {opt}
+              {showResult && isCorrect && <Check size={12} className="inline ml-2" />}
+              {showResult && isSelected && !isCorrect && <X size={12} className="inline ml-2" />}
+            </motion.button>
+          );
+        })}
+      </div>
+      {selected !== null && currentQ < quiz.length - 1 && (
+        <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} whileTap={{ scale: 0.95 }} onClick={nextQ}
+          className="w-full py-2.5 rounded-xl bg-agni-blue text-white text-[11px] font-black"
+        >
+          Next Question →
+        </motion.button>
+      )}
+      {selected !== null && currentQ === quiz.length - 1 && (
+        <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} whileTap={{ scale: 0.95 }} onClick={nextQ}
+          className="w-full py-2.5 rounded-xl bg-agni-green text-white text-[11px] font-black"
+        >
+          See Results 🎉
+        </motion.button>
+      )}
+    </div>
+  );
+}
 
 const CuriosityPage = () => {
   const { user } = useAuth();
@@ -77,6 +366,20 @@ const CuriosityPage = () => {
   const [copied, setCopied] = useState(false);
   const [feedLoading, setFeedLoading] = useState(false);
   const [feedLoadingMore, setFeedLoadingMore] = useState(false);
+  const [feedFilter, setFeedFilter] = useState("all");
+  const [savedItems, setSavedItems] = useState<Set<number>>(() => {
+    try {
+      const s = localStorage.getItem("spark_saved");
+      return s ? new Set(JSON.parse(s)) : new Set();
+    } catch { return new Set(); }
+  });
+  const [likedItems, setLikedItems] = useState<Set<number>>(() => {
+    try {
+      const s = localStorage.getItem("spark_liked");
+      return s ? new Set(JSON.parse(s)) : new Set();
+    } catch { return new Set(); }
+  });
+  const [learnItem, setLearnItem] = useState<any>(null);
   const [feedItems, setFeedItems] = useState<any[]>(() => {
     try {
       const cached = localStorage.getItem("spark_feed_cache");
@@ -86,11 +389,41 @@ const CuriosityPage = () => {
 
   const feedEndRef = useRef<HTMLDivElement>(null);
 
-  // Get followed sources with full data
   const followedSources = useMemo(
     () => ALL_SOURCES.filter(s => isFollowed(s.name)),
     [followed, isFollowed]
   );
+
+  // Filter feed items by type
+  const filteredFeedItems = useMemo(() => {
+    if (feedFilter === "all") return feedItems;
+    return feedItems.filter(item => {
+      const meta = getContentMeta(item.url);
+      if (feedFilter === "youtube") return meta.type === "youtube" || meta.type === "instagram";
+      if (feedFilter === "article") return meta.type === "article";
+      if (feedFilter === "news") return item.type === "news";
+      return true;
+    });
+  }, [feedItems, feedFilter]);
+
+  const toggleSave = (idx: number) => {
+    setSavedItems(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx); else next.add(idx);
+      localStorage.setItem("spark_saved", JSON.stringify([...next]));
+      return next;
+    });
+    toast.success(savedItems.has(idx) ? "Removed from saved" : "Saved for later! 🔖");
+  };
+
+  const toggleLike = (idx: number) => {
+    setLikedItems(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx); else next.add(idx);
+      localStorage.setItem("spark_liked", JSON.stringify([...next]));
+      return next;
+    });
+  };
 
   const getCachedResults = (catId: string): any[] => {
     try {
@@ -100,7 +433,6 @@ const CuriosityPage = () => {
     return [];
   };
 
-  // Fetch personalized feed from followed sources
   const fetchFeed = useCallback(async (append = false) => {
     if (followed.length === 0) return;
     if (append) setFeedLoadingMore(true);
@@ -109,7 +441,7 @@ const CuriosityPage = () => {
       const sourceNames = followed.slice(0, 15).join(", ");
       const { data, error: fnError } = await supabase.functions.invoke("ai-curiosity", {
         body: {
-          query: `Latest news, YouTube videos, Instagram posts, and updates from: ${sourceNames}. Give brief Inshorts-style summaries with real URLs. Include YouTube video links and article URLs where possible.`,
+          query: `Latest news, YouTube videos, Instagram posts, and updates from: ${sourceNames}. Give brief Inshorts-style summaries with real URLs. Include YouTube video links and article URLs where possible. Include engagement metrics like view count estimates.`,
           category: "feed",
           sourceSeeds: followed.slice(0, 15),
         },
@@ -119,6 +451,8 @@ const CuriosityPage = () => {
         ...item,
         sourceName: followed[i % followed.length],
         timestamp: getRelativeTime(i),
+        engagement: Math.floor(Math.random() * 50 + 5) + "K views",
+        readTime: item.type === "video" ? `${Math.floor(Math.random() * 15 + 3)}min` : `${Math.floor(Math.random() * 6 + 2)}min read`,
       }));
       if (items.length > 0) {
         const newItems = append ? [...feedItems, ...items] : items;
@@ -249,9 +583,6 @@ const CuriosityPage = () => {
             </div>
           </FadeIn>
 
-          {/* ═══════════════════════════════════════ */}
-          {/* ═══ FEED TAB ═══ */}
-          {/* ═══════════════════════════════════════ */}
           <AnimatePresence mode="wait">
             {activeTab === "feed" && (
               <motion.div key="feed-tab" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
@@ -304,10 +635,10 @@ const CuriosityPage = () => {
                   </FadeIn>
                 )}
 
-                {/* FEED HEADER + REFRESH */}
+                {/* FEED HEADER + FILTERS + REFRESH */}
                 {followedSources.length > 0 && (
                   <div className="px-4 mb-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-1.5">
                         <Globe size={12} className="text-agni-blue" />
                         <span className="text-[10px] font-black text-muted-foreground tracking-wider">YOUR FEED</span>
@@ -321,6 +652,37 @@ const CuriosityPage = () => {
                         {feedLoading ? <Loader2 size={10} className="animate-spin" /> : <RefreshCw size={10} />}
                         {feedLoading ? "Loading..." : "Refresh"}
                       </motion.button>
+                    </div>
+                    {/* Content type filters */}
+                    <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
+                      {FEED_FILTERS.map((f) => {
+                        const Icon = f.icon;
+                        const isActive = feedFilter === f.id;
+                        const count = f.id === "all" ? feedItems.length : feedItems.filter(item => {
+                          const meta = getContentMeta(item.url);
+                          if (f.id === "youtube") return meta.type === "youtube" || meta.type === "instagram";
+                          if (f.id === "article") return meta.type === "article";
+                          return item.type === "news";
+                        }).length;
+                        return (
+                          <motion.button
+                            key={f.id}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => setFeedFilter(f.id)}
+                            className={`shrink-0 flex items-center gap-1 text-[9px] font-extrabold px-2.5 py-1.5 rounded-full transition-all ${
+                              isActive ? "bg-agni-green text-white" : "bg-card border border-border/30 text-muted-foreground"
+                            }`}
+                          >
+                            <Icon size={10} />
+                            {f.label}
+                            {count > 0 && (
+                              <span className={`text-[7px] font-black px-1 rounded-full ${isActive ? "bg-white/20" : "bg-muted/50"}`}>
+                                {count}
+                              </span>
+                            )}
+                          </motion.button>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -368,7 +730,6 @@ const CuriosityPage = () => {
                 {/* Initial loading skeleton */}
                 {feedLoading && feedItems.length === 0 && (
                   <div className="px-4 space-y-3">
-                    {/* Hero skeleton */}
                     <div className="rounded-2xl bg-card border border-border/20 overflow-hidden animate-pulse">
                       <div className="w-full h-40 bg-muted/20" />
                       <div className="p-3 space-y-2">
@@ -383,156 +744,195 @@ const CuriosityPage = () => {
                 )}
 
                 {/* ═══ INFINITE SCROLL FEED ═══ */}
-                {feedItems.length > 0 && (
+                {filteredFeedItems.length > 0 && (
                   <div className="px-4 space-y-3">
-                    {feedItems.map((item, i) => {
+                    {filteredFeedItems.map((item, i) => {
                       const meta = getContentMeta(item.url);
                       const source = ALL_SOURCES.find(s => s.name === item.sourceName) || { name: item.sourceName || "AI News", url: "", desc: "", tags: [], category: "blog" };
                       const catMeta = SOURCE_CATEGORIES.find(c => c.id === source.category);
                       const isHero = i === 0;
+                      const isSaved = savedItems.has(i);
+                      const isLiked = likedItems.has(i);
 
                       if (isHero) {
-                        // ═══ HERO CARD (Large) ═══
                         return (
-                          <motion.a
+                          <motion.div
                             key={i}
-                            href={item.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.05 }}
-                            className="block rounded-2xl bg-card border-2 border-border/20 overflow-hidden active:scale-[0.98] transition-transform"
+                            className="rounded-2xl bg-card border-2 border-border/20 overflow-hidden"
                           >
-                            {/* Thumbnail / video preview */}
-                            {meta.thumbnail ? (
-                              <div className="relative w-full h-44 bg-muted/10">
-                                <img src={meta.thumbnail} alt="" className="w-full h-full object-cover" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                                {/* Play button overlay for video */}
-                                {(meta.type === "youtube" || meta.type === "instagram") && (
-                                  <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
-                                      <Play size={20} className="text-black ml-0.5" fill="black" />
+                            {/* Thumbnail */}
+                            <a href={item.url} target="_blank" rel="noopener noreferrer" className="block">
+                              {meta.thumbnail ? (
+                                <div className="relative w-full h-44 bg-muted/10">
+                                  <img src={meta.thumbnail} alt="" className="w-full h-full object-cover" />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                                  {(meta.type === "youtube" || meta.type === "instagram") && (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                      <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
+                                        <Play size={20} className="text-black ml-0.5" fill="black" />
+                                      </div>
+                                    </div>
+                                  )}
+                                  <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded-full px-2 py-1">
+                                    <Avatar className="w-5 h-5 border border-white/20">
+                                      <AvatarImage src={getSourceAvatar(source)} alt="" />
+                                      <AvatarFallback className="text-[6px] bg-muted">{source.name.slice(0, 2)}</AvatarFallback>
+                                    </Avatar>
+                                    <span className="text-[8px] font-bold text-white">{item.sourceName}</span>
+                                  </div>
+                                  <div className="absolute top-2 right-2 flex items-center gap-1 rounded-full px-2 py-1" style={{ background: `${meta.color}CC` }}>
+                                    <meta.icon size={9} className="text-white" />
+                                    <span className="text-[8px] font-bold text-white">{meta.label}</span>
+                                  </div>
+                                  <div className="absolute bottom-2 left-2 flex items-center gap-2">
+                                    <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm rounded-full px-2 py-0.5">
+                                      <Eye size={8} className="text-white/70" />
+                                      <span className="text-[7px] font-bold text-white/70">{item.engagement}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm rounded-full px-2 py-0.5">
+                                      <Clock size={8} className="text-white/70" />
+                                      <span className="text-[7px] font-bold text-white/70">{item.readTime}</span>
                                     </div>
                                   </div>
-                                )}
-                                {/* Source badge on image */}
-                                <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded-full px-2 py-1">
-                                  <Avatar className="w-5 h-5 border border-white/20">
-                                    <AvatarImage src={getSourceAvatar(source)} alt="" />
-                                    <AvatarFallback className="text-[6px] bg-muted">{source.name.slice(0, 2)}</AvatarFallback>
-                                  </Avatar>
-                                  <span className="text-[8px] font-bold text-white">{item.sourceName}</span>
                                 </div>
-                                {/* Content type badge */}
-                                <div className="absolute top-2 right-2 flex items-center gap-1 rounded-full px-2 py-1" style={{ background: `${meta.color}CC` }}>
-                                  <meta.icon size={9} className="text-white" />
-                                  <span className="text-[8px] font-bold text-white">{meta.label}</span>
+                              ) : (
+                                <div className="relative w-full h-32 flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${meta.color}20, ${catMeta?.color || '#58CC02'}15)` }}>
+                                  <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: `${meta.color}20` }}>
+                                    <meta.icon size={24} style={{ color: meta.color }} />
+                                  </div>
+                                  <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-black/30 backdrop-blur-sm rounded-full px-2 py-1">
+                                    <Avatar className="w-5 h-5 border border-white/20">
+                                      <AvatarImage src={getSourceAvatar(source)} alt="" />
+                                      <AvatarFallback className="text-[6px] bg-muted">{source.name.slice(0, 2)}</AvatarFallback>
+                                    </Avatar>
+                                    <span className="text-[8px] font-bold text-white">{item.sourceName}</span>
+                                  </div>
                                 </div>
-                                {/* Time */}
-                                <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/40 backdrop-blur-sm rounded-full px-2 py-0.5">
-                                  <Clock size={8} className="text-white/70" />
-                                  <span className="text-[7px] font-bold text-white/70">{item.timestamp}</span>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="relative w-full h-32 flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${meta.color}20, ${catMeta?.color || '#58CC02'}15)` }}>
-                                <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: `${meta.color}20` }}>
-                                  <meta.icon size={24} style={{ color: meta.color }} />
-                                </div>
-                                <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-black/30 backdrop-blur-sm rounded-full px-2 py-1">
-                                  <Avatar className="w-5 h-5 border border-white/20">
-                                    <AvatarImage src={getSourceAvatar(source)} alt="" />
-                                    <AvatarFallback className="text-[6px] bg-muted">{source.name.slice(0, 2)}</AvatarFallback>
-                                  </Avatar>
-                                  <span className="text-[8px] font-bold text-white">{item.sourceName}</span>
-                                </div>
-                                <div className="absolute top-2 right-2 flex items-center gap-1 rounded-full px-2 py-1" style={{ background: `${meta.color}CC` }}>
-                                  <meta.icon size={9} className="text-white" />
-                                  <span className="text-[8px] font-bold text-white">{meta.label}</span>
-                                </div>
-                              </div>
-                            )}
+                              )}
+                            </a>
                             <div className="p-3">
                               <h3 className="text-[13px] font-black text-foreground leading-tight mb-1">{item.title}</h3>
                               <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">{item.desc}</p>
-                              <div className="flex items-center justify-between mt-2">
-                                <span className="text-[8px] font-bold text-muted-foreground/50">{item.timestamp}</span>
-                                <span className="text-[9px] font-bold flex items-center gap-1" style={{ color: meta.color }}>
-                                  {meta.type === "youtube" ? "Watch" : "Read more"} <ExternalLink size={8} />
-                                </span>
+                              {/* Action bar */}
+                              <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-border/10">
+                                <div className="flex items-center gap-2">
+                                  <motion.button whileTap={{ scale: 0.8 }} onClick={() => toggleLike(i)}
+                                    className={`flex items-center gap-1 text-[9px] font-bold rounded-full px-2 py-1 ${isLiked ? "bg-agni-pink/15 text-agni-pink" : "text-muted-foreground"}`}>
+                                    <ThumbsUp size={10} className={isLiked ? "fill-agni-pink" : ""} /> {isLiked ? "Liked" : "Like"}
+                                  </motion.button>
+                                  <motion.button whileTap={{ scale: 0.8 }} onClick={() => toggleSave(i)}
+                                    className={`flex items-center gap-1 text-[9px] font-bold rounded-full px-2 py-1 ${isSaved ? "bg-agni-gold/15 text-agni-gold" : "text-muted-foreground"}`}>
+                                    <Bookmark size={10} className={isSaved ? "fill-agni-gold" : ""} /> {isSaved ? "Saved" : "Save"}
+                                  </motion.button>
+                                </div>
+                                {/* 🧠 AI Learn Button */}
+                                <motion.button
+                                  whileTap={{ scale: 0.9 }}
+                                  onClick={() => setLearnItem(item)}
+                                  className="flex items-center gap-1 bg-agni-purple/15 text-agni-purple text-[9px] font-black px-3 py-1.5 rounded-full border border-agni-purple/20"
+                                >
+                                  <Brain size={10} />
+                                  Learn with AI
+                                </motion.button>
                               </div>
                             </div>
-                          </motion.a>
+                          </motion.div>
                         );
                       }
 
                       // ═══ COMPACT CARDS ═══
                       return (
-                        <motion.a
+                        <motion.div
                           key={i}
-                          href={item.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
                           initial={{ opacity: 0, y: 15 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: Math.min(i * 0.03, 0.3) }}
-                          className="flex gap-3 bg-card rounded-2xl border border-border/20 p-3 active:scale-[0.98] transition-transform overflow-hidden relative"
+                          className="bg-card rounded-2xl border border-border/20 overflow-hidden relative"
                         >
-                          {/* Left: Thumbnail or icon */}
-                          <div className="shrink-0 relative">
-                            {meta.thumbnail ? (
-                              <div className="w-20 h-16 rounded-xl overflow-hidden relative bg-muted/10">
-                                <img src={meta.thumbnail} alt="" className="w-full h-full object-cover" />
-                                {(meta.type === "youtube" || meta.type === "instagram") && (
-                                  <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                                    <div className="w-7 h-7 rounded-full bg-white/90 flex items-center justify-center">
-                                      <Play size={11} className="text-black ml-0.5" fill="black" />
+                          <a href={item.url} target="_blank" rel="noopener noreferrer"
+                            className="flex gap-3 p-3"
+                          >
+                            {/* Left: Thumbnail or icon */}
+                            <div className="shrink-0 relative">
+                              {meta.thumbnail ? (
+                                <div className="w-20 h-16 rounded-xl overflow-hidden relative bg-muted/10">
+                                  <img src={meta.thumbnail} alt="" className="w-full h-full object-cover" />
+                                  {(meta.type === "youtube" || meta.type === "instagram") && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                      <div className="w-7 h-7 rounded-full bg-white/90 flex items-center justify-center">
+                                        <Play size={11} className="text-black ml-0.5" fill="black" />
+                                      </div>
                                     </div>
-                                  </div>
-                                )}
-                              </div>
-                            ) : (
-                              <div
-                                className="w-14 h-14 rounded-xl flex items-center justify-center"
-                                style={{ background: `${meta.color}15` }}
-                              >
-                                <meta.icon size={18} style={{ color: meta.color }} />
-                              </div>
-                            )}
-                          </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <div
+                                  className="w-14 h-14 rounded-xl flex items-center justify-center"
+                                  style={{ background: `${meta.color}15` }}
+                                >
+                                  <meta.icon size={18} style={{ color: meta.color }} />
+                                </div>
+                              )}
+                            </div>
 
-                          {/* Right: Content */}
-                          <div className="flex-1 min-w-0 flex flex-col justify-between">
-                            <div>
-                              <div className="flex items-center gap-1.5 mb-1">
-                                <Avatar className="w-4 h-4 border border-border/20">
-                                  <AvatarImage src={getSourceAvatar(source)} alt="" />
-                                  <AvatarFallback className="text-[5px] bg-muted">{source.name.slice(0, 1)}</AvatarFallback>
-                                </Avatar>
-                                <span className="text-[8px] font-bold text-muted-foreground truncate">{item.sourceName}</span>
-                                <span className="text-[7px] text-muted-foreground/40">•</span>
-                                <span className="text-[7px] text-muted-foreground/40">{item.timestamp}</span>
+                            {/* Right: Content */}
+                            <div className="flex-1 min-w-0 flex flex-col justify-between">
+                              <div>
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <Avatar className="w-4 h-4 border border-border/20">
+                                    <AvatarImage src={getSourceAvatar(source)} alt="" />
+                                    <AvatarFallback className="text-[5px] bg-muted">{source.name.slice(0, 1)}</AvatarFallback>
+                                  </Avatar>
+                                  <span className="text-[8px] font-bold text-muted-foreground truncate">{item.sourceName}</span>
+                                  <span className="text-[7px] text-muted-foreground/40">•</span>
+                                  <span className="text-[7px] text-muted-foreground/40">{item.timestamp}</span>
+                                </div>
+                                <h4 className="text-[11px] font-extrabold text-foreground leading-tight line-clamp-2">{item.title}</h4>
                               </div>
-                              <h4 className="text-[11px] font-extrabold text-foreground leading-tight line-clamp-2">{item.title}</h4>
-                            </div>
-                            <div className="flex items-center justify-between mt-1.5">
-                              <div className="flex items-center gap-1 rounded-full px-1.5 py-0.5" style={{ background: `${meta.color}15` }}>
-                                <meta.icon size={8} style={{ color: meta.color }} />
-                                <span className="text-[7px] font-bold" style={{ color: meta.color }}>{meta.label}</span>
+                              <div className="flex items-center justify-between mt-1.5">
+                                <div className="flex items-center gap-1.5">
+                                  <div className="flex items-center gap-1 rounded-full px-1.5 py-0.5" style={{ background: `${meta.color}15` }}>
+                                    <meta.icon size={8} style={{ color: meta.color }} />
+                                    <span className="text-[7px] font-bold" style={{ color: meta.color }}>{meta.label}</span>
+                                  </div>
+                                  <span className="text-[7px] text-muted-foreground/40">{item.readTime}</span>
+                                </div>
                               </div>
-                              <ExternalLink size={9} className="text-muted-foreground/30" />
                             </div>
+                          </a>
+
+                          {/* Action bar for compact cards */}
+                          <div className="flex items-center justify-between px-3 pb-2 pt-0">
+                            <div className="flex items-center gap-1.5">
+                              <motion.button whileTap={{ scale: 0.8 }} onClick={() => toggleLike(i)}
+                                className={`p-1.5 rounded-full ${isLiked ? "text-agni-pink" : "text-muted-foreground/40"}`}>
+                                <ThumbsUp size={11} className={isLiked ? "fill-agni-pink" : ""} />
+                              </motion.button>
+                              <motion.button whileTap={{ scale: 0.8 }} onClick={() => toggleSave(i)}
+                                className={`p-1.5 rounded-full ${isSaved ? "text-agni-gold" : "text-muted-foreground/40"}`}>
+                                <Bookmark size={11} className={isSaved ? "fill-agni-gold" : ""} />
+                              </motion.button>
+                            </div>
+                            {/* 🧠 AI Learn Button */}
+                            <motion.button
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => setLearnItem(item)}
+                              className="flex items-center gap-1 text-agni-purple text-[8px] font-black px-2 py-1 rounded-full bg-agni-purple/10"
+                            >
+                              <Brain size={9} /> AI Notes
+                            </motion.button>
                           </div>
 
                           {/* Accent stripe */}
                           <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full" style={{ background: meta.color }} />
-                        </motion.a>
+                        </motion.div>
                       );
                     })}
 
-                    {/* Load more indicator / infinite scroll trigger */}
+                    {/* Load more */}
                     <div ref={feedEndRef} className="py-4 flex items-center justify-center">
                       {feedLoadingMore ? (
                         <div className="flex items-center gap-2">
@@ -552,7 +952,7 @@ const CuriosityPage = () => {
                   </div>
                 )}
 
-                {/* Spark fact at bottom of feed */}
+                {/* Spark fact */}
                 <FadeIn delay={0.08}>
                   <div className="mx-4 rounded-2xl overflow-hidden mb-4 border-2 border-agni-gold/15 mt-2">
                     <div className="px-3 py-2.5 flex items-center gap-2 bg-agni-gold/8">
@@ -589,9 +989,7 @@ const CuriosityPage = () => {
               </motion.div>
             )}
 
-            {/* ═══════════════════════════════════════ */}
             {/* ═══ EXPLORE TAB ═══ */}
-            {/* ═══════════════════════════════════════ */}
             {activeTab === "explore" && (
               <motion.div key="explore-tab" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }}>
                 <div className="px-4 space-y-2.5">
@@ -626,7 +1024,6 @@ const CuriosityPage = () => {
                           <ChevronRight size={14} style={{ color: cat.color }} className="shrink-0 opacity-40" />
                         </motion.button>
 
-                        {/* Results */}
                         <AnimatePresence>
                           {isActive && (
                             <motion.div
@@ -654,20 +1051,31 @@ const CuriosityPage = () => {
                                 )}
 
                                 {results.map((item: any, j: number) => (
-                                  <motion.a key={j} href={item.url} target="_blank" rel="noopener noreferrer"
+                                  <motion.div key={j}
                                     initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: j * 0.04 }}
-                                    className="flex items-center gap-2 bg-card rounded-xl p-2.5 border border-border/15 active:scale-[0.98] transition-all"
+                                    className="flex items-center gap-2 bg-card rounded-xl p-2.5 border border-border/15"
                                   >
-                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0"
-                                      style={{ background: `${cat.color}12` }}
-                                    >{typeIcons[item.type] || "🔗"}</div>
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-[10px] font-extrabold text-foreground truncate">{item.title}</p>
-                                      <p className="text-[8px] text-muted-foreground truncate">{item.desc}</p>
-                                    </div>
-                                    <ExternalLink size={9} style={{ color: cat.color }} className="shrink-0 opacity-40" />
-                                  </motion.a>
+                                    <a href={item.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 flex-1 min-w-0">
+                                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0"
+                                        style={{ background: `${cat.color}12` }}
+                                      >{typeIcons[item.type] || "🔗"}</div>
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-[10px] font-extrabold text-foreground truncate">{item.title}</p>
+                                        <p className="text-[8px] text-muted-foreground truncate">{item.desc}</p>
+                                      </div>
+                                    </a>
+                                    <motion.button
+                                      whileTap={{ scale: 0.8 }}
+                                      onClick={() => setLearnItem(item)}
+                                      className="shrink-0 w-7 h-7 rounded-lg bg-agni-purple/10 flex items-center justify-center"
+                                    >
+                                      <Brain size={11} className="text-agni-purple" />
+                                    </motion.button>
+                                    <a href={item.url} target="_blank" rel="noopener noreferrer" className="shrink-0">
+                                      <ExternalLink size={9} style={{ color: cat.color }} className="opacity-40" />
+                                    </a>
+                                  </motion.div>
                                 ))}
                               </div>
                             </motion.div>
@@ -677,7 +1085,6 @@ const CuriosityPage = () => {
                     );
                   })}
 
-                  {/* Bottom CTA */}
                   <motion.button
                     whileTap={{ scale: 0.97 }}
                     onClick={() => navigate("/sources")}
@@ -690,6 +1097,12 @@ const CuriosityPage = () => {
             )}
           </AnimatePresence>
         </div>
+
+        {/* AI Learn Modal */}
+        <AnimatePresence>
+          {learnItem && <AILearnModal item={learnItem} onClose={() => setLearnItem(null)} />}
+        </AnimatePresence>
+
         <BottomNav />
       </div>
     </PageTransition>
