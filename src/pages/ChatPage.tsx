@@ -8,6 +8,7 @@ import {
 import { useChat, type ChatTab } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
 import { getPersona } from "@/lib/neuralOS";
+import { getTeachingLabel, getUniverseVibe } from "@/lib/teachingConfig";
 import ContentRenderer from "@/components/chat/ContentRenderer";
 import SmartInputBar from "@/components/chat/SmartInputBar";
 import { toast } from "sonner";
@@ -63,17 +64,27 @@ export default function ChatPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
 
-  const teachingContext = useMemo(() => ({
-    identity: persona.currentRole || undefined,
-    mission: persona.goal || undefined,
-    vibe: persona.vibe || undefined,
-    level: persona.experience || undefined,
-    interests: [
-      ...(persona.shows || []),
-      ...(persona.music || []),
-      ...(persona.sports || []),
-    ].slice(0, 5).join(", ") || undefined,
-  }), [persona]);
+  // Build teaching context from LIVE selections (not stale persona)
+  const teachingContext = useMemo(() => {
+    const identity = getTeachingLabel("identity");
+    const mission = getTeachingLabel("mission");
+    const vibe = getTeachingLabel("vibe");
+    const brain = getTeachingLabel("brain");
+    const universeVibe = getUniverseVibe();
+
+    return {
+      identity: identity ? `${identity.label}${identity.desc ? ` — ${identity.desc}` : ""}` : persona.currentRole || undefined,
+      mission: mission ? `${mission.label}${mission.desc ? ` — ${mission.desc}` : ""}` : persona.goal || undefined,
+      vibe: vibe ? `${vibe.label}${vibe.desc ? ` — ${vibe.desc}` : ""}` : persona.vibe || undefined,
+      level: brain ? `${brain.label}${brain.desc ? ` — ${brain.desc}` : ""}` : persona.experience || undefined,
+      universeVibe: universeVibe || undefined,
+      interests: [
+        ...(persona.shows || []),
+        ...(persona.music || []),
+        ...(persona.sports || []),
+      ].slice(0, 5).join(", ") || undefined,
+    };
+  }, [persona]);
 
   useEffect(() => {
     if (scrollRef.current) {
