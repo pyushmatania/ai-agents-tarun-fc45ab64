@@ -117,6 +117,7 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
   const inputRef = useRef<HTMLInputElement>(null);
   const powerRowRef = useRef<HTMLDivElement>(null);
   const [showSwipeHint, setShowSwipeHint] = useState(true);
+  const [showPersonaModal, setShowPersonaModal] = useState(false);
 
   const agniExpr: AgniExpression = isLoading ? "thinking" : messages.length === 0 ? "teaching" : "happy";
   const basePowerups = POWERUPS[activeMode] || POWERUPS.engineer;
