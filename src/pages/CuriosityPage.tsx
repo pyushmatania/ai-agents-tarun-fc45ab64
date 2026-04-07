@@ -1004,6 +1004,61 @@ const CuriosityPage = () => {
                   </div>
                 )}
 
+                {/* ═══ RECENTLY VIEWED ═══ */}
+                {recentlyViewedItems.length > 0 && (
+                  <FadeIn delay={0.06}>
+                    <div className="px-4 mb-3 mt-2">
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <History size={11} className="text-agni-purple" />
+                        <span className="text-[9px] font-black text-muted-foreground tracking-wider">RECENTLY VIEWED</span>
+                        <span className="text-[8px] font-bold text-muted-foreground/50 ml-auto">{recentlyViewedItems.length} items</span>
+                      </div>
+                      <div className="flex gap-2.5 overflow-x-auto scrollbar-none pb-1">
+                        {recentlyViewedItems.map((item, j) => {
+                          const meta = getContentMeta(item.url);
+                          return (
+                            <motion.a
+                              key={j}
+                              href={item.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: j * 0.04 }}
+                              className="shrink-0 w-36 bg-card rounded-xl border border-border/20 overflow-hidden group"
+                            >
+                              {meta.thumbnail ? (
+                                <div className="w-full h-20 bg-muted/10 relative">
+                                  <img src={meta.thumbnail} alt="" className="w-full h-full object-cover" />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                                  {(meta.type === "youtube" || meta.type === "instagram") && (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                      <div className="w-7 h-7 rounded-full bg-white/80 flex items-center justify-center">
+                                        <Play size={10} className="text-black ml-0.5" fill="black" />
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="w-full h-16 flex items-center justify-center" style={{ background: `${meta.color}10` }}>
+                                  <meta.icon size={18} style={{ color: meta.color }} />
+                                </div>
+                              )}
+                              <div className="p-2">
+                                <p className="text-[9px] font-extrabold text-foreground line-clamp-2 leading-tight">{item.title}</p>
+                                <div className="flex items-center gap-1 mt-1">
+                                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: meta.color }} />
+                                  <span className="text-[7px] font-bold text-muted-foreground">{meta.label}</span>
+                                </div>
+                              </div>
+                            </motion.a>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </FadeIn>
+                )}
+
                 {/* Spark fact */}
                 <FadeIn delay={0.08}>
                   <div className="mx-4 rounded-2xl overflow-hidden mb-4 border-2 border-agni-gold/15 mt-2">
