@@ -1,4 +1,4 @@
-import { Home, BookOpen, BarChart3, Sparkles, Map, Library } from "lucide-react";
+import { Home, BookOpen, BarChart3, Sparkles, Map, Library, UserCircle } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -8,7 +8,7 @@ const tabs = [
   { icon: Sparkles, path: "/curiosity", label: "Spark", center: true },
   { icon: Library, path: "/sources", label: "Hub" },
   { icon: Map, path: "/roadmap", label: "Path" },
-  { icon: BarChart3, path: "/progress", label: "Stats" },
+  { icon: UserCircle, path: "/settings", label: "Profile" },
 ];
 
 const BottomNav = () => {
