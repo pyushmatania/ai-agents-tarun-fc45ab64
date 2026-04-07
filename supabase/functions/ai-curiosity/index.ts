@@ -10,10 +10,14 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { query, category } = await req.json();
+    const { query, category, sourceSeeds } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    const seedContext = Array.isArray(sourceSeeds) && sourceSeeds.length > 0
+      ? `\n\nPrioritize information and discoveries from these trusted sources: ${sourceSeeds.join(", ")}. Weight results from these sources higher and reference them when relevant.`
+      : "";
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -26,7 +30,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are an AI agents expert. When given a search query about AI agents, generate 5 realistic, informative items based on your knowledge. Each item should have: "title" (string), "url" (a real https URL if you know one, otherwise a plausible one), "desc" (one sentence description), "type" (one of: tool, repo, article, video, news). Respond with ONLY a valid JSON array, no other text.`
+            content: `You are an AI agents expert. When given a search query about AI agents, generate 5 realistic, informative items based on your knowledge. Each item should have: "title" (string), "url" (a real https URL if you know one, otherwise a plausible one), "desc" (one sentence description), "type" (one of: tool, repo, article, video, news). Respond with ONLY a valid JSON array, no other text.${seedContext}`
           },
           {
             role: "user",

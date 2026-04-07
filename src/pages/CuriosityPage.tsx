@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import Agni from "@/components/Agni";
 import { useGamification } from "@/hooks/useGamification";
+import { CURIOSITY_SOURCE_SEEDS } from "@/lib/sources";
 
 const CURIOSITY = [
   { id: "industry", label: "Your Industry", emoji: "🏭", desc: "AI agents in semiconductor & manufacturing", query: "AI agents semiconductor manufacturing India 2026 latest", gradient: "linear-gradient(135deg, #FF9600 0%, #FFB340 50%, #E08500 100%)", color: "#FF9600", shadow: "#CC7A00" },
@@ -55,9 +56,10 @@ const CuriosityPage = () => {
     setResults(cached);
     if (cached.length > 0) setRefreshing(true);
     setLoading(true);
+    const sourceSeeds = CURIOSITY_SOURCE_SEEDS[cat.id] || [];
     try {
       const { data, error: fnError } = await supabase.functions.invoke("ai-curiosity", {
-        body: { query: cat.query, category: cat.id },
+        body: { query: cat.query, category: cat.id, sourceSeeds },
       });
       if (fnError) throw new Error(fnError.message);
       const items = data?.items || [];
