@@ -57,10 +57,11 @@ serve(async (req) => {
       if (context.identity) ctxParts.push(`User identity: ${context.identity}`);
       if (context.mission) ctxParts.push(`User's mission: ${context.mission}`);
       if (context.vibe) ctxParts.push(`Preferred teaching style: ${context.vibe}`);
-      if (context.level) ctxParts.push(`Knowledge level: ${context.level}`);
+      if (context.level) ctxParts.push(`Brain level: ${context.level}`);
+      if (context.universeVibe) ctxParts.push(`Universe vibe: Teach through the world of "${context.universeVibe}" — use characters, vocabulary, and plot moments from this universe`);
       if (context.interests) ctxParts.push(`Interests: ${context.interests}`);
       if (ctxParts.length > 0) {
-        systemPrompt += `\n\nUSER PROFILE:\n${ctxParts.join("\n")}`;
+        systemPrompt += `\n\nUSER PROFILE:\n${ctxParts.join("\n")}\n\nIMPORTANT: Adapt your tone, depth, analogies, and examples to match ALL of the user's profile settings above. They are not decorative — they define how you should respond.`;
       }
     }
 
