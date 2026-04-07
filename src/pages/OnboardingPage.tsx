@@ -1035,7 +1035,7 @@ const OnboardingPage = () => {
                     {brainTrack === track && (
                       <motion.div layoutId="brain-track-bg" className="absolute inset-0 bg-[#3F51B5] rounded-full" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
                     )}
-                    <span className="relative z-10">{track === "skill" ? "⚡ Skill Track" : "🎓 Academic Track"}</span>
+                    <span className="relative z-10">{track === "skill" ? "⚡ Skill Track" : "🎓 Classroom Track"}</span>
                   </motion.button>
                 ))}
               </div>
