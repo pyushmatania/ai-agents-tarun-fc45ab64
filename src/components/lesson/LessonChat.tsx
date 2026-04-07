@@ -429,7 +429,40 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
   const handlePowerUpPress = (pu: PowerUp) => {
     SFX.powerup(pu.soundColor);
     setPressedBtn(pu.id);
-    setTimeout(() => { setPressedBtn(null); handleSend(pu.prompt); }, 150);
+    
+    let resolvedPrompt = pu.prompt;
+    
+    // Resolve Interest Deck placeholders — pick from user's favorites
+    if (resolvedPrompt === "__INTEREST_DECK_FUN__" || resolvedPrompt === "__INTEREST_DECK_STORY__") {
+      const allInterests: string[] = [];
+      const p = getPersona();
+      if (p.shows?.length) allInterests.push(...p.shows);
+      if (p.sports?.length) allInterests.push(...p.sports);
+      if (p.gaming?.length) allInterests.push(...p.gaming);
+      if (p.music?.length) allInterests.push(...p.music);
+      if (p.hobbies?.length) allInterests.push(...p.hobbies);
+      if (p.books?.length) allInterests.push(...p.books);
+      
+      if (allInterests.length > 0) {
+        // Pick 2-3 random interests for AI to choose from
+        const shuffled = [...allInterests].sort(() => Math.random() - 0.5);
+        const picks = shuffled.slice(0, Math.min(3, shuffled.length));
+        const interestList = picks.map(i => `"${i}"`).join(", ");
+        
+        if (resolvedPrompt === "__INTEREST_DECK_FUN__") {
+          resolvedPrompt = `Pick the BEST one from these things I love: ${interestList} — and give me a fun, vivid example of this concept using it. Make it entertaining and memorable! If none fit well, use a general fun example instead.`;
+        } else {
+          resolvedPrompt = `Pick the BEST one from these things I love: ${interestList} — and tell me a short, engaging story that explains this concept through it. Make it dramatic and memorable! If none fit well, tell an original story.`;
+        }
+      } else {
+        // Fallback if no interests set
+        resolvedPrompt = resolvedPrompt === "__INTEREST_DECK_FUN__"
+          ? "Give me a fun, real-world example of this!"
+          : "Tell me a short story to explain this concept.";
+      }
+    }
+    
+    setTimeout(() => { setPressedBtn(null); handleSend(resolvedPrompt); }, 150);
   };
 
   const handleModeChange = (mode: string) => {
