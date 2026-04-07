@@ -49,28 +49,40 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
   const [liveQuery, setLiveQuery] = useState(query);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const lastSearchedQuery = useRef("");
+  const skipAutocompleteRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (open) {
-      setLiveQuery(query);
-      setTimeout(() => inputRef.current?.focus(), 150);
-    }
-  }, [query, open]);
-
-  useEffect(() => {
     if (!open) {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
       setResults(null);
       setError(null);
       setLoading(false);
       lastSearchedQuery.current = "";
+      return;
     }
-  }, [open]);
+
+    skipAutocompleteRef.current = true;
+    setLiveQuery(query);
+
+    const focusTimer = window.setTimeout(() => inputRef.current?.focus(), 120);
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, [query, open]);
 
   const doSearch = useCallback(async (searchQuery: string) => {
     const trimmed = searchQuery.trim();
     if (!trimmed || trimmed === lastSearchedQuery.current) return;
-    
+
     lastSearchedQuery.current = trimmed;
     setLoading(true);
     setError(null);
@@ -92,30 +104,26 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
     }
   }, [currentCategory]);
 
-  // Auto-search on open with initial query
-  useEffect(() => {
-    if (open && query.trim()) {
-      doSearch(query);
-    }
-  }, [open]);
-
-  // Debounced autocomplete: search as user types (500ms delay)
   useEffect(() => {
     if (!open) return;
+    if (skipAutocompleteRef.current) {
+      skipAutocompleteRef.current = false;
+      return;
+    }
+
     const trimmed = liveQuery.trim();
     if (!trimmed || trimmed.length < 2) return;
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       doSearch(trimmed);
-    }, 500);
+    }, 450);
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, [liveQuery, open, doSearch]);
 
-  // Manual search: force re-search on send/enter
   const handleManualSearch = useCallback(() => {
     const trimmed = liveQuery.trim();
     if (trimmed) {
@@ -148,7 +156,7 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
     onClose();
   };
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
   const catMeta = CATEGORY_MAP[currentCategory] || CATEGORY_MAP.curious;
 
@@ -158,32 +166,36 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[9999] bg-background flex flex-col"
-        style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }}
+        className="fixed inset-0 z-[9999] flex flex-col overflow-hidden bg-background"
+        style={{ height: "100dvh" }}
       >
-        {/* Top bar */}
-        <div className="flex items-center gap-3 px-4 pt-3 pb-2 border-b border-border bg-card shrink-0">
-          <button onClick={onClose} className="w-9 h-9 rounded-full bg-muted/60 flex items-center justify-center shrink-0">
+        <div className="flex items-center gap-3 border-b border-border bg-card px-4 pb-2 pt-3 shrink-0">
+          <button onClick={onClose} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted/60">
             <X size={16} className="text-foreground" />
           </button>
-          <div className="flex-1 relative">
+          <div className="relative flex-1">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" />
             <input
               ref={inputRef}
               type="text"
               value={liveQuery}
               onChange={(e) => setLiveQuery(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleManualSearch(); } }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleManualSearch();
+                }
+              }}
               placeholder={`Search ${catMeta.label}...`}
               autoFocus
-              className="w-full pl-9 pr-16 py-2.5 bg-muted/30 border border-border/30 rounded-xl text-sm font-bold text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-agni-purple/40 transition-colors"
+              className="w-full rounded-xl border border-border/30 bg-muted/30 py-2.5 pl-9 pr-16 text-sm font-bold text-foreground transition-colors placeholder:text-muted-foreground/40 focus:border-agni-purple/40 focus:outline-none"
             />
             {loading ? (
-              <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-agni-purple animate-spin" />
+              <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-agni-purple" />
             ) : (
               <button
                 onClick={handleManualSearch}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-agni-purple flex items-center justify-center"
+                className="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg bg-agni-purple"
               >
                 <ArrowRight size={14} className="text-white" />
               </button>
@@ -191,54 +203,52 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
           </div>
         </div>
 
-        {/* Category badge */}
-        <div className="px-4 pt-2 pb-1 flex items-center gap-2 shrink-0">
-          <span className="text-[9px] font-black px-2.5 py-1 rounded-full" style={{ background: `${catMeta.color}20`, color: catMeta.color }}>
+        <div className="flex items-center gap-2 px-4 pb-1 pt-2 shrink-0">
+          <span className="rounded-full px-2.5 py-1 text-[9px] font-black" style={{ background: `${catMeta.color}20`, color: catMeta.color }}>
             {catMeta.emoji} {catMeta.label}
           </span>
           {liveQuery.trim() && (
             <span className="text-[9px] text-muted-foreground">
-              {loading ? "Searching with AI..." : results ? `${results.results.length} result${results.results.length !== 1 ? "s" : ""}` : "Start typing to search"}
+              {loading ? "Searching with AI..." : results ? `${results.results.length} result${results.results.length !== 1 ? "s" : ""}` : "Start typing to auto-search"}
             </span>
           )}
         </div>
 
-        {/* Content — full scrollable area */}
-        <div className="flex-1 overflow-y-auto px-4 pb-24 scrollbar-none overscroll-contain">
-          {/* Loading state */}
+        <div className="flex-1 overflow-y-auto px-4 pb-28 scrollbar-none overscroll-contain">
           {loading && !results && (
             <div className="flex flex-col items-center justify-center py-16">
               <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
                 <Loader2 size={32} className="text-agni-purple" />
               </motion.div>
-              <p className="text-xs font-bold text-muted-foreground mt-4">AGNI is searching...</p>
-              <p className="text-[10px] text-muted-foreground/60 mt-1">Finding matches with smart prediction</p>
+              <p className="mt-4 text-xs font-bold text-muted-foreground">AGNI is searching...</p>
+              <p className="mt-1 text-[10px] text-muted-foreground/60">Finding matches with smart prediction</p>
             </div>
           )}
 
-          {/* Empty state */}
           {!loading && !results && !error && !liveQuery.trim() && (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-agni-purple/20 to-agni-pink/20 flex items-center justify-center mb-4">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-agni-purple/20 to-agni-pink/20">
                 <Brain size={28} className="text-agni-purple" />
               </div>
-              <p className="text-sm font-bold text-foreground mb-1">Smart AI Search</p>
-              <p className="text-[11px] text-muted-foreground max-w-[240px]">
-                Start typing to auto-search — AI handles typos, partial names, and predictions
+              <p className="mb-1 text-sm font-bold text-foreground">Smart AI Search</p>
+              <p className="max-w-[240px] text-[11px] text-muted-foreground">
+                Start typing and AGNI will autocomplete with typo-fix and predictive matching
               </p>
             </div>
           )}
 
-          {/* Error */}
           {error && (
-            <div className="bg-destructive/10 border border-destructive/20 rounded-2xl p-4 mb-3 mt-2">
-              <div className="flex items-center gap-2 mb-2">
+            <div className="mb-3 mt-2 rounded-2xl border border-destructive/20 bg-destructive/10 p-4">
+              <div className="mb-2 flex items-center gap-2">
                 <AlertCircle size={14} className="text-destructive" />
                 <span className="text-xs font-bold text-destructive">Search failed</span>
               </div>
               <p className="text-[10px] text-muted-foreground">{error}</p>
               <button
-                onClick={() => { lastSearchedQuery.current = ""; doSearch(liveQuery); }}
+                onClick={() => {
+                  lastSearchedQuery.current = "";
+                  doSearch(liveQuery);
+                }}
                 className="mt-2 text-[10px] font-bold text-agni-purple underline"
               >
                 Retry
@@ -246,27 +256,27 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
             </div>
           )}
 
-          {/* Results */}
           {results && (
             <>
               {results.clarifyingQuestion && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-agni-gold/10 border border-agni-gold/20 rounded-2xl p-3 mb-3 mt-2"
+                  className="mb-3 mt-2 rounded-2xl border border-agni-gold/20 bg-agni-gold/10 p-3"
                 >
                   <p className="text-[11px] font-bold text-agni-gold">🤔 {results.clarifyingQuestion}</p>
                 </motion.div>
               )}
 
               {results.results.length > 0 && (
-                <div className="space-y-2.5 mt-2">
-                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-wider">
+                <div className="mt-2 space-y-2.5">
+                  <p className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">
                     {results.results.length === 1 ? "Best match" : "Pick the right one"}
                   </p>
                   {results.results.map((r, i) => {
                     const rCatMeta = CATEGORY_MAP[r.category] || CATEGORY_MAP.curious;
                     const isDiffCategory = r.category !== currentCategory;
+
                     return (
                       <motion.button
                         key={`${r.name}-${i}`}
@@ -275,45 +285,40 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
                         transition={{ delay: i * 0.08 }}
                         whileTap={{ scale: 0.97 }}
                         onClick={() => handleSelect(r)}
-                        className="w-full text-left bg-muted/30 hover:bg-muted/60 border-2 border-border/50 hover:border-agni-green/40 rounded-2xl p-3.5 transition-all"
+                        className="w-full rounded-2xl border-2 border-border/50 bg-muted/30 p-3.5 text-left transition-all hover:border-agni-green/40 hover:bg-muted/60"
                       >
                         <div className="flex items-start gap-3">
-                          <Avatar className="w-12 h-12 rounded-xl shrink-0 border-2" style={{ borderColor: `${rCatMeta.color}30` }}>
-                            <AvatarImage src={getSuggestionImage(r.name, r.category)} alt={r.name} className="object-cover rounded-xl" />
+                          <Avatar className="h-12 w-12 shrink-0 rounded-xl border-2" style={{ borderColor: `${rCatMeta.color}30` }}>
+                            <AvatarImage src={getSuggestionImage(r.name, r.category)} alt={r.name} className="rounded-xl object-cover" />
                             <AvatarFallback className="rounded-xl text-2xl" style={{ background: `${rCatMeta.color}15` }}>
                               {rCatMeta.emoji}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-0.5">
+                          <div className="min-w-0 flex-1">
+                            <div className="mb-0.5 flex items-center gap-2">
                               <span className="text-sm font-black text-foreground">{r.name}</span>
                               {r.confidence >= 0.9 && (
-                                <span className="text-[7px] font-bold bg-agni-green/20 text-agni-green px-1.5 py-0.5 rounded-full">BEST MATCH</span>
+                                <span className="rounded-full bg-agni-green/20 px-1.5 py-0.5 text-[7px] font-bold text-agni-green">BEST MATCH</span>
                               )}
                             </div>
-                            <p className="text-[10px] text-muted-foreground leading-relaxed">{r.description}</p>
-                            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                              <span
-                                className="text-[8px] font-black px-2 py-0.5 rounded-full"
-                                style={{ background: `${rCatMeta.color}20`, color: rCatMeta.color }}
-                              >
+                            <p className="text-[10px] leading-relaxed text-muted-foreground">{r.description}</p>
+                            <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                              <span className="rounded-full px-2 py-0.5 text-[8px] font-black" style={{ background: `${rCatMeta.color}20`, color: rCatMeta.color }}>
                                 {rCatMeta.emoji} {rCatMeta.label}
                               </span>
                               {r.subCategory && (
-                                <span className="text-[8px] font-bold text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-full">{r.subCategory}</span>
+                                <span className="rounded-full bg-muted/60 px-2 py-0.5 text-[8px] font-bold text-muted-foreground">{r.subCategory}</span>
                               )}
-                              {r.year && (
-                                <span className="text-[8px] text-muted-foreground/60">{r.year}</span>
-                              )}
+                              {r.year && <span className="text-[8px] text-muted-foreground/60">{r.year}</span>}
                             </div>
                             {isDiffCategory && (
-                              <p className="text-[9px] font-bold text-agni-orange mt-1.5 flex items-center gap-1">
+                              <p className="mt-1.5 flex items-center gap-1 text-[9px] font-bold text-agni-orange">
                                 <ArrowRight size={9} />
                                 Will be added to {rCatMeta.label}
                               </p>
                             )}
                           </div>
-                          <div className="w-8 h-8 rounded-full bg-agni-green/15 flex items-center justify-center shrink-0">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-agni-green/15">
                             <Check size={14} className="text-agni-green" />
                           </div>
                         </div>
@@ -323,10 +328,9 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
                 </div>
               )}
 
-              {/* Related suggestions */}
               {results.suggestions && results.suggestions.length > 0 && (
                 <div className="mt-5">
-                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-wider mb-2">Related suggestions</p>
+                  <p className="mb-2 text-[9px] font-black uppercase tracking-wider text-muted-foreground">Related suggestions</p>
                   <div className="flex flex-wrap gap-1.5">
                     {results.suggestions.map((s, i) => (
                       <motion.button
@@ -339,7 +343,7 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
                           onSelect({ name: s, category: currentCategory, subCategory: "" });
                           onClose();
                         }}
-                        className="text-[10px] font-bold text-muted-foreground bg-muted/40 border border-border/30 rounded-full px-3 py-1.5 hover:bg-agni-purple/10 hover:text-agni-purple transition-colors"
+                        className="rounded-full border border-border/30 bg-muted/40 px-3 py-1.5 text-[10px] font-bold text-muted-foreground transition-colors hover:bg-agni-purple/10 hover:text-agni-purple"
                       >
                         + {s}
                       </motion.button>
@@ -350,7 +354,6 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
             </>
           )}
 
-          {/* Fallback: add as-is */}
           {!loading && liveQuery.trim() && (
             <motion.button
               initial={{ opacity: 0 }}
@@ -358,10 +361,10 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
               transition={{ delay: 0.3 }}
               whileTap={{ scale: 0.97 }}
               onClick={handleAddAsIs}
-              className="w-full mt-5 p-3.5 rounded-2xl border-2 border-dashed border-agni-gold/30 bg-agni-gold/5 text-left"
+              className="mt-5 w-full rounded-2xl border-2 border-dashed border-agni-gold/30 bg-agni-gold/5 p-3.5 text-left"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-agni-gold to-agni-orange flex items-center justify-center shadow-lg shrink-0">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-agni-gold to-agni-orange shadow-lg">
                   <Sparkles size={16} className="text-white" />
                 </div>
                 <div className="flex-1">
@@ -376,7 +379,6 @@ const SmartInterestSearch = ({ query, currentCategory, onSelect, onClose, open }
     </AnimatePresence>
   );
 
-  // Use portal to render at document.body level, escaping any parent z-index/overflow constraints
   return createPortal(content, document.body);
 };
 

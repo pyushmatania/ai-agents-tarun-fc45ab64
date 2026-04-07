@@ -326,11 +326,10 @@ const OnboardingPage = () => {
     setPersona({ ...persona, [catField]: current.filter(x => x !== item) });
   };
 
-  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && search.trim() && activeCategory) {
-      setSmartSearchQuery(search.trim());
-      setSmartSearchOpen(true);
-    }
+  const openSmartSearch = (initialQuery = "") => {
+    if (!activeCategory) return;
+    setSmartSearchQuery(initialQuery);
+    setSmartSearchOpen(true);
   };
 
   const handleSmartSearchSelect = (item: { name: string; category: string; subCategory: string }) => {
@@ -1254,24 +1253,22 @@ const OnboardingPage = () => {
 
               {/* Search bar */}
               <div className="relative mb-2 shrink-0 group">
-                <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-agni-green via-agni-blue to-agni-purple opacity-30 group-focus-within:opacity-80 transition-opacity duration-300 blur-[1px]" />
-                <div className="relative flex items-center bg-card rounded-2xl border-2 border-transparent overflow-hidden">
-                  <Search size={16} className="absolute left-3 text-muted-foreground group-focus-within:text-agni-green transition-colors" />
-                  <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={handleSearchKeyDown}
-                    placeholder="Search or type your own..."
-                    className="w-full bg-transparent pl-10 pr-20 py-3 text-sm font-medium outline-none placeholder:text-muted-foreground/50"
-                  />
-                  {!search.trim() && (
-                    <motion.div
-                      animate={{ y: [0, -3, 0] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="absolute right-2 flex items-center gap-1 bg-agni-purple/10 border border-agni-purple/20 rounded-lg px-2 py-1 pointer-events-none"
-                    >
-                      <Sparkles size={10} className="text-agni-purple" />
-                      <span className="text-[8px] font-bold text-agni-purple whitespace-nowrap">+ Custom</span>
-                    </motion.div>
-                  )}
-                </div>
+                <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-agni-green via-agni-blue to-agni-purple opacity-30 transition-opacity duration-300 blur-[1px]" />
+                <button
+                  type="button"
+                  onClick={() => openSmartSearch()}
+                  className="relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border-2 border-transparent bg-card px-3 py-3 text-left"
+                >
+                  <Search size={16} className="shrink-0 text-muted-foreground" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-muted-foreground/80">Search or type your own...</p>
+                    <p className="mt-0.5 text-[9px] font-bold text-agni-purple">AI autocomplete + typo fix</p>
+                  </div>
+                  <div className="flex items-center gap-1 rounded-lg border border-agni-purple/20 bg-agni-purple/10 px-2 py-1">
+                    <Sparkles size={10} className="text-agni-purple" />
+                    <span className="whitespace-nowrap text-[8px] font-bold text-agni-purple">Open AI Search</span>
+                  </div>
+                </button>
               </div>
 
               {/* Add custom */}
