@@ -544,7 +544,7 @@ const OnboardingPage = () => {
           <motion.div key="name" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
-            <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.name.bg} pointer-events-none`} />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#E0F2FE] via-[#E8F4F8] to-[#F0E6FA] pointer-events-none" />
 
             <div className="flex-1 flex flex-col items-center justify-center relative z-10">
               <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200, damping: 12 }}>
@@ -552,30 +552,32 @@ const OnboardingPage = () => {
               </motion.div>
 
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="w-full mt-6">
-                <h2 className="text-3xl font-black text-foreground text-center mb-1">What should I call you?</h2>
-                <p className="text-sm text-muted-foreground text-center mb-6">I'm <span className="text-agni-green font-bold">AGNI 🔥</span>, your AI teaching buddy!</p>
+                <h2 className="text-3xl font-black text-gray-800 text-center mb-1">What should I call you?</h2>
+                <p className="text-sm text-gray-500 text-center mb-6">I'm <span className="text-agni-green font-bold">AGNI 🔥</span>, your AI teaching buddy!</p>
                 <Input type="text" placeholder="Enter your name..." value={name} onChange={(e) => setName(e.target.value)}
-                  className="h-14 rounded-2xl bg-card border-2 border-border text-lg font-bold text-center focus:border-agni-green" autoFocus
+                  className="h-14 rounded-2xl bg-white/80 border-2 border-white/50 text-lg font-bold text-center text-gray-800 focus:border-agni-green shadow-sm" autoFocus
                 />
               </motion.div>
 
               {/* Fun preview */}
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: name.trim() ? 1 : 0 }} transition={{ delay: 0.5 }}
-                className="mt-6 bg-card/60 backdrop-blur border border-agni-green/20 rounded-2xl p-3 w-full max-w-[300px]"
+                className="mt-6 bg-white/60 backdrop-blur border border-white/50 rounded-2xl p-3 w-full max-w-[300px] shadow-sm"
               >
                 <div className="flex items-center gap-2 mb-1.5">
-                  <Sparkles size={12} className="text-agni-gold" />
-                  <span className="text-[9px] font-black text-agni-gold uppercase tracking-wider">How AGNI will talk to you</span>
+                  <Sparkles size={12} className="text-[#D4A853]" />
+                  <span className="text-[9px] font-black text-[#D4A853] uppercase tracking-wider">How AGNI will talk to you</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground italic">
+                <p className="text-[11px] text-gray-600 italic">
                   "Yo <span className="text-agni-green font-bold">{name || "..."}</span>! Think of an AI agent like Naruto's shadow clone jutsu 🥷 — multiple copies doing different tasks simultaneously!"
                 </p>
               </motion.div>
             </div>
 
-            <Button onClick={goNext} disabled={!name.trim()} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none">
-              CONTINUE <ArrowRight size={18} className="ml-2" />
-            </Button>
+            <div className="sticky bottom-0 pt-3 pb-2 z-20 bg-gradient-to-t from-[#F0E6FA] via-[#F0E6FA]/95 to-transparent">
+              <Button onClick={goNext} disabled={!name.trim()} className="w-full h-14 rounded-full bg-[#1CB0F6] hover:bg-[#1A9FE0] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none">
+                CONTINUE <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </div>
           </motion.div>
         )}
 
