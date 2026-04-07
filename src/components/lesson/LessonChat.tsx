@@ -6,6 +6,7 @@ import type { AgniExpression } from "@/components/Agni";
 import { SFX } from "@/lib/sounds";
 import { getAIConfig } from "@/lib/aiConfig";
 import { getPersona } from "@/lib/neuralOS";
+import MascotProfileModal from "@/components/MascotProfileModal";
 
 interface Message {
   role: "user" | "assistant";
