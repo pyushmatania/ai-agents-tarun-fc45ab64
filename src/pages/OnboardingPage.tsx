@@ -909,23 +909,28 @@ const OnboardingPage = () => {
           <motion.div key="vibe" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.35 }}
             className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
-            <div className={`absolute inset-0 bg-gradient-to-b ${STEP_THEMES.vibe.bg} pointer-events-none`} />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#FCE4EC] via-[#F8BBD0] to-[#F3E5F5] pointer-events-none" />
 
             <div className="flex flex-col flex-1 min-h-0 relative z-10">
+              <div className="flex justify-center mb-2">
+                <div className="bg-white/70 backdrop-blur-sm rounded-full px-4 py-1.5 shadow-sm border border-white/50">
+                  <span className="text-xs font-bold text-gray-600">Pick your teaching DJ! 🎧</span>
+                </div>
+              </div>
               <div className="flex justify-center mb-2 shrink-0">
-                <Agni expression="celebrating" size={80} speech="Pick your teaching DJ! 🎧" animate />
+                <Agni expression="celebrating" size={80} animate />
               </div>
 
-              <h2 className="text-2xl font-black text-foreground text-center mb-0.5 shrink-0">🎨 Set Your Vibe</h2>
-              <p className="text-xs text-muted-foreground text-center mb-1 shrink-0">
-                <span className="text-agni-orange font-bold">Like picking a DJ for your learning playlist! 🎵</span>
+              <h2 className="text-2xl font-black text-gray-800 text-center mb-0.5 shrink-0">🎨 Set Your Vibe</h2>
+              <p className="text-xs text-center mb-1 shrink-0">
+                <span className="text-[#E91E63] font-bold">Like picking a DJ for your learning playlist! 🎵</span>
               </p>
-              <p className="text-[10px] text-muted-foreground/70 text-center mb-3 shrink-0">How should AGNI talk to you?</p>
+              <p className="text-[10px] text-gray-500 text-center mb-3 shrink-0">How should AGNI talk to you?</p>
 
               <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
-                <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2.5">
                   {[...VIBES.map(v => ({ ...v, color: v.gradient })), ...customVibes].map((vibe, i) => (
-                    <ColorListOption
+                    <ColorPill
                       key={vibe.id}
                       emoji={vibe.emoji}
                       label={vibe.label}
@@ -933,31 +938,31 @@ const OnboardingPage = () => {
                       selected={selectedVibe === vibe.id}
                       onClick={() => setSelectedVibe(vibe.id)}
                       index={i}
-                      color={vibe.color}
                     />
                   ))}
-
-                  <CustomOptionInput
-                    categoryId="vibe"
-                    categoryLabel="Teaching Vibe"
-                    onSave={(opt) => {
-                      const saved = saveCustomOption("vibe", opt);
-                      setCustomVibes(prev => [...prev, saved]);
-                      setSelectedVibe(saved.id);
-                    }}
-                  />
                 </div>
+
+                <CustomOptionInput
+                  categoryId="vibe"
+                  categoryLabel="Teaching Vibe"
+                  onSave={(opt) => {
+                    const saved = saveCustomOption("vibe", opt);
+                    setCustomVibes(prev => [...prev, saved]);
+                    setSelectedVibe(saved.id);
+                  }}
+                />
               </div>
 
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-                className="bg-agni-purple/5 border border-agni-purple/20 rounded-2xl px-4 py-2.5 mb-3 shrink-0"
+                className="bg-white/50 border border-[#E91E63]/20 rounded-2xl px-4 py-2.5 mb-3 shrink-0"
               >
-                <p className="text-[10px] text-agni-purple font-bold">💡 "Sensei" = Mr. Miyagi energy 🥋 • "Wizard" = Dumbledore dropping knowledge 🧙 • "Game Mode" = Level up like Goku! 🎮</p>
+                <p className="text-[10px] text-[#880E4F] font-bold">💡 "Sensei" = Mr. Miyagi energy 🥋 • "Wizard" = Dumbledore dropping knowledge 🧙 • "Game Mode" = Level up like Goku! 🎮</p>
               </motion.div>
             </div>
 
-            <Button onClick={goNext} disabled={!selectedVibe} className="w-full h-14 rounded-2xl bg-agni-green text-white font-extrabold text-base shadow-btn-3d btn-3d disabled:opacity-30 disabled:shadow-none shrink-0">
-              CONTINUE <ArrowRight size={18} className="ml-2" />
+            <Button onClick={goNext} disabled={!selectedVibe}
+              className="w-full h-14 rounded-full bg-[#E91E63] hover:bg-[#C2185B] text-white font-extrabold text-base shadow-lg disabled:opacity-30 disabled:shadow-none shrink-0">
+              Continue <ArrowRight size={18} className="ml-2" />
             </Button>
           </motion.div>
         )}
