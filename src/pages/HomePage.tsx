@@ -446,25 +446,31 @@ const HomePage = () => {
                   <Trophy size={13} className="text-white" />
                 </div>
                 <span className="text-[10px] font-extrabold text-foreground">Leaderboard</span>
-                <span className="ml-auto text-[8px] font-bold text-muted-foreground">This Week</span>
+                <span className="ml-auto text-[8px] font-bold text-muted-foreground">All Time</span>
               </div>
               <div className="space-y-1.5">
-                {[
-                  { rank: 1, name: "Arjun S.", xp: 2450, emoji: "👑", color: "text-agni-gold" },
-                  { rank: 2, name: "Priya M.", xp: 2100, emoji: "🥈", color: "text-muted-foreground" },
-                  { rank: 3, name: "Rahul K.", xp: 1800, emoji: "🥉", color: "text-agni-orange" },
-                  { rank: 4, name: displayName, xp: stats.xp, emoji: "🔥", color: "text-agni-green", isYou: true },
-                  { rank: 5, name: "Sneha D.", xp: Math.max(stats.xp - 120, 50), emoji: "⚡", color: "text-muted-foreground" },
-                ].sort((a, b) => b.xp - a.xp).map((player, idx) => (
-                  <div key={idx} className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl ${(player as any).isYou ? "bg-agni-green/10 border border-agni-green/20" : "bg-muted/20"}`}>
-                    <span className="text-xs font-black text-muted-foreground w-4 text-center">{idx + 1}</span>
-                    <span className="text-sm">{player.emoji}</span>
-                    <span className={`text-[11px] font-extrabold flex-1 ${(player as any).isYou ? "text-agni-green" : "text-foreground"}`}>
-                      {player.name} {(player as any).isYou && <span className="text-[8px] font-bold text-agni-green/70">(You)</span>}
-                    </span>
-                    <span className="text-[10px] font-black text-agni-gold">{player.xp.toLocaleString()} XP</span>
+                {leaderboard.length > 0 ? (
+                  leaderboard.slice(0, 5).map((player, idx) => {
+                    const isYou = user && player.user_id === user.id;
+                    const rankEmoji = idx === 0 ? "👑" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "⚡";
+                    return (
+                      <div key={player.user_id} className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl ${isYou ? "bg-agni-green/10 border border-agni-green/20" : "bg-muted/20"}`}>
+                        <span className="text-xs font-black text-muted-foreground w-4 text-center">{idx + 1}</span>
+                        <span className="text-sm">{rankEmoji}</span>
+                        <span className={`text-[11px] font-extrabold flex-1 ${isYou ? "text-agni-green" : "text-foreground"}`}>
+                          {player.display_name} {isYou && <span className="text-[8px] font-bold text-agni-green/70">(You)</span>}
+                        </span>
+                        <span className="text-[10px] font-black text-agni-gold">{player.xp.toLocaleString()} XP</span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="text-center py-3">
+                    <p className="text-[11px] text-muted-foreground font-semibold">
+                      {user ? "Earn XP to appear on the leaderboard! 🚀" : "Sign in to compete! 🏆"}
+                    </p>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </FadeIn>
