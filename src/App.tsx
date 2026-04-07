@@ -16,6 +16,7 @@ import SourcesPage from "./pages/SourcesPage";
 import RoadmapPage from "./pages/RoadmapPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import ChatPage from "./pages/ChatPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
