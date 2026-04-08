@@ -33,7 +33,7 @@ const ProgressPage = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background pb-24">
-        <div className="max-w-md mx-auto px-4 pt-5">
+        <div className="max-w-md md:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto px-4 pt-5">
 
           {/* Top Bar */}
           <FadeIn>
@@ -69,6 +69,12 @@ const ProgressPage = () => {
               </div>
             </div>
           </FadeIn>
+
+          {/* Desktop two-column grid for main cards */}
+          <div className="lg:grid lg:grid-cols-2 lg:gap-6">
+
+          {/* Left column */}
+          <div>
 
           {/* XP Level Progress — Large */}
           <FadeIn delay={0.05}>
@@ -108,7 +114,7 @@ const ProgressPage = () => {
           </FadeIn>
 
           {/* Stats Row */}
-          <StaggerContainer className="grid grid-cols-4 gap-2 mb-4">
+          <StaggerContainer className="grid grid-cols-4 gap-2 md:gap-4 mb-4">
             {[
               { icon: BookOpen, value: stats.totalLessons, label: "Lessons", color: "bg-agni-blue" },
               { icon: Flame, value: `${stats.streak}d`, label: "Streak", color: "bg-agni-orange" },
@@ -216,6 +222,11 @@ const ProgressPage = () => {
             </div>
           </FadeIn>
 
+          </div>{/* End left column */}
+
+          {/* Right column */}
+          <div>
+
           {/* Daily Quests */}
           <FadeIn delay={0.25}>
             <DailyQuests quests={dailyQuests} />
@@ -289,7 +300,7 @@ const ProgressPage = () => {
                 </div>
                 <h4 className="text-xs font-extrabold text-foreground">Module Progress</h4>
               </div>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-4 gap-2 md:gap-4">
                 {MODULE_PROGRESS.map((mod, i) => {
                   const completed = mod.ids.filter(id => stats.done.includes(id)).length;
                   const pct = Math.round((completed / mod.total) * 100);
@@ -325,6 +336,9 @@ const ProgressPage = () => {
             </div>
           </FadeIn>
 
+          </div>{/* End right column */}
+          </div>{/* End desktop two-column grid */}
+
           {/* Achievements */}
           <FadeIn delay={0.4}>
             <div className="bg-card rounded-2xl p-3.5 border border-border/40 shadow-card mb-4">
@@ -347,7 +361,7 @@ const ProgressPage = () => {
                   transition={{ duration: 0.8, delay: 0.5 }}
                 />
               </div>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
                 {achievements.map((a, i) => (
                   <motion.div
                     key={a.id}
@@ -393,7 +407,7 @@ const ProgressPage = () => {
                 <h4 className="text-xs font-extrabold text-foreground">Gem Store</h4>
                 <span className="ml-auto text-[10px] font-black text-agni-gold">{stats.gems} 💎</span>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 md:grid md:grid-cols-3 md:gap-3 md:space-y-0">
                 {[
                   { name: "Refill Hearts", emoji: "❤️", cost: 50, desc: "Restore all 5 hearts" },
                   { name: "Streak Freeze", emoji: "🛡️", cost: STREAK_FREEZE_COST, desc: "Protect your streak for 1 day" },

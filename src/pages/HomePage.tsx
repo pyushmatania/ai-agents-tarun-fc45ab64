@@ -138,7 +138,7 @@ const HomePage = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background pb-24 relative">
-        <div className="max-w-md mx-auto px-4 pt-5 relative z-10">
+        <div className="max-w-md md:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto px-4 pt-5 relative z-10">
 
           {/* Top bar */}
           <FadeIn>
@@ -245,7 +245,7 @@ const HomePage = () => {
           </FadeIn>
 
           {/* Stats Row */}
-          <StaggerContainer className="grid grid-cols-4 gap-2 mb-4">
+          <StaggerContainer className="grid grid-cols-4 md:grid-cols-4 gap-2 md:gap-3 mb-4">
             {[
               { icon: BookOpen, value: stats.totalLessons, label: "Lessons", color: "bg-agni-blue" },
               { icon: Zap, value: stats.xp, label: "XP", color: "bg-agni-green" },
@@ -291,6 +291,10 @@ const HomePage = () => {
               </div>
             </motion.button>
           </FadeIn>
+
+          {/* Two-column grid on desktop: left = quests+streak+config, right = leaderboard+achievements+persona */}
+          <div className="lg:grid lg:grid-cols-2 lg:gap-6">
+          <div>
 
           {/* Daily Quests */}
           <FadeIn delay={0.25}>
@@ -443,7 +447,7 @@ const HomePage = () => {
           </FadeIn>
 
           {/* Quick Actions */}
-          <StaggerContainer className="grid grid-cols-3 gap-2 mb-4">
+          <StaggerContainer className="grid grid-cols-3 md:grid-cols-3 gap-2 md:gap-3 mb-4">
             {[
               { nav: "/curiosity", emoji: "🔮", label: "Spark", sub: "AI Insights", color: "bg-agni-purple" },
               { nav: "/sources", emoji: "🌐", label: "Hub", sub: "Resources", color: "bg-agni-blue" },
@@ -461,6 +465,9 @@ const HomePage = () => {
               </StaggerItem>
             ))}
           </StaggerContainer>
+
+          </div>{/* end left column */}
+          <div>{/* right column */}
 
           {/* League & Achievements Row */}
           <FadeIn delay={0.45}>
@@ -632,9 +639,12 @@ const HomePage = () => {
             </div>
           </FadeIn>
 
+          </div>{/* end right column */}
+          </div>{/* end two-column grid */}
+
           {/* More Quick Links Row */}
           <FadeIn delay={0.6}>
-            <div className="grid grid-cols-2 gap-2 mb-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-4">
               <motion.button whileTap={{ scale: 0.95 }} onClick={() => navigate("/mega-prompt")}
                 className="bg-card rounded-2xl p-3 border border-border/40 shadow-card flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-agni-green flex items-center justify-center shrink-0">

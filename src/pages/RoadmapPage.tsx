@@ -68,7 +68,7 @@ const RoadmapPage = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background pb-24">
-        <div className="max-w-md mx-auto px-4 pt-5">
+        <div className="max-w-md md:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto px-4 pt-5">
 
           {/* Top bar */}
           <FadeIn>
@@ -95,7 +95,7 @@ const RoadmapPage = () => {
 
           {/* Journey Progress Banner */}
           <FadeIn delay={0.05}>
-            <div className="rounded-2xl p-4 mb-4 relative overflow-hidden border border-agni-purple/20"
+            <div className="rounded-2xl p-4 md:p-6 lg:p-8 mb-4 relative overflow-hidden border border-agni-purple/20"
               style={{ background: "linear-gradient(135deg, hsl(var(--agni-purple) / 0.15), hsl(var(--agni-green) / 0.1))" }}>
               <div className="flex items-center justify-between mb-3">
                 <div>
@@ -165,7 +165,7 @@ const RoadmapPage = () => {
                     <motion.button
                       whileTap={{ scale: 0.99 }}
                       onClick={() => setExpandedPhase(isExpanded ? null : phase.id)}
-                      className="w-full p-3.5 flex items-center gap-3 text-left"
+                      className="w-full p-3.5 md:p-5 lg:p-6 flex items-center gap-3 text-left"
                     >
                       <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${phase.color} flex items-center justify-center text-lg shrink-0 shadow-md`}>
                         {phase.emoji}
@@ -202,7 +202,7 @@ const RoadmapPage = () => {
                           transition={{ duration: 0.25 }}
                           className="overflow-hidden"
                         >
-                          <div className="px-3.5 pb-3.5 space-y-1">
+                          <div className="px-3.5 pb-3.5 md:px-5 md:pb-5 lg:px-6 lg:pb-6 space-y-1">
                             {phase.milestones.map((milestone, mIdx) => {
                               const isComplete = milestone.lessonIds.every(id => stats.done.includes(id));
                               const isNext = !isComplete && (mIdx === 0 || phase.milestones[mIdx - 1].lessonIds.every(id => stats.done.includes(id)));
@@ -213,7 +213,7 @@ const RoadmapPage = () => {
                                   initial={{ opacity: 0, x: -8 }}
                                   animate={{ opacity: 1, x: 0 }}
                                   transition={{ delay: mIdx * 0.04 }}
-                                  className={`relative flex gap-2.5 p-2.5 rounded-xl transition-all ${
+                                  className={`relative flex gap-2.5 p-2.5 md:p-4 lg:p-5 rounded-xl transition-all ${
                                     milestone.checkpoint
                                       ? isComplete ? "bg-agni-green/10 border border-agni-green/20" : "bg-muted/20 border border-dashed border-agni-gold/20"
                                       : isNext ? "bg-agni-green/5 border border-agni-green/15" : ""
@@ -274,7 +274,7 @@ const RoadmapPage = () => {
 
           {/* Total XP Summary */}
           <FadeIn delay={0.4}>
-            <div className="mt-4 bg-card rounded-2xl p-3.5 border border-border/40 shadow-card">
+            <div className="mt-4 bg-card rounded-2xl p-3.5 md:p-5 lg:p-6 border border-border/40 shadow-card">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Trophy size={16} className="text-agni-gold" />

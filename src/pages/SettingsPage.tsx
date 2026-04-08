@@ -146,7 +146,7 @@ const SettingsPage = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background pb-24">
-        <div className="max-w-md mx-auto px-4 pt-5">
+        <div className="max-w-md md:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto px-4 pt-5">
 
           {/* Top bar */}
           <FadeIn>
@@ -235,7 +235,7 @@ const SettingsPage = () => {
               )}
 
               {/* Quick Stats */}
-              <div className="grid grid-cols-4 gap-2 mb-4">
+              <div className="grid grid-cols-4 gap-2 lg:gap-4 xl:gap-6 mb-4">
                 {[
                   { icon: Zap, value: stats.xp, label: "XP", color: "text-agni-green" },
                   { icon: Flame, value: stats.streak, label: "Streak", color: "text-agni-orange" },
@@ -251,6 +251,7 @@ const SettingsPage = () => {
               </div>
 
               <div className="space-y-2.5">
+                <div className="md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3 lg:gap-4 space-y-2.5 md:space-y-0">
                 <div>
                   <label className="text-micro text-muted-foreground">NAME</label>
                   <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Enter your name"
@@ -260,6 +261,7 @@ const SettingsPage = () => {
                   <label className="text-micro text-muted-foreground">ROLE</label>
                   <Input value={role} onChange={(e) => setRole(e.target.value)} placeholder="e.g. Developer, Student"
                     className="h-10 rounded-xl bg-muted/50 border-border/40 text-foreground text-sm mt-1" />
+                </div>
                 </div>
                 <motion.div whileTap={{ scale: 0.97, y: 2 }}>
                   <Button onClick={handleSave} disabled={saving}
@@ -357,6 +359,7 @@ const SettingsPage = () => {
                 {detailsExpanded && (
                   <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                     <div className="px-3.5 pb-3.5 space-y-3">
+                      <div className="md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3 lg:gap-4 space-y-3 md:space-y-0">
                       {/* Age Range */}
                       <div>
                         <p className="text-micro text-muted-foreground mb-1.5">AGE RANGE</p>
@@ -395,7 +398,9 @@ const SettingsPage = () => {
                           ))}
                         </div>
                       </div>
+                      </div>
 
+                      <div className="md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3 lg:gap-4 space-y-3 md:space-y-0">
                       {/* Location */}
                       <div>
                         <p className="text-micro text-muted-foreground mb-1.5 flex items-center gap-1"><MapPin size={9} /> LOCATION</p>
@@ -423,6 +428,7 @@ const SettingsPage = () => {
                         <Input value={ctx.job_title} onChange={e => updateContext({ job_title: e.target.value })}
                           placeholder="e.g. Software Engineer, Student"
                           className="h-9 rounded-xl bg-muted/50 border-border/40 text-foreground text-[11px]" />
+                      </div>
                       </div>
 
                       {/* Mission Follow-up (dynamic based on selected mission) */}
@@ -523,8 +529,8 @@ const SettingsPage = () => {
                       </div>
 
                       {aiConfig.mode === "builtin" ? (
-                        <div className="space-y-1.5">
-                          <p className="text-micro text-muted-foreground">SELECT MODEL</p>
+                        <div className="space-y-1.5 lg:grid lg:grid-cols-2 lg:gap-2 lg:space-y-0">
+                          <p className="text-micro text-muted-foreground lg:col-span-2">SELECT MODEL</p>
                           {BUILT_IN_MODELS.map(model => (
                             <motion.button
                               key={model.id}
@@ -1140,8 +1146,8 @@ const SettingsPage = () => {
           </FadeIn>
 
           <FadeIn delay={0.2}>
-            <div className="bg-card rounded-2xl border border-border/40 overflow-hidden mb-3 shadow-card">
-              <div className="flex items-center justify-between p-3.5 border-b border-border/30">
+            <div className="bg-card rounded-2xl border border-border/40 overflow-hidden mb-3 shadow-card lg:grid lg:grid-cols-2 xl:grid-cols-4">
+              <div className="flex items-center justify-between p-3.5 border-b border-border/30 lg:border-r lg:border-border/30 xl:border-b-0">
                 <div className="flex items-center gap-2.5">
                   {lightMode ? <Sun size={15} className="text-agni-gold" /> : <Moon size={15} className="text-agni-purple" />}
                   <div>
@@ -1151,7 +1157,7 @@ const SettingsPage = () => {
                 </div>
                 <Switch checked={lightMode} onCheckedChange={toggleTheme} />
               </div>
-              <div className="flex items-center justify-between p-3.5 border-b border-border/30">
+              <div className="flex items-center justify-between p-3.5 border-b border-border/30 xl:border-b-0 xl:border-r xl:border-border/30">
                 <div className="flex items-center gap-2.5">
                   <Bell size={15} className={soundEnabled ? "text-agni-green" : "text-muted-foreground"} />
                   <div>
@@ -1161,7 +1167,7 @@ const SettingsPage = () => {
                 </div>
                 <Switch checked={soundEnabled} onCheckedChange={(v) => { setSoundEnabled(v); if (v) SFX.unmute(); else SFX.mute(); }} />
               </div>
-              <button className="flex items-center justify-between w-full p-3.5 border-b border-border/30 hover:bg-muted/20 transition-colors">
+              <button className="flex items-center justify-between w-full p-3.5 border-b border-border/30 lg:border-b-0 lg:border-r lg:border-border/30 xl:border-r xl:border-border/30 hover:bg-muted/20 transition-colors">
                 <div className="flex items-center gap-2.5">
                   <Bell size={15} className="text-muted-foreground" />
                   <div className="text-left">
@@ -1194,18 +1200,18 @@ const SettingsPage = () => {
 
           {/* Danger Zone */}
           <FadeIn delay={0.3}>
-            <div className="space-y-2">
+            <div className="space-y-2 lg:flex lg:gap-3 lg:space-y-0">
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 onClick={handleResetProgress}
-                className="w-full bg-agni-orange/10 text-agni-orange font-extrabold rounded-2xl p-3 flex items-center justify-center gap-2 text-xs border border-agni-orange/20"
+                className="w-full bg-agni-orange/10 text-agni-orange font-extrabold rounded-2xl p-3 flex items-center justify-center gap-2 text-xs border border-agni-orange/20 lg:flex-1"
               >
                 <Trash2 size={14} /> Reset All Progress
               </motion.button>
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 onClick={handleLogout}
-                className="w-full bg-agni-red/10 text-agni-red font-extrabold rounded-2xl p-3 flex items-center justify-center gap-2 text-xs border border-agni-red/20"
+                className="w-full bg-agni-red/10 text-agni-red font-extrabold rounded-2xl p-3 flex items-center justify-center gap-2 text-xs border border-agni-red/20 lg:flex-1"
               >
                 <LogOut size={14} /> {user ? "Log Out" : "Reset & Start Over"}
               </motion.button>

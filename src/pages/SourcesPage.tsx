@@ -111,7 +111,7 @@ const SourcesPage = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background pb-24 relative overflow-x-hidden">
-        <div className="max-w-md mx-auto relative z-10">
+        <div className="max-w-md md:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto relative z-10">
           {/* Top bar */}
           <FadeIn>
             <div className="px-4 pt-4 pb-2 flex items-center justify-between">
@@ -285,7 +285,7 @@ const SourcesPage = () => {
           </div>
 
           {/* Source Cards */}
-          <div className="px-4 space-y-1.5">
+          <div className="px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1.5">
             <AnimatePresence mode="popLayout">
               {filteredSources.map((source, i) => {
                 const catMeta = SOURCE_CATEGORIES.find(c => c.id === source.category);
