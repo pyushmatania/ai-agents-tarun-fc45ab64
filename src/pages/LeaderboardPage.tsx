@@ -69,11 +69,11 @@ const LeaderboardPage = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background pb-24">
-        <div className="max-w-md mx-auto px-4 pt-5">
+        <div className="max-w-md md:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto px-4 pt-5">
 
           {/* Header */}
           <FadeIn>
-            <div className="flex items-center gap-3 mb-5">
+            <div className="flex items-center gap-3 mb-5 md:mb-6">
               <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate(-1)}
                 className="w-9 h-9 rounded-xl bg-card flex items-center justify-center border border-border/50">
                 <ArrowLeft size={16} className="text-muted-foreground" />
@@ -89,7 +89,7 @@ const LeaderboardPage = () => {
           {/* Your rank card */}
           {user && myIdx >= 0 && (
             <FadeIn delay={0.05}>
-              <div className="bg-gradient-to-r from-agni-green/15 to-agni-blue/10 border border-agni-green/25 rounded-2xl p-3.5 mb-4">
+              <div className="bg-gradient-to-r from-agni-green/15 to-agni-blue/10 border border-agni-green/25 rounded-2xl p-3.5 md:p-5 mb-4 md:mb-5">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-2xl bg-agni-green/20 flex items-center justify-center">
                     <span className="text-xl font-black text-agni-green">#{myIdx + 1}</span>
@@ -115,11 +115,11 @@ const LeaderboardPage = () => {
 
           {/* Tabs */}
           <FadeIn delay={0.1}>
-            <div className="flex gap-2 mb-5">
+            <div className="flex gap-2 md:gap-3 mb-5 md:mb-6">
               {(["weekly", "alltime"] as const).map(t => (
                 <motion.button key={t} whileTap={{ scale: 0.95 }}
                   onClick={() => setTab(t)}
-                  className={`flex-1 text-[11px] font-black py-2.5 rounded-xl transition-all ${
+                  className={`flex-1 text-[11px] font-black py-2.5 md:py-3 rounded-xl transition-all ${
                     tab === t
                       ? "bg-agni-gold/20 text-agni-gold border border-agni-gold/40 shadow-md"
                       : "bg-card text-muted-foreground border border-border/40"
@@ -136,7 +136,7 @@ const LeaderboardPage = () => {
             <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
               {top3.length >= 3 && (
                 <FadeIn delay={0.15}>
-                  <div className="flex items-end justify-center gap-2 mb-5">
+                  <div className="flex items-end justify-center gap-2 md:gap-6 mb-5 md:mb-8">
                     {/* 2nd place */}
                     <PodiumCard entry={top3[1]} rank={2} tab={tab} isYou={user?.id === top3[1].user_id} />
                     {/* 1st place */}
@@ -148,7 +148,7 @@ const LeaderboardPage = () => {
               )}
 
               {/* Rest of leaderboard */}
-              <StaggerContainer className="space-y-2 mb-4">
+              <StaggerContainer className="space-y-2 md:space-y-3 mb-4 md:mb-6">
                 {rest.map((entry, idx) => {
                   const rank = idx + 4;
                   const isYou = user?.id === entry.user_id;
@@ -159,7 +159,7 @@ const LeaderboardPage = () => {
                     <StaggerItem key={entry.user_id}>
                       <motion.div
                         whileTap={{ scale: 0.98 }}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl border transition-all ${
+                        className={`flex items-center gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-2xl border transition-all ${
                           isYou
                             ? "bg-agni-green/10 border-agni-green/25"
                             : "bg-card border-border/40"
@@ -201,14 +201,14 @@ const LeaderboardPage = () => {
 
           {/* League tiers section */}
           <FadeIn delay={0.3}>
-            <div className="bg-card rounded-2xl p-3.5 border border-border/40 shadow-card mb-4">
-              <div className="flex items-center gap-2 mb-3">
+            <div className="bg-card rounded-2xl p-3.5 md:p-5 border border-border/40 shadow-card mb-4 md:mb-6">
+              <div className="flex items-center gap-2 mb-3 md:mb-4">
                 <div className="w-7 h-7 rounded-xl bg-agni-purple flex items-center justify-center">
                   <Crown size={14} className="text-white" />
                 </div>
                 <h4 className="text-xs font-extrabold text-foreground">League Tiers</h4>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 md:space-y-3">
                 {[
                   { name: "Starter", emoji: "🌱", xp: "0 XP", desc: "Just getting started" },
                   { name: "Bronze", emoji: "🥉", xp: "300 XP", desc: "Finding your rhythm" },
@@ -223,7 +223,7 @@ const LeaderboardPage = () => {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.35 + i * 0.05 }}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-xl border ${
+                      className={`flex items-center gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl border ${
                         isCurrentLeague
                           ? "bg-agni-green/10 border-agni-green/25"
                           : "bg-muted/15 border-border/30"
@@ -264,7 +264,7 @@ const PodiumCard = ({ entry, rank, tab, isYou, first }: {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 + (rank - 1) * 0.08, type: "spring" }}
-      className={`flex flex-col items-center ${first ? "w-28 -mt-4" : "w-24"}`}
+      className={`flex flex-col items-center ${first ? "w-28 md:w-36 -mt-4" : "w-24 md:w-32"}`}
     >
       <motion.span
         className={`${first ? "text-3xl" : "text-xl"} mb-1`}
@@ -273,7 +273,7 @@ const PodiumCard = ({ entry, rank, tab, isYou, first }: {
       >
         {rankEmoji}
       </motion.span>
-      <div className={`w-full rounded-2xl p-3 border text-center bg-gradient-to-b ${PODIUM_COLORS[rank - 1]} ${
+      <div className={`w-full rounded-2xl p-3 md:p-5 border text-center bg-gradient-to-b ${PODIUM_COLORS[rank - 1]} ${
         isYou ? "ring-2 ring-agni-green/40" : ""
       }`}>
         <span className="text-lg block mb-0.5">{leagueMeta.emoji}</span>

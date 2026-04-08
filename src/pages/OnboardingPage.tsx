@@ -466,7 +466,7 @@ const OnboardingPage = () => {
         {/* ═══════ STEP 0: SPLASH ═══════ */}
         {step === 0 && (
           <motion.div key="splash" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
-            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen items-center justify-center"
+            className="relative z-10 max-w-md md:max-w-2xl lg:max-w-3xl mx-auto px-6 flex flex-col min-h-screen items-center justify-center"
           >
             {/* Animated colorful background */}
             <motion.div
@@ -558,7 +558,7 @@ const OnboardingPage = () => {
         {/* ═══════ STEP 1: NAME ═══════ */}
         {step === 1 && (
           <motion.div key="name" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
-            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
+            className="relative z-10 max-w-md md:max-w-2xl lg:max-w-3xl mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-[#E0F2FE] via-[#E8F4F8] to-[#F0E6FA] pointer-events-none" />
 
@@ -605,7 +605,7 @@ const OnboardingPage = () => {
         {/* ═══════ STEP 2: ABOUT YOU (age/gender) ═══════ */}
         {step === 2 && (
           <motion.div key="aboutyou" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
-            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
+            className="relative z-10 max-w-md md:max-w-2xl lg:max-w-3xl mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-[#FCE4EC] via-[#F8E8D0] to-[#FFF3E0] pointer-events-none" />
 
@@ -676,7 +676,7 @@ const OnboardingPage = () => {
         {/* ═══════ STEP 3: IDENTITY (Pick your avatar!) ═══════ */}
         {step === 3 && (
           <motion.div key="role" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
-            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
+            className="relative z-10 max-w-md md:max-w-2xl lg:max-w-3xl mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-[#F0E6FA] via-[#F5E0F0] to-[#FADADD] pointer-events-none" />
 
@@ -698,7 +698,7 @@ const OnboardingPage = () => {
                 Your identity shapes how AGNI teaches — pick the world you live in
               </p>
 
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
                 {(showAllRoles ? ROLES : ROLES.slice(0, 10)).map((role, i) => (
                   <ColorPill
                     key={role.id}
@@ -758,7 +758,7 @@ const OnboardingPage = () => {
         {/* ═══════ STEP 4: BACKGROUND ═══════ */}
         {step === 4 && (
           <motion.div key="lifecontext" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
-            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
+            className="relative z-10 max-w-md md:max-w-2xl lg:max-w-3xl mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-[#E8F5E9] via-[#E0F2FE] to-[#E8EAF6] pointer-events-none" />
 
@@ -841,7 +841,7 @@ const OnboardingPage = () => {
         {/* ═══════ STEP 5: MISSION MODE (Choose your quest!) ═══════ */}
         {step === 5 && (
            <motion.div key="mission" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
-            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
+            className="relative z-10 max-w-md md:max-w-2xl lg:max-w-3xl mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-[#FFF3E0] via-[#FFECD2] to-[#FFE0B2] pointer-events-none" />
 
@@ -862,7 +862,7 @@ const OnboardingPage = () => {
               <p className="text-[10px] text-gray-500 text-center mb-3 shrink-0">Why are you learning AI agents?</p>
 
               <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
-                <div className="grid grid-cols-2 gap-2.5">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
                   {[...MISSION_MODES, ...customMissions].map((m, i) => (
                     <ColorPill
                       key={m.id}
@@ -904,7 +904,7 @@ const OnboardingPage = () => {
         {/* ═══════ STEP 6: MISSION FOLLOW-UP ═══════ */}
         {step === 6 && selectedMission && MISSION_FOLLOWUPS[selectedMission] && (
           <motion.div key="missionfollowup" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
-            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
+            className="relative z-10 max-w-md md:max-w-2xl lg:max-w-3xl mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-[#FFF8E1] via-[#F0F4C3] to-[#E8F5E9] pointer-events-none" />
 
@@ -970,7 +970,7 @@ const OnboardingPage = () => {
         {/* ═══════ STEP 7: TEACHING VIBE (Set your DJ!) ═══════ */}
         {step === 7 && (
           <motion.div key="vibe" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
-            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
+            className="relative z-10 max-w-md md:max-w-2xl lg:max-w-3xl mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-[#FCE4EC] via-[#F8BBD0] to-[#F3E5F5] pointer-events-none" />
 
@@ -991,7 +991,7 @@ const OnboardingPage = () => {
               <p className="text-[10px] text-gray-500 text-center mb-3 shrink-0">How should AGNI talk to you?</p>
 
               <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
-                <div className="grid grid-cols-2 gap-2.5">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
                   {[...VIBES.map(v => ({ ...v, color: v.gradient })), ...customVibes].map((vibe, i) => (
                     <ColorPill
                       key={vibe.id}
@@ -1039,7 +1039,7 @@ const OnboardingPage = () => {
         {/* ═══════ STEP 8: BRAIN LEVEL (Power Level!) ═══════ */}
         {step === 8 && (
           <motion.div key="brain" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
-            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
+            className="relative z-10 max-w-md md:max-w-2xl lg:max-w-3xl mx-auto px-6 flex flex-col min-h-screen h-screen pt-16 pb-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-[#E8EAF6] via-[#C5CAE9] to-[#E1F5FE] pointer-events-none" />
 
@@ -1077,7 +1077,7 @@ const OnboardingPage = () => {
               </div>
 
               <div className="flex-1 overflow-y-auto scrollbar-none -mx-1 px-1 mb-3">
-                <div className="grid grid-cols-2 gap-2.5">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
                   {[...(brainTrack === "skill" ? BRAIN_LEVELS_SKILL : BRAIN_LEVELS_ACADEMIC), ...customBrains].map((b, i) => (
                     <ColorPill
                       key={b.id}
@@ -1129,7 +1129,7 @@ const OnboardingPage = () => {
         {/* ═══════ STEP 9: WHY THIS MATTERS ═══════ */}
         {step === 9 && (
           <motion.div key="whymatters" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
-            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
+            className="relative z-10 max-w-md md:max-w-2xl lg:max-w-3xl mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-agni-gold/10 via-agni-orange/5 to-agni-pink/10 pointer-events-none" />
             
@@ -1204,7 +1204,7 @@ const OnboardingPage = () => {
         {/* ═══════ CATEGORY SELECTION SCREENS ═══════ */}
         {activeCategory && !isConfirmStep && (
           <motion.div key={`cat-${categoryIndex}`} custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
-            className="relative z-10 max-w-md mx-auto px-5 pt-16 pb-4 flex flex-col min-h-screen h-screen"
+            className="relative z-10 max-w-md md:max-w-2xl lg:max-w-3xl mx-auto px-5 pt-16 pb-4 flex flex-col min-h-screen h-screen"
           >
             <div className={`absolute inset-0 bg-gradient-to-b ${CATEGORY_GRADIENTS[categoryIndex % CATEGORY_GRADIENTS.length]} pointer-events-none`} />
 
@@ -1410,7 +1410,7 @@ const OnboardingPage = () => {
         {/* ═══════ CONFIRM STEP ═══════ */}
         {isConfirmStep && (
           <motion.div key="confirm" custom={dir} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={stepTransition}
-            className="relative z-10 max-w-md mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
+            className="relative z-10 max-w-md md:max-w-2xl lg:max-w-3xl mx-auto px-6 flex flex-col min-h-screen pt-16 pb-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-[#E8F5E9] via-[#E0F2FE] to-[#F0E6FA] pointer-events-none" />
 

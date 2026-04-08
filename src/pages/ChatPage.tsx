@@ -185,7 +185,7 @@ export default function ChatPage() {
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* Header */}
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/10">
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="max-w-md md:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
           <button onClick={() => navigate("/")} className="w-10 h-10 rounded-2xl bg-muted/20 flex items-center justify-center hover:bg-muted/30 transition-colors">
             <X size={18} className="text-foreground" />
           </button>
@@ -229,6 +229,7 @@ export default function ChatPage() {
 
       {/* Messages area */}
       <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-4 py-4 relative">
+        <div className="max-w-md md:max-w-3xl lg:max-w-4xl mx-auto">
         {chat.isLoadingHistory ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <Loader2 size={24} className="animate-spin" style={{ color: tabConfig.color }} />
@@ -291,6 +292,7 @@ export default function ChatPage() {
             })}
           </div>
         )}
+        </div>
       </div>
 
       {/* Scroll to bottom button */}
@@ -310,6 +312,7 @@ export default function ChatPage() {
 
       {/* Smart Input Bar */}
       <div className="sticky bottom-0 pb-[env(safe-area-inset-bottom,0px)]">
+        <div className="max-w-md md:max-w-3xl lg:max-w-4xl mx-auto">
         <SmartInputBar
           value={input}
           onChange={setInput}
@@ -327,6 +330,7 @@ export default function ChatPage() {
           hasMessages={chat.messages.length > 0}
           onRecookLast={() => chat.regenerateLast(buildTeachingContext())}
         />
+        </div>
       </div>
     </div>
   );

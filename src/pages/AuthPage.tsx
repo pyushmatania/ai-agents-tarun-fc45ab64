@@ -80,7 +80,7 @@ const AuthPage = () => {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-secondary/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="max-w-md mx-auto px-6 pt-8 pb-8 flex-1 flex flex-col w-full relative z-10">
+      <div className="max-w-md md:max-w-lg mx-auto px-6 pt-8 pb-8 flex-1 flex flex-col w-full relative z-10">
         {/* Mascot + Branding */}
         <motion.div
           className="flex flex-col items-center mb-6"

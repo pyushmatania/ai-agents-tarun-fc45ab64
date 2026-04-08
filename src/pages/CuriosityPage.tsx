@@ -623,7 +623,7 @@ const CuriosityPage = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background pb-24 relative overflow-x-hidden">
-        <div className="max-w-md mx-auto relative z-10">
+        <div className="max-w-md md:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto relative z-10">
           {/* Top bar */}
           <FadeIn>
             <div className="px-4 pt-4 pb-2 flex items-center justify-between">
@@ -1279,7 +1279,7 @@ const CuriosityPage = () => {
                       <p className="text-[10px] text-muted-foreground mt-1">Tap the bookmark icon on any feed item to save it here</p>
                     </div>
                   ) : (
-                    <div className="space-y-2.5">
+                    <div className="space-y-2.5 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3 md:space-y-0">
                       {feedItems.filter((_, i) => savedItems.has(i)).map((item, j) => {
                         const originalIdx = feedItems.indexOf(item);
                         const meta = getContentMeta(item.url);
@@ -1398,7 +1398,7 @@ const CuriosityPage = () => {
                   </div>
 
                   {/* Category Cards — Netflix-ranked colorful cards */}
-                  <div className="space-y-3">
+                  <div className="space-y-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3 md:space-y-0">
                     {CURIOSITY
                       .filter(cat => !exploreSearch || cat.label.toLowerCase().includes(exploreSearch.toLowerCase()) || cat.desc.toLowerCase().includes(exploreSearch.toLowerCase()))
                       .map((cat, i) => {

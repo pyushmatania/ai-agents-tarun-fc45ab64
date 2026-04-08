@@ -150,11 +150,11 @@ const CoursesPage = () => {
           </svg>
         </div>
 
-        <div className="max-w-md mx-auto relative z-10">
+        <div className="max-w-md md:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto relative z-10">
           
           {/* Top stats bar */}
           <FadeIn>
-            <div className="px-4 pt-4 pb-2 flex items-center justify-between">
+            <div className="px-4 md:px-6 pt-4 md:pt-5 pb-2 md:pb-3 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <div className="flex items-center gap-1 bg-agni-orange/15 rounded-full px-2 py-1">
                   <Flame size={12} className="text-agni-orange" />
@@ -180,7 +180,7 @@ const CoursesPage = () => {
 
           {/* Overall progress bar */}
           <FadeIn>
-            <div className="px-4 mb-2">
+            <div className="px-4 md:px-6 mb-2 md:mb-3">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[8px] font-black text-muted-foreground tracking-wider">OVERALL PROGRESS</span>
                 <span className="text-[9px] font-black text-agni-green">{totalDone}/{totalLessons} lessons</span>
@@ -211,8 +211,8 @@ const CoursesPage = () => {
 
           {/* Module selector tabs */}
           <FadeIn>
-            <div className="px-4 mb-3">
-              <div className="flex gap-1.5 bg-card rounded-2xl p-1.5 border border-border/30">
+            <div className="px-4 md:px-6 mb-3 md:mb-4">
+              <div className="flex gap-1.5 md:gap-2 bg-card rounded-2xl p-1.5 md:p-2 border border-border/30">
                 {MODULES.map((m, i) => {
                   const mDone = m.lessons.filter(l => done.includes(l.id)).length;
                   const isActive = i === activeModule;
@@ -221,7 +221,7 @@ const CoursesPage = () => {
                       key={m.id}
                       whileTap={{ scale: 0.92 }}
                       onClick={() => setActiveModule(i)}
-                      className={`flex-1 rounded-xl py-2 text-center transition-all relative ${
+                      className={`flex-1 rounded-xl py-2 md:py-2.5 text-center transition-all relative ${
                         isActive ? `${m.color} shadow-lg` : "hover:bg-muted/30"
                       }`}
                     >
@@ -243,7 +243,7 @@ const CoursesPage = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className={`mx-4 ${mod.color} rounded-3xl p-4 shadow-lg mb-4 relative overflow-hidden`}
+              className={`mx-4 md:mx-6 ${mod.color} rounded-3xl p-4 md:p-6 shadow-lg mb-4 md:mb-6 relative overflow-hidden`}
             >
               {/* Decorative circles */}
               <div className="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-white/5" />
@@ -281,7 +281,7 @@ const CoursesPage = () => {
           </AnimatePresence>
 
           {/* Winding S-curve path */}
-          <div className="px-4 relative">
+          <div className="px-4 md:px-6 relative">
             {/* SVG connector path */}
             <svg className="absolute top-0 left-4 right-4 h-full pointer-events-none" style={{ width: "calc(100% - 32px)" }}>
               {mod.lessons.map((_, i) => {
@@ -377,7 +377,7 @@ const CoursesPage = () => {
                       </motion.div>
                     )}
 
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-3 md:gap-5 lg:gap-6">
                       {/* Node */}
                       <motion.button
                         whileHover={!isLocked ? { scale: 1.12 } : {}}
@@ -448,13 +448,13 @@ const CoursesPage = () => {
                       </motion.button>
 
                       {/* Label card */}
-                      <div className="pt-2 flex-1 min-w-0">
-                        <p className={`text-[11px] font-black leading-tight ${
+                      <div className="pt-2 md:pt-3 lg:pt-4 flex-1 min-w-0">
+                        <p className={`text-[11px] md:text-xs font-black leading-tight ${
                           isLocked ? "text-muted-foreground/30" : "text-foreground"
                         }`}>
                           {lesson.t}
                         </p>
-                        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                        <div className="flex items-center gap-1.5 md:gap-2 mt-1 md:mt-1.5 flex-wrap">
                           <span className={`text-[9px] font-black ${isDone ? "text-agni-green" : "text-muted-foreground/40"}`}>
                             +{lesson.xp} XP
                           </span>
@@ -518,11 +518,11 @@ const CoursesPage = () => {
                 initial={{ opacity: 0, scale: 0.7 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ type: "spring" }}
-                className="text-center py-6"
+                className="text-center py-6 md:py-8"
               >
                 <Agni expression="celebrating" size={120} speech="You're amazing! 🎉" />
-                <p className="text-foreground font-black text-sm mt-3">Module Complete! 🏆</p>
-                <p className="text-muted-foreground text-[10px] font-semibold">You've mastered {mod.title}</p>
+                <p className="text-foreground font-black text-sm md:text-base mt-3">Module Complete! 🏆</p>
+                <p className="text-muted-foreground text-[10px] md:text-xs font-semibold">You've mastered {mod.title}</p>
                 {activeModule < MODULES.length - 1 && (
                   <motion.button
                     whileTap={{ scale: 0.95 }}

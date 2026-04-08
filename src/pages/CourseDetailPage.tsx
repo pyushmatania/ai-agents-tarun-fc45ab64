@@ -340,7 +340,7 @@ const CourseDetailPage = () => {
     <div className="flex flex-col h-screen bg-background">
       {/* Minimal header */}
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/10">
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="max-w-md md:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
           <button onClick={() => { clearInterval(timerRef.current); navigate("/courses"); }}
             className="w-10 h-10 rounded-2xl bg-muted/20 flex items-center justify-center">
             <X size={18} className="text-foreground" />
@@ -385,6 +385,7 @@ const CourseDetailPage = () => {
         {phase === "chat" && (
           <>
             <div ref={scrollRef} className="h-full overflow-y-auto px-4 py-4">
+              <div className="max-w-md md:max-w-3xl lg:max-w-4xl mx-auto">
               <div className="space-y-1">
                 {messages.map((msg, i) => {
                   const { clean } = parseSuggestions(msg.content);
@@ -411,6 +412,7 @@ const CourseDetailPage = () => {
                     </div>
                   </div>
                 )}
+              </div>
               </div>
             </div>
           </>
