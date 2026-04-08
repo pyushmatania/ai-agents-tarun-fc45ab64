@@ -309,8 +309,16 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
     handleSend(prompt);
   };
 
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    // Throttle scroll-to-bottom during streaming to prevent jank
+    if (scrollTimerRef.current) return;
+    scrollTimerRef.current = setTimeout(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+      }
+      scrollTimerRef.current = null;
+    }, 80);
   }, [messages, isLoading]);
 
   useEffect(() => {
@@ -804,7 +812,7 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
           className="flex-1 bg-card border-2 border-border/30 rounded-2xl px-4 py-2.5 text-[12px] font-semibold text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-agni-green/50 transition-all disabled:opacity-50"
         />
         <motion.button whileTap={{ scale: 0.85 }} onClick={() => handleSend()} disabled={!input.trim() || isLoading}
-          className="w-10 h-10 rounded-xl bg-agni-green flex items-center justify-center shadow-[0_4px_0_0_hsl(100,100%,31%)] active:shadow-[0_1px_0_0_hsl(100,100%,31%)] active:translate-y-[3px] transition-all disabled:opacity-30 disabled:shadow-none"
+          className="w-11 h-11 rounded-xl bg-agni-green flex items-center justify-center shadow-[0_4px_0_0_hsl(100,100%,31%)] active:shadow-[0_1px_0_0_hsl(100,100%,31%)] active:translate-y-[3px] transition-all disabled:opacity-30 disabled:shadow-none"
         >
           <Send size={16} className="text-white" />
         </motion.button>

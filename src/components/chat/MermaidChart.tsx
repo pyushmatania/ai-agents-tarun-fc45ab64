@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
-import { Copy, Check, GitBranch } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Copy, Check, GitBranch, ChevronDown, ChevronUp } from "lucide-react";
 
 interface MermaidChartProps {
   code: string;
@@ -13,6 +13,7 @@ export default function MermaidChart({ code }: MermaidChartProps) {
   const [svg, setSvg] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [copied, setCopied] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const idRef = useRef(`mermaid-${Math.random().toString(36).slice(2, 10)}`);
 
   useEffect(() => {
@@ -60,7 +61,6 @@ export default function MermaidChart({ code }: MermaidChartProps) {
   };
 
   if (error) {
-    // Fallback to code view
     return (
       <motion.div
         initial={{ opacity: 0, y: 12 }}
@@ -95,16 +95,37 @@ export default function MermaidChart({ code }: MermaidChartProps) {
           <GitBranch size={14} className="text-agni-purple" />
           <span className="text-[11px] font-black text-agni-purple uppercase tracking-wider">Diagram</span>
         </div>
-        <button onClick={handleCopy} className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground hover:text-foreground transition-colors">
-          {copied ? <Check size={12} className="text-agni-green" /> : <Copy size={12} />}
-          {copied ? "Copied!" : "Copy"}
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={handleCopy} className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground hover:text-foreground transition-colors">
+            {copied ? <Check size={12} className="text-agni-green" /> : <Copy size={12} />}
+            {copied ? "Copied!" : "Copy"}
+          </button>
+          <button
+            onClick={() => setCollapsed(c => !c)}
+            className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {collapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+            {collapsed ? "Show" : "Hide"}
+          </button>
+        </div>
       </div>
-      <div
-        ref={containerRef}
-        className="p-4 overflow-x-auto scrollbar-none flex justify-center [&_svg]:max-w-full [&_svg]:h-auto"
-        dangerouslySetInnerHTML={{ __html: svg }}
-      />
+      <AnimatePresence initial={false}>
+        {!collapsed && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div
+              ref={containerRef}
+              className="p-4 overflow-x-auto scrollbar-none flex justify-center [&_svg]:max-w-full [&_svg]:h-auto"
+              dangerouslySetInnerHTML={{ __html: svg }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
