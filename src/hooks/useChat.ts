@@ -139,13 +139,17 @@ export function useChat(tab: ChatTab) {
         ? { messages: allMessages, stream: true, teachingContext: extraContext }
         : { messages: allMessages, context: extraContext };
 
+      // Get the user's actual access token for auth
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
       const resp = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${edgeFunction}`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify(body),
           signal: controller.signal,
