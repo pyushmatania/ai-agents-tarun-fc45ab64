@@ -52,25 +52,16 @@ const HomePage = () => {
   const [modesOpen, setModesOpen] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showInfoTooltip, setShowInfoTooltip] = useState(false);
-  const [leaderboard, setLeaderboard] = useState<{ display_name: string; xp: number; weekly_xp: number; public_id: string }[]>([]);
+  const [leaderboard, setLeaderboard] = useState<{ display_name: string; xp: number; weekly_xp: number; user_id: string }[]>([]);
   const [lbTab, setLbTab] = useState<"weekly" | "alltime">("weekly");
   const [prevRank, setPrevRank] = useState<number | null>(null);
-
-  const [myPublicId, setMyPublicId] = useState<string | null>(null);
-
-  // Compute SHA-256 of user ID for leaderboard "is this me?" matching
-  useEffect(() => {
-    if (!user?.id) { setMyPublicId(null); return; }
-    crypto.subtle.digest("SHA-256", new TextEncoder().encode(user.id))
-      .then(buf => setMyPublicId(Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("")));
-  }, [user?.id]);
 
   // Fetch leaderboard + realtime subscription
   useEffect(() => {
     const fetchLeaderboard = async () => {
       const { data } = await supabase
         .from("leaderboard")
-        .select("display_name, xp, weekly_xp")
+        .select("display_name, xp, weekly_xp, user_id")
         .order("weekly_xp", { ascending: false })
         .limit(10);
       if (data) setLeaderboard(data as any);
