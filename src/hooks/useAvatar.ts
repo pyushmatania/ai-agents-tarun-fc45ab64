@@ -2,20 +2,27 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { getPersona } from "@/lib/neuralOS";
-
-const LOCAL_KEY = "user_avatar_url";
+import { getScopedStorage, getCurrentScopedStorage } from "@/lib/scopedStorage";
 
 /**
  * Hook for user avatar management
- * - Upload DP to Cloud storage
- * - Generate AI avatar based on gender/interests
- * - Show across all pages
  */
 export function useAvatar() {
   const { user } = useAuth();
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(() => localStorage.getItem(LOCAL_KEY));
+  const userId = user?.id ?? null;
+  const storage = getScopedStorage(userId);
+
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(() =>
+    storage.get<string | null>("avatar_url", null)
+  );
   const [uploading, setUploading] = useState(false);
   const [generating, setGenerating] = useState(false);
+
+  // Re-sync from scoped storage when user changes
+  useEffect(() => {
+    const s = getScopedStorage(userId);
+    setAvatarUrl(s.get<string | null>("avatar_url", null));
+  }, [userId]);
 
   // Load avatar from profile on mount
   useEffect(() => {
@@ -25,10 +32,10 @@ export function useAvatar() {
         .from("profiles")
         .select("avatar_url")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
       if (data?.avatar_url) {
         setAvatarUrl(data.avatar_url);
-        localStorage.setItem(LOCAL_KEY, data.avatar_url);
+        getScopedStorage(user.id).set("avatar_url", data.avatar_url);
       }
     })();
   }, [user]);
@@ -58,7 +65,7 @@ export function useAvatar() {
         .eq("user_id", user.id);
 
       setAvatarUrl(url);
-      localStorage.setItem(LOCAL_KEY, url);
+      getScopedStorage(user.id).set("avatar_url", url);
       return url;
     } catch (e) {
       console.error("Avatar upload failed:", e);
@@ -73,10 +80,8 @@ export function useAvatar() {
     setGenerating(true);
     try {
       const persona = getPersona();
-      const ctx = (() => {
-        try { return JSON.parse(localStorage.getItem("user_context") || "{}"); }
-        catch { return {}; }
-      })();
+      const s = getScopedStorage(user.id);
+      const ctx = s.get<Record<string, any>>("user_context", {});
 
       const interests = [
         ...(persona.shows || []),
@@ -89,14 +94,14 @@ export function useAvatar() {
         body: {
           gender: ctx.gender || null,
           interests,
-          name: persona.name || localStorage.getItem("edu_user_name") || "User",
+          name: persona.name || s.get<string>("user_name", "") || "User",
         },
       });
 
       if (error) throw error;
       if (data?.url) {
         setAvatarUrl(data.url);
-        localStorage.setItem(LOCAL_KEY, data.url);
+        getScopedStorage(user.id).set("avatar_url", data.url);
         return data.url;
       }
       return null;
@@ -116,7 +121,7 @@ export function useAvatar() {
         .update({ avatar_url: null })
         .eq("user_id", user.id);
       setAvatarUrl(null);
-      localStorage.removeItem(LOCAL_KEY);
+      getScopedStorage(user.id).remove("avatar_url");
     } catch (e) {
       console.error("Avatar remove failed:", e);
     }
@@ -127,7 +132,6 @@ export function useAvatar() {
 
 /**
  * Get a fallback avatar based on persona
- * Returns: { emoji, gradient, initials }
  */
 export function getFallbackAvatar(name?: string | null): {
   emoji: string;
@@ -135,20 +139,15 @@ export function getFallbackAvatar(name?: string | null): {
   initials: string;
 } {
   const persona = getPersona();
-  const gender = (() => {
-    try {
-      const ctx = JSON.parse(localStorage.getItem("user_context") || "{}");
-      return ctx.gender || null;
-    } catch { return null; }
-  })();
+  const storage = getCurrentScopedStorage();
+  const ctx = storage.get<Record<string, any>>("user_context", {});
+  const gender = ctx.gender || null;
 
-  // Pick emoji based on gender
   let emoji = "🧑‍💻";
   if (gender === "Male") emoji = "👨‍💻";
   else if (gender === "Female") emoji = "👩‍💻";
   else if (gender === "Non-binary") emoji = "🧑‍💻";
 
-  // Pick gradient based on favorite interests
   const interests = [
     ...(persona.shows || []),
     ...(persona.sports || []),
