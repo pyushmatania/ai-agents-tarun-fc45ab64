@@ -81,11 +81,11 @@ serve(async (req) => {
 
     // Use client-provided difficulty prompt or fall back to mode-based mapping
     let difficultyText = difficultyPrompt || "";
+    const DIFFICULTY_MAP: Record<string, string> = {
+      class5: "easy", founder: "medium", engineer: "hard", hacker: "hard",
+    };
+    const difficulty = DIFFICULTY_MAP[teachingMode] || "medium";
     if (!difficultyText) {
-      const DIFFICULTY_MAP: Record<string, string> = {
-        class5: "easy", founder: "medium", engineer: "hard", hacker: "hard",
-      };
-      const difficulty = DIFFICULTY_MAP[teachingMode] || "medium";
       const difficultyGuide: Record<string, string> = {
         easy: `Difficulty: EASY. Use simple language a child can understand. Questions should test basic recall and simple concepts.`,
         medium: `Difficulty: MEDIUM. Use clear professional language. Questions should test understanding and application.`,

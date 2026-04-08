@@ -69,8 +69,8 @@ const HomePage = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       const { data } = await supabase
-        .from("leaderboard_public")
-        .select("display_name, xp, weekly_xp, public_id")
+        .from("leaderboard")
+        .select("display_name, xp, weekly_xp")
         .order("weekly_xp", { ascending: false })
         .limit(10);
       if (data) setLeaderboard(data as any);

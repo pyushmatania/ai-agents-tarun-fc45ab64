@@ -67,7 +67,7 @@ serve(async (req) => {
     }
     let jsonStr = match[0];
     // Remove control characters that break JSON.parse
-    jsonStr = jsonStr.replace(/[\x00-\x1F\x7F]/g, (ch) => {
+    jsonStr = jsonStr.replace(/[\x00-\x1F\x7F]/g, (ch: string) => {
       if (ch === '\n' || ch === '\r' || ch === '\t') return ch;
       return '';
     });

@@ -50,8 +50,8 @@ const LeaderboardPage = () => {
   useEffect(() => {
     const fetch = async () => {
       const { data } = await supabase
-        .from("leaderboard_public")
-        .select("display_name, xp, weekly_xp, public_id, level, league")
+        .from("leaderboard")
+        .select("display_name, xp, weekly_xp, level, league")
         .order("weekly_xp", { ascending: false })
         .limit(50);
       if (data) setEntries(data as LeaderboardEntry[]);
