@@ -141,7 +141,7 @@ export function useChat(tab: ChatTab) {
 
       // Get the user's actual access token for auth
       const { data: { session } } = await supabase.auth.getSession();
-      const accessToken = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const accessToken = session?.access_token ?? null;
 
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
