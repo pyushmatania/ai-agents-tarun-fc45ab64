@@ -134,7 +134,13 @@ export default function ChatPage() {
 
   const handleSend = (text?: string, hiddenPrompt?: string) => {
     const msg = text || input.trim();
-    if (!msg) return;
+    if (!msg) {
+      // Blank send = recook last question with new settings
+      if (chat.messages.length > 0) {
+        chat.regenerateLast(buildTeachingContext());
+      }
+      return;
+    }
     const ctx = buildTeachingContext();
     const snapshot = buildSettingsSnapshot();
     const opts = hiddenPrompt ? { hiddenPrompt, hideUserMessage: true } : undefined;

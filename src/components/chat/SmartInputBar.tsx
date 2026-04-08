@@ -625,7 +625,7 @@ export default function SmartInputBar({
             ) : (
               <button
                 onClick={() => onSend()}
-                disabled={!value.trim()}
+                disabled={false}
                 className="absolute right-2 bottom-2 w-8 h-8 rounded-xl flex items-center justify-center transition-all disabled:opacity-20"
                 style={{ background: value.trim() ? accentColor : "hsl(var(--muted))" }}
               >
