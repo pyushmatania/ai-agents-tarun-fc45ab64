@@ -8,6 +8,7 @@ import { hasPersona } from "@/lib/neuralOS";
 import { SFX } from "@/lib/sounds";
 import UserAvatar from "./UserAvatar";
 import { useAvatar } from "@/hooks/useAvatar";
+import { getCurrentScopedStorage } from "@/lib/scopedStorage";
 
 const EXPRESSIONS: AgniExpression[] = ["default", "happy", "excited", "thinking", "teaching", "celebrating"];
 
@@ -31,7 +32,7 @@ const Header = ({ name, progress }: HeaderProps) => {
   const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
   const { avatarUrl } = useAvatar();
-  const xp = parseInt(localStorage.getItem("adojo_xp") || "0");
+  const xp = getCurrentScopedStorage().get<number>("xp", 0);
   const level = Math.floor(xp / 100) + 1;
   const personaActive = hasPersona();
 

@@ -424,31 +424,21 @@ const CuriosityPage = () => {
   const [dateFilter, setDateFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("newest");
   const [showFilters, setShowFilters] = useState(false);
-  const [lastFetchTime, setLastFetchTime] = useState<string | null>(() => localStorage.getItem("spark_last_fetch"));
+  const [lastFetchTime, setLastFetchTime] = useState<string | null>(() => getCurrentScopedStorage().get<string | null>("spark_last_fetch", null));
   const [savedItems, setSavedItems] = useState<Set<number>>(() => {
-    try {
-      const s = localStorage.getItem("spark_saved");
-      return s ? new Set(JSON.parse(s)) : new Set();
-    } catch { return new Set(); }
+    const arr = getCurrentScopedStorage().get<number[]>("spark_saved", []);
+    return new Set(arr);
   });
   const [likedItems, setLikedItems] = useState<Set<number>>(() => {
-    try {
-      const s = localStorage.getItem("spark_liked");
-      return s ? new Set(JSON.parse(s)) : new Set();
-    } catch { return new Set(); }
+    const arr = getCurrentScopedStorage().get<number[]>("spark_liked", []);
+    return new Set(arr);
   });
   const [learnItem, setLearnItem] = useState<any>(null);
   const [feedItems, setFeedItems] = useState<any[]>(() => {
-    try {
-      const cached = localStorage.getItem("spark_feed_cache");
-      return cached ? JSON.parse(cached) : [];
-    } catch { return []; }
+    return getCurrentScopedStorage().get<any[]>("spark_feed_cache", []);
   });
   const [viewedItems, setViewedItems] = useState<number[]>(() => {
-    try {
-      const v = localStorage.getItem("spark_viewed");
-      return v ? JSON.parse(v) : [];
-    } catch { return []; }
+    return getCurrentScopedStorage().get<number[]>("spark_viewed", []);
   });
   const [exploreSearch, setExploreSearch] = useState("");
   const [exploreFilter, setExploreFilter] = useState("all");
@@ -496,7 +486,7 @@ const CuriosityPage = () => {
     setSavedItems(prev => {
       const next = new Set(prev);
       if (next.has(idx)) next.delete(idx); else next.add(idx);
-      localStorage.setItem("spark_saved", JSON.stringify([...next]));
+      getCurrentScopedStorage().set("spark_saved", [...next]);
       return next;
     });
     toast.success(savedItems.has(idx) ? "Removed from saved" : "Saved for later! 🔖");
@@ -506,7 +496,7 @@ const CuriosityPage = () => {
     setLikedItems(prev => {
       const next = new Set(prev);
       if (next.has(idx)) next.delete(idx); else next.add(idx);
-      localStorage.setItem("spark_liked", JSON.stringify([...next]));
+      getCurrentScopedStorage().set("spark_liked", [...next]);
       return next;
     });
   };
@@ -516,11 +506,11 @@ const CuriosityPage = () => {
       if (prev.includes(idx)) {
         // Move to front
         const next = [idx, ...prev.filter(i => i !== idx)].slice(0, 20);
-        localStorage.setItem("spark_viewed", JSON.stringify(next));
+        getCurrentScopedStorage().set("spark_viewed", next);
         return next;
       }
       const next = [idx, ...prev].slice(0, 20);
-      localStorage.setItem("spark_viewed", JSON.stringify(next));
+      getCurrentScopedStorage().set("spark_viewed", next);
       return next;
     });
   };
@@ -531,11 +521,7 @@ const CuriosityPage = () => {
   );
 
   const getCachedResults = (catId: string): any[] => {
-    try {
-      const cached = localStorage.getItem(`spark_cache_${catId}`);
-      if (cached) return JSON.parse(cached);
-    } catch {}
-    return [];
+    return getCurrentScopedStorage().get<any[]>(`spark_cache_${catId}`, []);
   };
 
   const fetchFeed = useCallback(async (append = false) => {
@@ -562,10 +548,10 @@ const CuriosityPage = () => {
       if (items.length > 0) {
         const newItems = append ? [...feedItems, ...items] : items;
         setFeedItems(newItems);
-        localStorage.setItem("spark_feed_cache", JSON.stringify(newItems));
+        getCurrentScopedStorage().set("spark_feed_cache", newItems);
         const now = new Date().toISOString();
         setLastFetchTime(now);
-        localStorage.setItem("spark_last_fetch", now);
+        getCurrentScopedStorage().set("spark_last_fetch", now);
       }
     } catch (e: any) {
       toast.error("Couldn't refresh feed");
@@ -618,7 +604,7 @@ const CuriosityPage = () => {
       const items = data?.items || [];
       if (items.length > 0) {
         setResults(items);
-        localStorage.setItem(`spark_cache_${cat.id}`, JSON.stringify(items));
+        getCurrentScopedStorage().set(`spark_cache_${cat.id}`, items);
       } else if (cached.length === 0) {
         setError("No results found. Try again!");
       }

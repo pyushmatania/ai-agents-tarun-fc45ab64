@@ -6,7 +6,7 @@ import {
   Image, Paperclip, Mic, Search,
 } from "lucide-react";
 import { getPersona } from "@/lib/neuralOS";
-import { getTeachingLabel, getTeachingSelection, setTeachingSelection, MISSION_MODES, TEACHING_VIBES, BRAIN_LEVELS_SKILL, BRAIN_LEVELS_ACADEMIC, getBrainTrack, QUIZ_DIFFICULTIES, getActiveExplainStyles, type QuizDifficulty } from "@/lib/teachingConfig";
+import { getTeachingLabel, getTeachingSelection, setTeachingSelection, MISSION_MODES, TEACHING_VIBES, BRAIN_LEVELS_SKILL, BRAIN_LEVELS_ACADEMIC, getBrainTrack, QUIZ_DIFFICULTIES, getActiveExplainStyles, type QuizDifficulty, getUniverseVibe, setUniverseVibe } from "@/lib/teachingConfig";
 import { InterestPill } from "@/components/InterestPill";
 import { SFX } from "@/lib/sounds";
 
@@ -75,7 +75,7 @@ export default function SmartInputBar({
   const [currentMotive, setCurrentMotive] = useState(() => getTeachingSelection("mission"));
   const [currentVibe, setCurrentVibe] = useState(() => getTeachingSelection("vibe"));
   const [currentBrain, setCurrentBrain] = useState(() => getTeachingSelection("brain"));
-  const [selectedInterest, setSelectedInterest] = useState(() => localStorage.getItem("teaching_universe_vibe") || "");
+  const [selectedInterest, setSelectedInterest] = useState(() => getUniverseVibe() || "");
   const [settingsChanged, setSettingsChanged] = useState(false);
 
   // Track settings fingerprint — mark changed when any selection changes after messages exist
@@ -136,7 +136,7 @@ export default function SmartInputBar({
     SFX.select();
     setActivePanel("none");
     setTeachingSelection("vibe", currentVibe);
-    localStorage.setItem("teaching_universe_vibe", item);
+    setUniverseVibe(item);
     window.dispatchEvent(new Event("storage"));
     setSelectedInterest(item);
   };
@@ -162,7 +162,7 @@ export default function SmartInputBar({
       setTeachingSelection("brain", "");
       setCurrentBrain("");
     } else if (type === "interest") {
-      localStorage.removeItem("teaching_universe_vibe");
+      setUniverseVibe(null);
       window.dispatchEvent(new Event("storage"));
       setSelectedInterest("");
     }
@@ -425,7 +425,7 @@ export default function SmartInputBar({
                     <div className="flex flex-wrap gap-1.5 mb-1">
                       <motion.button
                         whileTap={{ scale: 0.93 }}
-                        onClick={() => { SFX.tap(); localStorage.removeItem("teaching_universe_vibe"); window.dispatchEvent(new Event("storage")); setSelectedInterest(""); setActivePanel("none"); }}
+                        onClick={() => { SFX.tap(); setUniverseVibe(null); window.dispatchEvent(new Event("storage")); setSelectedInterest(""); setActivePanel("none"); }}
                         className={`text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all border ${
                           !selectedInterest ? "bg-red-500/15 text-red-400 border-red-500/40" : "bg-card text-muted-foreground border-border/30 hover:border-border/60"
                         }`}

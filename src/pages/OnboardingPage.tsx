@@ -301,7 +301,7 @@ const OnboardingPage = () => {
       teaching_brain: selectedBrain || "",
       brain_track: brainTrack,
     };
-    localStorage.setItem("user_context", JSON.stringify(userCtx));
+    getCurrentScopedStorage().set("user_context", userCtx);
     navigate("/");
   };
 
@@ -393,7 +393,7 @@ const OnboardingPage = () => {
       teaching_brain: selectedBrain || "",
       brain_track: brainTrack,
     };
-    localStorage.setItem("user_context", JSON.stringify(userCtx));
+    getCurrentScopedStorage().set("user_context", userCtx);
     navigate("/");
   };
 

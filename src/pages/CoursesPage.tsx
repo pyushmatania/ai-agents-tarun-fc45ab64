@@ -7,6 +7,7 @@ import { CheckCircle2, Lock, Star, Crown, Diamond, Heart, Flame, ChevronRight, T
 import { motion, AnimatePresence } from "framer-motion";
 import Agni from "@/components/Agni";
 import type { AgniExpression } from "@/components/Agni";
+import { getCurrentScopedStorage } from "@/lib/scopedStorage";
 
 const MODULES = [
   { id:"found", title:"Foundations", sub:"START HERE", icon:"🧬", color: "bg-agni-green", hex: "#58CC02", lessons:[
@@ -71,8 +72,8 @@ const FloatingOrb = ({ delay, x, y, size, color }: { delay: number; x: string; y
 
 const CoursesPage = () => {
   const navigate = useNavigate();
-  const done: string[] = JSON.parse(localStorage.getItem("adojo_done") || "[]");
-  const xp = parseInt(localStorage.getItem("adojo_xp") || "0");
+  const done: string[] = getCurrentScopedStorage().get<string[]>("done", []);
+  const xp = getCurrentScopedStorage().get<number>("xp", 0);
   const [activeModule, setActiveModule] = useState(0);
 
   const totalLessons = MODULES.reduce((a, m) => a + m.lessons.length, 0);

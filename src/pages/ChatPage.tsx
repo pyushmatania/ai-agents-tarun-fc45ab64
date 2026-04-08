@@ -56,10 +56,7 @@ export default function ChatPage() {
   const autoSend = (location.state as any)?.autoSend || false;
   const [activeTab, setActiveTab] = useState<ChatTab>(initialTab);
   const [activeMode, setActiveMode] = useState(() => {
-    const saved = getCurrentScopedStorage().get<string>("teaching_mode", "");
-    if (saved) return saved;
-    const identity = localStorage.getItem("teaching_identity");
-    return identity || "";
+    return getCurrentScopedStorage().get<string>("teaching_mode", "");
   });
 
   const chat = useChat(activeTab);
