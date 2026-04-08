@@ -78,12 +78,21 @@ export default function SmartInputBar({
   const [selectedInterest, setSelectedInterest] = useState(() => localStorage.getItem("teaching_universe_vibe") || "");
   const [settingsChanged, setSettingsChanged] = useState(false);
 
-  // Reset settingsChanged when a message is sent (value clears or onSend fires)
-  const originalOnSend = onSend;
+  // Track settings fingerprint — mark changed when any selection changes after messages exist
+  const settingsFingerprint = `${currentMotive}|${currentVibe}|${currentBrain}|${selectedInterest}`;
+  const prevFingerprintRef = useRef(settingsFingerprint);
+  useEffect(() => {
+    if (prevFingerprintRef.current !== settingsFingerprint && hasMessages) {
+      setSettingsChanged(true);
+    }
+    prevFingerprintRef.current = settingsFingerprint;
+  }, [settingsFingerprint, hasMessages]);
+
+  // Wrap onSend to reset settingsChanged
   const wrappedOnSend = useCallback((text?: string, hiddenPrompt?: string) => {
     setSettingsChanged(false);
-    originalOnSend(text, hiddenPrompt);
-  }, [originalOnSend]);
+    onSend(text, hiddenPrompt);
+  }, [onSend]);
 
   // Auto-resize textarea
   useEffect(() => {
