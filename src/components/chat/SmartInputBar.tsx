@@ -122,11 +122,6 @@ export default function SmartInputBar({
     localStorage.setItem("teaching_universe_vibe", item);
     window.dispatchEvent(new Event("storage"));
     setSelectedInterest(item);
-    if (hasMessages && !value.trim() && onRecookLast) setTimeout(() => onRecookLast(), 100);
-  };
-
-  const maybeRecook = () => {
-    if (hasMessages && !value.trim() && onRecookLast) setTimeout(() => onRecookLast(), 100);
   };
 
   // Get labels for active selections — show chip only when explicitly set
@@ -248,7 +243,6 @@ export default function SmartInputBar({
                         setTeachingSelection("mission", m.id);
                         setCurrentMotive(m.id);
                         setActivePanel("none");
-                        maybeRecook();
                       }}
                       className={`text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all border ${
                         currentMotive === m.id
@@ -347,7 +341,6 @@ export default function SmartInputBar({
                         setTeachingSelection("vibe", v.id);
                         setCurrentVibe(v.id);
                         setActivePanel("none");
-                        maybeRecook();
                       }}
                       className={`text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all border ${
                         currentVibe === v.id
@@ -388,7 +381,7 @@ export default function SmartInputBar({
                         setTeachingSelection("brain", b.id);
                         setCurrentBrain(b.id);
                         setActivePanel("none");
-                        maybeRecook();
+                        
                       }}
                       className={`text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all border ${
                         currentBrain === b.id
