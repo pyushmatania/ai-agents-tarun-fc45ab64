@@ -124,11 +124,8 @@ export default function ChatPage() {
   const buildSettingsSnapshot = () => {
     const ctx = buildTeachingContext();
     const parts: { key: string; emoji: string; value: string }[] = [];
+    // Only show actively selected universe/interest — other settings are background config
     if (ctx.universeVibe) parts.push({ key: "World", emoji: "🌍", value: ctx.universeVibe });
-    if (ctx.vibe) parts.push({ key: "Vibe", emoji: "🎨", value: ctx.vibe.split(" — ")[0] });
-    if (ctx.level) parts.push({ key: "Brain", emoji: "🧠", value: ctx.level.split(" — ")[0] });
-    if (ctx.identity) parts.push({ key: "Identity", emoji: "🪪", value: ctx.identity.split(" — ")[0] });
-    if (ctx.mission) parts.push({ key: "Mission", emoji: "🎯", value: ctx.mission.split(" — ")[0] });
     return parts;
   };
 
@@ -137,7 +134,8 @@ export default function ChatPage() {
     if (!msg) {
       // Blank send = recook last question with new settings
       if (chat.messages.length > 0) {
-        chat.regenerateLast(buildTeachingContext());
+        const snapshot = buildSettingsSnapshot();
+        chat.regenerateLast(buildTeachingContext(), snapshot);
       }
       return;
     }

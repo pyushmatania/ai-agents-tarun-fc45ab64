@@ -247,7 +247,7 @@ export function useChat(tab: ChatTab) {
     }
   }, [user, tab]);
 
-  const regenerateLast = useCallback(async (extraContext?: Record<string, any>) => {
+  const regenerateLast = useCallback(async (extraContext?: Record<string, any>, settingsSnapshot?: { key: string; emoji: string; value: string }[]) => {
     if (isLoading || messages.length === 0) return;
     // Find the last user message
     const lastUserIdx = [...messages].reverse().findIndex(m => m.role === "user");
@@ -258,7 +258,7 @@ export function useChat(tab: ChatTab) {
     setMessages(prev => prev.slice(0, actualIdx));
     // Small delay to let state settle, then re-send
     setTimeout(() => {
-      sendMessage(lastUserMsg.content, extraContext);
+      sendMessage(lastUserMsg.content, extraContext, undefined, settingsSnapshot);
     }, 50);
   }, [messages, isLoading, sendMessage]);
 
