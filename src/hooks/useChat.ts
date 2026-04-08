@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { getScopedStorage } from "@/lib/scopedStorage";
 
 export type ChatTab = "curriculum" | "general";
 
@@ -13,35 +14,28 @@ export interface ChatMessage {
   created_at: string;
 }
 
-const LOCAL_KEY = (tab: ChatTab) => `agni_chat_${tab}`;
-
-function loadLocal(tab: ChatTab): ChatMessage[] {
-  try {
-    const raw = localStorage.getItem(LOCAL_KEY(tab));
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveLocal(tab: ChatTab, messages: ChatMessage[]) {
-  try {
-    // Keep last 100 messages locally
-    const trimmed = messages.slice(-100);
-    localStorage.setItem(LOCAL_KEY(tab), JSON.stringify(trimmed));
-  } catch {}
-}
+const LOCAL_KEY = (tab: ChatTab) => `chat_${tab}`;
 
 export function useChat(tab: ChatTab) {
   const { user } = useAuth();
+  const userId = user?.id ?? null;
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
-  // Load history on mount
+  // Mirror messages into a ref so sendMessage doesn't need messages in deps
+  const messagesRef = useRef<ChatMessage[]>([]);
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
+
+  // Storage ref scoped to current user
+  const storageRef = useRef(getScopedStorage(userId));
+  useEffect(() => { storageRef.current = getScopedStorage(userId); }, [userId]);
+
+  // Load history on mount and when user/tab changes
   useEffect(() => {
     const load = async () => {
+      const storage = getScopedStorage(userId);
       if (user) {
         setIsLoadingHistory(true);
         try {
@@ -63,24 +57,24 @@ export function useChat(tab: ChatTab) {
             })));
           } else {
             // Fallback to local
-            setMessages(loadLocal(tab));
+            setMessages(storage.get<ChatMessage[]>(LOCAL_KEY(tab), []));
           }
         } catch {
-          setMessages(loadLocal(tab));
+          setMessages(storage.get<ChatMessage[]>(LOCAL_KEY(tab), []));
         } finally {
           setIsLoadingHistory(false);
         }
       } else {
-        setMessages(loadLocal(tab));
+        setMessages(storage.get<ChatMessage[]>(LOCAL_KEY(tab), []));
       }
     };
     load();
-  }, [user, tab]);
+  }, [user, userId, tab]);
 
   // Save to local whenever messages change
   useEffect(() => {
     if (messages.length > 0) {
-      saveLocal(tab, messages);
+      storageRef.current.set(LOCAL_KEY(tab), messages.slice(-100));
     }
   }, [messages, tab]);
 
@@ -106,7 +100,6 @@ export function useChat(tab: ChatTab) {
     const actualPrompt = options?.hiddenPrompt || displayText;
     const hideUser = options?.hideUserMessage || false;
 
-    // Only add user message bubble if not hidden
     const userMsg: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
@@ -127,7 +120,6 @@ export function useChat(tab: ChatTab) {
     let assistantContent = "";
     const assistantId = crypto.randomUUID();
 
-    // Add placeholder assistant message with settings snapshot
     setMessages(prev => [...prev, {
       id: assistantId,
       role: "assistant",
@@ -138,9 +130,8 @@ export function useChat(tab: ChatTab) {
     }]);
 
     try {
-      // Build message history for AI
-      const historyMessages = messages.map(m => ({ role: m.role, content: m.content }));
-      // Always include the actual prompt as a user message for AI, even if hidden from UI
+      // Read from ref to avoid stale closure
+      const historyMessages = messagesRef.current.map(m => ({ role: m.role, content: m.content }));
       const allMessages = [...historyMessages, { role: "user" as const, content: actualPrompt }];
 
       const edgeFunction = tab === "curriculum" ? "ai-tutor" : "ai-chat";
@@ -203,7 +194,6 @@ export function useChat(tab: ChatTab) {
         }
       }
 
-      // Persist completed assistant message
       persistMessage({
         role: "assistant",
         content: assistantContent,
@@ -215,7 +205,7 @@ export function useChat(tab: ChatTab) {
       setMessages(prev =>
         prev.map(m =>
           m.id === assistantId
-            ? { ...m, content: `❌ Error: ${e.message || "Something went wrong"}` }
+            ? { ...m, content: `Error: ${e.message || "Something went wrong"}` }
             : m
         )
       );
@@ -223,7 +213,7 @@ export function useChat(tab: ChatTab) {
       setIsLoading(false);
       abortRef.current = null;
     }
-  }, [messages, tab, isLoading, persistMessage]);
+  }, [tab, isLoading, persistMessage]);
 
   const stopStreaming = useCallback(() => {
     abortRef.current?.abort();
@@ -232,10 +222,9 @@ export function useChat(tab: ChatTab) {
 
   const clearHistory = useCallback(async () => {
     setMessages([]);
-    localStorage.removeItem(LOCAL_KEY(tab));
+    storageRef.current.remove(LOCAL_KEY(tab));
     if (user) {
       try {
-        // Delete all messages for this tab
         await supabase
           .from("chat_messages")
           .delete()
@@ -248,19 +237,17 @@ export function useChat(tab: ChatTab) {
   }, [user, tab]);
 
   const regenerateLast = useCallback(async (extraContext?: Record<string, any>, settingsSnapshot?: { key: string; emoji: string; value: string }[]) => {
-    if (isLoading || messages.length === 0) return;
-    // Find the last user message
-    const lastUserIdx = [...messages].reverse().findIndex(m => m.role === "user");
+    const currentMessages = messagesRef.current;
+    if (isLoading || currentMessages.length === 0) return;
+    const lastUserIdx = [...currentMessages].reverse().findIndex(m => m.role === "user");
     if (lastUserIdx === -1) return;
-    const actualIdx = messages.length - 1 - lastUserIdx;
-    const lastUserMsg = messages[actualIdx];
-    // Remove messages from that user message onward (re-send it)
+    const actualIdx = currentMessages.length - 1 - lastUserIdx;
+    const lastUserMsg = currentMessages[actualIdx];
     setMessages(prev => prev.slice(0, actualIdx));
-    // Small delay to let state settle, then re-send
     setTimeout(() => {
       sendMessage(lastUserMsg.content, extraContext, undefined, settingsSnapshot);
     }, 50);
-  }, [messages, isLoading, sendMessage]);
+  }, [isLoading, sendMessage]);
 
   return {
     messages,
