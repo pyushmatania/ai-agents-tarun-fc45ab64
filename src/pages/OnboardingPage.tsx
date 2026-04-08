@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
+import { getCurrentScopedStorage } from "@/lib/scopedStorage";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -290,9 +291,9 @@ const OnboardingPage = () => {
 
   const skipAll = () => {
     SFX.celebration();
-    localStorage.setItem("edu_user_name", name.trim() || "Learner");
+    getCurrentScopedStorage().set("user_name", name.trim() || "Learner");
     localStorage.setItem("edu_onboarded", "true");
-    localStorage.setItem("edu_user_role", selectedRole || "student");
+    getCurrentScopedStorage().set("user_role", selectedRole || "student");
     const userCtx = {
       teaching_identity: selectedRole || "",
       teaching_mission: selectedMission || "",
@@ -375,8 +376,8 @@ const OnboardingPage = () => {
     if (selectedMission) setTeachingSelection("mission", selectedMission);
     if (selectedVibe) setTeachingSelection("vibe", selectedVibe);
     if (selectedBrain) setTeachingSelection("brain", selectedBrain);
-    localStorage.setItem("edu_user_name", name.trim());
-    localStorage.setItem("edu_user_role", selectedRole || "student");
+    getCurrentScopedStorage().set("user_name", name.trim());
+    getCurrentScopedStorage().set("user_role", selectedRole || "student");
     localStorage.setItem("edu_onboarded", "true");
     const userCtx = {
       age_range: ageRange,

@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import Agni from "@/components/Agni";
 import DailyQuests from "@/components/DailyQuests";
 import { useGamification } from "@/hooks/useGamification";
+import { getCurrentScopedStorage } from "@/lib/scopedStorage";
 
 const MODULE_PROGRESS = [
   { title: "Foundations", icon: "🧬", total: 6, ids: ["f1","f2","f3","f4","f5","f6"] },
@@ -26,7 +27,7 @@ const ProgressPage = () => {
     refillHearts, STREAK_FREEZE_COST,
   } = useGamification();
 
-  const userName = user?.user_metadata?.full_name?.split(" ")[0] || localStorage.getItem("edu_user_name") || "Learner";
+  const userName = user?.user_metadata?.full_name?.split(" ")[0] || getCurrentScopedStorage().get<string>("user_name", "") || "Learner";
   const displayProgress = Math.round((stats.done.length / 22) * 100);
 
   return (

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, Circle, Lock, ChevronDown, Rocket, Zap, Trophy, Target, Star, Flame, Diamond } from "lucide-react";
 import Agni from "@/components/Agni";
 import { useGamification } from "@/hooks/useGamification";
+import { getCurrentScopedStorage } from "@/lib/scopedStorage";
 
 const PHASES = [
   {
@@ -56,7 +57,7 @@ const TOTAL_MILESTONES = PHASES.flatMap(p => p.milestones).length;
 const RoadmapPage = () => {
   const { user } = useAuth();
   const { stats, league } = useGamification();
-  const userName = user?.user_metadata?.full_name?.split(" ")[0] || localStorage.getItem("edu_user_name") || "Learner";
+  const userName = user?.user_metadata?.full_name?.split(" ")[0] || getCurrentScopedStorage().get<string>("user_name", "") || "Learner";
 
   const [expandedPhase, setExpandedPhase] = useState<string | null>("30");
 

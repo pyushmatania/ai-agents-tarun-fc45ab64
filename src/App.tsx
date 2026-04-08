@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -22,7 +23,13 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const OnboardedRoute = ({ children }: { children: React.ReactNode }) => {
-  const isOnboarded = localStorage.getItem("edu_onboarded") === "true";
+  const [isOnboarded, setIsOnboarded] = useState(() => localStorage.getItem("edu_onboarded") === "true");
+  useEffect(() => {
+    const check = () => setIsOnboarded(localStorage.getItem("edu_onboarded") === "true");
+    window.addEventListener("storage", check);
+    window.addEventListener("auth-changed", check);
+    return () => { window.removeEventListener("storage", check); window.removeEventListener("auth-changed", check); };
+  }, []);
   if (!isOnboarded) return <Navigate to="/welcome" replace />;
   return <>{children}</>;
 };

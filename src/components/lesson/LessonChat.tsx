@@ -9,6 +9,7 @@ import { getPersona } from "@/lib/neuralOS";
 import { InterestPill } from "@/components/InterestPill";
 import MascotProfileModal from "@/components/MascotProfileModal";
 import { TEACHING_CATEGORIES, getTeachingSelection, getTeachingContext, getTeachingLabel, getUniverseVibe } from "@/lib/teachingConfig";
+import { getCurrentScopedStorage } from "@/lib/scopedStorage";
 
 interface Message {
   role: "user" | "assistant";
@@ -520,7 +521,7 @@ const LessonChat = ({ lessonTitle, lessonTopic, teachingMode: initialMode, onQui
   const handleModeChange = (mode: string) => {
     SFX.tap();
     setActiveMode(mode);
-    localStorage.setItem("teaching_mode", mode);
+    getCurrentScopedStorage().set("teaching_mode", mode);
     window.dispatchEvent(new Event("storage"));
     const modeInfo = MODES.find(m => m.key === mode);
     if (modeInfo) {

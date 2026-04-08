@@ -11,6 +11,7 @@ import {
   Share2, Bookmark, Filter, X, Search, History, MessageCircleMore
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { getCurrentScopedStorage } from "@/lib/scopedStorage";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGamification } from "@/hooks/useGamification";
@@ -406,7 +407,7 @@ const CuriosityPage = () => {
   const navigate = useNavigate();
   const { stats } = useGamification();
   const { followed, isFollowed } = useFollowedSources();
-  const storedName = localStorage.getItem("edu_user_name") || "Learner";
+  const storedName = getCurrentScopedStorage().get<string>("user_name", "") || "Learner";
   const displayName = user?.user_metadata?.full_name?.split(" ")[0] || storedName;
 
   const [activeTab, setActiveTab] = useState<"feed" | "saved" | "explore">("feed");
