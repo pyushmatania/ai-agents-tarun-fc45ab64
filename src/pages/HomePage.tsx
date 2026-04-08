@@ -52,25 +52,16 @@ const HomePage = () => {
   const [modesOpen, setModesOpen] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showInfoTooltip, setShowInfoTooltip] = useState(false);
-  const [leaderboard, setLeaderboard] = useState<{ display_name: string; xp: number; weekly_xp: number; public_id: string }[]>([]);
+  const [leaderboard, setLeaderboard] = useState<{ display_name: string; xp: number; weekly_xp: number; user_id: string }[]>([]);
   const [lbTab, setLbTab] = useState<"weekly" | "alltime">("weekly");
   const [prevRank, setPrevRank] = useState<number | null>(null);
-
-  const [myPublicId, setMyPublicId] = useState<string | null>(null);
-
-  // Compute SHA-256 of user ID for leaderboard "is this me?" matching
-  useEffect(() => {
-    if (!user?.id) { setMyPublicId(null); return; }
-    crypto.subtle.digest("SHA-256", new TextEncoder().encode(user.id))
-      .then(buf => setMyPublicId(Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("")));
-  }, [user?.id]);
 
   // Fetch leaderboard + realtime subscription
   useEffect(() => {
     const fetchLeaderboard = async () => {
       const { data } = await supabase
-        .from("leaderboard_public")
-        .select("display_name, xp, weekly_xp, public_id")
+        .from("leaderboard")
+        .select("display_name, xp, weekly_xp, user_id")
         .order("weekly_xp", { ascending: false })
         .limit(10);
       if (data) setLeaderboard(data as any);
@@ -588,11 +579,11 @@ const HomePage = () => {
                     const sorted = [...leaderboard].sort((a, b) =>
                       lbTab === "weekly" ? b.weekly_xp - a.weekly_xp : b.xp - a.xp
                     );
-                    const myIdx = myPublicId ? sorted.findIndex(p => p.public_id === myPublicId) : -1;
+                    const myIdx = user?.id ? sorted.findIndex(p => p.user_id === user.id) : -1;
 
                     return sorted.length > 0 ? (
                       sorted.slice(0, 5).map((player, idx) => {
-                        const isYou = myPublicId && player.public_id === myPublicId;
+                        const isYou = user?.id && player.user_id === user.id;
                         const rankEmoji = idx === 0 ? "👑" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "⚡";
                         const xpVal = lbTab === "weekly" ? player.weekly_xp : player.xp;
                         // Rank change indicator for current user
@@ -603,7 +594,7 @@ const HomePage = () => {
                           else if (diff < 0) rankChange = <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-[8px] font-black text-red-400">▼{Math.abs(diff)}</motion.span>;
                         }
                         return (
-                          <motion.div key={player.public_id}
+                          <motion.div key={player.user_id}
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: idx * 0.05 }}
