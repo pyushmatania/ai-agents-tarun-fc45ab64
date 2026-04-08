@@ -13,7 +13,7 @@ interface LeaderboardEntry {
   display_name: string;
   xp: number;
   weekly_xp: number;
-  public_id: string;
+  user_id: string;
   level: number;
   league: string;
 }
