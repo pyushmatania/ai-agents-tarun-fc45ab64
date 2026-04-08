@@ -38,7 +38,7 @@ const LeaderboardPage = () => {
   const { stats, league, streakDays } = useGamification();
   const [tab, setTab] = useState<"weekly" | "alltime">("weekly");
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
-  const [myPublicId, setMyPublicId] = useState<string | null>(null);
+  const [user?.id, setMyPublicId] = useState<string | null>(null);
 
   // Compute SHA-256 of user ID for "is this me?" matching
   useEffect(() => {
@@ -72,7 +72,7 @@ const LeaderboardPage = () => {
 
   const top3 = sorted.slice(0, 3);
   const rest = sorted.slice(3);
-  const myIdx = myPublicId ? sorted.findIndex(p => p.public_id === myPublicId) : -1;
+  const myIdx = user?.id ? sorted.findIndex(p => p.user_id === user?.id) : -1;
 
   return (
     <PageTransition>
@@ -146,11 +146,11 @@ const LeaderboardPage = () => {
                 <FadeIn delay={0.15}>
                   <div className="flex items-end justify-center gap-2 mb-5">
                     {/* 2nd place */}
-                    <PodiumCard entry={top3[1]} rank={2} tab={tab} isYou={myPublicId === top3[1].public_id} />
+                    <PodiumCard entry={top3[1]} rank={2} tab={tab} isYou={user?.id === top3[1].user_id} />
                     {/* 1st place */}
-                    <PodiumCard entry={top3[0]} rank={1} tab={tab} isYou={myPublicId === top3[0].public_id} first />
+                    <PodiumCard entry={top3[0]} rank={1} tab={tab} isYou={user?.id === top3[0].user_id} first />
                     {/* 3rd place */}
-                    <PodiumCard entry={top3[2]} rank={3} tab={tab} isYou={myPublicId === top3[2].public_id} />
+                    <PodiumCard entry={top3[2]} rank={3} tab={tab} isYou={user?.id === top3[2].user_id} />
                   </div>
                 </FadeIn>
               )}
@@ -159,12 +159,12 @@ const LeaderboardPage = () => {
               <StaggerContainer className="space-y-2 mb-4">
                 {rest.map((entry, idx) => {
                   const rank = idx + 4;
-                  const isYou = myPublicId === entry.public_id;
+                  const isYou = user?.id === entry.user_id;
                   const leagueMeta = LEAGUE_META[entry.league] || LEAGUE_META.Starter;
                   const xpVal = tab === "weekly" ? entry.weekly_xp : entry.xp;
 
                   return (
-                    <StaggerItem key={entry.public_id}>
+                    <StaggerItem key={entry.user_id}>
                       <motion.div
                         whileTap={{ scale: 0.98 }}
                         className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl border transition-all ${
