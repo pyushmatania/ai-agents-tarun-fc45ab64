@@ -76,6 +76,14 @@ export default function SmartInputBar({
   const [currentVibe, setCurrentVibe] = useState(() => getTeachingSelection("vibe"));
   const [currentBrain, setCurrentBrain] = useState(() => getTeachingSelection("brain"));
   const [selectedInterest, setSelectedInterest] = useState(() => localStorage.getItem("teaching_universe_vibe") || "");
+  const [settingsChanged, setSettingsChanged] = useState(false);
+
+  // Reset settingsChanged when a message is sent (value clears or onSend fires)
+  const originalOnSend = onSend;
+  const wrappedOnSend = useCallback((text?: string, hiddenPrompt?: string) => {
+    setSettingsChanged(false);
+    originalOnSend(text, hiddenPrompt);
+  }, [originalOnSend]);
 
   // Auto-resize textarea
   useEffect(() => {
