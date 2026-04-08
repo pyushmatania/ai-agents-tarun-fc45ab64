@@ -143,14 +143,20 @@ export function useChat(tab: ChatTab) {
       const { data: { session } } = await supabase.auth.getSession();
       const accessToken = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      };
+
+      if (accessToken) {
+        headers.Authorization = `Bearer ${accessToken}`;
+      }
+
       const resp = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${edgeFunction}`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
+          headers,
           body: JSON.stringify(body),
           signal: controller.signal,
         }
