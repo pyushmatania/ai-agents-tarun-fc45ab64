@@ -1,3 +1,5 @@
+import { getCurrentScopedStorage } from "./scopedStorage";
+
 // AI model configuration for the app
 export const BUILT_IN_MODELS = [
   { id: "google/gemini-2.5-flash", label: "Gemini Flash", provider: "lovable", emoji: "⚡", desc: "Fast & balanced" },
@@ -34,6 +36,9 @@ const DEFAULT_CONFIG: AIConfig = {
 
 export const getAIConfig = (): AIConfig => {
   try {
+    const scoped = getCurrentScopedStorage().get<AIConfig | null>("ai_config", null);
+    if (scoped) return { ...DEFAULT_CONFIG, ...scoped };
+    // Legacy fallback
     const stored = localStorage.getItem("adojo_ai_config");
     if (stored) return { ...DEFAULT_CONFIG, ...JSON.parse(stored) };
   } catch {}
@@ -41,7 +46,7 @@ export const getAIConfig = (): AIConfig => {
 };
 
 export const saveAIConfig = (config: AIConfig) => {
-  localStorage.setItem("adojo_ai_config", JSON.stringify(config));
+  getCurrentScopedStorage().set("ai_config", config);
 };
 
 export const getActiveModelLabel = (): string => {
