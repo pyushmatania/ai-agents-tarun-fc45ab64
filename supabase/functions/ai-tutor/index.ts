@@ -251,7 +251,6 @@ These should be 3 short (max 6 words each) contextual follow-up questions or act
         { role: "system", content: systemPrompt },
         ...messages,
       ],
-      temperature: 0.7,
     };
 
     if (stream) {
