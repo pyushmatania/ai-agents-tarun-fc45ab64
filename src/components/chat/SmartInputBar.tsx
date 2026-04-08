@@ -412,6 +412,17 @@ export default function SmartInputBar({
                 </div>
                 {interestCategories.length > 0 ? (
                   <div className="space-y-2 max-h-48 overflow-y-auto scrollbar-none">
+                    <div className="flex flex-wrap gap-1.5 mb-1">
+                      <motion.button
+                        whileTap={{ scale: 0.93 }}
+                        onClick={() => { SFX.tap(); localStorage.removeItem("teaching_universe_vibe"); window.dispatchEvent(new Event("storage")); setSelectedInterest(""); setActivePanel("none"); }}
+                        className={`text-[10px] font-black px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all border ${
+                          !selectedInterest ? "bg-red-500/15 text-red-400 border-red-500/40" : "bg-card text-muted-foreground border-border/30 hover:border-border/60"
+                        }`}
+                      >
+                        <span>🚫</span> None
+                      </motion.button>
+                    </div>
                     {interestCategories.map(cat => (
                       <div key={cat.id}>
                         <p className="text-[8px] font-bold text-muted-foreground mb-1">{cat.emoji} {cat.label}</p>
