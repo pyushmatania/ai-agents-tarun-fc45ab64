@@ -623,14 +623,14 @@ export default function SmartInputBar({
               onKeyDown={e => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
-                  onSend();
+                  wrappedOnSend();
                 }
               }}
-              placeholder={placeholder || "Ask anything..."}
+              placeholder={settingsChanged && !value.trim() ? "Press send to recook with new settings..." : (placeholder || "Ask anything...")}
               rows={1}
               disabled={isLoading}
               className="w-full bg-card border border-border/20 rounded-2xl pl-4 pr-12 py-3 text-[13px] font-medium text-foreground placeholder:text-muted-foreground/30 focus:outline-none resize-none overflow-hidden transition-all disabled:opacity-50"
-              style={{ borderColor: value.trim() ? `${accentColor}30` : undefined }}
+              style={{ borderColor: value.trim() ? `${accentColor}30` : settingsChanged ? `${accentColor}40` : undefined }}
             />
             {isLoading ? (
               <button
@@ -641,12 +641,20 @@ export default function SmartInputBar({
               </button>
             ) : (
               <button
-                onClick={() => onSend()}
+                onClick={() => wrappedOnSend()}
                 disabled={false}
-                className="absolute right-2 bottom-2 w-8 h-8 rounded-xl flex items-center justify-center transition-all disabled:opacity-20"
-                style={{ background: value.trim() ? accentColor : "hsl(var(--muted))" }}
+                className={`absolute right-2 bottom-2 w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
+                  settingsChanged && !value.trim() ? "animate-pulse shadow-lg" : ""
+                }`}
+                style={{ 
+                  background: value.trim() ? accentColor : settingsChanged ? accentColor : "hsl(var(--muted))",
+                  boxShadow: settingsChanged && !value.trim() ? `0 0 12px ${accentColor}60` : undefined,
+                }}
               >
-                <Send size={14} className="text-white" />
+                {settingsChanged && !value.trim() 
+                  ? <RefreshCw size={14} className="text-white" />
+                  : <Send size={14} className="text-white" />
+                }
               </button>
             )}
           </div>
