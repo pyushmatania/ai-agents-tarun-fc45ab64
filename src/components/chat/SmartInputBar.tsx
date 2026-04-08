@@ -122,11 +122,6 @@ export default function SmartInputBar({
     localStorage.setItem("teaching_universe_vibe", item);
     window.dispatchEvent(new Event("storage"));
     setSelectedInterest(item);
-    if (hasMessages && !value.trim() && onRecookLast) setTimeout(() => onRecookLast(), 100);
-  };
-
-  const maybeRecook = () => {
-    if (hasMessages && !value.trim() && onRecookLast) setTimeout(() => onRecookLast(), 100);
   };
 
   // Get labels for active selections — show chip only when explicitly set
