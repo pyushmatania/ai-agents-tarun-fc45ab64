@@ -5,6 +5,8 @@ export const BUILT_IN_MODELS = [
   { id: "google/gemini-2.5-flash-lite", label: "Gemini Lite", provider: "lovable", emoji: "🪶", desc: "Fastest" },
   { id: "openai/gpt-5-mini", label: "GPT-5 Mini", provider: "lovable", emoji: "🤖", desc: "Strong & fast" },
   { id: "openai/gpt-5", label: "GPT-5", provider: "lovable", emoji: "🏆", desc: "Most powerful" },
+  { id: "anthropic/claude-sonnet", label: "Claude Sonnet", provider: "byok", emoji: "🟠", desc: "Smart & safe" },
+  { id: "anthropic/claude-haiku", label: "Claude Haiku", provider: "byok", emoji: "🍃", desc: "Fast & light" },
 ] as const;
 
 export const BYOK_PROVIDERS = [
