@@ -38,20 +38,12 @@ const LeaderboardPage = () => {
   const { stats, league, streakDays } = useGamification();
   const [tab, setTab] = useState<"weekly" | "alltime">("weekly");
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
-  const [user?.id, setMyPublicId] = useState<string | null>(null);
-
-  // Compute SHA-256 of user ID for "is this me?" matching
-  useEffect(() => {
-    if (!user?.id) { setMyPublicId(null); return; }
-    crypto.subtle.digest("SHA-256", new TextEncoder().encode(user.id))
-      .then(buf => setMyPublicId(Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("")));
-  }, [user?.id]);
 
   useEffect(() => {
     const fetch = async () => {
       const { data } = await supabase
         .from("leaderboard")
-        .select("display_name, xp, weekly_xp, level, league")
+        .select("display_name, xp, weekly_xp, user_id, level, league")
         .order("weekly_xp", { ascending: false })
         .limit(50);
       if (data) setEntries(data as LeaderboardEntry[]);
