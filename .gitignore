@@ -1,5 +1,4 @@
-# Environment files
-.env
+# Environment files (keep .env for public client keys; exclude secrets)
 .env.local
 .env.*.local
 .env.production
