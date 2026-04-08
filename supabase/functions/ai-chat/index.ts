@@ -60,15 +60,6 @@ serve(async (req) => {
 
   // Rate limiting
   const authHeader = req.headers.get("Authorization");
-  const jwt = authHeader?.replace("Bearer ", "");
-  if (!jwt) {
-    return new Response(
-      JSON.stringify({ error: "Missing authorization" }),
-      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  }
-
-  const authHeader = req.headers.get("Authorization");
   const jwt = authHeader?.replace("Bearer ", "").trim();
 
   const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
