@@ -158,30 +158,29 @@ function checkRateLimit(userId: string): boolean {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  // Rate limiting
   const authHeader = req.headers.get("Authorization");
-  const jwt = authHeader?.replace("Bearer ", "");
-  if (!jwt) {
-    return new Response(
-      JSON.stringify({ error: "Missing authorization" }),
-      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  }
+  const jwt = authHeader?.replace("Bearer ", "").trim();
 
   const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
   const supabaseAdmin = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
-  const { data: { user: authUser }, error: authError } = await supabaseAdmin.auth.getUser(jwt);
-  if (authError || !authUser) {
-    return new Response(
-      JSON.stringify({ error: "Invalid token" }),
-      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+
+  let authUser: { id: string } | null = null;
+  if (jwt) {
+    const { data, error } = await supabaseAdmin.auth.getUser(jwt);
+    if (!error && data.user) {
+      authUser = { id: data.user.id };
+    }
   }
 
-  if (!checkRateLimit(authUser.id)) {
+  const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+    || req.headers.get("x-real-ip")?.trim()
+    || "anonymous";
+  const rateLimitKey = authUser?.id ?? `anon:${clientIp}`;
+
+  if (!checkRateLimit(rateLimitKey)) {
     return new Response(
       JSON.stringify({ error: "Rate limit exceeded. Please slow down." }),
       { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" } }
