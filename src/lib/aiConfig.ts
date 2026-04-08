@@ -26,7 +26,7 @@ export type AIConfig = {
 
 const DEFAULT_CONFIG: AIConfig = {
   mode: "builtin",
-  builtinModel: "google/gemini-2.5-flash",
+  builtinModel: "openai/gpt-5",
   byokProvider: "",
   byokModel: "",
   byokApiKey: "",
