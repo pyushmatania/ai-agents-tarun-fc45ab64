@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Send, Plus, X, Sparkles, Brain, Zap,
+  Send, Plus, X, Sparkles, Brain, Zap, RefreshCw,
   GraduationCap, StopCircle, Palette, Target,
   Image, Paperclip, Mic, Search,
 } from "lucide-react";
@@ -76,6 +76,23 @@ export default function SmartInputBar({
   const [currentVibe, setCurrentVibe] = useState(() => getTeachingSelection("vibe"));
   const [currentBrain, setCurrentBrain] = useState(() => getTeachingSelection("brain"));
   const [selectedInterest, setSelectedInterest] = useState(() => localStorage.getItem("teaching_universe_vibe") || "");
+  const [settingsChanged, setSettingsChanged] = useState(false);
+
+  // Track settings fingerprint — mark changed when any selection changes after messages exist
+  const settingsFingerprint = `${currentMotive}|${currentVibe}|${currentBrain}|${selectedInterest}`;
+  const prevFingerprintRef = useRef(settingsFingerprint);
+  useEffect(() => {
+    if (prevFingerprintRef.current !== settingsFingerprint && hasMessages) {
+      setSettingsChanged(true);
+    }
+    prevFingerprintRef.current = settingsFingerprint;
+  }, [settingsFingerprint, hasMessages]);
+
+  // Wrap onSend to reset settingsChanged
+  const wrappedOnSend = useCallback((text?: string, hiddenPrompt?: string) => {
+    setSettingsChanged(false);
+    onSend(text, hiddenPrompt);
+  }, [onSend]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -606,14 +623,14 @@ export default function SmartInputBar({
               onKeyDown={e => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
-                  onSend();
+                  wrappedOnSend();
                 }
               }}
-              placeholder={placeholder || "Ask anything..."}
+              placeholder={settingsChanged && !value.trim() ? "Press send to recook with new settings..." : (placeholder || "Ask anything...")}
               rows={1}
               disabled={isLoading}
               className="w-full bg-card border border-border/20 rounded-2xl pl-4 pr-12 py-3 text-[13px] font-medium text-foreground placeholder:text-muted-foreground/30 focus:outline-none resize-none overflow-hidden transition-all disabled:opacity-50"
-              style={{ borderColor: value.trim() ? `${accentColor}30` : undefined }}
+              style={{ borderColor: value.trim() ? `${accentColor}30` : settingsChanged ? `${accentColor}40` : undefined }}
             />
             {isLoading ? (
               <button
@@ -624,12 +641,20 @@ export default function SmartInputBar({
               </button>
             ) : (
               <button
-                onClick={() => onSend()}
+                onClick={() => wrappedOnSend()}
                 disabled={false}
-                className="absolute right-2 bottom-2 w-8 h-8 rounded-xl flex items-center justify-center transition-all disabled:opacity-20"
-                style={{ background: value.trim() ? accentColor : "hsl(var(--muted))" }}
+                className={`absolute right-2 bottom-2 w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
+                  settingsChanged && !value.trim() ? "animate-pulse shadow-lg" : ""
+                }`}
+                style={{ 
+                  background: value.trim() ? accentColor : settingsChanged ? accentColor : "hsl(var(--muted))",
+                  boxShadow: settingsChanged && !value.trim() ? `0 0 12px ${accentColor}60` : undefined,
+                }}
               >
-                <Send size={14} className="text-white" />
+                {settingsChanged && !value.trim() 
+                  ? <RefreshCw size={14} className="text-white" />
+                  : <Send size={14} className="text-white" />
+                }
               </button>
             )}
           </div>
