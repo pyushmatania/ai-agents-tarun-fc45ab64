@@ -154,7 +154,7 @@ const CoursesPage = () => {
           
           {/* Top stats bar */}
           <FadeIn>
-            <div className="px-4 md:px-6 pt-4 pb-2 flex items-center justify-between">
+            <div className="px-4 md:px-6 pt-4 md:pt-5 pb-2 md:pb-3 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <div className="flex items-center gap-1 bg-agni-orange/15 rounded-full px-2 py-1">
                   <Flame size={12} className="text-agni-orange" />
@@ -221,7 +221,7 @@ const CoursesPage = () => {
                       key={m.id}
                       whileTap={{ scale: 0.92 }}
                       onClick={() => setActiveModule(i)}
-                      className={`flex-1 rounded-xl py-2 text-center transition-all relative ${
+                      className={`flex-1 rounded-xl py-2 md:py-2.5 text-center transition-all relative ${
                         isActive ? `${m.color} shadow-lg` : "hover:bg-muted/30"
                       }`}
                     >
@@ -448,13 +448,13 @@ const CoursesPage = () => {
                       </motion.button>
 
                       {/* Label card */}
-                      <div className="pt-2 md:pt-3 flex-1 min-w-0">
-                        <p className={`text-[11px] font-black leading-tight ${
+                      <div className="pt-2 md:pt-3 lg:pt-4 flex-1 min-w-0">
+                        <p className={`text-[11px] md:text-xs font-black leading-tight ${
                           isLocked ? "text-muted-foreground/30" : "text-foreground"
                         }`}>
                           {lesson.t}
                         </p>
-                        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                        <div className="flex items-center gap-1.5 md:gap-2 mt-1 md:mt-1.5 flex-wrap">
                           <span className={`text-[9px] font-black ${isDone ? "text-agni-green" : "text-muted-foreground/40"}`}>
                             +{lesson.xp} XP
                           </span>
@@ -518,11 +518,11 @@ const CoursesPage = () => {
                 initial={{ opacity: 0, scale: 0.7 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ type: "spring" }}
-                className="text-center py-6"
+                className="text-center py-6 md:py-8"
               >
                 <Agni expression="celebrating" size={120} speech="You're amazing! 🎉" />
-                <p className="text-foreground font-black text-sm mt-3">Module Complete! 🏆</p>
-                <p className="text-muted-foreground text-[10px] font-semibold">You've mastered {mod.title}</p>
+                <p className="text-foreground font-black text-sm md:text-base mt-3">Module Complete! 🏆</p>
+                <p className="text-muted-foreground text-[10px] md:text-xs font-semibold">You've mastered {mod.title}</p>
                 {activeModule < MODULES.length - 1 && (
                   <motion.button
                     whileTap={{ scale: 0.95 }}

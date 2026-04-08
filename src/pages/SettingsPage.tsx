@@ -146,7 +146,7 @@ const SettingsPage = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background pb-24">
-        <div className="max-w-md md:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto px-4 pt-5">
+        <div className="max-w-md md:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto px-4 lg:px-6 xl:px-8 pt-5">
 
           {/* Top bar */}
           <FadeIn>
@@ -550,7 +550,7 @@ const SettingsPage = () => {
                               {aiConfig.builtinModel === model.id && <Check size={12} className="text-agni-green" />}
                             </motion.button>
                           ))}
-                          <p className="text-[8px] text-muted-foreground text-center pt-1 font-semibold">No API key needed — powered by Lovable AI</p>
+                          <p className="text-[8px] text-muted-foreground text-center pt-1 font-semibold lg:col-span-2">No API key needed — powered by Lovable AI</p>
                         </div>
                       ) : (
                         <div className="space-y-2.5">
