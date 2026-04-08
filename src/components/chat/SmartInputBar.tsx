@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Send, Plus, X, Sparkles, Brain, Zap,
+  Send, Plus, X, Sparkles, Brain, Zap, RefreshCw,
   GraduationCap, StopCircle, Palette, Target,
   Image, Paperclip, Mic, Search,
 } from "lucide-react";
