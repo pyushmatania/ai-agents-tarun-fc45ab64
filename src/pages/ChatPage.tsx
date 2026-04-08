@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, Loader2, Brain, Sparkles, Trash2,
-  GraduationCap, X
+  GraduationCap, X, ChevronDown
 } from "lucide-react";
 import { useChat, type ChatTab } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
@@ -63,6 +63,23 @@ export default function ChatPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState(prefill);
   const hasAutoSent = useRef(false);
+  const [showScrollDown, setShowScrollDown] = useState(false);
+
+  // Track if user has scrolled away from the bottom
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    setShowScrollDown(distFromBottom > 150);
+  }, []);
+
+  const scrollToBottom = useCallback((smooth = true) => {
+    requestAnimationFrame(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: smooth ? "smooth" : "auto" });
+      }
+    });
+  }, []);
 
   // Build teaching context LIVE on each send (not memoized — selections change without re-render)
   const buildTeachingContext = () => {
@@ -98,25 +115,23 @@ export default function ChatPage() {
     }
   }, [autoSend, prefill, chat.isLoadingHistory]);
 
-  // Scroll to bottom on new messages
+  // Scroll to bottom on new messages (only if user is near the bottom)
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    const el = scrollRef.current;
+    if (!el) return;
+    const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    if (distFromBottom < 200) {
+      scrollToBottom(true);
     }
-  }, [chat.messages]);
+  }, [chat.messages, scrollToBottom]);
 
   // Scroll to bottom on mount, tab switch, and after history loads
   useEffect(() => {
     if (chat.isLoadingHistory) return;
-    const raf = requestAnimationFrame(() => {
-      setTimeout(() => {
-        if (scrollRef.current) {
-          scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "auto" });
-        }
-      }, 50);
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [activeTab, chat.isLoadingHistory]);
+    // Use multiple frames to ensure DOM is fully rendered
+    const timer = setTimeout(() => scrollToBottom(false), 100);
+    return () => clearTimeout(timer);
+  }, [activeTab, chat.isLoadingHistory, scrollToBottom]);
 
   // Build a snapshot of current settings for the blueprint stamp
   const buildSettingsSnapshot = () => {
@@ -167,7 +182,7 @@ export default function ChatPage() {
   const tabConfig = TAB_CONFIG[activeTab];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* Header */}
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/10">
         <div className="flex items-center justify-between px-4 py-3">
@@ -213,7 +228,7 @@ export default function ChatPage() {
       </div>
 
       {/* Messages area */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
+      <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-4 py-4 relative">
         {chat.isLoadingHistory ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <Loader2 size={24} className="animate-spin" style={{ color: tabConfig.color }} />
@@ -277,6 +292,21 @@ export default function ChatPage() {
           </div>
         )}
       </div>
+
+      {/* Scroll to bottom button */}
+      <AnimatePresence>
+        {showScrollDown && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            onClick={() => scrollToBottom(true)}
+            className="fixed bottom-28 right-4 z-40 w-10 h-10 rounded-full bg-card border border-border/50 shadow-lg flex items-center justify-center hover:bg-muted/50 transition-colors"
+          >
+            <ChevronDown size={18} className="text-foreground" />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Smart Input Bar */}
       <div className="sticky bottom-0 pb-[env(safe-area-inset-bottom,0px)]">
