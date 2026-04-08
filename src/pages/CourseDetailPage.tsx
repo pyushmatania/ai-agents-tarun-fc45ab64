@@ -84,7 +84,7 @@ const CourseDetailPage = () => {
   const abortRef = useRef<AbortController | null>(null);
 
   const lesson = id ? ALL_LESSONS[id] : null;
-  const done: string[] = JSON.parse(localStorage.getItem("adojo_done") || "[]");
+  const done: string[] = getCurrentScopedStorage().get<string[]>("done", []);
   const isDone = id ? done.includes(id) : false;
   const persona = useMemo(() => getPersona(), []);
 

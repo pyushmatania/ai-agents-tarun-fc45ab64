@@ -196,7 +196,7 @@ const SettingsPage = () => {
                   {user && <p className="text-[10px] text-muted-foreground">{user.email}</p>}
                   {(() => {
                     try {
-                      const ctx = JSON.parse(localStorage.getItem("user_context") || "{}");
+                      const ctx = getCurrentScopedStorage().get<Record<string, any>>("user_context", {});
                       const tags = [ctx.age_range, ctx.education, ctx.location, ctx.work_experience].filter(Boolean);
                       return tags.length > 0 ? (
                         <div className="flex flex-wrap gap-1 mt-1">
