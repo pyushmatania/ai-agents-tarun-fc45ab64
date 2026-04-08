@@ -16,10 +16,54 @@ function corsHeadersFor(origin: string | null): Record<string, string> {
   };
 }
 
+const rateLimits = new Map<string, number[]>();
+const WINDOW_MS = 60_000;
+const MAX_REQUESTS = 30;
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const existing = rateLimits.get(userId) || [];
+  const recent = existing.filter(t => now - t < WINDOW_MS);
+  if (recent.length >= MAX_REQUESTS) return false;
+  recent.push(now);
+  rateLimits.set(userId, recent);
+  return true;
+}
+
 serve(async (req) => {
   const origin = req.headers.get("Origin");
   const corsHeaders = corsHeadersFor(origin);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // Rate limiting
+  const authHeader = req.headers.get("Authorization");
+  const jwt = authHeader?.replace("Bearer ", "");
+  if (!jwt) {
+    return new Response(
+      JSON.stringify({ error: "Missing authorization" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
+  const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+  const supabaseAdmin = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  );
+  const { data: { user: authUser }, error: authError } = await supabaseAdmin.auth.getUser(jwt);
+  if (authError || !authUser) {
+    return new Response(
+      JSON.stringify({ error: "Invalid token" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
+  if (!checkRateLimit(authUser.id)) {
+    return new Response(
+      JSON.stringify({ error: "Rate limit exceeded. Please slow down." }),
+      { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" } }
+    );
+  }
 
   try {
     const { query, category, sourceSeeds } = await req.json();
