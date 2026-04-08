@@ -12,6 +12,7 @@ import { getTeachingLabel, getUniverseVibe } from "@/lib/teachingConfig";
 import ContentRenderer from "@/components/chat/ContentRenderer";
 import SmartInputBar from "@/components/chat/SmartInputBar";
 import { toast } from "sonner";
+import { getCurrentScopedStorage } from "@/lib/scopedStorage";
 
 function parseSuggestions(content: string): { text: string; suggestions: string[] } {
   const match = content.match(/\[SUGGESTIONS\](.*?)\[\/SUGGESTIONS\]/s);
@@ -55,7 +56,7 @@ export default function ChatPage() {
   const autoSend = (location.state as any)?.autoSend || false;
   const [activeTab, setActiveTab] = useState<ChatTab>(initialTab);
   const [activeMode, setActiveMode] = useState(() => {
-    const saved = localStorage.getItem("teaching_mode");
+    const saved = getCurrentScopedStorage().get<string>("teaching_mode", "");
     if (saved) return saved;
     const identity = localStorage.getItem("teaching_identity");
     return identity || "";
@@ -157,7 +158,7 @@ export default function ChatPage() {
 
   const handleModeChange = (mode: string) => {
     setActiveMode(mode);
-    localStorage.setItem("teaching_mode", mode);
+    getCurrentScopedStorage().set("teaching_mode", mode);
   };
 
   // Get last assistant suggestions

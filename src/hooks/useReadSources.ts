@@ -1,32 +1,34 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useAuth } from "./useAuth";
+import { getScopedStorage } from "@/lib/scopedStorage";
 
-const STORAGE_KEY = "neuralos_read_sources";
-
-function loadRead(): Record<string, number> {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : {};
-  } catch {
-    return {};
-  }
-}
+const SCOPED_KEY = "read_sources";
 
 export function useReadSources() {
-  const [readMap, setReadMap] = useState<Record<string, number>>(loadRead);
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
+
+  const [readMap, setReadMap] = useState<Record<string, number>>(() =>
+    getScopedStorage(userId).get<Record<string, number>>(SCOPED_KEY, {})
+  );
+
+  // Rebuild when user changes
+  useEffect(() => {
+    setReadMap(getScopedStorage(userId).get<Record<string, number>>(SCOPED_KEY, {}));
+  }, [userId]);
 
   const markRead = useCallback((name: string) => {
     setReadMap((prev) => {
       const next = { ...prev, [name]: Date.now() };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      getScopedStorage(userId).set(SCOPED_KEY, next);
       return next;
     });
-  }, []);
+  }, [userId]);
 
   const isRead = useCallback((name: string) => !!readMap[name], [readMap]);
 
   const getReadTime = useCallback((name: string) => readMap[name] || 0, [readMap]);
 
-  /** Sources read in the last 7 days, sorted by most recent */
   const recentlyRead = useCallback(
     (allNames: string[]) => {
       const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;

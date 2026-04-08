@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { getScopedStorage, getCurrentScopedStorage } from "@/lib/scopedStorage";
 
 export interface UserContext {
   age_range: string;
@@ -17,7 +18,8 @@ export interface UserContext {
   brain_track: string;
 }
 
-const LOCAL_KEY = "user_context";
+const SCOPED_KEY = "user_context";
+const LEGACY_KEY = "user_context";
 
 const defaults: UserContext = {
   age_range: "",
@@ -34,27 +36,43 @@ const defaults: UserContext = {
   brain_track: "skill",
 };
 
-function loadLocal(): UserContext {
+function loadFromStorage(userId: string | null): UserContext {
   try {
-    const raw = localStorage.getItem(LOCAL_KEY);
+    const storage = getScopedStorage(userId);
+    const scoped = storage.get<UserContext | null>(SCOPED_KEY, null);
+    if (scoped) return { ...defaults, ...scoped };
+    // Legacy fallback
+    const raw = localStorage.getItem(LEGACY_KEY);
     return raw ? { ...defaults, ...JSON.parse(raw) } : { ...defaults };
   } catch {
     return { ...defaults };
   }
 }
 
-function saveLocal(ctx: UserContext) {
-  localStorage.setItem(LOCAL_KEY, JSON.stringify(ctx));
-}
-
+/** Synchronous helper for non-React code */
 export function getUserContextLocal(): UserContext {
-  return loadLocal();
+  try {
+    const storage = getCurrentScopedStorage();
+    const scoped = storage.get<UserContext | null>(SCOPED_KEY, null);
+    if (scoped) return { ...defaults, ...scoped };
+    // Legacy fallback
+    const raw = localStorage.getItem(LEGACY_KEY);
+    return raw ? { ...defaults, ...JSON.parse(raw) } : { ...defaults };
+  } catch {
+    return { ...defaults };
+  }
 }
 
 export function useUserContext() {
   const { user } = useAuth();
-  const [ctx, setCtxState] = useState<UserContext>(loadLocal);
+  const userId = user?.id ?? null;
+  const [ctx, setCtxState] = useState<UserContext>(() => loadFromStorage(userId));
   const [loaded, setLoaded] = useState(false);
+
+  // Rebuild from scoped storage when user changes
+  useEffect(() => {
+    setCtxState(loadFromStorage(userId));
+  }, [userId]);
 
   // Load from DB on auth
   useEffect(() => {
@@ -64,7 +82,7 @@ export function useUserContext() {
         .from("user_context")
         .select("*")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
       if (data) {
         const merged: UserContext = {
           age_range: data.age_range || "",
@@ -81,7 +99,7 @@ export function useUserContext() {
           brain_track: data.brain_track || "skill",
         };
         setCtxState(merged);
-        saveLocal(merged);
+        getScopedStorage(user.id).set(SCOPED_KEY, merged);
       }
       setLoaded(true);
     })();
@@ -90,7 +108,7 @@ export function useUserContext() {
   const updateContext = useCallback(async (partial: Partial<UserContext>) => {
     const updated = { ...ctx, ...partial };
     setCtxState(updated);
-    saveLocal(updated);
+    getScopedStorage(userId).set(SCOPED_KEY, updated);
 
     if (user) {
       await supabase
@@ -101,7 +119,7 @@ export function useUserContext() {
           mission_followup: updated.mission_followup as any,
         }, { onConflict: "user_id" });
     }
-  }, [ctx, user]);
+  }, [ctx, user, userId]);
 
   return { ctx, updateContext, loaded };
 }

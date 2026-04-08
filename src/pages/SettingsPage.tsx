@@ -16,6 +16,7 @@ import { BUILT_IN_MODELS, BYOK_PROVIDERS, getAIConfig, saveAIConfig, type AIConf
 import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection, getAllOptions, saveCustomOption, getCustomOptions, IDENTITIES, MISSION_MODES, TEACHING_VIBES, BRAIN_LEVELS_SKILL, BRAIN_LEVELS_ACADEMIC, getAllExplainStyles, getActiveExplainStyleIds, setActiveExplainStyleIds, saveCustomExplainStyle, removeCustomExplainStyle, type ExplainStyle } from "@/lib/teachingConfig";
 import CustomOptionInput from "@/components/CustomOptionInput";
 import { getPersona, savePersona, SUGGESTION_CATEGORIES, getSubFilters, getSubFilterCount, POPULAR_PICKS, type NeuralOSPersona } from "@/lib/neuralOS";
+import { getCurrentScopedStorage } from "@/lib/scopedStorage";
 import SmartInterestSearch from "@/components/SmartInterestSearch";
 import Agni from "@/components/Agni";
 import StatsSection from "@/components/StatsSection";
@@ -33,8 +34,8 @@ const SettingsPage = () => {
   const { ctx, updateContext, loaded: ctxLoaded } = useUserContext();
   const { avatarUrl, uploading, generating, uploadAvatar, generateAIAvatar, removeAvatar } = useAvatar();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [fullName, setFullName] = useState(localStorage.getItem("edu_user_name") || "");
-  const [role, setRole] = useState(localStorage.getItem("edu_user_role") || "");
+  const [fullName, setFullName] = useState(getCurrentScopedStorage().get<string>("user_name", ""));
+  const [role, setRole] = useState(getCurrentScopedStorage().get<string>("user_role", ""));
   const [saving, setSaving] = useState(false);
   const [lightMode, setLightMode] = useState(() => document.documentElement.classList.contains("light"));
   const [soundEnabled, setSoundEnabled] = useState(!SFX.isMuted());
@@ -110,8 +111,8 @@ const SettingsPage = () => {
 
   const handleSave = async () => {
     setSaving(true);
-    localStorage.setItem("edu_user_name", fullName);
-    localStorage.setItem("edu_user_role", role);
+    getCurrentScopedStorage().set("user_name", fullName);
+    getCurrentScopedStorage().set("user_role", role);
     if (user) {
       await supabase.from("profiles").update({ full_name: fullName }).eq("user_id", user.id);
     }
@@ -122,8 +123,8 @@ const SettingsPage = () => {
   const handleLogout = async () => {
     if (user) await signOut();
     localStorage.removeItem("edu_onboarded");
-    localStorage.removeItem("edu_user_name");
-    localStorage.removeItem("edu_user_role");
+    getCurrentScopedStorage().remove("user_name");
+    getCurrentScopedStorage().remove("user_role");
     navigate("/welcome");
   };
 
@@ -300,7 +301,7 @@ const SettingsPage = () => {
                     <div className="px-3.5 pb-3.5">
                       <p className="text-micro text-muted-foreground mb-2">WHO ARE YOU? — Drives metaphors & examples</p>
                       <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto scrollbar-none">
-                        <button onClick={() => { updateContext({ teaching_identity: "" }); setTeachingSelection("identity", ""); localStorage.removeItem("edu_user_role"); setRole(""); }}
+                        <button onClick={() => { updateContext({ teaching_identity: "" }); setTeachingSelection("identity", ""); getCurrentScopedStorage().remove("user_role"); setRole(""); }}
                           className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${!ctx.teaching_identity ? "bg-destructive/10 border-destructive/30 text-destructive" : "bg-muted/30 border-border/40 text-muted-foreground"}`}>
                           🚫 None
                         </button>
@@ -308,7 +309,7 @@ const SettingsPage = () => {
                           <button key={id.id} onClick={() => {
                             updateContext({ teaching_identity: id.id });
                             setTeachingSelection("identity", id.id);
-                            localStorage.setItem("edu_user_role", id.label);
+                            getCurrentScopedStorage().set("user_role", id.label);
                             setRole(id.label);
                           }}
                             className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all ${

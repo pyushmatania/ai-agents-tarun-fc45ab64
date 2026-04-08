@@ -11,7 +11,10 @@
  * v2 adds: Twitter-style suggestion catalogs across categories.
  */
 
-const PERSONA_KEY = "neuralos_persona_v2";
+import { getCurrentScopedStorage } from "./scopedStorage";
+
+const LEGACY_PERSONA_KEY = "neuralos_persona_v2";
+const SCOPED_PERSONA_KEY = "persona";
 
 export interface NeuralOSPersona {
   // VIDYA — what they know / want
@@ -50,7 +53,10 @@ const DEFAULT_PERSONA: NeuralOSPersona = { version: 2 };
 
 export const getPersona = (): NeuralOSPersona => {
   try {
-    const stored = localStorage.getItem(PERSONA_KEY);
+    const scoped = getCurrentScopedStorage().get<NeuralOSPersona | null>(SCOPED_PERSONA_KEY, null);
+    if (scoped) return { ...DEFAULT_PERSONA, ...scoped };
+    // Legacy fallback
+    const stored = localStorage.getItem(LEGACY_PERSONA_KEY);
     if (stored) return { ...DEFAULT_PERSONA, ...JSON.parse(stored) };
   } catch {}
   return DEFAULT_PERSONA;
@@ -59,7 +65,7 @@ export const getPersona = (): NeuralOSPersona => {
 export const savePersona = (persona: Partial<NeuralOSPersona>) => {
   const current = getPersona();
   const updated = { ...current, ...persona, version: 2 };
-  localStorage.setItem(PERSONA_KEY, JSON.stringify(updated));
+  getCurrentScopedStorage().set(SCOPED_PERSONA_KEY, updated);
   return updated;
 };
 
@@ -68,7 +74,8 @@ export const hasPersona = (): boolean => {
 };
 
 export const clearPersona = () => {
-  localStorage.removeItem(PERSONA_KEY);
+  getCurrentScopedStorage().remove(SCOPED_PERSONA_KEY);
+  try { localStorage.removeItem(LEGACY_PERSONA_KEY); } catch {}
 };
 
 /** Popular picks per category — items most commonly selected, shown at top with trending badge */

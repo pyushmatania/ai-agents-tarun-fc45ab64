@@ -13,6 +13,7 @@ import { useState, useEffect, useMemo } from "react";
 import { SFX } from "@/lib/sounds";
 import { toast } from "sonner";
 import { getPersona } from "@/lib/neuralOS";
+import { getCurrentScopedStorage } from "@/lib/scopedStorage";
 import { supabase } from "@/integrations/supabase/client";
 import { InterestPill } from "@/components/InterestPill";
 import { TEACHING_CATEGORIES, getTeachingSelection, setTeachingSelection, getAllOptions } from "@/lib/teachingConfig";
@@ -44,23 +45,32 @@ const HomePage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { stats, dailyQuests, streakDays, league, achievements, unlockedAchievements } = useGamification();
-  const storedName = localStorage.getItem("edu_user_name") || "Learner";
+  const storedName = getCurrentScopedStorage().get<string>("user_name", "") || "Learner";
   const displayName = user?.user_metadata?.full_name?.split(" ")[0] || storedName;
-  const [activeMode, setActiveMode] = useState(localStorage.getItem("teaching_mode") || "engineer");
+  const [activeMode, setActiveMode] = useState(getCurrentScopedStorage().get<string>("teaching_mode", "engineer"));
   const [agniExpression, setAgniExpression] = useState<"default" | "happy" | "excited">("default");
   const [modesOpen, setModesOpen] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showInfoTooltip, setShowInfoTooltip] = useState(false);
-  const [leaderboard, setLeaderboard] = useState<{ display_name: string; xp: number; weekly_xp: number; user_id: string }[]>([]);
+  const [leaderboard, setLeaderboard] = useState<{ display_name: string; xp: number; weekly_xp: number; public_id: string }[]>([]);
   const [lbTab, setLbTab] = useState<"weekly" | "alltime">("weekly");
   const [prevRank, setPrevRank] = useState<number | null>(null);
+
+  const [myPublicId, setMyPublicId] = useState<string | null>(null);
+
+  // Compute SHA-256 of user ID for leaderboard "is this me?" matching
+  useEffect(() => {
+    if (!user?.id) { setMyPublicId(null); return; }
+    crypto.subtle.digest("SHA-256", new TextEncoder().encode(user.id))
+      .then(buf => setMyPublicId(Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("")));
+  }, [user?.id]);
 
   // Fetch leaderboard + realtime subscription
   useEffect(() => {
     const fetchLeaderboard = async () => {
       const { data } = await supabase
-        .from("leaderboard")
-        .select("display_name, xp, weekly_xp, user_id")
+        .from("leaderboard_public")
+        .select("display_name, xp, weekly_xp, public_id")
         .order("weekly_xp", { ascending: false })
         .limit(10);
       if (data) setLeaderboard(data as any);
@@ -76,7 +86,17 @@ const HomePage = () => {
 
     return () => { supabase.removeChannel(channel); };
   }, []);
-  const persona = useMemo(() => getPersona(), []);
+  const [persona, setPersona] = useState(() => getPersona());
+
+  useEffect(() => {
+    const handleUpdate = () => setPersona(getPersona());
+    window.addEventListener("storage", handleUpdate);
+    window.addEventListener("auth-changed", handleUpdate);
+    return () => {
+      window.removeEventListener("storage", handleUpdate);
+      window.removeEventListener("auth-changed", handleUpdate);
+    };
+  }, []);
 
   const totalLessons = 22;
   const overallProgress = Math.round((stats.done.length / totalLessons) * 100);
@@ -97,7 +117,7 @@ const HomePage = () => {
     return c;
   }, [persona]);
 
-  const storedRole = localStorage.getItem("edu_user_role");
+  const storedRole = getCurrentScopedStorage().get<string>("user_role", "");
   const roleLabel = storedRole ? ALL_TEACHING_OPTIONS.find(m => m.id === storedRole)?.label || storedRole : null;
 
   // Personalized features shown under the greeting
@@ -355,7 +375,7 @@ const HomePage = () => {
                               onClick={() => {
                                 setTeachingSelection(cat.id, opt.id);
                                 setActiveMode(opt.id);
-                                localStorage.setItem("teaching_mode", opt.id);
+                                getCurrentScopedStorage().set("teaching_mode", opt.id);
                                 SFX.tap();
                                 toast(`${opt.emoji} ${opt.label}`, { description: opt.desc, duration: 1500 });
                               }}
@@ -388,7 +408,7 @@ const HomePage = () => {
                         if (e.key === "Enter" && (e.target as HTMLInputElement).value.trim()) {
                           const val = (e.target as HTMLInputElement).value.trim();
                           setActiveMode(val);
-                          localStorage.setItem("teaching_mode", val);
+                          getCurrentScopedStorage().set("teaching_mode", val);
                           window.dispatchEvent(new Event("storage"));
                           SFX.tap();
                           toast(`✨ ${val}`, { description: "Custom mode activated!", duration: 1500 });
@@ -568,11 +588,11 @@ const HomePage = () => {
                     const sorted = [...leaderboard].sort((a, b) =>
                       lbTab === "weekly" ? b.weekly_xp - a.weekly_xp : b.xp - a.xp
                     );
-                    const myIdx = user ? sorted.findIndex(p => p.user_id === user.id) : -1;
+                    const myIdx = myPublicId ? sorted.findIndex(p => p.public_id === myPublicId) : -1;
 
                     return sorted.length > 0 ? (
                       sorted.slice(0, 5).map((player, idx) => {
-                        const isYou = user && player.user_id === user.id;
+                        const isYou = myPublicId && player.public_id === myPublicId;
                         const rankEmoji = idx === 0 ? "👑" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "⚡";
                         const xpVal = lbTab === "weekly" ? player.weekly_xp : player.xp;
                         // Rank change indicator for current user
@@ -583,7 +603,7 @@ const HomePage = () => {
                           else if (diff < 0) rankChange = <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-[8px] font-black text-red-400">▼{Math.abs(diff)}</motion.span>;
                         }
                         return (
-                          <motion.div key={player.user_id}
+                          <motion.div key={player.public_id}
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: idx * 0.05 }}

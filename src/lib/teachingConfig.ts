@@ -1,3 +1,5 @@
+import { getCurrentScopedStorage } from "./scopedStorage";
+
 /**
  * Unified Teaching Configuration — 4 Dimensions (AGNI Mega Prompt v2)
  * 
@@ -212,6 +214,8 @@ const EXPLAIN_STYLES_ACTIVE_KEY = "explain_styles_active";
 
 export function getCustomExplainStyles(): ExplainStyle[] {
   try {
+    const scoped = getCurrentScopedStorage().get<ExplainStyle[] | null>(EXPLAIN_STYLES_STORAGE_KEY, null);
+    if (scoped) return scoped;
     const raw = localStorage.getItem(EXPLAIN_STYLES_STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch { return []; }
@@ -226,13 +230,13 @@ export function saveCustomExplainStyle(style: { label: string; desc: string; pro
   };
   const existing = getCustomExplainStyles();
   existing.push(custom);
-  localStorage.setItem(EXPLAIN_STYLES_STORAGE_KEY, JSON.stringify(existing));
+  getCurrentScopedStorage().set(EXPLAIN_STYLES_STORAGE_KEY, existing);
   return custom;
 }
 
 export function removeCustomExplainStyle(id: string) {
   const existing = getCustomExplainStyles().filter(s => s.id !== id);
-  localStorage.setItem(EXPLAIN_STYLES_STORAGE_KEY, JSON.stringify(existing));
+  getCurrentScopedStorage().set(EXPLAIN_STYLES_STORAGE_KEY, existing);
 }
 
 export function getAllExplainStyles(): ExplainStyle[] {
@@ -241,15 +245,16 @@ export function getAllExplainStyles(): ExplainStyle[] {
 
 export function getActiveExplainStyleIds(): string[] {
   try {
+    const scoped = getCurrentScopedStorage().get<string[] | null>(EXPLAIN_STYLES_ACTIVE_KEY, null);
+    if (scoped) return scoped;
     const raw = localStorage.getItem(EXPLAIN_STYLES_ACTIVE_KEY);
     if (raw) return JSON.parse(raw);
   } catch {}
-  // Default: first 6
   return EXPLAIN_STYLES.slice(0, 6).map(s => s.id);
 }
 
 export function setActiveExplainStyleIds(ids: string[]) {
-  localStorage.setItem(EXPLAIN_STYLES_ACTIVE_KEY, JSON.stringify(ids));
+  getCurrentScopedStorage().set(EXPLAIN_STYLES_ACTIVE_KEY, ids);
 }
 
 export function getActiveExplainStyles(): ExplainStyle[] {
@@ -292,6 +297,10 @@ const CUSTOM_STORAGE_KEY = "teaching_custom_options";
 
 export function getCustomOptions(categoryId: string): CustomTeachingOption[] {
   try {
+    const storage = getCurrentScopedStorage();
+    const scoped = storage.get<Record<string, CustomTeachingOption[]> | null>(CUSTOM_STORAGE_KEY, null);
+    if (scoped) return scoped[categoryId] || [];
+    // Legacy fallback
     const raw = localStorage.getItem(CUSTOM_STORAGE_KEY);
     if (!raw) return [];
     const all = JSON.parse(raw) as Record<string, CustomTeachingOption[]>;
@@ -311,11 +320,11 @@ export function saveCustomOption(categoryId: string, option: { label: string; de
   };
 
   try {
-    const raw = localStorage.getItem(CUSTOM_STORAGE_KEY);
-    const all = raw ? JSON.parse(raw) as Record<string, CustomTeachingOption[]> : {};
+    const storage = getCurrentScopedStorage();
+    const all = storage.get<Record<string, CustomTeachingOption[]>>(CUSTOM_STORAGE_KEY, {});
     if (!all[categoryId]) all[categoryId] = [];
     all[categoryId].push(customOpt);
-    localStorage.setItem(CUSTOM_STORAGE_KEY, JSON.stringify(all));
+    storage.set(CUSTOM_STORAGE_KEY, all);
     window.dispatchEvent(new Event("storage"));
   } catch { /* ignore */ }
 
@@ -324,12 +333,11 @@ export function saveCustomOption(categoryId: string, option: { label: string; de
 
 export function removeCustomOption(categoryId: string, optionId: string) {
   try {
-    const raw = localStorage.getItem(CUSTOM_STORAGE_KEY);
-    if (!raw) return;
-    const all = JSON.parse(raw) as Record<string, CustomTeachingOption[]>;
+    const storage = getCurrentScopedStorage();
+    const all = storage.get<Record<string, CustomTeachingOption[]>>(CUSTOM_STORAGE_KEY, {});
     if (!all[categoryId]) return;
     all[categoryId] = all[categoryId].filter(o => o.id !== optionId);
-    localStorage.setItem(CUSTOM_STORAGE_KEY, JSON.stringify(all));
+    storage.set(CUSTOM_STORAGE_KEY, all);
     window.dispatchEvent(new Event("storage"));
   } catch { /* ignore */ }
 }
@@ -386,13 +394,15 @@ export const TEACHING_CATEGORIES = [
 export function getTeachingSelection(categoryId: string): string {
   const cat = TEACHING_CATEGORIES.find(c => c.id === categoryId);
   if (!cat) return "";
+  const scoped = getCurrentScopedStorage().get<string | null>(cat.storageKey, null);
+  if (scoped) return scoped;
   return localStorage.getItem(cat.storageKey) || "";
 }
 
 export function setTeachingSelection(categoryId: string, value: string) {
   const cat = TEACHING_CATEGORIES.find(c => c.id === categoryId);
   if (!cat) return;
-  localStorage.setItem(cat.storageKey, value);
+  getCurrentScopedStorage().set(cat.storageKey, value);
   window.dispatchEvent(new Event("storage"));
 }
 
@@ -419,7 +429,7 @@ export function getTeachingContext(): string {
     }
   }
   // Also check for universe vibe
-  const universeVibe = localStorage.getItem("teaching_universe_vibe");
+  const universeVibe = getUniverseVibe();
   if (universeVibe) {
     parts.push(`Universe Vibe: ${universeVibe} (Teach through this world — use characters, plot moments, vocabulary from this universe)`);
   }
@@ -428,24 +438,28 @@ export function getTeachingContext(): string {
 
 /** Get/set universe vibe (e.g. "Goku", "Naruto", "The Matrix") */
 export function getUniverseVibe(): string | null {
+  const scoped = getCurrentScopedStorage().get<string | null>("teaching_universe_vibe", null);
+  if (scoped) return scoped;
   return localStorage.getItem("teaching_universe_vibe");
 }
 
 export function setUniverseVibe(vibe: string | null) {
+  const storage = getCurrentScopedStorage();
   if (vibe) {
-    localStorage.setItem("teaching_universe_vibe", vibe);
+    storage.set("teaching_universe_vibe", vibe);
   } else {
-    localStorage.removeItem("teaching_universe_vibe");
+    storage.remove("teaching_universe_vibe");
   }
   window.dispatchEvent(new Event("storage"));
 }
 
-/** Get brain level track preference */
 export function getBrainTrack(): "skill" | "academic" {
+  const scoped = getCurrentScopedStorage().get<string | null>("teaching_brain_track", null);
+  if (scoped === "skill" || scoped === "academic") return scoped;
   return (localStorage.getItem("teaching_brain_track") as "skill" | "academic") || "skill";
 }
 
 export function setBrainTrack(track: "skill" | "academic") {
-  localStorage.setItem("teaching_brain_track", track);
+  getCurrentScopedStorage().set("teaching_brain_track", track);
   window.dispatchEvent(new Event("storage"));
 }

@@ -1,3 +1,12 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Lockfiles (bun is canonical)
+package-lock.json
+
 # Logs
 logs
 *.log

@@ -9,6 +9,7 @@ import { getActiveModelLabel, getAIConfig } from "@/lib/aiConfig";
 import { useGamification } from "@/hooks/useGamification";
 import { getPersona } from "@/lib/neuralOS";
 import { getTeachingLabel, getUniverseVibe, getQuizDifficultyPrompt } from "@/lib/teachingConfig";
+import { getCurrentScopedStorage } from "@/lib/scopedStorage";
 import QuizCard from "@/components/lesson/QuizCard";
 import type { QuizQuestion } from "@/components/lesson/QuizCard";
 import LessonComplete from "@/components/lesson/LessonComplete";
@@ -69,7 +70,7 @@ const CourseDetailPage = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
-  const [activeMode, setActiveMode] = useState(localStorage.getItem("teaching_mode") || "engineer");
+  const [activeMode, setActiveMode] = useState(getCurrentScopedStorage().get<string>("teaching_mode", "engineer"));
   const [exchangeCount, setExchangeCount] = useState(0);
   const [quizzes, setQuizzes] = useState<QuizQuestion[]>([]);
   const [quizIndex, setQuizIndex] = useState(0);
@@ -259,7 +260,7 @@ const CourseDetailPage = () => {
 
   const handleModeChange = (mode: string) => {
     setActiveMode(mode);
-    localStorage.setItem("teaching_mode", mode);
+    getCurrentScopedStorage().set("teaching_mode", mode);
     setMessages(prev => [...prev, { role: "assistant", content: `🔄 **Mode switched!** I'll adjust my teaching style.` }]);
   };
 

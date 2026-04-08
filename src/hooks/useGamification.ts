@@ -1,14 +1,16 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { getScopedStorage, type ScopedStorage } from "@/lib/scopedStorage";
 
 // ── Constants ──
-const STORAGE_PREFIX = "adojo_";
 const XP_PER_LEVEL = 500;
 const MAX_HEARTS = 5;
 const HEART_REGEN_MINUTES = 30;
 const DAILY_GOAL_XP = 50;
 const GEMS_PER_LESSON = 5;
 const STREAK_FREEZE_COST = 50; // gems
+const SYNC_DEBOUNCE_MS = 800;
 
 export interface DailyQuest {
   id: string;
@@ -38,11 +40,11 @@ export interface GamificationStats {
   xpToNextLevel: number;
   hearts: number;
   maxHearts: number;
-  heartRegenAt: number | null; // timestamp when next heart regenerates
+  heartRegenAt: number | null;
   gems: number;
   streak: number;
   bestStreak: number;
-  lastActiveDate: string; // YYYY-MM-DD
+  lastActiveDate: string;
   streakFreezes: number;
   dailyXp: number;
   dailyGoal: number;
@@ -74,7 +76,7 @@ const ACHIEVEMENTS: Achievement[] = [
 function generateDailyQuests(stats: GamificationStats): DailyQuest[] {
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
   const seed = dayOfYear;
-  
+
   return [
     {
       id: `dq_lessons_${seed}`,
@@ -116,90 +118,100 @@ function getToday(): string {
   return new Date().toISOString().split("T")[0];
 }
 
-function load<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(STORAGE_PREFIX + key);
-    if (raw === null) return fallback;
-    return JSON.parse(raw) as T;
-  } catch {
-    return fallback;
-  }
+function getYesterday(): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().split("T")[0];
 }
 
-function save(key: string, value: unknown) {
-  localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
+function buildInitialStats(storage: ScopedStorage): GamificationStats {
+  const today = getToday();
+  const yesterday = getYesterday();
+  const lastActive = storage.get<string>("last_active", "");
+  const isNewDay = lastActive !== today;
+
+  const xp = storage.get<number>("xp", 0);
+  let streak = storage.get<number>("streak", 0);
+  const bestStreak = storage.get<number>("best_streak", 0);
+  const hearts = storage.get<number>("hearts", MAX_HEARTS);
+  const gems = storage.get<number>("gems", 0);
+  const done = storage.get<string[]>("done", []);
+  const bookmarks = storage.get<string[]>("bookmarks", []);
+  let streakFreezes = storage.get<number>("streak_freezes", 0);
+  const heartRegenAt = storage.get<number | null>("heart_regen_at", null);
+  const totalQuizzes = storage.get<number>("total_quizzes", 0);
+  const totalPerfect = storage.get<number>("total_perfect", 0);
+
+  const dailyXp = isNewDay ? 0 : storage.get<number>("daily_xp", 0);
+  const lessonsToday = isNewDay ? 0 : storage.get<number>("lessons_today", 0);
+  const quizzesToday = isNewDay ? 0 : storage.get<number>("quizzes_today", 0);
+  const perfectLessonsToday = isNewDay ? 0 : storage.get<number>("perfect_today", 0);
+
+  // Explicit streak handling on new day
+  if (isNewDay && lastActive) {
+    if (lastActive === yesterday) {
+      // Streak continues — no change needed
+    } else if (streakFreezes > 0) {
+      // Consume a freeze to preserve streak
+      streakFreezes = streakFreezes - 1;
+      storage.set("streak_freezes", streakFreezes);
+    } else {
+      // Missed day(s) without freeze — reset streak
+      streak = 0;
+      storage.set("streak", 0);
+    }
+  }
+
+  return {
+    xp,
+    level: Math.floor(xp / XP_PER_LEVEL) + 1,
+    xpInLevel: xp % XP_PER_LEVEL,
+    xpToNextLevel: XP_PER_LEVEL,
+    hearts,
+    maxHearts: MAX_HEARTS,
+    heartRegenAt,
+    gems,
+    streak,
+    bestStreak: Math.max(bestStreak, streak),
+    lastActiveDate: lastActive,
+    streakFreezes,
+    dailyXp,
+    dailyGoal: DAILY_GOAL_XP,
+    lessonsToday,
+    quizzesToday,
+    perfectLessonsToday,
+    totalLessons: done.length,
+    totalQuizzes,
+    totalPerfect,
+    done,
+    bookmarks,
+  };
 }
 
 export function useGamification() {
-  const [stats, setStats] = useState<GamificationStats>(() => {
-    const today = getToday();
-    const lastActive = load<string>("last_active", "");
-    const isNewDay = lastActive !== today;
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
+  const storageRef = useRef<ScopedStorage>(getScopedStorage(userId));
 
-    const xp = load<number>("xp", 0);
-    const streak = load<number>("streak", 0);
-    const bestStreak = load<number>("best_streak", 0);
-    const hearts = load<number>("hearts", MAX_HEARTS);
-    const gems = load<number>("gems", 0);
-    const done = load<string[]>("done", []);
-    const bookmarks = load<string[]>("bookmarks", []);
-    const streakFreezes = load<number>("streak_freezes", 0);
-    const heartRegenAt = load<number | null>("heart_regen_at", null);
-    const totalQuizzes = load<number>("total_quizzes", 0);
-    const totalPerfect = load<number>("total_perfect", 0);
+  const [stats, setStats] = useState<GamificationStats>(() =>
+    buildInitialStats(storageRef.current)
+  );
 
-    // Reset daily counters on new day
-    const dailyXp = isNewDay ? 0 : load<number>("daily_xp", 0);
-    const lessonsToday = isNewDay ? 0 : load<number>("lessons_today", 0);
-    const quizzesToday = isNewDay ? 0 : load<number>("quizzes_today", 0);
-    const perfectLessonsToday = isNewDay ? 0 : load<number>("perfect_today", 0);
+  // Rebuild state when user changes
+  useEffect(() => {
+    storageRef.current = getScopedStorage(userId);
+    setStats(buildInitialStats(storageRef.current));
+  }, [userId]);
 
-    // Handle streak logic on new day
-    let newStreak = streak;
-    if (isNewDay && lastActive) {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yStr = yesterday.toISOString().split("T")[0];
-      if (lastActive === yStr) {
-        // Streak continues (will increment when they earn XP today)
-      } else if (streakFreezes > 0) {
-        save("streak_freezes", streakFreezes - 1);
-      } else {
-        newStreak = 0;
-        save("streak", 0);
-      }
-    }
-
-    return {
-      xp,
-      level: Math.floor(xp / XP_PER_LEVEL) + 1,
-      xpInLevel: xp % XP_PER_LEVEL,
-      xpToNextLevel: XP_PER_LEVEL,
-      hearts,
-      maxHearts: MAX_HEARTS,
-      heartRegenAt,
-      gems,
-      streak: newStreak,
-      bestStreak: Math.max(bestStreak, newStreak),
-      lastActiveDate: lastActive,
-      streakFreezes,
-      dailyXp,
-      dailyGoal: DAILY_GOAL_XP,
-      lessonsToday,
-      quizzesToday,
-      perfectLessonsToday,
-      totalLessons: done.length,
-      totalQuizzes,
-      totalPerfect,
-      done,
-      bookmarks,
-    };
-  });
+  // Helper to save to current user's storage
+  const save = useCallback((key: string, value: unknown) => {
+    storageRef.current.set(key, value);
+  }, []);
 
   // Heart regeneration timer
   useEffect(() => {
     if (stats.hearts >= MAX_HEARTS) return;
-    
+
     const checkRegen = () => {
       const regenAt = stats.heartRegenAt;
       if (regenAt && Date.now() >= regenAt) {
@@ -210,10 +222,10 @@ export function useGamification() {
         setStats(prev => ({ ...prev, hearts: newHearts, heartRegenAt: newRegenAt }));
       }
     };
-    
+
     const interval = setInterval(checkRegen, 10000);
     return () => clearInterval(interval);
-  }, [stats.hearts, stats.heartRegenAt]);
+  }, [stats.hearts, stats.heartRegenAt, save]);
 
   const addXP = useCallback((amount: number) => {
     setStats(prev => {
@@ -246,7 +258,7 @@ export function useGamification() {
         lastActiveDate: today,
       };
     });
-  }, []);
+  }, [save]);
 
   const loseHeart = useCallback(() => {
     setStats(prev => {
@@ -257,7 +269,7 @@ export function useGamification() {
       save("heart_regen_at", regenAt);
       return { ...prev, hearts: newHearts, heartRegenAt: regenAt };
     });
-  }, []);
+  }, [save]);
 
   const refillHearts = useCallback((withGems: boolean = false) => {
     setStats(prev => {
@@ -268,11 +280,10 @@ export function useGamification() {
       if (withGems) save("gems", newGems);
       return { ...prev, hearts: MAX_HEARTS, heartRegenAt: null, gems: newGems };
     });
-  }, []);
+  }, [save]);
 
   const completeLesson = useCallback((lessonId: string, xpEarned: number, isPerfect: boolean) => {
     setStats(prev => {
-      const today = getToday();
       const newDone = prev.done.includes(lessonId) ? prev.done : [...prev.done, lessonId];
       const newLessonsToday = prev.lessonsToday + 1;
       const newPerfectToday = isPerfect ? prev.perfectLessonsToday + 1 : prev.perfectLessonsToday;
@@ -296,7 +307,7 @@ export function useGamification() {
       };
     });
     addXP(xpEarned);
-  }, [addXP]);
+  }, [addXP, save]);
 
   const buyStreakFreeze = useCallback(() => {
     setStats(prev => {
@@ -307,19 +318,18 @@ export function useGamification() {
       save("streak_freezes", newFreezes);
       return { ...prev, gems: newGems, streakFreezes: newFreezes };
     });
-  }, []);
+  }, [save]);
 
   const dailyQuests = useMemo(() => generateDailyQuests(stats), [stats.lessonsToday, stats.dailyXp, stats.perfectLessonsToday]);
 
-  const achievements = useMemo(() => 
+  const achievements = useMemo(() =>
     ACHIEVEMENTS.map(a => ({ ...a, unlocked: a.check(stats) })),
     [stats]
   );
 
   const unlockedAchievements = achievements.filter(a => a.unlocked).length;
 
-  // Streak days for display
-  const streakDays = useMemo(() => 
+  const streakDays = useMemo(() =>
     Array.from({ length: 7 }, (_, i) => {
       const d = new Date();
       d.setDate(d.getDate() - (6 - i));
@@ -332,7 +342,6 @@ export function useGamification() {
     [stats.streak]
   );
 
-  // Heart regen countdown
   const heartRegenCountdown = useMemo(() => {
     if (!stats.heartRegenAt || stats.hearts >= MAX_HEARTS) return null;
     const remaining = Math.max(0, stats.heartRegenAt - Date.now());
@@ -341,7 +350,6 @@ export function useGamification() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   }, [stats.heartRegenAt, stats.hearts]);
 
-  // League based on XP
   const league = useMemo(() => {
     if (stats.xp >= 5000) return { name: "Diamond", emoji: "💎", color: "text-agni-blue" };
     if (stats.xp >= 2500) return { name: "Gold", emoji: "🥇", color: "text-agni-gold" };
@@ -350,47 +358,72 @@ export function useGamification() {
     return { name: "Starter", emoji: "🌱", color: "text-agni-green" };
   }, [stats.xp]);
 
-  // Sync XP to leaderboard table
-  const lastSyncedXp = useRef(stats.xp);
+  // ── Leaderboard sync with debounce + race protection ──
+  const lastSuccessfullySyncedXp = useRef(stats.xp);
+  const syncInFlight = useRef(false);
+  const pendingSyncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
-    if (stats.xp === lastSyncedXp.current && lastSyncedXp.current !== 0) return;
-    const xpDelta = stats.xp - lastSyncedXp.current;
-    lastSyncedXp.current = stats.xp;
+    if (!userId) return;
+    if (stats.xp === lastSuccessfullySyncedXp.current && lastSuccessfullySyncedXp.current !== 0) return;
 
-    const syncToLeaderboard = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+    if (pendingSyncTimer.current) clearTimeout(pendingSyncTimer.current);
 
-      const displayName = user.user_metadata?.full_name?.split(" ")[0] 
-        || localStorage.getItem("edu_user_name") || "Learner";
+    pendingSyncTimer.current = setTimeout(async () => {
+      if (syncInFlight.current) return;
+      syncInFlight.current = true;
 
-      const { data: existing } = await supabase
-        .from("leaderboard")
-        .select("id, weekly_xp")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      try {
+        const targetXp = stats.xp;
+        const targetLevel = stats.level;
+        const targetLeague = league.name;
+        const xpDelta = Math.max(targetXp - lastSuccessfullySyncedXp.current, 0);
 
-      if (existing) {
-        await supabase.from("leaderboard").update({
-          xp: stats.xp,
-          weekly_xp: (existing.weekly_xp || 0) + Math.max(xpDelta, 0),
-          level: stats.level,
-          league: league.name,
-          display_name: displayName,
-        }).eq("user_id", user.id);
-      } else {
-        await supabase.from("leaderboard").insert({
-          user_id: user.id,
-          xp: stats.xp,
-          weekly_xp: stats.xp,
-          level: stats.level,
-          league: league.name,
-          display_name: displayName,
-        });
+        const displayName =
+          storageRef.current.get<string>("user_name", "") ||
+          user?.user_metadata?.full_name?.split(" ")[0] ||
+          "Learner";
+
+        const { data: existing } = await supabase
+          .from("leaderboard")
+          .select("id, weekly_xp")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        let error;
+        if (existing) {
+          ({ error } = await supabase.from("leaderboard").update({
+            xp: targetXp,
+            weekly_xp: (existing.weekly_xp || 0) + xpDelta,
+            level: targetLevel,
+            league: targetLeague,
+            display_name: displayName,
+          }).eq("user_id", userId));
+        } else {
+          ({ error } = await supabase.from("leaderboard").insert({
+            user_id: userId,
+            xp: targetXp,
+            weekly_xp: targetXp,
+            level: targetLevel,
+            league: targetLeague,
+            display_name: displayName,
+          }));
+        }
+
+        if (!error) {
+          lastSuccessfullySyncedXp.current = targetXp;
+        }
+      } catch {
+        // sync failed — will retry on next XP change
+      } finally {
+        syncInFlight.current = false;
       }
+    }, SYNC_DEBOUNCE_MS);
+
+    return () => {
+      if (pendingSyncTimer.current) clearTimeout(pendingSyncTimer.current);
     };
-    syncToLeaderboard();
-  }, [stats.xp, stats.level, league.name]);
+  }, [stats.xp, stats.level, league.name, userId, user]);
 
   return {
     stats,
